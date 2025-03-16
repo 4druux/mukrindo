@@ -1,21 +1,23 @@
 // Home.js
+import CarForm from "@/components/common/CarForm";
 import Carousel from "@/components/common/Carousel";
 import Link from "next/link";
 
 export default function Home() {
   const bannerImages = [
-    "/images/carousel/bg-1.png",
-    "/images/carousel/bg-1.png",
-    "/images/carousel/bg-1.png",
-    "/images/carousel/bg-1.png",
-    "/images/carousel/bg-1.png",
-    "/images/carousel/bg-1.png",
+    "/images/carousel/7.jpg",
+    "/images/carousel/7.jpg",
+    "/images/carousel/7.jpg",
+    "/images/carousel/7.jpg",
+    "/images/carousel/7.jpg",
+    "/images/carousel/7.jpg",
   ];
 
   return (
-    <div className="h-[150vh] pt-10 px-3 md:px-12">
+    <div className="h-[150vh] pt-10 px-3 md:px-40 bg-gray-50">
       {/* Carousel (tanpa perubahan) */}
       <Carousel images={bannerImages} />
+      <CarForm />
 
       {/* Konten lainnya (dengan px-6) */}
       <div className="flex flex-col gap-4 justify-start items-center">
