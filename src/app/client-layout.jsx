@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarProvider } from "@/context/SidebarContext";
 import AppHeader from "@/layout/user/AppHeader";
+import { HeaderProvider } from "@/context/HeaderContext";
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
@@ -19,10 +20,14 @@ export default function ClientLayout({ children }) {
 
   return (
     <>
-      <SidebarProvider>
-        {!isAdminPage && <AppHeader />}
-        {children}
-      </SidebarProvider>
+      <HeaderProvider>
+        <SidebarProvider>
+          {!isAdminPage && <AppHeader />}
+          <div className="px-4 sm:px-[6vw] md:px-[9vw] lg:px-[10vw] bg-gray-50">
+            {children}
+          </div>
+        </SidebarProvider>
+      </HeaderProvider>
     </>
   );
 }

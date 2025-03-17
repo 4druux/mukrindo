@@ -14,7 +14,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="h-[150vh] pt-10 px-3 md:px-40 bg-gray-50">
+    <div className="h-[150vh] pt-10 border-t-2 border-gray-200">
       {/* Carousel (tanpa perubahan) */}
       <Carousel images={bannerImages} />
       <CarForm />

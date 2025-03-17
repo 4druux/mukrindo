@@ -35,7 +35,7 @@ const CarForm = () => {
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
               <div className="relative md:col-span-1">
                 <select
-                  className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-red-500"
+                  className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-orange-500"
                   aria-label="Select Brand and Model" // Added for accessibility
                 >
                   <option value="">Pilih Merek dan Model</option>{" "}
@@ -50,7 +50,7 @@ const CarForm = () => {
               </div>
               <div className="relative md:col-span-1">
                 <select
-                  className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-red-500"
+                  className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-orange-500"
                   aria-label="Select Price Range"
                 >
                   <option value="">Pilih Harga</option>
@@ -64,7 +64,7 @@ const CarForm = () => {
               </div>
               <div className="relative md:col-span-1">
                 <select
-                  className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-red-500"
+                  className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-orange-500"
                   aria-label="Select Year"
                 >
                   <option value="">Pilih Tahun</option>
@@ -78,7 +78,7 @@ const CarForm = () => {
               </div>
               <div className="relative md:col-span-1">
                 <select
-                  className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-red-500"
+                  className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-orange-500"
                   aria-label="Select Location"
                 >
                   <option value="">Pilih Lokasi</option>
@@ -91,7 +91,7 @@ const CarForm = () => {
                 <DropdownArrow />
               </div>
               <button
-                className="md:col-span-1 w-full py-3 px-4 rounded-full text-white font-medium transition-colors duration-200 bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50" // Added focus styles
+                className="md:col-span-1 w-full py-3 px-4 rounded-full text-white font-medium transition-colors duration-200 bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50" // Added focus styles
                 type="button" // Good practice to specify button type
               >
                 Temukan Mobil
@@ -110,7 +110,7 @@ const CarForm = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
                 <div className="relative">
                   <select
-                    className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-red-500"
+                    className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-orange-500"
                     aria-label="Select Brand and Model"
                   >
                     <option value="">Pilih Merek & Model</option>
@@ -127,7 +127,7 @@ const CarForm = () => {
                   <input
                     type="number"
                     placeholder="Pilih Tahun"
-                    className="block w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded leading-tight focus:outline-none focus:border-red-500"
+                    className="block w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded leading-tight focus:outline-none focus:border-orange-500"
                     min="1900" // Set reasonable min and max years
                     max={new Date().getFullYear()}
                     step="1" // Increment by 1 year
@@ -137,7 +137,7 @@ const CarForm = () => {
                 <input
                   type="tel"
                   placeholder="No Handphone"
-                  className="block w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded leading-tight focus:outline-none focus:border-red-500"
+                  className="block w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded leading-tight focus:outline-none focus:border-orange-500"
                 />
               </div>
               <div className="flex justify-between items-center">
@@ -146,10 +146,10 @@ const CarForm = () => {
                   cepat dan mudah di Mukrindo.id
                 </p>
                 <button
-                  className="py-3 px-16 rounded-full text-white font-medium transition-colors duration-200 bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                  className="py-3 px-16 rounded-full text-white font-medium transition-colors duration-200 bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
                   type="button"
                 >
-                  Temukan Mobil
+                  Jual Sekarang
                 </button>
               </div>
             </div>
@@ -165,14 +165,14 @@ const CarForm = () => {
       {/* Container Utama */}
       <div
         id="filter-container"
-        className="flex w-full bg-gray-200 lg:w-fit rounded-t-3xl"
+        className="flex w-full bg-gray-200 lg:w-fit rounded-t-3xl shadow-lg"
       >
         {/* Tab Beli Mobil */}
         <button // Changed to button for better semantics and accessibility
           onClick={() => setActiveTab("beli")}
           className={`relative w-full lg:w-fit rounded-tl-2xl rounded-br-2xl ${
             activeTab === "beli"
-              ? "bg-white text-red-500 before:absolute before:-right-5 before:top-0 before:h-6 before:w-10 before:bg-gray-200 before:content-[''] after:absolute after:top-0 after:right-0 after:h-6 after:w-5 after:rounded-tr-3xl after:bg-white after:content-['']"
+              ? "bg-white text-orange-500 before:absolute before:-right-5 before:top-0 before:h-6 before:w-10 before:bg-gray-200 before:content-[''] after:absolute after:top-0 after:right-0 after:h-6 after:w-5 after:rounded-tr-3xl after:bg-white after:content-['']"
               : activeTab === "jual"
               ? "bg-gray-200 text-gray-500 hover:text-gray-700 before:absolute before:-right-3 before:bottom-0 before:h-6 before:w-6 before:bg-white before:content-[''] after:absolute after:bottom-0 after:right-0 after:h-6 after:w-4 after:rounded-br-3xl after:bg-gray-200 after:content-['']"
               : "bg-gray-300 text-gray-500 hover:text-gray-700 before:absolute before:-right-3 before:top-0 before:h-6 before:w-6 before:bg-gray-300 before:content-[''] after:absolute after:top-0 after:right-0 after:h-6 after:w-4 after:rounded-tr-3xl after:bg-gray-300 after:content-['']"
@@ -192,7 +192,7 @@ const CarForm = () => {
           onClick={() => setActiveTab("jual")}
           className={`relative w-full lg:w-fit rounded-tl-2xl ${
             activeTab === "jual"
-              ? "bg-white text-red-500 before:absolute before:-right-5 before:top-0 before:h-6 before:w-10 before:bg-gray-200 before:content-[''] after:absolute after:top-0 after:right-0 after:h-6 after:w-6 after:rounded-tr-3xl after:bg-white after:content-['']"
+              ? "bg-white text-orange-500 before:absolute before:-right-5 before:top-0 before:h-6 before:w-10 before:bg-gray-200 before:content-[''] after:absolute after:top-0 after:right-0 after:h-6 after:w-6 after:rounded-tr-3xl after:bg-white after:content-['']"
               : activeTab === "tukar"
               ? "bg-gray-200 text-gray-500 hover:text-gray-700 before:absolute before:-right-3 before:bottom-0 before:h-6 before:w-6 before:bg-white before:content-[''] after:absolute after:bottom-0 after:right-0 after:h-6 after:w-4 after:rounded-br-3xl after:bg-gray-200 after:content-['']"
               : "bg-gray-200 text-gray-500 hover:text-gray-700 before:absolute before:-left-4 before:bottom-0 before:h-6 before:w-6 before:bg-white before:content-[''] after:absolute after:bottom-0 after:left-0 after:h-6 after:w-4 after:rounded-bl-3xl after:bg-gray-200 after:content-['']"
@@ -212,7 +212,7 @@ const CarForm = () => {
           onClick={() => setActiveTab("tukar")}
           className={`relative w-full lg:w-fit rounded-tr-2xl rounded-bl-2xl ${
             activeTab === "tukar"
-              ? "bg-white text-red-500 before:absolute before:-left-5 before:top-0 before:h-6 before:w-10 before:bg-gray-200 before:content-[''] after:absolute after:left-0 after:top-0 after:h-6 after:w-5 after:rounded-tl-3xl after:bg-white after:content-['']"
+              ? "bg-white text-orange-500 before:absolute before:-left-5 before:top-0 before:h-6 before:w-10 before:bg-gray-200 before:content-[''] after:absolute after:left-0 after:top-0 after:h-6 after:w-5 after:rounded-tl-3xl after:bg-white after:content-['']"
               : activeTab === "jual"
               ? "bg-gray-200 text-gray-500 hover:text-gray-700 before:absolute before:-left-3 before:bottom-0 before:h-6 before:w-6 before:bg-white before:content-[''] after:absolute after:bottom-0 after:left-0 after:h-6 after:w-4 after:rounded-bl-3xl after:bg-gray-200 after:content-['']"
               : "bg-gray-300 text-gray-500 hover:text-gray-700 before:absolute before:-left-2 before:top-0 before:h-6 before:w-8 before:bg-gray-300 before:content-[''] after:absolute after:top-0 after:-left-4 after:h-6 after:w-4 after:rounded-tr-3xl after:bg-gray-200 after:content-['']"
