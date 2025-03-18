@@ -11,7 +11,6 @@ import {
   MdTableChart,
   MdDescription,
   MdPieChart,
-  MdCheckBoxOutlineBlank,
   MdExtension,
   MdKeyboardArrowDown,
   MdMoreHoriz,
@@ -21,7 +20,10 @@ const navItems = [
   {
     icon: <MdDashboard />,
     name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/admin" }],
+    subItems: [
+      { name: "All Products", path: "/admin" },
+      { name: "Add Products", path: "/admin/add-product" },
+    ],
   },
   {
     name: "Forms",
@@ -53,18 +55,6 @@ const othersItems = [
     ],
   },
   {
-    icon: <MdCheckBoxOutlineBlank />,
-    name: "UI Elements",
-    subItems: [
-      { name: "Alerts", path: "/alerts" },
-      { name: "Avatar", path: "/avatars" },
-      { name: "Badge", path: "/badge" },
-      { name: "Buttons", path: "/buttons" },
-      { name: "Images", path: "/images" },
-      { name: "Videos", path: "/videos" },
-    ],
-  },
-  {
     icon: <MdExtension />,
     name: "Authentication",
     subItems: [
@@ -87,7 +77,7 @@ const AppSidebar = () => {
               onClick={() => handleSubmenuToggle(index, menuType)}
               className={`relative flex items-center w-full gap-3 px-3 py-2 font-medium text-sm rounded-lg cursor-pointer group ${
                 openSubmenu?.type === menuType && openSubmenu?.index === index
-                  ? "bg-sky-100 text-sky-500"
+                  ? "bg-orange-50 text-orange-500"
                   : "text-neutral-700 hover:bg-neutral-100"
               } ${
                 !isExpanded && !isHovered
@@ -98,7 +88,7 @@ const AppSidebar = () => {
               <span
                 className={` ${
                   openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? "text-sky-500 text-2xl"
+                    ? "text-orange-500 text-2xl"
                     : "text-neutral-500 group-hover:text-neutral-700 text-2xl"
                 }`}
               >
@@ -124,7 +114,7 @@ const AppSidebar = () => {
                 href={nav.path}
                 className={`relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm ${
                   isActive(nav.path)
-                    ? "bg-sky-100 text-brand-500"
+                    ? "bg-orange-50 text-brand-500"
                     : "text-gray-700 hover:bg-gray-100 group-hover:text-gray-700"
                 }`}
               >
@@ -163,7 +153,7 @@ const AppSidebar = () => {
                       href={subItem.path}
                       className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-normal ${
                         isActive(subItem.path)
-                          ? "bg-sky-100 text-sky-500"
+                          ? "bg-orange-50 text-orange-500"
                           : "text-neutral-700 hover:bg-neutral-100"
                       }`}
                     >
@@ -185,7 +175,6 @@ const AppSidebar = () => {
   const isActive = useCallback((path) => path === pathname, [pathname]);
 
   useEffect(() => {
-    // Check if the current path matches any submenu item
     let submenuMatched = false;
     ["main", "others"].forEach((menuType) => {
       const items = menuType === "main" ? navItems : othersItems;
@@ -203,14 +192,12 @@ const AppSidebar = () => {
         }
       });
     });
-    // If no submenu item matches, close the open submenu
     if (!submenuMatched) {
       setOpenSubmenu(null);
     }
   }, [pathname, isActive]);
 
   useEffect(() => {
-    // Set the height of the submenu items when the submenu is opened
     if (openSubmenu !== null) {
       const key = `${openSubmenu.type}-${openSubmenu.index}`;
       if (subMenuRefs.current[key]) {
@@ -261,7 +248,7 @@ const AppSidebar = () => {
             <>
               <Image
                 className=""
-                src="/images/logo/logo.svg"
+                src="/images/carousel/7.jpg"
                 alt="Logo"
                 width={150}
                 height={40}
@@ -269,7 +256,7 @@ const AppSidebar = () => {
             </>
           ) : (
             <Image
-              src="/images/logo/logo-icon.svg"
+              src="/images/carousel/7.jpg"
               alt="Logo"
               width={32}
               height={32}

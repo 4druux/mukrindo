@@ -1,28 +1,19 @@
-// components/SearchBar.js
-import React, { useEffect, useState } from "react";
+// layout/user/SearchBar.jsx
+import React, { useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useHeader } from "@/context/HeaderContext";
-import SearchModal from "./SearchModal";
+import AnimatedPlaceholder from "@/components/common/AnimatedPlacehoder";
+import SearchModal from "@/components/common/SearchModal";
 
 const SearchBar = () => {
   const { isSearchOpen, searchQuery, setSearchQuery, toggleSearch } =
     useHeader();
-  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const placeholderTexts = [
     "Beli mobil bekas terbaru",
     "Jual mobil saya",
     "Tukar tambah mobil",
   ];
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setPlaceholderIndex(
-        (prevIndex) => (prevIndex + 1) % placeholderTexts.length
-      );
-    }, 3000);
-    return () => clearInterval(intervalId);
-  }, [placeholderTexts.length]);
 
   useEffect(() => {
     document.body.style.overflow = isSearchOpen ? "hidden" : "auto";
@@ -69,32 +60,20 @@ const SearchBar = () => {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="relative flex-1 overflow-hidden">
-                  {/* Kondisi: Tampilkan animasi HANYA jika searchQuery kosong */}
                   {searchQuery === "" && (
-                    <AnimatePresence>
-                      <motion.span
-                        key={placeholderIndex}
-                        className="absolute inset-0 flex items-center text-xs text-gray-600"
-                        initial={{ y: "100%" }}
-                        animate={{ y: "0%" }}
-                        exit={{ y: "-100%" }}
-                        transition={{ duration: 0.5, ease: "easeInOut" }}
-                      >
-                        {placeholderTexts[placeholderIndex]}
-                      </motion.span>
-                    </AnimatePresence>
+                    <AnimatedPlaceholder placeholderTexts={placeholderTexts} />
                   )}
                   <input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="relative z-10 w-full h-full outline-none bg-transparent text-sm"
                     type="text"
-                    placeholder="" 
+                    placeholder=""
                   />
                 </div>
                 {searchQuery && (
                   <button
-                    className="hover:bg-slate-100 rounded-full p-1 group mr-1"
+                    className="hover:bg-slate-100 rounded-full p-1 group mr-1 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleClearSearch();

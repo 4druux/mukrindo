@@ -6,7 +6,7 @@ import { MdPersonOutline, MdKeyboardArrowDown } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
 import { HiMenuAlt3 } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
-import SearchBar from "@/components/common/SearchBar";
+import SearchBar from "@/layout/user/SearchBar";
 import { useHeader } from "@/context/HeaderContext"; // Import useHeader
 
 function AppHeader() {
@@ -35,7 +35,7 @@ function AppHeader() {
     };
   }, [dropdownRef]);
 
-  const beliMobilVariants = {
+  const dropDownVariant = {
     open: { opacity: 1, y: 0, transition: { duration: 0.2 } },
     closed: { opacity: 0, y: -10, transition: { duration: 0.2 } },
   };
@@ -99,8 +99,10 @@ function AppHeader() {
                       initial="closed"
                       animate="open"
                       exit="closed"
-                      variants={beliMobilVariants}
-                      className="absolute -left-10 top-full bg-white border border-neutral-100 shadow-md rounded-lg py-2 mt-4 z-10 min-w-[160px]"
+                      variants={dropDownVariant}
+                      className={`absolute -left-10 top-full border border-neutral-100 shadow-md rounded-lg py-2 mt-4 z-10 min-w-[160px] ${
+                        isTop ? "bg-gray-50" : "bg-white"
+                      }`}
                     >
                       <Link
                         href="/beli-mobil/baru"

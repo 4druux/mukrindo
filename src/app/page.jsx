@@ -1,6 +1,6 @@
 // Home.js
-import CarForm from "@/components/common/CarForm";
-import Carousel from "@/components/common/Carousel";
+import CarForm from "@/layout/user/CarForm";
+import Carousel from "@/layout/user/Carousel";
 import Link from "next/link";
 
 export default function Home() {

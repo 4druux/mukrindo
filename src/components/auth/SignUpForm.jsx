@@ -17,7 +17,7 @@ export default function SignUpForm() {
           className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700"
         >
           <FaChevronLeft />
-          Back to dashboard
+          Back to Home
         </Link>
       </div>
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
@@ -191,7 +191,7 @@ export default function SignUpForm() {
                   />
                   <label
                     htmlFor="agree"
-                    className="inline-block font-normal text-gray-500"
+                    className="inline-block font-normal text-gray-500 text-xs"
                   >
                     By creating an account means you agree to the{" "}
                     <span className="text-gray-800">Terms and Conditions,</span>{" "}

@@ -1,5 +1,5 @@
+// SidebarContext.js (sedikit perubahan)
 "use client";
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 const SidebarContext = createContext(undefined);
@@ -28,10 +28,8 @@ export const SidebarProvider = ({ children }) => {
         setIsMobileOpen(false);
       }
     };
-
     handleResize();
     window.addEventListener("resize", handleResize);
-
     return () => {
       window.removeEventListener("resize", handleResize);
     };
@@ -52,8 +50,9 @@ export const SidebarProvider = ({ children }) => {
   return (
     <SidebarContext.Provider
       value={{
-        isExpanded: isMobile ? false : isExpanded,
+        isExpanded,
         isMobileOpen,
+        isMobile,
         isHovered,
         activeItem,
         openSubmenu,

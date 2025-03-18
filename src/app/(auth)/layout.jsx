@@ -4,10 +4,9 @@ import Link from "next/link";
 import React from "react";
 
 export default function AuthLayout({ children }) {
-  // Hapus type annotation
   return (
     <div className="relative p-6 z-1 sm:p-0">
-      <div className="relative flex lg:flex-row w-full h-screen justify-center flex-col  sm:p-0">
+      <div className="relative flex lg:flex-row w-full h-screen justify-center flex-col sm:p-0">
         {children}
         <div className="lg:w-1/2 w-full h-full bg-cyan-900 lg:grid items-center hidden">
           <div className="relative items-center justify-center  flex z-1">

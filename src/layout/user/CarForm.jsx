@@ -25,7 +25,7 @@ const CarForm = () => {
     { length: 20 },
     (_, i) => new Date().getFullYear() - i
   ); // Generate last 20 years
-  const locationOptions = ["Jakarta", "Surabaya", "Medan", "Bandung"]; // Example locations
+  const locationOptions = ["Jakarta", "Surabaya", "Medan", "Bandung"];
 
   const renderForm = () => {
     switch (activeTab) {
@@ -36,7 +36,7 @@ const CarForm = () => {
               <div className="relative md:col-span-1">
                 <select
                   className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-orange-500"
-                  aria-label="Select Brand and Model" // Added for accessibility
+                  aria-label="Select Brand and Model"
                 >
                   <option value="">Pilih Merek dan Model</option>{" "}
                   {/* Empty option for placeholder */}
@@ -91,8 +91,9 @@ const CarForm = () => {
                 <DropdownArrow />
               </div>
               <button
-                className="md:col-span-1 w-full py-3 px-4 rounded-full text-white font-medium transition-colors duration-200 bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50" // Added focus styles
-                type="button" // Good practice to specify button type
+                className="md:col-span-1 w-full py-3 px-4 text-sm rounded-full text-white font-medium transition-colors duration-200
+                bg-orange-500 hover:bg-orange-600"
+                type="button"
               >
                 Temukan Mobil
               </button>
@@ -123,16 +124,14 @@ const CarForm = () => {
                   <DropdownArrow />
                 </div>
                 <div className="relative">
-                  {/* Improved Year Input - Number Input */}
                   <input
                     type="number"
                     placeholder="Pilih Tahun"
                     className="block w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded leading-tight focus:outline-none focus:border-orange-500"
-                    min="1900" // Set reasonable min and max years
+                    min="1900"
                     max={new Date().getFullYear()}
-                    step="1" // Increment by 1 year
+                    step="1" 
                   />
-                  {/* You could add a calendar icon here if you integrate a date picker library */}
                 </div>
                 <input
                   type="tel"
@@ -146,7 +145,8 @@ const CarForm = () => {
                   cepat dan mudah di Mukrindo.id
                 </p>
                 <button
-                  className="py-3 px-16 rounded-full text-white font-medium transition-colors duration-200 bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
+                  className="py-3 px-16 rounded-full text-sm text-white font-medium transition-colors duration-200 
+                  bg-orange-500 hover:bg-orange-600"
                   type="button"
                 >
                   Jual Sekarang
