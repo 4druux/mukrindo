@@ -1,5 +1,5 @@
 import React from "react";
-import { EcommerceMetrics } from "@/components/ecommerce/EcommerceMetrics";
+import EditProduct from "@/layout/admin/product/EditProduct";
 
 export const metadata = {
   title: "Admin Mukrindo Motor",
@@ -8,9 +8,9 @@ export const metadata = {
 
 export default function Ecommerce() {
   return (
-    <div className="grid grid-cols-12 gap-4 md:gap-6">
+    <div className="grid grid-cols-1 gap-4 md:gap-6">
       <div className="col-span-12 space-y-6 xl:col-span-7">
-        <EcommerceMetrics />
+        <EditProduct />
       </div>
     </div>
   );

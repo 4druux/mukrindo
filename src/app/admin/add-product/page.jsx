@@ -1,9 +1,8 @@
 import React from "react";
-import AddProduct from "@/components/product/AddProduct";
+import AddProduct from "@/layout/admin/product/AddProduct";
 
 export const metadata = {
-  title:
-    "Admin Mukrindo Motor",
+  title: "Admin Mukrindo Motor",
   description: "This is Next.js Home for TailAdmin Dashboard Template",
 };
 

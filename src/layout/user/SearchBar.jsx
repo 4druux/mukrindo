@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useHeader } from "@/context/HeaderContext";
-import AnimatedPlaceholder from "@/components/common/AnimatedPlacehoder";
+import AnimatedPlaceholder from "@/components/common/AnimatedPlaceholder";
 import SearchModal from "@/components/common/SearchModal";
 
 const SearchBar = () => {
