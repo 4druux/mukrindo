@@ -1,6 +1,6 @@
 // EditProduct.jsx
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
 import ImageUpload from "@/components/product/ImageUpload";
@@ -10,8 +10,9 @@ import CarPapers from "@/components/product/CarPapers";
 import { validateProductData } from "@/utils/validateProductData";
 import { formatNumber, unformatNumber } from "@/utils/formatNumber";
 import carData from "@/utils/carData";
+import { useRouter } from "next/navigation";
 
-const EditProduct = () => {
+const EditProduct = ({ productId }) => {
   const [productData, setProductData] = useState({
     carName: "",
     brand: "",
@@ -28,23 +29,25 @@ const EditProduct = () => {
     plateNumber: "",
     yearOfAssembly: "",
     price: "",
+    status: "", // Inisialisasi status
   });
   const [mediaFiles, setMediaFiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const router = useRouter();
 
-  // --- Input Change Handlers ---
   const handleChange = (e) => {
     const { name, value } = e.target;
     let updatedValue = value;
-
-    if ((name === "price", name === "cc", name === "travelDistance")) {
+    if (name === "price" || name === "cc" || name === "travelDistance") {
       updatedValue = unformatNumber(value);
     }
-
     setProductData((prevData) => ({
       ...prevData,
       [name]: updatedValue,
     }));
   };
+
   const handleBrandChange = (field, value, modelValue, variantValue) => {
     setProductData((prev) => ({
       ...prev,
@@ -59,26 +62,135 @@ const EditProduct = () => {
     }));
   };
 
-  // --- Form Submission ---
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (!productId) return;
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/products/${productId}`
+        );
+        if (!response.ok) {
+          throw new Error("Gagal mengambil data produk");
+        }
+        const data = await response.json();
+        setProductData({
+          carName: data.carName,
+          brand: data.brand,
+          model: data.model,
+          variant: data.variant,
+          type: data.type,
+          carColor: data.carColor,
+          cc: data.cc,
+          travelDistance: data.travelDistance,
+          driveSystem: data.driveSystem,
+          transmission: data.transmission,
+          fuelType: data.fuelType,
+          stnkExpiry: data.stnkExpiry,
+          plateNumber: data.plateNumber,
+          yearOfAssembly: data.yearOfAssembly,
+          price: data.price,
+          status: data.status, // Set status dari data yang diambil
+        });
 
+        const initialMediaFiles = await Promise.all(
+          data.images.map(async (base64, index) => {
+            const response = await fetch(base64);
+            const blob = await response.blob();
+            const file = new File([blob], `image${index}.jpg`, {
+              type: "image/jpeg",
+            });
+            return { original: file, cropped: file, originalBase64: base64 }; // Simpan Base64 asli
+          })
+        );
+        setMediaFiles(initialMediaFiles);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [productId]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    // Validasi (gunakan validateProductData yang sudah dimodifikasi)
     const validationError = validateProductData(productData, mediaFiles);
     if (validationError) {
-      alert(validationError);
+      setError(validationError);
       return;
     }
+    setLoading(true);
 
-    const submitData = {
-      ...productData,
-      imageFile: mediaFiles[0]?.cropped,
-    };
-    console.log("Data Produk:", submitData);
+    try {
+      // 1. Proses Gambar:  Hanya upload gambar yang *berubah*.
+      const base64Images = await Promise.all(
+        mediaFiles.map(async (fileObj) => {
+          if (fileObj.cropped) {
+            // Gambar diubah (ada crop baru) -> Konversi ke Base64
+            return new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result);
+              reader.onerror = reject;
+              reader.readAsDataURL(fileObj.cropped);
+            });
+          } else if (fileObj.originalBase64) {
+            // Gambar tidak diubah -> Gunakan Base64 yang asli
+            return fileObj.originalBase64;
+          }
+          return null; // Seharusnya tidak terjadi, tapi handle untuk keamanan
+        })
+      );
+
+      // 2. Siapkan Data untuk Dikirim
+      const submitData = {
+        ...productData,
+        images: base64Images, // Kirim semua Base64 (yang baru dan yang lama)
+      };
+
+      // 3. Kirim Request ke Backend
+      const response = await fetch(
+        `http://localhost:5000/api/products/${productId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(submitData),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "Gagal memperbarui produk. Silakan coba lagi."
+        );
+      }
+
+      const responseData = await response.json();
+      console.log("Produk berhasil diperbarui:", responseData);
+      router.push("/admin");
+    } catch (error) {
+      console.error("Error:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading) {
+    return <div className="text-center p-4">Loading...</div>;
+  }
+  if (error) {
+    return <div className="text-center p-4 text-red-500">{error}</div>;
+  }
 
   return (
     <div className="p-6 rounded-xl shadow-lg">
       <h2 className="text-2xl font-medium mb-4">Edit Produk Mobil</h2>
+      {error && <div className="text-red-500 mb-4">{error}</div>}
+      {loading && <div className="text-orange-500 mb-4">Memperbarui...</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Image Upload */}
         <div>
@@ -87,8 +199,6 @@ const EditProduct = () => {
           </label>
           <ImageUpload mediaFiles={mediaFiles} setMediaFiles={setMediaFiles} />
         </div>
-
-        {/* Car Name */}
         <Input
           label="Nama Mobil"
           id="carName"
@@ -101,7 +211,6 @@ const EditProduct = () => {
           value={productData.carName}
           onChange={handleChange}
         />
-
         <CarBrands
           carData={carData}
           brand={productData.brand}
@@ -109,7 +218,6 @@ const EditProduct = () => {
           variant={productData.variant}
           onChange={handleBrandChange}
         />
-
         <Select
           label="Tipe Mobil"
           id="type"
@@ -128,7 +236,6 @@ const EditProduct = () => {
             { value: "minibus", label: "Minibus" },
           ]}
         />
-
         <Input
           label="Warna Mobil"
           id="carColor"
@@ -167,7 +274,6 @@ const EditProduct = () => {
           onChange={handleChange}
           formatter={formatNumber}
         />
-
         <CarSystems
           data={{
             driveSystem: productData.driveSystem,
@@ -176,8 +282,6 @@ const EditProduct = () => {
           }}
           onChange={handleChange}
         />
-
-        {/* CarPapers */}
         <CarPapers
           data={{
             stnkExpiry: productData.stnkExpiry,
@@ -186,7 +290,6 @@ const EditProduct = () => {
           }}
           onChange={handleChange}
         />
-
         <Input
           label="Harga Mobil"
           id="price"
@@ -197,13 +300,37 @@ const EditProduct = () => {
           prefix="Rp "
         />
 
-        {/* Submit Button */}
-        <div className="flex justify-end">
+        {/* Status Select */}
+        <Select
+          label="Status"
+          id="status"
+          name="status"
+          value={productData.status}
+          onChange={(value) =>
+            handleChange({ target: { name: "status", value } })
+          }
+          options={[
+            { value: "available", label: "Available" },
+            { value: "sold out", label: "Sold Out" },
+          ]}
+        />
+
+        <div className="col-span-2 flex justify-end space-x-2 sm:space-x-4 mt-4">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="cursor-pointer border text-gray-600 border-gray-500 hover:bg-orange-100 hover:border-orange-500 
+            hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
+          >
+            Back
+          </button>
           <button
             type="submit"
-            className="cursor-pointer bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium py-3 px-6 rounded-full focus:outline-none focus:shadow-outline"
+            className="cursor-pointer bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium py-2.5 px-6 rounded-full 
+            focus:outline-none focus:shadow-outline"
+            disabled={loading}
           >
-            Update Produk
+            {loading ? "Memperbarui..." : "Update Produk"}
           </button>
         </div>
       </form>

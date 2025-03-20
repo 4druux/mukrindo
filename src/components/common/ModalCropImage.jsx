@@ -14,7 +14,6 @@ export default function ModalCropImage({ mediaSrc, onCropComplete, onClose }) {
   };
 
   const handleSave = async () => {
-    // --- IMPORTANT: Only Handle Images ---
     const croppedImage = await getCroppedImg(mediaSrc, croppedAreaPixels);
     onCropComplete(croppedImage);
   };
