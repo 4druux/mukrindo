@@ -4,7 +4,7 @@ import { Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useHeader } from "@/context/HeaderContext";
 import AnimatedPlaceholder from "@/components/common/AnimatedPlaceholder";
-import SearchModal from "@/components/common/SearchModal";
+import SearchModal from "@/components/hedaer-user/SearchModal";
 
 const SearchBar = () => {
   const { isSearchOpen, searchQuery, setSearchQuery, toggleSearch } =
@@ -73,20 +73,20 @@ const SearchBar = () => {
                 </div>
                 {searchQuery && (
                   <button
-                    className="hover:bg-slate-100 rounded-full p-1 group mr-1 cursor-pointer"
+                    className="hover:bg-gray-100 rounded-full p-1 mr-1 cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleClearSearch();
                     }}
                   >
-                    <X className="w-5 text-gray-700 group-hover:text-gray-900" />
+                    <X className="w-4 h-4 text-gray-500" />
                   </button>
                 )}
                 <div
                   className="border-l-2 border-gray-300"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Search className="w-5 ml-2 text-gray-700 cursor-pointer" />
+                  <Search className="h-4 w-4 ml-2 text-gray-500 cursor-pointer" />
                 </div>
               </div>
               <SearchModal />

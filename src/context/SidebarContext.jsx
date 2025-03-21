@@ -1,6 +1,12 @@
-// SidebarContext.js (sedikit perubahan)
+// SidebarContext.js
 "use client";
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+} from "react"; // Tambahkan useMemo
 
 const SidebarContext = createContext(undefined);
 
@@ -19,6 +25,7 @@ export const SidebarProvider = ({ children }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
   const [openSubmenu, setOpenSubmenu] = useState(null);
+  const [searchQuery, setSearchQuery] = useState(""); // Tambahkan state searchQuery
 
   useEffect(() => {
     const handleResize = () => {
@@ -47,22 +54,36 @@ export const SidebarProvider = ({ children }) => {
     setOpenSubmenu((prev) => (prev === item ? null : item));
   };
 
+  // Gunakan useMemo untuk mencegah re-render yang tidak perlu
+  const contextValue = useMemo(
+    () => ({
+      isExpanded,
+      isMobileOpen,
+      isMobile,
+      isHovered,
+      activeItem,
+      openSubmenu,
+      toggleSidebar,
+      toggleMobileSidebar,
+      setIsHovered,
+      setActiveItem,
+      toggleSubmenu,
+      searchQuery, // Sertakan searchQuery dan setSearchQuery
+      setSearchQuery,
+    }),
+    [
+      isExpanded,
+      isMobileOpen,
+      isMobile,
+      isHovered,
+      activeItem,
+      openSubmenu,
+      searchQuery,
+    ]
+  ); // searchQuery sebagai dependensi
+
   return (
-    <SidebarContext.Provider
-      value={{
-        isExpanded,
-        isMobileOpen,
-        isMobile,
-        isHovered,
-        activeItem,
-        openSubmenu,
-        toggleSidebar,
-        toggleMobileSidebar,
-        setIsHovered,
-        setActiveItem,
-        toggleSubmenu,
-      }}
-    >
+    <SidebarContext.Provider value={contextValue}>
       {children}
     </SidebarContext.Provider>
   );

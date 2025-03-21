@@ -32,7 +32,7 @@ export default function UserDropdown() {
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         className="flex items-center text-gray-700 dropdown-toggle cursor-pointer"
       >
-        <span className="mr-3 overflow-hidden rounded-full border border-gray-200 h-11 w-11">
+        <span className="mr-1 lg:mr-3 overflow-hidden rounded-full border border-gray-200 h-11 w-11">
           <Image
             width={44}
             height={44}
@@ -40,7 +40,7 @@ export default function UserDropdown() {
             alt="User"
           />
         </span>
-        <span className="block mr-1 font-medium text-sm">Mukrindo</span>
+        <span className="mr-1 font-medium text-sm hidden lg:block">Mukrindo</span>
         <div
           className={`transition-transform duration-200 ${
             isDropdownOpen ? "rotate-180" : ""
@@ -58,7 +58,7 @@ export default function UserDropdown() {
             animate="open"
             exit="closed"
             variants={dropDownVariant}
-            className="absolute z-40 right-0 mt-2 rounded-2xl border border-gray-200 bg-white shadow-lg p-4"
+            className="absolute z-40 right-0 mt-4 rounded-2xl border border-gray-200 bg-white shadow-lg p-4"
           >
             <div>
               <span className="block font-medium text-gray-700 text-sm">
