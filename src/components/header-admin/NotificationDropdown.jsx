@@ -38,7 +38,7 @@ export default function NotificationDropdown() {
     <div className="relative" ref={dropdownRef}>
       <button
         className="relative dropdown-toggle flex items-center justify-center text-gray-500 transition-colors bg-white border
-         border-gray-200 rounded-full hover:text-gray-700 h-11 w-11 hover:bg-gray-100 cursor-pointer"
+         border-gray-200 rounded-full hover:text-gray-700 w-8 h-8 lg:w-11 lg:h-11 hover:bg-gray-100 cursor-pointer"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
       >
         <span
@@ -48,7 +48,7 @@ export default function NotificationDropdown() {
         >
           <span className="absolute -right-0.5 -top-0.5 z-10 h-3 w-3 bg-orange-500 rounded-full opacity-75 animate-ping"></span>
         </span>
-        <Bell className="w-5 h-5" />
+        <Bell className="w-4 lg:w-5" />
       </button>
 
       {/* Inlined Dropdown */}

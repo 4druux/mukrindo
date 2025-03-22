@@ -6,7 +6,7 @@ import React, {
   useState,
   useEffect,
   useMemo,
-} from "react"; // Tambahkan useMemo
+} from "react";
 
 const SidebarContext = createContext(undefined);
 
@@ -25,7 +25,7 @@ export const SidebarProvider = ({ children }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
   const [openSubmenu, setOpenSubmenu] = useState(null);
-  const [searchQuery, setSearchQuery] = useState(""); // Tambahkan state searchQuery
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const handleResize = () => {
@@ -68,7 +68,7 @@ export const SidebarProvider = ({ children }) => {
       setIsHovered,
       setActiveItem,
       toggleSubmenu,
-      searchQuery, // Sertakan searchQuery dan setSearchQuery
+      searchQuery,
       setSearchQuery,
     }),
     [

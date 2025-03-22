@@ -20,11 +20,7 @@ const navItems = [
   {
     icon: <MdDashboard />,
     name: "Dashboard",
-    subItems: [
-      { name: "All Products", path: "/admin" },
-      { name: "Add Products", path: "/admin/add-product" },
-      { name: "Edit Products", path: "/admin/edit-product" },
-    ],
+    subItems: [{ name: "All Products", path: "/admin" }],
   },
   {
     name: "Forms",

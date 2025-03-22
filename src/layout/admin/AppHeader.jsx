@@ -6,40 +6,21 @@ import UserDropdown from "@/components/header-admin/UserDropdown";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
-import { AlignLeft, Ellipsis, Search, X } from "lucide-react";
+import { AlignLeft, Search, X } from "lucide-react";
 import AnimatedPlaceholder from "@/components/common/AnimatedPlaceholder";
 import { useRouter } from "next/navigation";
 
 const AppHeader = () => {
-  const {
-    toggleSidebar,
-    isMobileOpen,
-    toggleMobileSidebar,
-    searchQuery,
-    setSearchQuery,
-  } = useSidebar();
-  const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
+  const { toggleSidebar, toggleMobileSidebar, searchQuery, setSearchQuery } =
+    useSidebar();
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
   const router = useRouter();
 
-  const closeApplicationMenu = () => {
-    setApplicationMenuOpen(false);
-  };
-
   const handleMainToggle = () => {
     if (window.innerWidth >= 991) {
       toggleSidebar();
-      closeApplicationMenu();
     } else {
-      toggleMobileSidebar();
-      closeApplicationMenu();
-    }
-  };
-
-  const handleApplicationToggle = () => {
-    setApplicationMenuOpen((prev) => !prev);
-    if (isMobileOpen) {
       toggleMobileSidebar();
     }
   };
@@ -77,7 +58,6 @@ const AppHeader = () => {
   }, [searchQuery]);
 
   const placeholderTexts = [
-    "Cari berdasarkan No Polisi...",
     "Cari berdasarkan Merek...",
     "Cari berdasarkan Model...",
     "Cari berdasarkan Tahun...",
@@ -85,7 +65,7 @@ const AppHeader = () => {
   ];
 
   return (
-    <header className="sticky -top-1 lg:top-0 w-full bg-white border-gray-200 z-40 border-b">
+    <header className="sticky -top-1 lg:top-0 w-full bg-white border-gray-200 z-40 shadow-md lg:shadow-none lg:border-b">
       <div className="flex items-center justify-between">
         <button
           className="items-center ml-4 justify-center border-gray-200 rounded-lg z-50 w-11 h-11 lg:flex lg:border cursor-pointer"
@@ -99,29 +79,30 @@ const AppHeader = () => {
             <div className="block">
               <form onSubmit={handleSearchSubmit}>
                 <div className="relative overflow-hidden">
-                  <span className="absolute -translate-y-1/2 left-4 top-1/2 pointer-events-none">
-                    <Search className="w-5 text-gray-500" />
+                  <span className="absolute -translate-y-1/2 left-3 lg:left-4 top-1/2 pointer-events-none">
+                    <Search className="w-4 lg:w-5 text-gray-500" />
                   </span>
                   {inputValue === "" && (
                     <AnimatedPlaceholder
                       placeholderTexts={placeholderTexts}
-                      className="pl-13"
+                      className="pl-9 lg:pl-13  max-w-[170px] lg:max-w-full whitespace-nowrap"
                     />
                   )}
+
                   <input
                     ref={inputRef}
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder=""
-                    className="relative z-50 h-11 w-full rounded-full border-2 border-gray-200 bg-transparent py-2.5 pl-12 pr-14 text-sm text-gray-800 focus:outline-hidden focus:border-gray-400 xl:w-[430px]"
+                    className="relative z-50 h-8 lg:h-11 w-full rounded-full border-2 border-gray-200 bg-transparent py-2.5 pl-8 lg:pl-12 pr-8 lg:pr-20 text-sm text-gray-800 focus:outline-hidden focus:border-gray-400 xl:w-[430px]"
                   />
 
                   {inputValue && (
                     <button
                       type="button"
                       onClick={handleResetSearch}
-                      className="absolute right-14 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 z-50"
+                      className="absolute right-2 lg:right-14 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 z-50 cursor-pointer"
                       aria-label="Reset Search"
                     >
                       <X className="w-4 h-4 text-gray-500" />

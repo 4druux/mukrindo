@@ -32,7 +32,7 @@ export default function UserDropdown() {
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         className="flex items-center text-gray-700 dropdown-toggle cursor-pointer"
       >
-        <span className="mr-1 lg:mr-3 overflow-hidden rounded-full border border-gray-200 h-11 w-11">
+        <span className="mr-1 lg:mr-3 overflow-hidden rounded-full border border-gray-200 w-8 lg:w-11">
           <Image
             width={44}
             height={44}

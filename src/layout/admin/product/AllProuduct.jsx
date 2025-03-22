@@ -10,15 +10,8 @@ import generateSlug from "@/utils/generateSlug";
 import { BsFuelPumpFill } from "react-icons/bs";
 import { GiGearStickPattern } from "react-icons/gi";
 import { FaBoxOpen, FaRegCalendarAlt, FaRoad } from "react-icons/fa";
-import ReactPaginate from "react-paginate";
-import {
-  Ellipsis,
-  Plus,
-  SquarePen,
-  Trash2,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react";
+import { Ellipsis, Plus, SquarePen, Trash2 } from "lucide-react";
+import Pagination from "@/components/common/Pagination";
 
 const AllProducts = () => {
   const [products, setProducts] = useState([]);
@@ -32,7 +25,7 @@ const AllProducts = () => {
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(0);
-  const productsPerPage = 12;
+  const productsPerPage = 1;
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -161,7 +154,7 @@ const AllProducts = () => {
     );
   });
 
-  // Logic for displaying current products (pagination)
+  // Pagination Logic
   const indexOfLastProduct = (currentPage + 1) * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(
@@ -169,10 +162,9 @@ const AllProducts = () => {
     indexOfLastProduct
   );
 
-  // Change page
-  const handlePageClick = (data) => {
+  // Handle perubahan halaman
+  const handlePageChange = (data) => {
     setCurrentPage(data.selected);
-    // Scroll to top after page change
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -184,6 +176,7 @@ const AllProducts = () => {
   if (loading) {
     return <div className="text-center p-4">Loading...</div>;
   }
+
   if (error) {
     return <div className="text-center p-4 text-red-500">{error}</div>;
   }
@@ -220,230 +213,189 @@ const AllProducts = () => {
           Add Product
         </span>
       </button>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-        {currentProducts.map(
-          (
-            product // Map through currentProducts
-          ) => (
-            <div
-              key={product._id}
-              className={`rounded-2xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 relative  ${
-                product.status === "sold out" ? "cursor-not-allowed" : ""
-              }`}
+        {currentProducts.map((product) => (
+          <div
+            key={product._id}
+            className={`rounded-2xl overflow-hidden transition-shadow duration-200 relative  ${
+              product.status === "sold out"
+                ? "cursor-not-allowed shadow-sm"
+                : "shadow-md hover:shadow-xl"
+            }`}
+          >
+            {/* Sold Out Banner */}
+            {product.status === "sold out" && (
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <img
+                  src="./images/soldout.png"
+                  alt="Sold Out"
+                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80%]"
+                />
+              </div>
+            )}
+            {/* WRAP WITH LINK (Except Dropdown and Buttons) */}
+            <Link
+              href={`/admin/car-details/${generateSlug(
+                product.carName,
+                product._id
+              )}`}
             >
-              {/* Sold Out Banner */}
-              {product.status === "sold out" && (
-                <div className="absolute inset-0 flex items-center justify-center z-10">
-                  <img
-                    src="./images/soldout.png"
-                    alt="Sold Out"
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80%]"
+              <div
+                className={
+                  product.status === "sold out" ? "cursor-not-allowed" : ""
+                }
+              >
+                {/* Image Container (dengan overlay) */}
+                <div className="relative w-full h-40">
+                  <Image
+                    src={product.images[0]}
+                    alt={product.carName}
+                    layout="fill"
+                    objectFit="cover"
+                    placeholder="blur"
+                    blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+                    className={`object-cover ${
+                      product.status === "sold out" ? "opacity-40" : ""
+                    }`}
                   />
                 </div>
-              )}
-              {/* Image Container (dengan overlay) */}
-              <div className="relative w-full h-40">
-                <Image
-                  src={product.images[0]}
-                  alt={product.carName}
-                  layout="fill"
-                  objectFit="cover"
-                  placeholder="blur"
-                  blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
-                  className={`object-cover ${
+                {/* Product Info */}
+                <div
+                  className={`p-4 mb-10 ${
                     product.status === "sold out" ? "opacity-40" : ""
                   }`}
-                />
-                {/* Dropdown */}
-                <div
-                  className="absolute top-2 right-2 z-10"
-                  ref={(el) => (dropdownRefs.current[product._id] = el)}
                 >
-                  <button
-                    onClick={() => toggleDropdown(product._id)}
-                    className={`p-1 rounded-full border border-gray-200  bg-gray-200 hover:bg-orange-200 hover:border-orange-500 
+                  <h2 className="text-md text-gray-800">{product.carName}</h2>
+                  <p className="text-orange-500 font-medium text-lg mt-2">
+                    Rp {product.price.toLocaleString("id-ID")}
+                  </p>
+                  <div className="flex justify-between py-3 border-b border-gray-300">
+                    <div className="flex flex-col items-center space-y-1">
+                      <FaRoad className="w-5 h-5 text-gray-600" />
+                      <span className="text-gray-600 text-xs">
+                        {product.travelDistance.toLocaleString("id-ID")} KM
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center space-y-1">
+                      <GiGearStickPattern className="w-5 h-5 text-gray-600" />
+                      <span className="text-gray-600 text-xs">
+                        {product.transmission}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center space-y-1">
+                      <BsFuelPumpFill className="w-5 h-5 text-gray-600" />
+                      <span className="text-gray-600 text-xs">
+                        {product.fuelType}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-center space-y-1">
+                      <FaRegCalendarAlt className="w-5 h-5 text-gray-600" />
+                      <span className="text-gray-600 text-xs">
+                        {product.plateNumber}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* Dropdown */}
+            <div
+              className="absolute top-2 right-2 z-10"
+              ref={(el) => (dropdownRefs.current[product._id] = el)}
+            >
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleDropdown(product._id);
+                }}
+                className={`p-1 rounded-full border border-gray-200  bg-gray-200 hover:bg-orange-200 hover:border-orange-500 
                 cursor-pointer group ${
                   isDropdownOpen[product._id]
                     ? "bg-orange-200 border-orange-500"
                     : ""
                 }`}
-                  >
-                    <Ellipsis
-                      className={`w-4 h-4 text-gray-700 group-hover:text-orange-600 ${
-                        isDropdownOpen[product._id] ? "text-orange-600" : ""
-                      }`}
-                    />
-                  </button>
-                  <AnimatePresence>
-                    {isDropdownOpen[product._id] && (
-                      <motion.div
-                        initial="closed"
-                        animate="open"
-                        exit="closed"
-                        variants={dropDownVariant}
-                        className="absolute right-0 mt-2 w-28 bg-white border border-gray-300 rounded-lg shadow-lg"
-                      >
-                        <button
-                          onClick={() =>
-                            handleStatusChange(product._id, "available")
-                          }
-                          className="block w-full text-left text-xs px-4 py-2 text-gray-700 hover:text-gray-700 hover:bg-orange-100 rounded-lg cursor-pointer"
-                        >
-                          Available
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleStatusChange(product._id, "sold out")
-                          }
-                          className="block w-full text-left text-xs px-4 py-2 text-gray-700 hover:text-gray-700 hover:bg-orange-100 rounded-lg cursor-pointer"
-                        >
-                          Sold Out
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-              {/* Product Info */}
-              <div
-                className={`p-4  ${
-                  product.status === "sold out" ? "opacity-40" : ""
-                }`}
               >
-                <h2 className="text-md text-gray-800">
-                  <Link href={`/products/${product._id}`}>
-                    {product.carName}
-                  </Link>
-                </h2>
-                <p className="text-orange-500 font-medium text-lg mt-2">
-                  Rp {product.price.toLocaleString("id-ID")}
-                </p>
-                <div className="flex justify-between py-3">
-                  <div className="flex flex-col items-center space-y-1">
-                    <FaRoad className="w-5 h-5 text-gray-600" />
-                    <span className="text-gray-600 text-xs">
-                      {product.travelDistance.toLocaleString("id-ID")} KM
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center space-y-1">
-                    <GiGearStickPattern className="w-5 h-5 text-gray-600" />
-                    <span className="text-gray-600 text-xs">
-                      {product.transmission}
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center space-y-1">
-                    <BsFuelPumpFill className="w-5 h-5 text-gray-600" />
-                    <span className="text-gray-600 text-xs">
-                      {product.fuelType}
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center space-y-1">
-                    <FaRegCalendarAlt className="w-5 h-5 text-gray-600" />
-                    <span className="text-gray-600 text-xs">
-                      {product.plateNumber}
-                    </span>
-                  </div>
-                </div>
-                {/* Action Buttons */}
-                <div className="flex justify-end items-center border-t border-gray-300 pt-1 md:pt-3 mt-1 md:mt-3">
-                  <div className="flex md:space-x-2">
-                    <Link
-                      href={`/products/${product._id}`}
-                      className="p-2 rounded-full hover:bg-gray-100 hover:-translate-y-1 transition-all duration-500"
-                    >
-                      <Ellipsis className="w-5 h-5 text-orange-500" />
-                    </Link>
-                    <Link
-                      href={`/admin/edit-product/${generateSlug(
-                        product.carName,
-                        product._id
-                      )}`}
-                      className="p-2 rounded-full hover:bg-gray-100 hover:-translate-y-1 transition-all duration-500"
-                    >
-                      <SquarePen className="w-5 h-5 text-neutral-400" />
-                    </Link>
+                <Ellipsis
+                  className={`w-4 h-4 text-gray-700 group-hover:text-orange-600 ${
+                    isDropdownOpen[product._id] ? "text-orange-600" : ""
+                  }`}
+                />
+              </button>
+              <AnimatePresence>
+                {isDropdownOpen[product._id] && (
+                  <motion.div
+                    initial="closed"
+                    animate="open"
+                    exit="closed"
+                    variants={dropDownVariant}
+                    className="absolute right-0 mt-2 w-28 bg-white border border-gray-300 rounded-lg shadow-lg"
+                  >
                     <button
-                      onClick={() => handleDelete(product._id)}
-                      className="p-2 rounded-full hover:bg-gray-100 hover:-translate-y-1 transition-all duration-500"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(product._id, "available");
+                      }}
+                      className="block w-full text-left text-xs px-4 py-2 text-gray-700 hover:text-gray-700 hover:bg-orange-100 rounded-lg cursor-pointer"
                     >
-                      <Trash2 className="w-5 h-5 text-red-500" />
+                      Available
                     </button>
-                  </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStatusChange(product._id, "sold out");
+                      }}
+                      className="block w-full text-left text-xs px-4 py-2 text-gray-700 hover:text-gray-700 hover:bg-orange-100 rounded-lg cursor-pointer"
+                    >
+                      Sold Out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Action Buttons */}
+            <div
+              className={`absolute bottom-3 right-3 ${
+                product.status === "sold out" ? "opacity-40" : ""
+              }`}
+            >
+              <div className="flex justify-end items-center pt-1 md:pt-3 mt-1 md:mt-3">
+                <div className="flex md:space-x-2">
+                  <Link
+                    href={`/admin/edit-product/${generateSlug(
+                      product.carName,
+                      product._id
+                    )}`}
+                    className="p-2 rounded-full hover:bg-gray-100 hover:-translate-y-1 transition-all duration-500"
+                  >
+                    <SquarePen className="w-5 h-5 text-neutral-400" />
+                  </Link>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(product._id);
+                    }}
+                    className="p-2 rounded-full hover:bg-gray-100 hover:-translate-y-1 transition-all duration-500 cursor-pointer"
+                  >
+                    <Trash2 className="w-5 h-5 text-red-500" />
+                  </button>
                 </div>
               </div>
             </div>
-          )
-        )}
+          </div>
+        ))}
       </div>
 
       {/* Pagination */}
       {currentProducts.length > 0 && (
-        <div className="flex justify-center mt-8 md:mt-14">
-          <ReactPaginate
-            previousLabel={
-              <div
-                className={`flex items-center space-x-2 ${
-                  currentPage === 0 ? "cursor-not-allowed" : "cursor-pointer"
-                }`}
-              >
-                <ChevronsLeft
-                  className={`w-6 h-6 ${
-                    currentPage === 0 ? "text-gray-400" : "text-gray-500"
-                  }`}
-                />
-              </div>
-            }
-            nextLabel={
-              <div
-                className={`flex items-center space-x-2 ${
-                  currentPage ===
-                  Math.ceil(filteredProducts.length / productsPerPage) - 1
-                    ? "cursor-not-allowed"
-                    : "cursor-pointer"
-                }`}
-              >
-                <ChevronsRight
-                  className={`w-6 h-6 ${
-                    currentPage ===
-                    Math.ceil(filteredProducts.length / productsPerPage) - 1
-                      ? "text-gray-400"
-                      : "text-gray-500"
-                  }`}
-                />
-              </div>
-            }
-            breakLabel={"..."}
-            pageCount={Math.ceil(filteredProducts.length / productsPerPage)}
-            marginPagesDisplayed={1}
-            pageRangeDisplayed={1}
-            onPageChange={handlePageClick}
-            containerClassName={
-              "flex items-center space-x-1 md:space-x-4 border border-gray-100 p-2 rounded-full shadow-md bg-gray-50"
-            }
-            pageClassName={`relative w-8 h-8 flex items-center justify-center rounded-full cursor-pointer text-sm font-medium 
-              transition-all duration-300 hover:-translate-y-1 text-gray-500`}
-            previousClassName={`flex items-center space-x-2 px-3 py-2 rounded-full ${
-              currentPage === 0
-                ? "cursor-not-allowed"
-                : "hover:bg-gray-200 hover:-translate-y-1 transition-all duration-300"
-            }`}
-            nextClassName={`flex items-center space-x-2 px-3 py-2 rounded-full ${
-              currentPage ===
-              Math.ceil(filteredProducts.length / productsPerPage) - 1
-                ? "cursor-not-allowed"
-                : "hover:bg-gray-200 hover:-translate-y-1 transition-all duration-300"
-            }`}
-            breakClassName={"px-3 py-2 text-gray-700 select-none"}
-            activeClassName={"bg-gray-200 text-gray-700 shadow-md scale-105"}
-            pageLinkClassName={`absolute inset-0 flex items-center justify-center`}
-            disabledClassName={"opacity-50 cursor-not-allowed"}
-            renderOnZeroPageCount={null}
-          />
-        </div>
+        <Pagination
+          pageCount={Math.ceil(filteredProducts.length / productsPerPage)}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+        />
       )}
     </div>
   );
 };
-
 export default AllProducts;
