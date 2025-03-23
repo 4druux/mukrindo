@@ -2,6 +2,7 @@
 import { usePathname } from "next/navigation";
 import ClientLayout from "./client-layout";
 import { SidebarProvider } from "@/context/SidebarContext";
+import { ProductProvider } from "@/context/ProductContext";
 
 export default function RootLayoutClient({ children }) {
   const pathname = usePathname();
@@ -11,8 +12,10 @@ export default function RootLayoutClient({ children }) {
     pathname.startsWith("/sign-up");
 
   return (
-    <SidebarProvider>
-      {isAdminPage ? children : <ClientLayout>{children}</ClientLayout>}
-    </SidebarProvider>
+    <ProductProvider>
+      <SidebarProvider>
+        {isAdminPage ? children : <ClientLayout>{children}</ClientLayout>}
+      </SidebarProvider>
+    </ProductProvider>
   );
 }

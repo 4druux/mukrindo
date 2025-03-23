@@ -11,7 +11,7 @@ const Input = ({
   type = "text",
   formatter,
   prefix,
-  placeholderTexts, // Tambahkan prop baru
+  placeholderTexts,
   ...props
 }) => {
   const formattedValue = formatter ? formatter(value, prefix) : value;

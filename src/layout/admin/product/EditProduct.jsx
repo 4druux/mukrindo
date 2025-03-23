@@ -1,6 +1,7 @@
 // EditProduct.jsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
 import ImageUpload from "@/components/product/ImageUpload";
@@ -10,7 +11,8 @@ import CarPapers from "@/components/product/CarPapers";
 import { validateProductData } from "@/utils/validateProductData";
 import { formatNumber, unformatNumber } from "@/utils/formatNumber";
 import carData from "@/utils/carData";
-import { useRouter } from "next/navigation";
+import SkeletonEditProduct from "@/components/skeleton/SkeletonEditProduct";
+import { useProducts } from "@/context/ProductContext";
 
 const EditProduct = ({ productId }) => {
   const [productData, setProductData] = useState({
@@ -29,12 +31,17 @@ const EditProduct = ({ productId }) => {
     plateNumber: "",
     yearOfAssembly: "",
     price: "",
-    status: "", // Inisialisasi status
+    status: "",
   });
   const [mediaFiles, setMediaFiles] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingFetch, setLoadingFetch] = useState(false);
+  const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [error, setError] = useState(null);
   const router = useRouter();
+  const { refetchProducts } = useProducts();
+
+  const initialProductData = useRef(null);
+  const initialMediaFiles = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -64,6 +71,7 @@ const EditProduct = ({ productId }) => {
 
   useEffect(() => {
     const fetchProduct = async () => {
+      setLoadingFetch(true);
       if (!productId) return;
       try {
         const response = await fetch(
@@ -89,46 +97,85 @@ const EditProduct = ({ productId }) => {
           plateNumber: data.plateNumber,
           yearOfAssembly: data.yearOfAssembly,
           price: data.price,
-          status: data.status, // Set status dari data yang diambil
+          status: data.status,
         });
-
-        const initialMediaFiles = await Promise.all(
+        const initialFiles = await Promise.all(
           data.images.map(async (base64, index) => {
             const response = await fetch(base64);
             const blob = await response.blob();
             const file = new File([blob], `image${index}.jpg`, {
               type: "image/jpeg",
             });
-            return { original: file, cropped: file, originalBase64: base64 }; // Simpan Base64 asli
+            return { original: file, cropped: file, originalBase64: base64 };
           })
         );
-        setMediaFiles(initialMediaFiles);
+        setMediaFiles(initialFiles);
+
+        initialProductData.current = {
+          carName: data.carName,
+          brand: data.brand,
+          model: data.model,
+          variant: data.variant,
+          type: data.type,
+          carColor: data.carColor,
+          cc: data.cc,
+          travelDistance: data.travelDistance,
+          driveSystem: data.driveSystem,
+          transmission: data.transmission,
+          fuelType: data.fuelType,
+          stnkExpiry: data.stnkExpiry,
+          plateNumber: data.plateNumber,
+          yearOfAssembly: data.yearOfAssembly,
+          price: data.price,
+          status: data.status,
+        };
+        initialMediaFiles.current = initialFiles;
       } catch (error) {
         setError(error.message);
       } finally {
-        setLoading(false);
+        setLoadingFetch(false);
       }
     };
     fetchProduct();
   }, [productId]);
 
+  const isChanged = useMemo(() => {
+    if (!initialProductData.current || !initialMediaFiles.current) {
+      return false;
+    }
+
+    const productDataChanged = Object.keys(productData).some(
+      (key) => productData[key] !== initialProductData.current[key]
+    );
+
+    const mediaFilesChanged =
+      mediaFiles.length !== initialMediaFiles.current.length ||
+      mediaFiles.some((fileObj, index) => {
+        const initialFileObj = initialMediaFiles.current[index];
+        return (
+          !initialFileObj ||
+          fileObj.cropped !== initialFileObj.cropped ||
+          fileObj.original.name !== initialFileObj.original.name
+        );
+      });
+
+    return productDataChanged || mediaFilesChanged;
+  }, [productData, mediaFiles, initialProductData, initialMediaFiles]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    // Validasi (gunakan validateProductData yang sudah dimodifikasi)
     const validationError = validateProductData(productData, mediaFiles);
     if (validationError) {
       setError(validationError);
       return;
     }
-    setLoading(true);
+    setLoadingUpdate(true);
 
     try {
-      // 1. Proses Gambar:  Hanya upload gambar yang *berubah*.
       const base64Images = await Promise.all(
         mediaFiles.map(async (fileObj) => {
           if (fileObj.cropped) {
-            // Gambar diubah (ada crop baru) -> Konversi ke Base64
             return new Promise((resolve, reject) => {
               const reader = new FileReader();
               reader.onload = () => resolve(reader.result);
@@ -136,20 +183,15 @@ const EditProduct = ({ productId }) => {
               reader.readAsDataURL(fileObj.cropped);
             });
           } else if (fileObj.originalBase64) {
-            // Gambar tidak diubah -> Gunakan Base64 yang asli
             return fileObj.originalBase64;
           }
-          return null; // Seharusnya tidak terjadi, tapi handle untuk keamanan
+          return null;
         })
       );
-
-      // 2. Siapkan Data untuk Dikirim
       const submitData = {
         ...productData,
-        images: base64Images, // Kirim semua Base64 (yang baru dan yang lama)
+        images: base64Images,
       };
-
-      // 3. Kirim Request ke Backend
       const response = await fetch(
         `http://localhost:5000/api/products/${productId}`,
         {
@@ -170,18 +212,28 @@ const EditProduct = ({ productId }) => {
 
       const responseData = await response.json();
       console.log("Produk berhasil diperbarui:", responseData);
-      router.push("/admin");
+      refetchProducts();
+
+      await router.push("/admin");
     } catch (error) {
       console.error("Error:", error);
       setError(error.message);
-    } finally {
-      setLoading(false);
+      setLoadingUpdate(false);
     }
   };
 
-  if (loading) {
-    return <div className="text-center p-4">Loading...</div>;
+  if (loadingFetch) {
+    return <SkeletonEditProduct />;
   }
+
+  if (loadingUpdate) {
+    return (
+      <div className="flex items-center justify-center h-[80vh] bg-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-orange-500"></div>
+      </div>
+    );
+  }
+
   if (error) {
     return <div className="text-center p-4 text-red-500">{error}</div>;
   }
@@ -190,7 +242,6 @@ const EditProduct = ({ productId }) => {
     <div className="p-6 rounded-xl shadow-lg">
       <h2 className="text-2xl font-medium mb-4">Edit Produk Mobil</h2>
       {error && <div className="text-red-500 mb-4">{error}</div>}
-      {loading && <div className="text-orange-500 mb-4">Memperbarui...</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Image Upload */}
         <div>
@@ -299,7 +350,6 @@ const EditProduct = ({ productId }) => {
           formatter={formatNumber}
           prefix="Rp "
         />
-
         {/* Status Select */}
         <Select
           label="Status"
@@ -314,7 +364,6 @@ const EditProduct = ({ productId }) => {
             { value: "sold out", label: "Sold Out" },
           ]}
         />
-
         <div className="col-span-2 flex justify-end space-x-2 sm:space-x-4 mt-4">
           <button
             type="button"
@@ -326,11 +375,15 @@ const EditProduct = ({ productId }) => {
           </button>
           <button
             type="submit"
-            className="cursor-pointer bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium py-2.5 px-6 rounded-full 
-            focus:outline-none focus:shadow-outline"
-            disabled={loading}
+            className={` text-white text-sm font-medium py-2.5 px-6 rounded-full 
+             ${
+               !isChanged
+                 ? "bg-orange-500 opacity-55 cursor-not-allowed"
+                 : "bg-orange-500 hover:bg-orange-600 cursor-pointer "
+             }`}
+            disabled={loadingUpdate || !isChanged}
           >
-            {loading ? "Memperbarui..." : "Update Produk"}
+            {loadingUpdate ? "Memperbarui..." : "Update Produk"}
           </button>
         </div>
       </form>

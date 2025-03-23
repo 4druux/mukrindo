@@ -29,7 +29,7 @@ const AddProduct = () => {
     plateNumber: "",
     yearOfAssembly: "",
     price: "",
-    status: "available", // Inisialisasi status dengan default 'available'
+    status: "available",
   });
   const [mediaFiles, setMediaFiles] = useState([]);
   const [loading, setLoading] = useState(false);

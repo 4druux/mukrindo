@@ -20,10 +20,10 @@ export default function ClientLayout({ children }) {
   return (
     <>
       <HeaderProvider>
-          {!isAdminPage && <AppHeader />}
-          <div className="px-4 sm:px-[6vw] md:px-[9vw] lg:px-[10vw] bg-gray-50">
-            {children}
-          </div>
+        {!isAdminPage && <AppHeader />}
+        <div className="px-4 sm:px-[6vw] md:px-[9vw] lg:px-[10vw] bg-gray-50">
+          {children}
+        </div>
       </HeaderProvider>
     </>
   );
