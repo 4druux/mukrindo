@@ -45,7 +45,7 @@ const Pagination = ({ pageCount, currentPage, onPageChange }) => {
         pageRangeDisplayed={1}
         onPageChange={onPageChange}
         containerClassName={
-          "flex items-center space-x-1 md:space-x-4 border border-gray-100 p-2 rounded-full shadow-md bg-gray-50"
+          "flex items-center space-x-1 md:space-x-4 border border-gray-100 p-2 rounded-full shadow-md bg-white"
         }
         pageClassName={`relative w-8 h-8 flex items-center justify-center rounded-full cursor-pointer text-sm font-medium 
               transition-all duration-300 hover:-translate-y-1 text-orange-500`}

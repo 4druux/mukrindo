@@ -149,7 +149,7 @@ const AllProducts = () => {
           : currentProducts.map((product) => (
               <div
                 key={product._id}
-                className={`rounded-2xl overflow-hidden transition-shadow duration-200 relative  ${
+                className={`rounded-2xl bg-white overflow-hidden transition-shadow duration-200 relative  ${
                   product.status === "sold out"
                     ? "cursor-not-allowed shadow-sm"
                     : "shadow-md hover:shadow-xl"

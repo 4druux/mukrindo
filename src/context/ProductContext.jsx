@@ -17,9 +17,9 @@ export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [refetchTrigger, setRefetchTrigger] = useState(0); // Add a trigger
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
 
-  // Fetch Products (now depends on refetchTrigger)
+  // Fetch Products
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -37,21 +37,34 @@ export const ProductProvider = ({ children }) => {
     }
   }, [refetchTrigger]);
 
+  // Fetch Product by ID
+  const fetchProductById = useCallback(async (productId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/api/products/${productId}`
+      );
+      return { success: true, data: response.data };
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch product";
+      return { success: false, error: errorMessage };
+    }
+  }, []);
+
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Function to trigger a refetch
   const refetchProducts = () => {
-    setRefetchTrigger((prev) => prev + 1); // Increment the trigger
+    setRefetchTrigger((prev) => prev + 1);
   };
 
-  // Delete Product
   const deleteProduct = async (productId) => {
     try {
       await axios.delete(`http://localhost:5000/api/products/${productId}`);
-      // No need to manually update state, refetch will handle it
-      refetchProducts(); // Refetch after deletion
+      refetchProducts();
       return { success: true };
     } catch (error) {
       const errorMessage =
@@ -62,14 +75,12 @@ export const ProductProvider = ({ children }) => {
     }
   };
 
-  // Update Product Status
   const updateProductStatus = async (productId, newStatus) => {
     try {
       await axios.put(`http://localhost:5000/api/products/${productId}`, {
         status: newStatus,
       });
-      // No need to manually update state, refetch will handle it
-      refetchProducts(); // Refetch after status update
+      refetchProducts();
       return { success: true };
     } catch (error) {
       const errorMessage =
@@ -84,10 +95,11 @@ export const ProductProvider = ({ children }) => {
     products,
     loading,
     error,
-    fetchProducts, // Keep this for initial fetch
-    refetchProducts, // Expose the refetch function
+    fetchProducts,
+    refetchProducts,
     deleteProduct,
     updateProductStatus,
+    fetchProductById,
   };
 
   return (

@@ -38,7 +38,7 @@ const EditProduct = ({ productId }) => {
   const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [error, setError] = useState(null);
   const router = useRouter();
-  const { refetchProducts } = useProducts();
+  const { refetchProducts, fetchProductById } = useProducts(); // Destructure fetchProductById
 
   const initialProductData = useRef(null);
   const initialMediaFiles = useRef(null);
@@ -70,74 +70,73 @@ const EditProduct = ({ productId }) => {
   };
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchInitialProduct = async () => {
       setLoadingFetch(true);
       if (!productId) return;
       try {
-        const response = await fetch(
-          `http://localhost:5000/api/products/${productId}`
-        );
-        if (!response.ok) {
-          throw new Error("Gagal mengambil data produk");
-        }
-        const data = await response.json();
-        setProductData({
-          carName: data.carName,
-          brand: data.brand,
-          model: data.model,
-          variant: data.variant,
-          type: data.type,
-          carColor: data.carColor,
-          cc: data.cc,
-          travelDistance: data.travelDistance,
-          driveSystem: data.driveSystem,
-          transmission: data.transmission,
-          fuelType: data.fuelType,
-          stnkExpiry: data.stnkExpiry,
-          plateNumber: data.plateNumber,
-          yearOfAssembly: data.yearOfAssembly,
-          price: data.price,
-          status: data.status,
-        });
-        const initialFiles = await Promise.all(
-          data.images.map(async (base64, index) => {
-            const response = await fetch(base64);
-            const blob = await response.blob();
-            const file = new File([blob], `image${index}.jpg`, {
-              type: "image/jpeg",
-            });
-            return { original: file, cropped: file, originalBase64: base64 };
-          })
-        );
-        setMediaFiles(initialFiles);
+        const result = await fetchProductById(productId);
+        if (result.success) {
+          const data = result.data;
+          setProductData({
+            carName: data.carName,
+            brand: data.brand,
+            model: data.model,
+            variant: data.variant,
+            type: data.type,
+            carColor: data.carColor,
+            cc: data.cc,
+            travelDistance: data.travelDistance,
+            driveSystem: data.driveSystem,
+            transmission: data.transmission,
+            fuelType: data.fuelType,
+            stnkExpiry: data.stnkExpiry,
+            plateNumber: data.plateNumber,
+            yearOfAssembly: data.yearOfAssembly,
+            price: data.price,
+            status: data.status,
+          });
+          const initialFiles = await Promise.all(
+            data.images.map(async (base64, index) => {
+              const response = await fetch(base64);
+              const blob = await response.blob();
+              const file = new File([blob], `image${index}.jpg`, {
+                type: "image/jpeg",
+              });
+              return { original: file, cropped: file, originalBase64: base64 };
+            })
+          );
+          setMediaFiles(initialFiles);
 
-        initialProductData.current = {
-          carName: data.carName,
-          brand: data.brand,
-          model: data.model,
-          variant: data.variant,
-          type: data.type,
-          carColor: data.carColor,
-          cc: data.cc,
-          travelDistance: data.travelDistance,
-          driveSystem: data.driveSystem,
-          transmission: data.transmission,
-          fuelType: data.fuelType,
-          stnkExpiry: data.stnkExpiry,
-          plateNumber: data.plateNumber,
-          yearOfAssembly: data.yearOfAssembly,
-          price: data.price,
-          status: data.status,
-        };
-        initialMediaFiles.current = initialFiles;
+          initialProductData.current = {
+            carName: data.carName,
+            brand: data.brand,
+            model: data.model,
+            variant: data.variant,
+            type: data.type,
+            carColor: data.carColor,
+            cc: data.cc,
+            travelDistance: data.travelDistance,
+            driveSystem: data.driveSystem,
+            transmission: data.transmission,
+            fuelType: data.fuelType,
+            stnkExpiry: data.stnkExpiry,
+            plateNumber: data.plateNumber,
+            yearOfAssembly: data.yearOfAssembly,
+            price: data.price,
+            status: data.status,
+          };
+          initialMediaFiles.current = initialFiles;
+        } else {
+          setError(result.error);
+        }
       } catch (error) {
         setError(error.message);
       } finally {
         setLoadingFetch(false);
       }
     };
-    fetchProduct();
-  }, [productId]);
+    fetchInitialProduct();
+  }, [productId, fetchProductById]);
 
   const isChanged = useMemo(() => {
     if (!initialProductData.current || !initialMediaFiles.current) {
@@ -239,7 +238,7 @@ const EditProduct = ({ productId }) => {
   }
 
   return (
-    <div className="p-6 rounded-xl shadow-lg">
+    <div className="p-6 rounded-xl shadow-lg bg-white">
       <h2 className="text-2xl font-medium mb-4">Edit Produk Mobil</h2>
       {error && <div className="text-red-500 mb-4">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -381,9 +380,9 @@ const EditProduct = ({ productId }) => {
                  ? "bg-orange-500 opacity-55 cursor-not-allowed"
                  : "bg-orange-500 hover:bg-orange-600 cursor-pointer "
              }`}
-            disabled={loadingUpdate || !isChanged}
+            disabled={!isChanged}
           >
-            {loadingUpdate ? "Memperbarui..." : "Update Produk"}
+            Update Produk
           </button>
         </div>
       </form>

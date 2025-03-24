@@ -16,7 +16,7 @@ export default function AdminLayout({ children }) {
     : "lg:ml-[90px]";
 
   return (
-    <div className="min-h-screen xl:flex">
+    <div className="min-h-screen xl:flex bg-gray-50">
       {/* Sidebar and Backdrop */}
       <AppSidebar />
       <Backdrop />

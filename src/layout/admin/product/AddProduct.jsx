@@ -144,7 +144,7 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="p-6 rounded-xl shadow-lg">
+    <div className="p-6 rounded-xl shadow-lg bg-white">
       <h2 className="text-2xl font-medium mb-4">Tambah Produk Mobil</h2>
       {error && <div className="text-red-500 mb-4">{error}</div>}
       {loading && <div className="text-orange-500 mb-4">Menambahkan...</div>}
