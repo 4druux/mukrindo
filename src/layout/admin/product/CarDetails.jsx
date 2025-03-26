@@ -19,7 +19,6 @@ import { MdOutlineColorLens } from "react-icons/md";
 import { FileCheck } from "lucide-react";
 
 const CarDetails = ({ productId }) => {
-  const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { isExpanded, isHovered } = useSidebar();
@@ -30,12 +29,13 @@ const CarDetails = ({ productId }) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   // State untuk modal
+  const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [modalActiveIndex, setModalActiveIndex] = useState(0); // Index untuk modal
+  const [modalActiveIndex, setModalActiveIndex] = useState(0);
 
   // Fungsi untuk membuka modal
   const openModal = (index) => {
-    setModalActiveIndex(index); // Set index gambar yang diklik
+    setModalActiveIndex(index);
     setShowModal(true);
   };
 
@@ -45,7 +45,12 @@ const CarDetails = ({ productId }) => {
   };
 
   useEffect(() => {
-    // ... (useEffect untuk fetchProduct dan checkIsMobile - tidak ada perubahan)
+    if (thumbsSwiper && !thumbsSwiper.destroyed) {
+      thumbsSwiper.slideTo(modalActiveIndex);
+    }
+  }, [modalActiveIndex, thumbsSwiper]);
+
+  useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
       setError(null);
@@ -80,10 +85,7 @@ const CarDetails = ({ productId }) => {
   }, []);
 
   if (loading || error || !product) {
-    return (
-      // ... (loading, error, dan product not found handling - tidak ada perubahan)
-      <SkeletonCarDetails />
-    );
+    return <SkeletonCarDetails />;
   }
 
   if (error) {
@@ -120,7 +122,6 @@ const CarDetails = ({ productId }) => {
 
   return (
     <div className="">
-      {/* ... (tombol Back - tidak ada perubahan) */}
       <button
         onClick={() => router.back()}
         className="flex items-center bg-orange-400 hover:bg-orange-500 text-white py-2 px-4 rounded-full mb-4 cursor-grab"
@@ -155,7 +156,6 @@ const CarDetails = ({ productId }) => {
                         ? "lg:h-[400px]"
                         : "lg:h-[335px]"
                     }`}
-                    // Tambahkan onClick untuk membuka modal
                     onClick={() => openModal(index)}
                   >
                     <Image
@@ -177,18 +177,16 @@ const CarDetails = ({ productId }) => {
 
           {/* Swiper Thumbnail */}
           <Swiper
-            // ... (props Swiper Thumbnail - tidak ada perubahan)
             onSwiper={setThumbsSwiper}
             spaceBetween={isMobile ? 4 : 10}
             slidesPerView={isMobile ? 4 : 5}
             freeMode={true}
             watchSlidesProgress={true}
             modules={[FreeMode, Thumbs]}
-            className="mySwiper px-4 rounded-lg"
+            className="mySwiper rounded-lg"
           >
             {product.images.map((image, index) => (
               <SwiperSlide key={index}>
-                {/* Apply the border based on activeIndex */}
                 <div
                   className={`relative w-auto h-[50px] lg:h-[70px] cursor-pointer group ${
                     index === activeIndex
@@ -209,7 +207,7 @@ const CarDetails = ({ productId }) => {
           </Swiper>
         </div>
 
-        {/* Product Details (Tidak ada perubahan) */}
+        {/* Product Details*/}
         <div className="p-4 lg:p-12 rounded-t-3xl lg:rounded-3xl shadow-lg bg-white lg:w-1/2">
           <div className="flex flex-col-reverse lg:flex-row lg:justify-between mb-8 lg:pb-6 border-b border-gray-300">
             <h1 className="text-md lg:text-2xl mb-1 text-gray-700">
@@ -359,28 +357,28 @@ const CarDetails = ({ productId }) => {
       {showModal && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 lg:bg-black/80"
-          onClick={closeModal} 
+          onClick={closeModal}
         >
           <div
-            className="relative rounded-none lg:rounded-4xl max-w-sm lg:max-w-4xl mx-auto"
+            className="relative rounded-none lg:rounded-4xl min-w-sm px-2 lg:max-w-4xl mx-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               className="absolute right-3 top-1 lg:right-5 lg:top-4 bg-white hover:bg-orange-100 rounded-full p-2 z-10 cursor-pointer group"
               onClick={closeModal}
             >
-             <X className="w-4 h-4 lg:w-5 lg:h-5 text-gray-600 group-hover:text-orange-600" />
+              <X className="w-4 h-4 lg:w-5 lg:h-5 text-gray-600 group-hover:text-orange-600" />
             </button>
 
             <Swiper
-              initialSlide={modalActiveIndex} 
+              initialSlide={modalActiveIndex}
               spaceBetween={isMobile ? 10 : 0}
-              navigation 
+              navigation
+              modules={[FreeMode, Thumbs]}
               thumbs={{
                 swiper:
                   thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null,
               }}
-              modules={[FreeMode, Thumbs]}
               className="mySwiper2 rounded-none lg:rounded-4xl"
               onSlideChange={(swiper) =>
                 setModalActiveIndex(swiper.activeIndex)
@@ -393,7 +391,7 @@ const CarDetails = ({ productId }) => {
                       src={image}
                       alt={`${product.carName} - ${index}`}
                       layout="fill"
-                      className="object-cover"
+                      className="object-cover cursor-grab"
                     />
                   </div>
                 </SwiperSlide>
@@ -405,12 +403,12 @@ const CarDetails = ({ productId }) => {
 
             <Swiper
               onSwiper={setThumbsSwiper}
-              spaceBetween={10}
-              slidesPerView={5}
+              spaceBetween={isMobile ? 4 : 10}
+              slidesPerView={isMobile ? 4 : 5}
               freeMode={true}
               watchSlidesProgress={true}
               modules={[FreeMode, Thumbs]}
-              className="mySwiper mt-4 p-4"
+              className="mySwiper rounded-md mt-4"
             >
               {product.images.map((image, index) => (
                 <SwiperSlide key={index}>
