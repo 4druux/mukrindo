@@ -128,8 +128,8 @@ const AllProducts = () => {
     );
   }
   return (
-    <div className="">
-      <h1 className="mb-4 lg:mb-10 text-2xl font-medium">Product Management</h1>
+    <div className="p-4">
+      <h1 className="mb-4 lg:mb-10 text-2xl font-medium">Produk Manajemen</h1>
       <button
         onClick={() => router.push("/admin/add-product")}
         className="flex items-center space-x-1 px-4 py-2 rounded-full bg-orange-100 hover:bg-orange-200 
@@ -137,7 +137,7 @@ const AllProducts = () => {
       >
         <Plus className="text-orange-500 w-4 md:w-5" />
         <span className="text-xs md:text-sm mt-1 text-orange-500">
-          Add Product
+          Tambah Produk
         </span>
       </button>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
@@ -150,16 +150,16 @@ const AllProducts = () => {
               <div
                 key={product._id}
                 className={`rounded-2xl bg-white overflow-hidden transition-shadow duration-200 relative  ${
-                  product.status === "sold out"
+                  product.status === "Terjual"
                     ? "cursor-not-allowed shadow-sm"
                     : "shadow-md hover:shadow-xl"
                 }`}
               >
-                {product.status === "sold out" && (
+                {product.status === "Terjual" && (
                   <div className="absolute inset-0 flex items-center justify-center z-10">
                     <img
                       src="./images/soldout.png"
-                      alt="Sold Out"
+                      alt="Terjual"
                       className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80%]"
                     />
                   </div>
@@ -172,7 +172,7 @@ const AllProducts = () => {
                 >
                   <div
                     className={
-                      product.status === "sold out" ? "cursor-not-allowed" : ""
+                      product.status === "Terjual" ? "cursor-not-allowed" : ""
                     }
                   >
                     <div className="relative w-full h-40">
@@ -184,13 +184,13 @@ const AllProducts = () => {
                         placeholder="blur"
                         blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
                         className={`object-cover ${
-                          product.status === "sold out" ? "opacity-40" : ""
+                          product.status === "Terjual" ? "opacity-40" : ""
                         }`}
                       />
                     </div>
                     <div
                       className={`p-4 mb-10 ${
-                        product.status === "sold out" ? "opacity-40" : ""
+                        product.status === "Terjual" ? "opacity-40" : ""
                       }`}
                     >
                       <h2 className="text-md text-gray-800">
@@ -262,20 +262,20 @@ const AllProducts = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleStatusChange(product._id, "available");
+                            handleStatusChange(product._id, "Tersedia");
                           }}
                           className="block w-full text-left text-xs px-4 py-2 text-gray-700 hover:text-gray-700 hover:bg-orange-100 rounded-lg cursor-pointer"
                         >
-                          Available
+                          Tersedia
                         </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleStatusChange(product._id, "sold out");
+                            handleStatusChange(product._id, "Terjual");
                           }}
                           className="block w-full text-left text-xs px-4 py-2 text-gray-700 hover:text-gray-700 hover:bg-orange-100 rounded-lg cursor-pointer"
                         >
-                          Sold Out
+                          Terjual
                         </button>
                       </motion.div>
                     )}
@@ -283,7 +283,7 @@ const AllProducts = () => {
                 </div>
                 <div
                   className={`absolute bottom-3 right-3 ${
-                    product.status === "sold out" ? "opacity-40" : ""
+                    product.status === "Terjual" ? "opacity-40" : ""
                   }`}
                 >
                   <div className="flex justify-end items-center pt-1 md:pt-3 mt-1 md:mt-3">

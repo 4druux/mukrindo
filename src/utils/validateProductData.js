@@ -35,7 +35,7 @@ export const validateProductData = (productData, mediaFiles) => {
   if (!yearOfAssembly) return "Tahun perakitan harus diisi.";
   if (!price) return "Harga mobil harus diisi.";
   if (!status) return "Status mobil harus diisi";
-  if (!["available", "sold out"].includes(status)) return "Status tidak valid";
+  if (!["Tersedia", "Terjual"].includes(status)) return "Status tidak valid";
   if (mediaFiles.length === 0) return "Minimal harus ada satu gambar.";
 
   return null; // Tidak ada error

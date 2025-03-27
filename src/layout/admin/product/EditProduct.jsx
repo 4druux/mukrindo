@@ -4,10 +4,10 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
-import ImageUpload from "@/components/product/ImageUpload";
-import CarBrands from "@/components/product/CarBrands";
-import CarSystems from "@/components/product/CarSystems";
-import CarPapers from "@/components/product/CarPapers";
+import ImageUpload from "@/components/product-admin/ImageUpload";
+import CarBrands from "@/components/product-admin/CarBrands";
+import CarSystems from "@/components/product-admin/CarSystems";
+import CarPapers from "@/components/product-admin/CarPapers";
 import { validateProductData } from "@/utils/validateProductData";
 import { formatNumber, unformatNumber } from "@/utils/formatNumber";
 import carData from "@/utils/carData";
@@ -227,7 +227,7 @@ const EditProduct = ({ productId }) => {
 
   if (loadingUpdate) {
     return (
-      <div className="flex items-center justify-center h-[80vh] bg-white">
+      <div className="flex items-center justify-center h-[80vh] bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-orange-500"></div>
       </div>
     );
@@ -359,8 +359,8 @@ const EditProduct = ({ productId }) => {
             handleChange({ target: { name: "status", value } })
           }
           options={[
-            { value: "available", label: "Available" },
-            { value: "sold out", label: "Sold Out" },
+            { value: "Tersedia", label: "Tersedia" },
+            { value: "Terjual", label: "Terjual" },
           ]}
         />
         <div className="col-span-2 flex justify-end space-x-2 sm:space-x-4 mt-4">
@@ -370,7 +370,7 @@ const EditProduct = ({ productId }) => {
             className="cursor-pointer border text-gray-600 border-gray-500 hover:bg-orange-100 hover:border-orange-500 
             hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
           >
-            Back
+            Kembali
           </button>
           <button
             type="submit"
@@ -382,7 +382,7 @@ const EditProduct = ({ productId }) => {
              }`}
             disabled={!isChanged}
           >
-            Update Produk
+            Perbarui Produk
           </button>
         </div>
       </form>

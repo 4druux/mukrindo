@@ -4,3 +4,34 @@
 * {
   font-family: "Poppins", sans-serif;
 }
+
+@layer utilities {
+  .vertical-gradient-fade {
+    &::before,
+    &::after {
+      content: "";
+      @apply absolute left-0 w-full h-6 z-10 pointer-events-none;
+      @apply from-white to-transparent;
+    }
+    &::before {
+      @apply -top-1 bg-gradient-to-b;
+    }
+    &::after {
+      @apply -bottom-1 bg-gradient-to-t;
+    }
+  }
+
+  .horizontal-gradient-fade {
+    &::before,
+    &::after {
+      content: "";
+      @apply absolute top-0 h-full w-6 z-10 pointer-events-none from-white to-transparent;
+    }
+    &::before {
+      @apply -left-1 bg-gradient-to-r;
+    }
+    &::after {
+      @apply -right-1 bg-gradient-to-l;
+    }
+  }
+}

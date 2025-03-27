@@ -3,10 +3,10 @@
 import { useState } from "react";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
-import ImageUpload from "@/components/product/ImageUpload";
-import CarBrands from "@/components/product/CarBrands";
-import CarSystems from "@/components/product/CarSystems";
-import CarPapers from "@/components/product/CarPapers";
+import ImageUpload from "@/components/product-admin/ImageUpload";
+import CarBrands from "@/components/product-admin/CarBrands";
+import CarSystems from "@/components/product-admin/CarSystems";
+import CarPapers from "@/components/product-admin/CarPapers";
 import { validateProductData } from "@/utils/validateProductData";
 import { formatNumber, unformatNumber } from "@/utils/formatNumber";
 import carData from "@/utils/carData";
@@ -268,8 +268,8 @@ const AddProduct = () => {
             handleChange({ target: { name: "status", value } })
           }
           options={[
-            { value: "available", label: "Tersedia" },
-            { value: "sold out", label: "Sold Out" },
+            { value: "tersedia", label: "Tersedia" },
+            { value: "terjual", label: "Terjual" },
           ]}
         />
 
@@ -281,7 +281,7 @@ const AddProduct = () => {
             className="cursor-pointer border text-gray-600 border-gray-500 hover:bg-orange-100 hover:border-orange-500 
             hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
           >
-            Back
+            Kembali
           </button>
           <button
             type="submit"
