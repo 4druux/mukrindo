@@ -63,7 +63,7 @@ const Select = ({ label, options, value, onChange, description, title }) => {
             variants={dropDownVariant}
             className="absolute p-3 z-10 mt-1 w-full bg-white border border-gray-300 rounded-2xl shadow-lg"
           >
-            <div className="px-3 sticky top-0  z-10">
+            <div className="px-3 sticky top-0 z-10">
               <div className="flex items-center justify-between">
                 {title && (
                   <span className="font-semibold text-sm">{title}</span>
@@ -91,7 +91,7 @@ const Select = ({ label, options, value, onChange, description, title }) => {
 
             {/* Scrollable Options Container */}
             <div
-              className="overflow-y-auto max-h-[100px] mt-2"
+              className="overflow-y-auto  max-h-52 mt-2"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {options.map((option) => (

@@ -18,10 +18,16 @@ const CarSystems = ({ data, onChange }) => {
           onChange({ target: { name: "driveSystem", value } })
         }
         options={[
-          { value: "rwd", label: "RWD" },
-          { value: "fwd", label: "FWD" },
-          { value: "awd", label: "AWD" },
-          { value: "4wd", label: "4WD" },
+          {
+            value: "rwd 4x2",
+            label: "RWD 4x2",
+          },
+          {
+            value: "fwd 4x2",
+            label: "FWD 4x2",
+          },
+          { value: "awd 4x4", label: "AWD 4x4" },
+          { value: "4wd 4x4", label: "4WD 4x4" },
         ]}
       />
       {/* Transmisi */}

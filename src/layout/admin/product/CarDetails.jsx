@@ -33,6 +33,13 @@ const CarDetails = ({ productId }) => {
     setShowModal(true);
   };
 
+  useEffect(() => {
+    document.body.style.overflow = showModal ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [showModal]);
+
   const closeModal = () => {
     setShowModal(false);
   };

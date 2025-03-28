@@ -1,98 +1,109 @@
+// components/CarForm.jsx (atau path yang sesuai)
 "use client";
+import Input from "@/components/common/Input";
+import Select from "@/components/common/Select";
+import carData from "@/utils/carData";
 import React, { useState } from "react";
 import { FaCar, FaExchangeAlt, FaMoneyBillWave } from "react-icons/fa";
 
 const CarForm = () => {
   const [activeTab, setActiveTab] = useState("beli");
+  const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedModel, setSelectedModel] = useState("");
+  const [selectedPrice, setSelectedPrice] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
 
-  // Helper function for the dropdown arrow (reusable)
-  const DropdownArrow = () => (
-    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-      <svg
-        className="fill-current h-4 w-4"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 20 20"
-      >
-        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-      </svg>
-    </div>
+  const brandOptionsForSelect = Object.keys(carData).map((brand) => ({
+    value: brand,
+    label: brand,
+  }));
+
+  const modelOptionsForSelect =
+    selectedBrand && carData[selectedBrand]
+      ? Object.keys(carData[selectedBrand]).map((model) => ({
+          value: model,
+          label: model,
+        }))
+      : [];
+
+  const priceOptionsData = [
+    "< Rp150.000.000",
+    "Ro150.000.000 - Rp300.000.000",
+    ">Rp300.000.000",
+  ];
+  const priceOptionsForSelect = priceOptionsData.map((price) => ({
+    value: price,
+    label: price,
+  }));
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 30 }, (_, i) => currentYear - i).map(
+    (year) => ({
+      value: year.toString(),
+      label: year.toString(),
+    })
   );
-
-  // Data for dropdown options (better for maintainability)
-  const brandOptions = ["Toyota", "Honda", "Ford", "BMW", "Mercedes-Benz"]; // Example brands
-  const priceOptions = ["< $10,000", "$10,000 - $20,000", "> $20,000"]; // Example price ranges
-  const yearOptions = Array.from(
-    { length: 20 },
-    (_, i) => new Date().getFullYear() - i
-  ); // Generate last 20 years
-  const locationOptions = ["Jakarta", "Surabaya", "Medan", "Bandung"];
 
   const renderForm = () => {
     switch (activeTab) {
       case "beli":
         return (
-          <div className="bg-white rounded-b-2xl rounded-tr-2xl shadow-lg p-4 md:p-6 w-full mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-              <div className="relative md:col-span-1">
-                <select
-                  className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-orange-500"
-                  aria-label="Select Brand and Model"
-                >
-                  <option value="">Pilih Merek dan Model</option>{" "}
-                  {/* Empty option for placeholder */}
-                  {brandOptions.map((brand) => (
-                    <option key={brand} value={brand}>
-                      {brand}
-                    </option>
-                  ))}
-                </select>
-                <DropdownArrow />
-              </div>
-              <div className="relative md:col-span-1">
-                <select
-                  className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-orange-500"
-                  aria-label="Select Price Range"
-                >
-                  <option value="">Pilih Harga</option>
-                  {priceOptions.map((price) => (
-                    <option key={price} value={price}>
-                      {price}
-                    </option>
-                  ))}
-                </select>
-                <DropdownArrow />
-              </div>
-              <div className="relative md:col-span-1">
-                <select
-                  className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-orange-500"
-                  aria-label="Select Year"
-                >
-                  <option value="">Pilih Tahun</option>
-                  {yearOptions.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-                <DropdownArrow />
-              </div>
-              <div className="relative md:col-span-1">
-                <select
-                  className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-orange-500"
-                  aria-label="Select Location"
-                >
-                  <option value="">Pilih Lokasi</option>
-                  {locationOptions.map((location) => (
-                    <option key={location} value={location}>
-                      {location}
-                    </option>
-                  ))}
-                </select>
-                <DropdownArrow />
-              </div>
+          <div className="bg-white rounded-b-2xl lg:rounded-tr-2xl shadow-lg p-4 md:p-6 w-full mx-auto">
+            <h1 className="text-md font-medium text-gray-700 mb-4">
+              Cari Mobil yang Anda Inginkan
+            </h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {/* Select Merek */}
+              <Select
+                label="Merek"
+                title="Pilih Merek"
+                description="Pilih Merek Mobil Anda"
+                options={brandOptionsForSelect}
+                value={selectedBrand}
+                onChange={(value) => {
+                  setSelectedBrand(value);
+                  setSelectedModel("");
+                }}
+              />
+
+              {/* Select Model */}
+              <Select
+                label="Model"
+                title="Pilih Model"
+                description="Pilih Model Mobil Anda"
+                options={modelOptionsForSelect}
+                value={selectedModel}
+                onChange={setSelectedModel}
+              />
+
+              {/* Select Harga */}
+              <Select
+                label="Harga"
+                options={priceOptionsForSelect}
+                value={selectedPrice}
+                onChange={setSelectedPrice}
+                title="Pilih Harga"
+              />
+
+              {/* Select Tahun */}
+              <Select
+                label="Tahun"
+                title="Pilih Tahun"
+                description="Pilih Tahun Mobil Anda"
+                value={selectedYear}
+                onChange={setSelectedYear}
+                options={years}
+              />
+            </div>
+
+            <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-4">
+              <p className="text-xs lg:text-sm text-gray-500">
+                Dapatkan mobil terbaik untuk kebutuhanmu dengan harga terbaik di
+                Mukrindo.id
+              </p>
               <button
-                className="md:col-span-1 w-full py-3 px-4 text-sm rounded-full text-white font-medium transition-colors duration-200
-                bg-orange-500 hover:bg-orange-600"
+                className="w-full md:w-auto py-3 px-16 rounded-full text-sm text-white font-medium transition-colors duration-200
+                  bg-orange-500 hover:bg-orange-600"
                 type="button"
               >
                 Temukan Mobil
@@ -100,58 +111,77 @@ const CarForm = () => {
             </div>
           </div>
         );
+
       case "jual":
       case "tukar":
         return (
-          <div className="bg-white rounded-b-2xl rounded-tr-2xl shadow-lg p-4 md:p-6 w-full mx-auto">
-            <div className="flex flex-col gap-4">
-              <div className="text-md font-bold text-gray-600">
-                Informasi Mobil Kamu
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
-                <div className="relative">
-                  <select
-                    className="block appearance-none w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-orange-500"
-                    aria-label="Select Brand and Model"
-                  >
-                    <option value="">Pilih Merek & Model</option>
-                    {brandOptions.map((brand) => (
-                      <option key={brand} value={brand}>
-                        {brand}
-                      </option>
-                    ))}
-                  </select>
-                  <DropdownArrow />
-                </div>
-                <div className="relative">
-                  <input
-                    type="number"
-                    placeholder="Pilih Tahun"
-                    className="block w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded leading-tight focus:outline-none focus:border-orange-500"
-                    min="1900"
-                    max={new Date().getFullYear()}
-                    step="1" 
-                  />
-                </div>
-                <input
-                  type="tel"
-                  placeholder="No Handphone"
-                  className="block w-full bg-white border border-gray-300 text-gray-700 py-3 px-4 rounded leading-tight focus:outline-none focus:border-orange-500"
+          <div className="bg-white rounded-b-2xl lg:rounded-tr-2xl shadow-lg p-4 md:p-6 w-full mx-auto">
+            <h1 className="text-md font-medium text-gray-700 mb-4">
+              Informasi Mobil Kamu
+            </h1>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {/* Select Merek */}
+              <div>
+                <Select
+                  label="Merek"
+                  options={brandOptionsForSelect}
+                  value={selectedBrand}
+                  onChange={(value) => {
+                    setSelectedBrand(value);
+                    setSelectedModel("");
+                  }}
+                  title="Pilih Merek"
                 />
               </div>
-              <div className="flex justify-between items-center">
-                <p className="mt-2 text-sm text-gray-500 ml-0.5">
-                  Dapatkan estimasi harga dari mobil kamu dengan proses yang
-                  cepat dan mudah di Mukrindo.id
-                </p>
-                <button
-                  className="py-3 px-16 rounded-full text-sm text-white font-medium transition-colors duration-200 
-                  bg-orange-500 hover:bg-orange-600"
-                  type="button"
-                >
-                  Jual Sekarang
-                </button>
+
+              {/* Select Model */}
+              <div>
+                <Select
+                  label="Model"
+                  options={modelOptionsForSelect}
+                  value={selectedModel}
+                  onChange={setSelectedModel}
+                  title="Pilih Model"
+                />
               </div>
+
+              {/* Tahun jual/tukar tambah */}
+              <Select
+                label="Tahun"
+                title="Pilih Tahun"
+                description="Pilih Tahun Mobil Anda"
+                value={selectedYear}
+                onChange={setSelectedYear}
+                options={years}
+              />
+
+              <Input
+                label="No Handphone"
+                id="phone"
+                name="phone"
+                placeholderTexts={[
+                  "No handphone anda",
+                  "No handphone anda",
+                  "No handphone anda",
+                ]}
+                prefix="+62"
+              />
+            </div>
+
+            {/* Deskripsi dan Tombol Aksi */}
+            <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-4">
+              <p className="text-xs lg:text-sm text-gray-500">
+                Dapatkan estimasi harga dari mobil kamu dengan proses yang cepat
+                dan mudah di Mukrindo.id
+              </p>
+              <button
+                className="w-full md:w-auto py-3 px-16 rounded-full text-sm text-white font-medium transition-colors duration-200
+                  bg-orange-500 hover:bg-orange-600"
+                type="button"
+              >
+                {activeTab === "jual" ? "Jual Sekarang" : "Lanjut Tukar"}
+              </button>
             </div>
           </div>
         );
@@ -161,16 +191,12 @@ const CarForm = () => {
   };
 
   return (
-    <div className="my-8">
-      {/* Container Utama */}
-      <div
-        id="filter-container"
-        className="flex w-full bg-gray-200 lg:w-fit rounded-t-3xl shadow-lg"
-      >
+    <div className="my-4 lg:my-8">
+      <div className="flex w-full bg-gray-200 lg:w-fit rounded-t-3xl shadow-lg">
         {/* Tab Beli Mobil */}
-        <button // Changed to button for better semantics and accessibility
+        <button
           onClick={() => setActiveTab("beli")}
-          className={`relative w-full lg:w-fit rounded-tl-2xl rounded-br-2xl ${
+          className={`relative w-full lg:w-fit rounded-tl-3xl rounded-br-2xl cursor-pointer ${
             activeTab === "beli"
               ? "bg-white text-orange-500 before:absolute before:-right-5 before:top-0 before:h-6 before:w-10 before:bg-gray-200 before:content-[''] after:absolute after:top-0 after:right-0 after:h-6 after:w-5 after:rounded-tr-3xl after:bg-white after:content-['']"
               : activeTab === "jual"
@@ -180,19 +206,20 @@ const CarForm = () => {
         >
           <div className="m-0 flex h-full w-full items-center justify-center px-4 text-center text-sm font-semibold lg:px-8">
             <div className="w-fit items-center justify-center lg:w-full">
-              <div className="flex flex-row items-center justify-center gap-2 py-4">
-                <FaCar className="mr-2" />
-                <h3 className="z-10 text-sm font-medium">Beli Mobil</h3>
+              <div className="flex items-center justify-center gap-2 py-4">
+                <FaCar className="w-4 h-4 hidden lg:block" />
+                <h3 className="text-xs lg:text-sm font-medium">Beli Mobil</h3>
               </div>
             </div>
           </div>
         </button>
+
         {/* Tab Jual Mobil */}
-        <button // Changed to button
+        <button
           onClick={() => setActiveTab("jual")}
-          className={`relative w-full lg:w-fit rounded-tl-2xl ${
+          className={`relative w-full lg:w-fit rounded-tl-2xl cursor-pointer ${
             activeTab === "jual"
-              ? "bg-white text-orange-500 before:absolute before:-right-5 before:top-0 before:h-6 before:w-10 before:bg-gray-200 before:content-[''] after:absolute after:top-0 after:right-0 after:h-6 after:w-6 after:rounded-tr-3xl after:bg-white after:content-['']"
+              ? "bg-white text-orange-500 before:absolute before:-right-5 before:top-0 before:h-6 before:w-10 before:bg-gray-200 before:content-[''] after:absolute after:top-0 after:right-0 after:h-6 after:w-6 after:rounded-tr-2xl after:bg-white after:content-['']"
               : activeTab === "tukar"
               ? "bg-gray-200 text-gray-500 hover:text-gray-700 before:absolute before:-right-3 before:bottom-0 before:h-6 before:w-6 before:bg-white before:content-[''] after:absolute after:bottom-0 after:right-0 after:h-6 after:w-4 after:rounded-br-3xl after:bg-gray-200 after:content-['']"
               : "bg-gray-200 text-gray-500 hover:text-gray-700 before:absolute before:-left-4 before:bottom-0 before:h-6 before:w-6 before:bg-white before:content-[''] after:absolute after:bottom-0 after:left-0 after:h-6 after:w-4 after:rounded-bl-3xl after:bg-gray-200 after:content-['']"
@@ -200,29 +227,30 @@ const CarForm = () => {
         >
           <div className="m-0 flex h-full w-full items-center justify-center px-4 text-center text-sm font-semibold lg:px-8">
             <div className="w-fit items-center justify-center lg:w-full">
-              <div className="flex flex-row items-center justify-center gap-2 py-4">
-                <FaMoneyBillWave className="mr-2" />
-                <h3 className="z-10 text-sm font-medium">Jual Mobil</h3>
+              <div className="flex items-center justify-center gap-2 py-4">
+                <FaMoneyBillWave className="w-4 h-4 hidden lg:block" />
+                <h3 className="text-xs lg:text-sm font-medium">Jual Mobil</h3>
               </div>
             </div>
           </div>
         </button>
+
         {/* Tab Tukar Tambah */}
-        <button // Changed to button
+        <button
           onClick={() => setActiveTab("tukar")}
-          className={`relative w-full lg:w-fit rounded-tr-2xl rounded-bl-2xl ${
+          className={`relative w-full lg:w-fit rounded-tr-3xl rounded-bl-2xl cursor-pointer ${
             activeTab === "tukar"
               ? "bg-white text-orange-500 before:absolute before:-left-5 before:top-0 before:h-6 before:w-10 before:bg-gray-200 before:content-[''] after:absolute after:left-0 after:top-0 after:h-6 after:w-5 after:rounded-tl-3xl after:bg-white after:content-['']"
               : activeTab === "jual"
               ? "bg-gray-200 text-gray-500 hover:text-gray-700 before:absolute before:-left-3 before:bottom-0 before:h-6 before:w-6 before:bg-white before:content-[''] after:absolute after:bottom-0 after:left-0 after:h-6 after:w-4 after:rounded-bl-3xl after:bg-gray-200 after:content-['']"
-              : "bg-gray-300 text-gray-500 hover:text-gray-700 before:absolute before:-left-2 before:top-0 before:h-6 before:w-8 before:bg-gray-300 before:content-[''] after:absolute after:top-0 after:-left-4 after:h-6 after:w-4 after:rounded-tr-3xl after:bg-gray-200 after:content-['']"
+              : "bg-gray-300 text-gray-500 hover:text-gray-700 before:absolute before:-left-3 before:top-0 before:h-6 before:w-8 before:bg-gray-300 before:content-[''] after:absolute after:top-0 after:-left-4 after:h-6 after:w-4 after:rounded-tr-3xl after:bg-gray-200 after:content-['']"
           }`}
         >
           <div className="m-0 flex h-full w-full items-center justify-center px-4 text-center text-sm font-semibold lg:px-8">
             <div className="w-fit items-center justify-center lg:w-full">
-              <div className="flex flex-row items-center justify-center gap-2 py-4">
-                <FaExchangeAlt className="mr-2" />
-                <h3 className="z-10 text-sm font-medium">Tukar Tambah</h3>
+              <div className="flex items-center justify-center gap-2 py-4">
+                <FaExchangeAlt className="w-4 h-4 hidden lg:block" />
+                <h3 className="text-xs lg:text-sm font-medium">Tukar Mobil</h3>
               </div>
             </div>
           </div>

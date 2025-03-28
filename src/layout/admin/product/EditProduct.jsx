@@ -38,7 +38,7 @@ const EditProduct = ({ productId }) => {
   const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [error, setError] = useState(null);
   const router = useRouter();
-  const { refetchProducts, fetchProductById } = useProducts(); // Destructure fetchProductById
+  const { refetchProducts, fetchProductById } = useProducts();
 
   const initialProductData = useRef(null);
   const initialMediaFiles = useRef(null);

@@ -5,17 +5,16 @@ import Link from "next/link";
 
 export default function Home() {
   const bannerImages = [
+    "/images/carousel/1.jpg",
+    "/images/carousel/2.jpg",
+    "/images/carousel/5.jpg",
     "/images/carousel/7.jpg",
-    "/images/carousel/7.jpg",
-    "/images/carousel/7.jpg",
-    "/images/carousel/7.jpg",
-    "/images/carousel/7.jpg",
+    "/images/carousel/1.jpg",
     "/images/carousel/7.jpg",
   ];
 
   return (
-    <div className="h-[150vh] pt-10 border-t-2 border-gray-200">
-      {/* Carousel (tanpa perubahan) */}
+    <div className="pt-4 lg:pt-10 border-t-2 border-gray-200">
       <Carousel images={bannerImages} />
       <CarForm />
 

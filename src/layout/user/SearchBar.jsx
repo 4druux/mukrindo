@@ -54,7 +54,7 @@ const SearchBar = () => {
             exit="hidden"
             onClick={toggleSearch}
           >
-            <div className="flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center px-3 lg:px-0">
               <div
                 className="border bg-white border-gray-400 px-5 py-2 my-4 rounded-full shadow-lg w-full sm:w-1/2 h-10 flex items-center"
                 onClick={(e) => e.stopPropagation()}

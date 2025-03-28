@@ -92,7 +92,7 @@ const Carousel = ({
     >
       <Swiper
         modules={[A11y, Autoplay]}
-        spaceBetween={isMobile ? 16 : 0}
+        spaceBetween={0}
         slidesPerView={1}
         loop={false}
         className="h-full"
@@ -107,7 +107,7 @@ const Carousel = ({
               src={image}
               alt={`Slide ${index + 1}`}
               fill
-              className="object-cover rounded-2xl"
+              className="object-cover"
               priority={index === 0}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
