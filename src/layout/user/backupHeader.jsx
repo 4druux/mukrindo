@@ -51,8 +51,30 @@ function AppHeader() {
     closed: { opacity: 0, y: -10, transition: { duration: 0.2 } },
   };
 
-  const notchedBackgroundSvg =
-    "data:image/svg+xml,%3Csvg width='300' height='70' viewBox='0 0 300 70' fill='none' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'%3E%3Cpath d='M0 70 L0 20 A 30 20 0 0 1 20 0 L122 0 A 20 20 0 0 0 178 0 L280 0 A 30 20 0 0 1 300 20 L300 70 Z' fill='white'/%3E%3C/svg%3E";
+  const navHeight = 80;
+  const notchWidth = 10; // Lebar lekukan (sesuaikan sedikit jika perlu agar pas dengan tombol oranye)
+  const notchDepth = 90; // Konstanta ini tetap ada, tapi tidak dipakai langsung untuk kedalaman Q
+  const cornerRadius = 24;
+
+  // --- INI KUNCINYA ---
+  const effectiveNotchDepth = 80; // <<-- COBA UBAH NILAI INI (misal: 20, 25, 30)
+  // ---
+
+  // Hitung titik X awal dan akhir lekukan
+  const notchStartX = 140 - notchWidth / 2; // 120
+  const notchEndX = 180 + notchWidth / 2; // 180
+
+  const svgPath = `
+    M 0 ${cornerRadius}
+    A ${cornerRadius} ${cornerRadius} 0 0 1 ${cornerRadius} 0
+    L ${notchStartX} 0                       
+    Q 150 ${effectiveNotchDepth}, ${notchEndX} 0 
+    L ${300 - cornerRadius} 0               
+    A ${cornerRadius} ${cornerRadius} 0 0 1 300 ${cornerRadius}
+    L 300 ${navHeight}
+    L 0 ${navHeight}
+    Z
+  `;
 
   return (
     <>
@@ -173,110 +195,44 @@ function AppHeader() {
 
       <SearchBar />
 
-      <div
-        className="fixed -bottom-0.5 left-0 right-0 w-full z-40 md:hidden h-[70px] bg-transparent"
-        style={{
-          backgroundImage: `url("${notchedBackgroundSvg}")`,
-          backgroundSize: "cover",
-          // backgroundPosition: "center bottom",
-          backgroundRepeat: "no-repeat",
-          filter: "drop-shadow(0 -2px 5px rgba(0,0,0,0.1))",
-        }}
-      >
-        <div className="relative flex items-center justify-between w-full h-full px-4">
-          {/* Left Icons */}
-          <div className="flex items-center gap-6 text-[10px] z-10">
-            <Link
-              href="/"
-              className="flex flex-col items-center gap-1 cursor-pointer"
-            >
-              <FaHome
-                className={`w-5 h-5 ${
-                  pathname === "/" ? "text-orange-600" : "text-gray-700"
-                }`}
-              />
-              <p
-                className={`${
-                  pathname === "/" ? "text-orange-600" : "text-gray-700"
-                } font-medium`}
-              >
-                Beranda
-              </p>
-            </Link>
-            <Link
-              href="/beli-mobil"
-              className="flex flex-col items-center gap-1 cursor-pointer"
-            >
-              <FaShoppingBag
-                className={`w-5 h-5 ${
-                  pathname === "/beli-mobil"
-                    ? "text-orange-600"
-                    : "text-gray-700"
-                }`}
-              />
-              <p
-                className={`${
-                  pathname === "/beli-mobil"
-                    ? "text-orange-600"
-                    : "text-gray-700"
-                } font-medium`}
-              >
-                Beli Mobil
-              </p>
-            </Link>
+      <div className="fixed bottom-0 left-0 right-0 w-full z-40 md:hidden h-[70px]">
+        <svg
+          viewBox={`0 0 300 ${navHeight}`}
+          width="100%"
+          height={navHeight}
+          preserveAspectRatio="none"
+          className="absolute bottom-0 left-0 w-full h-full drop-shadow-[0_-2px_5px_rgba(0,0,0,0.1)]"
+        >
+          <path d={svgPath} fill="white" />
+        </svg>
+
+        <div className="relative flex items-center justify-between w-full h-full px-4 z-10">
+          {/* Item Kiri */}
+          <div className="flex items-center gap-6 text-[10px] justify-start">
+            <div className="flex flex-col items-center gap-1 cursor-pointer">
+              <FaHome className="w-5 h-5 text-gray-700" />
+              <p className="text-gray-700">Beranda</p>
+            </div>
+            <div className="flex flex-col items-center gap-1 cursor-pointer">
+              <FaShoppingBag className="w-5 h-5 text-gray-700" />
+              <p className="text-gray-700">Beli Mobil</p>
+            </div>
           </div>
 
-          <Link
-            href="/simulasi-budget"
-            className="absolute left-1/2 transform -translate-x-1/2 -top-8 w-16 h-16 bg-orange-500 rounded-full z-20 flex items-center justify-center shadow-lg cursor-pointer"
-          >
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-orange-500 p-3 rounded-full z-20">
             <FaMoneyBillWaveAlt className="w-8 h-8 text-gray-100" />
-          </Link>
+          </div>
 
-          {/* Right Icons */}
-          <div className="flex items-center gap-4 text-[10px] z-10">
-            <Link
-              href="/jual-mobil"
-              className="flex flex-col items-center gap-1 cursor-pointer"
-            >
-              <FaKey
-                className={`w-5 h-5 ${
-                  pathname === "/jual-mobil"
-                    ? "text-orange-600"
-                    : "text-gray-700"
-                }`}
-              />
-              <p
-                className={`${
-                  pathname === "/jual-mobil"
-                    ? "text-orange-600"
-                    : "text-gray-700"
-                } font-medium`}
-              >
-                Jual Mobil
-              </p>
-            </Link>
-            <Link
-              href="/tukar-tambah"
-              className="flex flex-col items-center gap-1 cursor-pointer"
-            >
-              <FaArrowsRotate
-                className={`w-5 h-5 ${
-                  pathname === "/tukar-tambah"
-                    ? "text-orange-600"
-                    : "text-gray-700"
-                }`}
-              />
-              <p
-                className={`${
-                  pathname === "/tukar-tambah"
-                    ? "text-orange-600"
-                    : "text-gray-700"
-                } font-medium`}
-              >
-                Tukar Tambah
-              </p>
-            </Link>
+          {/* Item Kanan */}
+          <div className="flex items-center gap-4 text-[10px] justify-end">
+            <div className="flex flex-col items-center gap-1 cursor-pointer">
+              <FaKey className="w-5 h-5 text-gray-700" />
+              <p className="text-gray-700">Jual Mobil</p>
+            </div>
+            <div className="flex flex-col items-center gap-1 cursor-pointer">
+              <FaArrowsRotate className="w-5 h-5 text-gray-700" />
+              <p className="text-gray-700">Tukar Tambah</p>
+            </div>
           </div>
         </div>
       </div>
