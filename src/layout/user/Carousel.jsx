@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import ReactDOM from "react-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -13,7 +12,6 @@ const Carousel = ({
   onSlideChangeTransitionEnd,
 }) => {
   const [isMobile, setIsMobile] = useState(false);
-  const [portalContainer, setPortalContainer] = useState(null);
   const [swiperInstance, setSwiperInstance] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -28,18 +26,6 @@ const Carousel = ({
     window.addEventListener("resize", checkIsMobile);
     return () => {
       window.removeEventListener("resize", checkIsMobile);
-    };
-  }, []);
-
-  useEffect(() => {
-    const portalDiv = document.createElement("div");
-    portalDiv.id = "carousel-buttons-portal";
-    document.body.appendChild(portalDiv);
-    setPortalContainer(portalDiv);
-    return () => {
-      if (portalDiv.parentNode) {
-        document.body.removeChild(portalDiv);
-      }
     };
   }, []);
 
@@ -86,7 +72,7 @@ const Carousel = ({
 
   return (
     <div
-      className="relative w-full max-h-[50vh] md:max-h-[60vh] overflow-hidden aspect-[2/1] rounded-2xl"
+      className="relative w-full max-h-[50vh] md:max-h-[60vh] overflow-hidden aspect-[16/9] rounded-2xl"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -114,7 +100,6 @@ const Carousel = ({
           </SwiperSlide>
         ))}
       </Swiper>
-
       {/* Centered Custom Dot Pagination with Progress Animation */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
         <div className="flex items-center px-2 py-1 space-x-1 bg-neutral-900/50 rounded-full">
@@ -138,38 +123,35 @@ const Carousel = ({
         </div>
       </div>
 
-      {!isMobile &&
-        portalContainer &&
-        ReactDOM.createPortal(
+      <div className="hidden lg:block">
+        <div
+          className={`absolute top-1/2 left-4 right-4 flex transform -translate-y-1/2 z-20 transition-opacity duration-300 ${
+            isHovered ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+        >
+          {!isFirstSlide && (
+            <button
+              onClick={handlePrevClick}
+              className="w-14 h-14 bg-black/30 shadow-lg rounded-full flex items-center justify-center hover:bg-black/50 transition cursor-pointer"
+            >
+              <BsChevronLeft className="w-6 h-6 text-white" />
+            </button>
+          )}
           <div
-            className={`absolute top-1/2 left-20 right-20 flex transform -translate-y-1/2 z-20 transition-opacity duration-300 ${
-              isHovered ? "opacity-100" : "opacity-0 pointer-events-none"
+            className={`flex-grow ${isFirstSlide ? "" : ""} ${
+              isLastSlide ? "" : ""
             }`}
-          >
-            {!isFirstSlide && (
-              <button
-                onClick={handlePrevClick}
-                className="w-12 h-12 ml-14 bg-white shadow-lg rounded-full flex items-center justify-center hover:bg-gray-200 transition cursor-pointer"
-              >
-                <BsChevronLeft />
-              </button>
-            )}
-            <div
-              className={`flex-grow ${isFirstSlide ? "ml-18" : ""} ${
-                isLastSlide ? "mr-18" : ""
-              }`}
-            ></div>
-            {!isLastSlide && (
-              <button
-                onClick={handleNextClick}
-                className="w-12 h-12 mr-14 bg-white shadow-lg rounded-full flex items-center justify-center hover:bg-gray-200 transition cursor-pointer"
-              >
-                <BsChevronRight />
-              </button>
-            )}
-          </div>,
-          portalContainer
-        )}
+          ></div>
+          {!isLastSlide && (
+            <button
+              onClick={handleNextClick}
+              className="w-14 h-14 bg-black/30 shadow-lg rounded-full flex items-center justify-center hover:bg-black/50 transition cursor-pointer"
+            >
+              <BsChevronRight className="w-6 h-6 text-white" />
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

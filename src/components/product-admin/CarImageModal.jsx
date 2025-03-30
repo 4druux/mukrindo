@@ -72,7 +72,7 @@ const CarImageModal = ({
         >
           {images.map((image, index) => (
             <SwiperSlide key={index}>
-              <div className="relative w-full h-[250px] md:h-[500px] lg:h-[550px]">
+              <div className="relative w-full aspect-[16/9]">
                 <Image
                   src={image}
                   alt={`${carName} - ${index + 1}`}

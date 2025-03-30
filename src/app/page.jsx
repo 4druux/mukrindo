@@ -1,7 +1,7 @@
 // Home.js
 import CarForm from "@/layout/user/CarForm";
 import Carousel from "@/layout/user/Carousel";
-import Link from "next/link";
+import CarProduct from "@/layout/user/CarProduct";
 
 export default function Home() {
   const bannerImages = [
@@ -14,16 +14,10 @@ export default function Home() {
   ];
 
   return (
-    <div className="pt-4 lg:pt-10 border-t-2 border-gray-200">
+    <div className="pt-4 lg:pt-10 border-t-2 border-gray-200 mb-10">
       <Carousel images={bannerImages} />
       <CarForm />
-
-      {/* Konten lainnya (dengan px-6) */}
-      <div className="flex flex-col gap-4 justify-start items-center">
-        <p className="text-2xl font-bold">Home</p>
-        <Link href="/sign-in">Click to sign in</Link>
-        <Link href="/sign-up">Click to sign up</Link>
-      </div>
+      <CarProduct />
     </div>
   );
 }

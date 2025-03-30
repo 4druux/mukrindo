@@ -57,7 +57,7 @@ const CarImage = ({ images, carName, isExpanded, isHovered, onImageClick }) => {
       <div className="lg:flex lg:flex-row lg:gap-4">
         {/* Vertical Thumbnail Desktop */}
         <div
-          className={`hidden lg:block lg:w-[200px] lg:flex-shrink-0 ${desktopThumbsHeightClass} transition-all duration-500 ease-in-out
+          className={`hidden lg:block lg:w-[310px] lg:flex-shrink-0 ${desktopThumbsHeightClass} transition-all duration-500 ease-in-out
        relative overflow-hidden vertical-gradient-fade 
       `}
         >
@@ -72,9 +72,9 @@ const CarImage = ({ images, carName, isExpanded, isHovered, onImageClick }) => {
             className="mySwiper-desktop h-full w-full rounded-lg"
           >
             {images.map((image, index) => (
-              <SwiperSlide key={index} className="!h-[100px] w-full">
+              <SwiperSlide key={index} className="!h-[150px] w-full">
                 <div
-                  className={`relative w-full h-full cursor-pointer group rounded-md overflow-hidden ${
+                  className={`relative w-full h-full cursor-pointer group rounded-2xl overflow-hidden ${
                     index === activeIndex
                       ? "border-2 border-orange-400"
                       : "border-2 border-transparent"
@@ -97,7 +97,7 @@ const CarImage = ({ images, carName, isExpanded, isHovered, onImageClick }) => {
         {/* Main Image */}
         <div className="lg:flex-1 relative lg:min-w-0">
           <div
-            className={`relative h-[210px] rounded-2xl mb-4 lg:mb-0 transition-all duration-500 ease-in-out ${desktopMainImageHeightClass} overflow-hidden`}
+            className={`relative aspect-[16/9] rounded-2xl mb-4 lg:mb-0 transition-all duration-500 ease-in-out ${desktopMainImageHeightClass} overflow-hidden`}
           >
             <Swiper
               onSwiper={setMainSwiper}

@@ -65,13 +65,14 @@ function AppHeader() {
           {/* Logo */}
           <Link href="/">
             <div className="flex items-center">
-              <Image
+              {/* <Image
                 src="/images/logo/logo.svg"
                 alt="MukrindoLogo"
                 width={130}
                 height={35}
                 className="cursor-pointer lg:w-[150px] lg:h-[40px]"
-              />
+              /> */}
+              Mukrindo Motor LOGO
             </div>
           </Link>
 

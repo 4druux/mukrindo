@@ -140,6 +140,7 @@ const AllProducts = () => {
           Tambah Produk
         </span>
       </button>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
         {/* Conditionally render skeletons or actual products */}
         {loading
@@ -164,6 +165,7 @@ const AllProducts = () => {
                     />
                   </div>
                 )}
+
                 <Link
                   href={`/admin/car-details/${generateSlug(
                     product.carName,
@@ -312,6 +314,7 @@ const AllProducts = () => {
               </div>
             ))}
       </div>
+
       {/* Only show pagination if not loading and there are products */}
       {!loading && currentProducts.length > 0 && (
         <Pagination
