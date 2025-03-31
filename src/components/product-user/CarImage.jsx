@@ -1,4 +1,4 @@
-// components/product-user/ProductImageSlider.jsx
+// components/product-user/CarImage.jsx
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
@@ -9,7 +9,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { Navigation, A11y } from "swiper/modules";
 
-const ProductImageSlider = ({ images, altText, status }) => {
+const CarImage = ({ images, altText, status }) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const validImages = Array.isArray(images) && images.length > 0 ? images : [];
@@ -89,18 +89,20 @@ const ProductImageSlider = ({ images, altText, status }) => {
 
         {validImages.length > 1 && (
           <>
-            <button
-              aria-label="Previous Slide"
-              className="swiper-button-prev-custom absolute mt-0.5 top-1/2 left-2 transform -translate-y-1/2 z-10 p-2 bg-black/30 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/50 cursor-pointer"
-            >
-              <BsChevronLeft size={24} />
-            </button>
-            <button
-              aria-label="Next Slide"
-              className="swiper-button-next-custom absolute top-1/2 right-2 transform -translate-y-1/2 z-10 p-2 bg-black/30 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/50 cursor-pointer"
-            >
-              <BsChevronRight size={24} />
-            </button>
+            <div className="hidden lg:block">
+              <button
+                aria-label="Previous Slide"
+                className="swiper-button-prev-custom absolute mt-0.5 top-1/2 left-2 transform -translate-y-1/2 z-10 p-2 bg-black/30 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/50 cursor-pointer"
+              >
+                <BsChevronLeft size={24} />
+              </button>
+              <button
+                aria-label="Next Slide"
+                className="swiper-button-next-custom absolute top-1/2 right-2 transform -translate-y-1/2 z-10 p-2 bg-black/30 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/50 cursor-pointer"
+              >
+                <BsChevronRight size={24} />
+              </button>
+            </div>
           </>
         )}
       </Swiper>
@@ -133,4 +135,4 @@ const ProductImageSlider = ({ images, altText, status }) => {
   );
 };
 
-export default ProductImageSlider;
+export default CarImage;
