@@ -17,17 +17,9 @@ import {
   Tag,
   CheckCircle,
   XCircle,
-} from "lucide-react"; // Contoh ikon Lucide
+} from "lucide-react";
 import ImageCarDetails from "@/components/product-user/ImageCarDetails";
 import CarImageModal from "@/components/product-admin/CarImageModal";
-
-// Komponen Loading sederhana (bisa dipisah jika ingin reusable)
-const LoadingSpinner = () => (
-  <div className="flex justify-center items-center min-h-[60vh] bg-gray-50">
-    <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-500"></div>
-    <p className="ml-4 text-md text-gray-600">Memuat Detail Mobil...</p>
-  </div>
-);
 
 // Komponen untuk menampilkan detail spesifikasi dengan ikon (bisa dipisah jika ingin reusable)
 const SpecItem = ({ icon: Icon, label, value }) => (
@@ -111,7 +103,12 @@ const CarDetails = ({ productId }) => {
   }, []);
 
   if (loading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="flex justify-center items-center min-h-[60vh] bg-gray-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-500"></div>
+        <p className="ml-4 text-md text-gray-600">Memuat Detail Mobil...</p>
+      </div>
+    );
   }
 
   // Tampilan Error

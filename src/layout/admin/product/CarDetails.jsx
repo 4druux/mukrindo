@@ -138,18 +138,23 @@ const CarDetails = ({ productId }) => {
 
         {/* Product Details*/}
         <div className="p-4 lg:p-12 rounded-t-3xl border-t border-gray-300 lg:border-none lg:rounded-3xl shadow-lg bg-white">
-          <div className="flex flex-col mb-8 border-b border-gray-300">
+          <div className="flex flex-col mb-4 lg:mb-8 border-b border-gray-300">
             <div className="flex flex-col items-start space-y-1">
-              <h1 className="text-xl text-gray-700">{product.carName}</h1>
-
+              <div className="flex flex-col lg:flex-row items-start lg:items-center space-x-2">
+                <h1 className="text-xl text-gray-700">{product.carName}</h1>
+                <span className="text-gray-400 hidden lg:block">-</span>
+                <p className="text-sm text-gray-500">
+                  {product.brand} / {product.model}{" "}
+                  {product.variant ? `/ ${product.variant}` : ""}
+                </p>
+              </div>
               <p className="text-orange-500 font-semibold text-lg mb-8">
                 Rp {product.price.toLocaleString("id-ID")}
               </p>
             </div>
-
             <div className="flex justify-between mb-3">
               <h1 className="text-md mt-1.5 text-gray-700">
-                Detail Spesifikasi
+                Spesifikasi Utama
               </h1>
               {/* Status Ketersediaan */}
               <div
@@ -169,7 +174,7 @@ const CarDetails = ({ productId }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-14 gap-y-6 lg:flex lg:justify-between mb-8">
+          <div className="grid grid-cols-2 gap-x-14 gap-y-6 lg:flex lg:justify-between mb-8 border-b lg:border-none border-gray-300">
             <div className="flex items-center space-x-2">
               <FaRoad className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
               <div className="flex flex-col">
@@ -229,6 +234,8 @@ const CarDetails = ({ productId }) => {
                 </span>
               </div>
             </div>
+
+            <h1 className="block lg:hidden text-md text-gray-700 mb-3">Detail Spesifikasi</h1>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-6">
