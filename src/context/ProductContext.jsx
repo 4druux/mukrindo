@@ -1,105 +1,96 @@
-// context/ProductContext.jsx
 "use client";
-import React, {
-  createContext,
-  useState,
-  useContext,
-  useEffect,
-  useCallback,
-} from "react";
+import React, { createContext, useContext, useCallback } from "react";
 import axios from "axios";
+import useSWR from "swr";
 
 const ProductContext = createContext();
 
 export const useProducts = () => useContext(ProductContext);
 
+const fetcher = (url) => axios.get(url).then((res) => res.data);
+const API_ENDPOINT = "http://localhost:5000/api/products";
+
 export const ProductProvider = ({ children }) => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [refetchTrigger, setRefetchTrigger] = useState(0);
+  const {
+    data,
+    error: swrError,
+    isLoading: swrLoading,
+    mutate,
+  } = useSWR(API_ENDPOINT, fetcher, {
+    revalidateOnFocus: true,
+    // refreshInterval: 30000,
+  });
 
-  // Fetch Products
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get("http://localhost:5000/api/products");
-      setProducts(response.data);
-    } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to fetch products"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [refetchTrigger]);
-
-  // Fetch Product by ID
-  const fetchProductById = useCallback(async (productId) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:5000/api/products/${productId}`
-      );
-      return { success: true, data: response.data };
-    } catch (error) {
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to fetch product";
-      return { success: false, error: errorMessage };
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-
-  const refetchProducts = () => {
-    setRefetchTrigger((prev) => prev + 1);
-  };
+  const products = data || [];
+  const loading = swrLoading;
+  const error = swrError;
 
   const deleteProduct = async (productId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/products/${productId}`);
-      refetchProducts();
+      await axios.delete(`${API_ENDPOINT}/${productId}`);
+      mutate();
       return { success: true };
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
         "Failed to delete product";
+      console.error("Delete Product Error:", errorMessage);
       return { success: false, error: errorMessage };
     }
   };
 
   const updateProductStatus = async (productId, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/api/products/${productId}`, {
+      await axios.put(`${API_ENDPOINT}/${productId}`, {
         status: newStatus,
       });
-      refetchProducts();
+      mutate();
       return { success: true };
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
         "Failed to update status";
+      console.error("Update Status Error:", errorMessage);
       return { success: false, error: errorMessage };
     }
   };
+
+  const fetchProductById = useCallback(async (productId) => {
+    try {
+      const response = await axios.get(`${API_ENDPOINT}/${productId}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to fetch product";
+      console.error("Fetch By ID Error:", errorMessage);
+      return { success: false, error: errorMessage };
+    }
+  }, []);
+
+  const incrementProductView = useCallback(async (productId) => {
+    try {
+      await axios.put(`${API_ENDPOINT}/${productId}/increment-view`);
+
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to increment view count:", error);
+      return { success: false, error: "Failed to increment view count" };
+    }
+  }, []);
 
   const contextValue = {
     products,
     loading,
     error,
-    fetchProducts,
-    refetchProducts,
+    mutateProducts: mutate,
     deleteProduct,
     updateProductStatus,
     fetchProductById,
+    incrementProductView,
   };
 
   return (

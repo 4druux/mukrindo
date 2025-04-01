@@ -1,6 +1,7 @@
 // AddProduct.jsx
 "use client";
 import { useState } from "react";
+import { useProducts } from "@/context/ProductContext";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
 import ImageUpload from "@/components/product-admin/ImageUpload";
@@ -11,6 +12,7 @@ import { validateProductData } from "@/utils/validateProductData";
 import { formatNumber, unformatNumber } from "@/utils/formatNumber";
 import carData from "@/utils/carData";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const AddProduct = () => {
   const [productData, setProductData] = useState({
@@ -29,12 +31,14 @@ const AddProduct = () => {
     plateNumber: "",
     yearOfAssembly: "",
     price: "",
-    status: "available",
+    status: "Tersedia",
   });
   const [mediaFiles, setMediaFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const router = useRouter();
+  const { mutateProducts } = useProducts();
+  const API_ENDPOINT = "http://localhost:5000/api/products";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -97,24 +101,11 @@ const AddProduct = () => {
         images: base64Images,
       };
 
-      const response = await fetch("http://localhost:5000/api/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(submitData),
-      });
+      const response = await axios.post(API_ENDPOINT, submitData);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "Gagal menambahkan produk. Silakan coba lagi."
-        );
-      }
+      console.log("Produk berhasil ditambahkan:", response.data);
+      mutateProducts();
 
-      const responseData = await response.json();
-      console.log("Produk berhasil ditambahkan:", responseData);
-      // Reset form (termasuk status)
       setProductData({
         carName: "",
         brand: "",
@@ -131,14 +122,18 @@ const AddProduct = () => {
         plateNumber: "",
         yearOfAssembly: "",
         price: "",
-        status: "available", // Reset status ke default
+        status: "Tersedia",
       });
       setMediaFiles([]);
+
       router.push("/admin");
     } catch (error) {
-      console.error("Error:", error);
-      setError(error.message);
-    } finally {
+      console.error("Error adding product:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Gagal menambahkan produk. Silakan coba lagi.";
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -268,8 +263,8 @@ const AddProduct = () => {
             handleChange({ target: { name: "status", value } })
           }
           options={[
-            { value: "tersedia", label: "Tersedia" },
-            { value: "terjual", label: "Terjual" },
+            { value: "Tersedia", label: "Tersedia" },
+            { value: "Terjual", label: "Terjual" },
           ]}
         />
 
@@ -277,7 +272,7 @@ const AddProduct = () => {
         <div className="col-span-2 flex justify-end space-x-2 sm:space-x-4 mt-4">
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={() => router.back("/admin")}
             className="cursor-pointer border text-gray-600 border-gray-500 hover:bg-orange-100 hover:border-orange-500 
             hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
           >

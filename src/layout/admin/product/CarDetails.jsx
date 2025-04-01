@@ -13,7 +13,7 @@ import { BsFuelPumpFill } from "react-icons/bs";
 import { GiGearStickPattern } from "react-icons/gi";
 import { FaRegCalendarAlt, FaRoad } from "react-icons/fa";
 import { MdOutlineColorLens } from "react-icons/md";
-import { FileCheck } from "lucide-react";
+import { CheckCircle, FileCheck, XCircle } from "lucide-react";
 import { ArrowLeft } from "lucide-react";
 
 const CarDetails = ({ productId }) => {
@@ -139,27 +139,34 @@ const CarDetails = ({ productId }) => {
         {/* Product Details*/}
         <div className="p-4 lg:p-12 rounded-t-3xl border-t border-gray-300 lg:border-none lg:rounded-3xl shadow-lg bg-white">
           <div className="flex flex-col mb-8 border-b border-gray-300">
-            <div className="flex flex-col ">
-              <div className="flex gap-2 items-center">
-                <h1 className="text-xl text-gray-700">{product.carName}</h1>
-                <p className="">-</p>
-                <p
-                  className={`text-md  ${
-                    product.status === "Terjual"
-                      ? "text-red-500"
-                      : "text-green-500 "
-                  }`}
-                >
-                  {product.status}
-                </p>
-              </div>
+            <div className="flex flex-col items-start space-y-1">
+              <h1 className="text-xl text-gray-700">{product.carName}</h1>
 
               <p className="text-orange-500 font-semibold text-lg mb-8">
                 Rp {product.price.toLocaleString("id-ID")}
               </p>
             </div>
 
-            <h1 className="text-md mb-1 text-gray-700">Detail Spesifikasi</h1>
+            <div className="flex justify-between mb-3">
+              <h1 className="text-md mt-1.5 text-gray-700">
+                Detail Spesifikasi
+              </h1>
+              {/* Status Ketersediaan */}
+              <div
+                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium  ${
+                  product.status === "Terjual"
+                    ? "bg-red-100 text-red-800"
+                    : "bg-green-100 text-green-800"
+                }`}
+              >
+                {product.status === "Terjual" ? (
+                  <XCircle className="w-4 h-4 mr-1.5" />
+                ) : (
+                  <CheckCircle className="w-4 h-4 mr-1.5" />
+                )}
+                {product.status}
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-x-14 gap-y-6 lg:flex lg:justify-between mb-8">

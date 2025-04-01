@@ -1,3 +1,4 @@
+//app/layout.client.jsx (admin)
 "use client";
 import { usePathname } from "next/navigation";
 import ClientLayout from "./client-layout";

@@ -1,8 +1,8 @@
 // Home.js
-import CarForm from "@/layout/user/CarForm";
-import Carousel from "@/layout/user/Carousel";
-import PrdouctByPrice from "@/layout/user/PrdouctByPrice";
-import ProductByRecom from "@/layout/user/ProductByRecom";
+import CarForm from "@/layout/user/product/CarForm";
+import Carousel from "@/layout/user/product/Carousel";
+import ProductByPrice from "@/layout/user/product/ProductByPrice";
+import ProductByRecom from "@/layout/user/product/ProductByRecom";
 
 export default function Home() {
   const bannerImages = [
@@ -15,7 +15,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="pt-4 lg:pt-10 border-t-2 border-gray-200 mb-10">
+    <div className="pt-4 lg:pt-10 border-t-2 border-gray-200">
       <Carousel images={bannerImages} />
       <CarForm />
       <div className="">
@@ -24,13 +24,7 @@ export default function Home() {
         </p>
         <ProductByRecom />
       </div>
-
-      <div className="my-8">
-        <p className="text-xl font-medium text-gray-700 mb-2">
-          Mobil Pilihan Sesuai Budget
-        </p>
-        <PrdouctByPrice />
-      </div>
+      <ProductByPrice />
     </div>
   );
 }

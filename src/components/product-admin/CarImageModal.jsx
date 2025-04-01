@@ -86,7 +86,7 @@ const CarImageModal = ({
 
         <div className="hidden lg:block">
           <button
-            className="modal-swiper-button-prev absolute top-1/2 -mt-6 left-4 transform -translate-y-1/2 bg-black/30 
+            className="modal-swiper-button-prev absolute top-1/2 -mt-9 left-4 transform -translate-y-1/2 bg-black/30 
           hover:bg-black/50 disabled:hidden rounded-full p-3 z-10 opacity-0 group-hover:opacity-100 
            transition-opacity duration-300 ease-in-out cursor-pointer"
             aria-label="Previous image"
@@ -122,7 +122,7 @@ const CarImageModal = ({
           {images.map((image, index) => (
             <SwiperSlide key={index}>
               <div
-                className={`relative w-full h-[50px] md:h-[70px] cursor-pointer ${
+                className={`relative w-full h-[50px] md:h-[90px] cursor-pointer ${
                   modalActiveIndex === index
                     ? "border-2 border-orange-500 rounded-md"
                     : ""

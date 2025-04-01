@@ -1,3 +1,4 @@
+// layout/user/product/Carousel.jsx 
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -72,7 +73,7 @@ const Carousel = ({
 
   return (
     <div
-      className="relative w-full max-h-[50vh] md:max-h-[60vh] overflow-hidden aspect-[16/9] rounded-2xl"
+      className="relative w-full max-h-[50vh] md:max-h-[60vh] overflow-hidden aspect-[16/9] rounded-2xl cursor-pointer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -114,7 +115,7 @@ const Carousel = ({
               {index === currentSlide && (
                 <div
                   ref={index === currentSlide ? progressRef : null}
-                  className="absolute inset-0 bg-white h-full rounded-full z-10 transition-all duration-[5000ms] ease-linear"
+                  className="absolute inset-0 bg-orange-500 h-full rounded-full z-10 transition-all duration-[5000ms] ease-linear"
                   style={{ width: "0%" }}
                 ></div>
               )}

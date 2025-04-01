@@ -13,6 +13,7 @@ import { formatNumber, unformatNumber } from "@/utils/formatNumber";
 import carData from "@/utils/carData";
 import SkeletonEditProduct from "@/components/skeleton/SkeletonEditProduct";
 import { useProducts } from "@/context/ProductContext";
+import axios from "axios";
 
 const EditProduct = ({ productId }) => {
   const [productData, setProductData] = useState({
@@ -38,10 +39,12 @@ const EditProduct = ({ productId }) => {
   const [loadingUpdate, setLoadingUpdate] = useState(false);
   const [error, setError] = useState(null);
   const router = useRouter();
-  const { refetchProducts, fetchProductById } = useProducts();
+  const { fetchProductById, mutateProducts } = useProducts();
 
   const initialProductData = useRef(null);
   const initialMediaFiles = useRef(null);
+
+  const API_ENDPOINT = "http://localhost:5000/api/products";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -191,32 +194,23 @@ const EditProduct = ({ productId }) => {
         ...productData,
         images: base64Images,
       };
-      const response = await fetch(
-        `http://localhost:5000/api/products/${productId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(submitData),
-        }
+
+      const response = await axios.put(
+        `${API_ENDPOINT}/${productId}`,
+        submitData
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "Gagal memperbarui produk. Silakan coba lagi."
-        );
-      }
-
-      const responseData = await response.json();
-      console.log("Produk berhasil diperbarui:", responseData);
-      refetchProducts();
+      console.log("Produk berhasil diperbarui:", response.data);
+      mutateProducts();
 
       await router.push("/admin");
     } catch (error) {
-      console.error("Error:", error);
-      setError(error.message);
+      console.error("Error updating product:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Gagal memperbarui produk. Silakan coba lagi.";
+      setError(errorMessage);
       setLoadingUpdate(false);
     }
   };

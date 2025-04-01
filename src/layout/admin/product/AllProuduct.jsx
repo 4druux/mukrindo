@@ -3,17 +3,17 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSidebar } from "@/context/SidebarContext";
-import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import generateSlug from "@/utils/generateSlug";
 import { BsFuelPumpFill } from "react-icons/bs";
 import { GiGearStickPattern } from "react-icons/gi";
-import { FaBoxOpen, FaRegCalendarAlt, FaRoad } from "react-icons/fa";
+import { FaBoxOpen, FaEye, FaRegCalendarAlt, FaRoad } from "react-icons/fa";
 import { Ellipsis, Plus, SquarePen, Trash2 } from "lucide-react";
 import Pagination from "@/components/common/Pagination";
 import { useProducts } from "@/context/ProductContext";
 import SkeletonAllProduct from "@/components/skeleton/SkeletonAllProduct";
+import CarImage from "@/components/product-user/CarImage";
 
 const AllProducts = () => {
   const { products, loading, error, deleteProduct, updateProductStatus } =
@@ -150,52 +150,25 @@ const AllProducts = () => {
           : currentProducts.map((product) => (
               <div
                 key={product._id}
-                className={`rounded-2xl bg-white overflow-hidden transition-shadow duration-200 relative  ${
-                  product.status === "Terjual"
-                    ? "cursor-not-allowed shadow-sm"
-                    : "shadow-md hover:shadow-xl"
-                }`}
+                className="rounded-2xl bg-white overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-200 relative"
               >
-                {product.status === "Terjual" && (
-                  <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <img
-                      src="./images/soldout.png"
-                      alt="Terjual"
-                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80%]"
-                    />
-                  </div>
-                )}
-
                 <Link
                   href={`/admin/car-details/${generateSlug(
                     product.carName,
                     product._id
                   )}`}
                 >
-                  <div
-                    className={
-                      product.status === "Terjual" ? "cursor-not-allowed" : ""
-                    }
-                  >
-                    <div className="relative w-full h-40">
-                      <Image
-                        src={product.images[0]}
-                        alt={product.carName}
-                        layout="fill"
-                        objectFit="cover"
-                        placeholder="blur"
-                        blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
-                        className={`object-cover ${
-                          product.status === "Terjual" ? "opacity-40" : ""
-                        }`}
-                      />
-                    </div>
-                    <div
-                      className={`p-4 mb-10 ${
-                        product.status === "Terjual" ? "opacity-40" : ""
-                      }`}
-                    >
-                      <h2 className="text-md text-gray-800">
+                  <div>
+                    <CarImage
+                      images={product.images}
+                      altText={product.carName}
+                      status={product.status}
+                      brand={product.brand}
+                      model={product.model}
+                      variant={product.variant}
+                    />
+                    <div className="p-4 mb-10">
+                      <h2 className="text-md text-gray-800 line-clamp-1">
                         {product.carName}
                       </h2>
                       <p className="text-orange-500 font-medium text-lg mt-2">
@@ -283,12 +256,12 @@ const AllProducts = () => {
                     )}
                   </AnimatePresence>
                 </div>
-                <div
-                  className={`absolute bottom-3 right-3 ${
-                    product.status === "Terjual" ? "opacity-40" : ""
-                  }`}
-                >
-                  <div className="flex justify-end items-center pt-1 md:pt-3 mt-1 md:mt-3">
+                <div className="absolute bottom-3 w-full">
+                  <div className="flex justify-between items-center px-4 pt-1 md:pt-3 mt-1 md:mt-3">
+                    <div className="flex items-center space-x-1 text-xs text-gray-500 mt-1">
+                      <FaEye />
+                      <span>Dilihat {product.viewCount || 0} kali</span>
+                    </div>
                     <div className="flex md:space-x-2">
                       <Link
                         href={`/admin/edit-product/${generateSlug(

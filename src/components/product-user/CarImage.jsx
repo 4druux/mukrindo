@@ -41,7 +41,7 @@ const CarImage = ({ images, altText, status }) => {
 
   if (validImages.length === 0) {
     return (
-      <div className="relative w-full h-60 bg-gray-200 flex items-center justify-center">
+      <div className="relative w-full aspect-[16/9] bg-gray-200 flex items-center justify-center">
         <Image
           src="/placeholder-image.png"
           alt={altText || "Placeholder Image"}
@@ -70,6 +70,7 @@ const CarImage = ({ images, altText, status }) => {
           nextSlideMessage: "Next slide",
         }}
         onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+        allowTouchMove={status !== "Terjual"}
       >
         {validImages.map((image, index) => (
           <SwiperSlide key={index}>
@@ -92,13 +93,21 @@ const CarImage = ({ images, altText, status }) => {
             <div className="hidden lg:block">
               <button
                 aria-label="Previous Slide"
-                className="swiper-button-prev-custom absolute mt-0.5 top-1/2 left-2 transform -translate-y-1/2 z-10 p-2 bg-black/30 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/50 cursor-pointer"
+                className={`swiper-button-prev-custom absolute mt-0.5 top-1/2 left-2 transform -translate-y-1/2 z-10 p-2 
+                bg-black/30 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 
+                hover:bg-black/50 cursor-pointer ${
+                  status === "Terjual" ? "hidden" : ""
+                }`}
               >
                 <BsChevronLeft size={24} />
               </button>
               <button
                 aria-label="Next Slide"
-                className="swiper-button-next-custom absolute top-1/2 right-2 transform -translate-y-1/2 z-10 p-2 bg-black/30 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-black/50 cursor-pointer"
+                className={`swiper-button-next-custom absolute top-1/2 right-2 transform -translate-y-1/2 z-10 p-2 
+                bg-black/30 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 
+                hover:bg-black/50 cursor-pointer  ${
+                  status === "Terjual" ? "hidden" : ""
+                }`}
               >
                 <BsChevronRight size={24} />
               </button>
@@ -107,7 +116,11 @@ const CarImage = ({ images, altText, status }) => {
         )}
       </Swiper>
       {totalDots > 1 && (
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10">
+        <div
+          className={`absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10 ${
+            status === "Terjual" ? "hidden" : ""
+          }`}
+        >
           <div className="flex items-center space-x-1.5 bg-black/10 backdrop-blur-sm px-2 py-1 rounded-full">
             {/* Render dot yang terlihat */}
             {visibleDotsIndices.map((index) => (

@@ -1,8 +1,9 @@
-// layout/user/PrdouctByPrice.jsx
+// layout/user/product/ProductByPrice.jsx
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import { useProducts } from "@/context/ProductContext";
 import CarProduct from "@/components/product-user/CarProduct";
+import Link from "next/link";
 
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";
 const MAX_VIEWED_ITEMS = 10;
@@ -38,7 +39,7 @@ const PRICE_FILTER_TYPES = {
 const PRICE_LOWER_BOUND = 150000000;
 const PRICE_UPPER_BOUND = 300000000;
 
-const PrdouctByPrice = () => {
+const ProductByPrice = () => {
   const { products, loading, error } = useProducts();
   const [activePriceFilter, setActivePriceFilter] = useState(
     PRICE_FILTER_TYPES.ALL
@@ -92,7 +93,11 @@ const PrdouctByPrice = () => {
   }.`;
 
   return (
-    <div>
+    <div className="py-8">
+      <h1 className="text-xl font-medium text-gray-700 mb-4">
+        Mobil Pilihan Sesuai Budget
+      </h1>
+
       <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
         <button
           onClick={() => setActivePriceFilter(PRICE_FILTER_TYPES.ALL)}
@@ -139,13 +144,25 @@ const PrdouctByPrice = () => {
       </div>
 
       <CarProduct
-        products={displayedProducts}
+        products={displayedProducts.slice(0, 9)}
         loading={loading}
         onProductClick={handleProductClick}
         emptyMessage={emptyMessage}
       />
+
+      <div className="flex flex-col items-end mt-4">
+        <p className="text-sm text-gray-500">
+          Hanya menampilkan {displayedProducts.slice(0, 9).length} dari{" "}
+          {products.length} Mobil
+        </p>
+        <Link href="/beli">
+          <p className="text-sm text-orange-500 font-medium hover:text-orange-600 hover:text-underline hover:underline cursor-pointer">
+            Tampilkan Semua Mobil
+          </p>
+        </Link>
+      </div>
     </div>
   );
 };
 
-export default PrdouctByPrice;
+export default ProductByPrice;
