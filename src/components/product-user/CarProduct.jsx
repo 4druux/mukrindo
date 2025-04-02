@@ -34,7 +34,7 @@ const CarProduct = ({
               onClick={() => onProductClick(product)}
             >
               <Link
-                href={`/detail-mobil/${generateSlug(
+                href={`/beli-mobil/${generateSlug(
                   product.carName,
                   product._id
                 )}`}

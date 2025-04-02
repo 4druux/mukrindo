@@ -1,36 +1,17 @@
 // layout/user/product/CarDetails.jsx
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
-import { useProducts } from "@/context/ProductContext"; // Sesuaikan path jika perlu
-import { useRouter } from "next/navigation"; // Gunakan useRouter untuk navigasi
+import React, { useState, useEffect } from "react";
+import { useProducts } from "@/context/ProductContext";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  CalendarDays,
-  Car,
-  Gauge,
-  Gem,
-  Palette,
-  Settings,
-  Fuel,
-  GitBranch,
-  Tag,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import { BsFuelPumpFill } from "react-icons/bs";
+import { GiGearStickPattern } from "react-icons/gi";
+import { FaChevronRight, FaRegCalendarAlt, FaRoad } from "react-icons/fa";
+import { MdOutlineColorLens } from "react-icons/md";
+import { CheckCircle, FileCheck, XCircle } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import ImageCarDetails from "@/components/product-user/ImageCarDetails";
 import CarImageModal from "@/components/product-admin/CarImageModal";
-
-// Komponen untuk menampilkan detail spesifikasi dengan ikon (bisa dipisah jika ingin reusable)
-const SpecItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-start py-3 px-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-    <Icon className="w-6 h-6 text-orange-500 mr-3 mt-1 flex-shrink-0" />
-    <div>
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="text-md font-medium text-gray-800">{value || "-"}</p>
-    </div>
-  </div>
-);
 
 const CarDetails = ({ productId }) => {
   const router = useRouter();
@@ -104,9 +85,8 @@ const CarDetails = ({ productId }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-[60vh] bg-gray-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-500"></div>
-        <p className="ml-4 text-md text-gray-600">Memuat Detail Mobil...</p>
+      <div className="flex items-center justify-center h-[80vh] bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-orange-500"></div>
       </div>
     );
   }
@@ -114,164 +94,267 @@ const CarDetails = ({ productId }) => {
   // Tampilan Error
   if (error || !product) {
     return (
-      <div className="p-6 md:p-10 text-center text-red-600 min-h-[60vh] bg-gray-50 flex flex-col justify-center items-center">
+      <div className="p-6 md:p-10 text-center text-red-600 h-[80vh] bg-gray-50 flex flex-col justify-center items-center">
         <p className="text-xl mb-4">
           {error || "Produk tidak ditemukan atau gagal dimuat."}
         </p>
         <button
-          onClick={() => router.back()}
-          className="flex items-center text-gray-600 hover:text-orange-600 mb-4 text-sm"
+          onClick={() => router.back("/")}
+          className="flex items-center bg-orange-400 hover:bg-orange-500 text-white py-2 px-4 rounded-full mb-4 cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4 mr-1" />
-          Kembali
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          <span className="text-sm">Kembali</span>
         </button>
-        <Link href="/" className="text-blue-500 hover:underline text-sm">
-          Kembali ke Halaman Utama
-        </Link>
       </div>
     );
   }
 
-  // Tampilan Detail Produk
-  const {
-    carName,
-    brand,
-    model,
-    variant,
-    type,
-    carColor,
-    cc,
-    travelDistance,
-    driveSystem,
-    transmission,
-    fuelType,
-    stnkExpiry,
-    plateNumber,
-    yearOfAssembly,
-    price,
-    images,
-    status,
-  } = product;
+  const createSlug = (text) => {
+    if (!text) return "";
+    return text
+      .toLowerCase()
+      .replace(/ /g, "-")
+      .replace(/[^\w-]+/g, "");
+  };
 
-  const formattedPrice = price
-    ? `Rp ${price.toLocaleString("id-ID")}`
-    : "Harga tidak tersedia";
-  const formattedMileage = travelDistance
-    ? `${travelDistance.toLocaleString("id-ID")} KM`
-    : "-";
-  const formattedSTNK = stnkExpiry
-    ? new Date(stnkExpiry).toLocaleDateString("id-ID", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "-";
+  const brandSlug = createSlug(product.brand);
+  const modelSlug = createSlug(product.model); 
 
   return (
     <div className="">
-      <button
-        onClick={() => router.back()}
-        className="flex items-center text-gray-600 hover:text-orange-600 mb-6 text-sm"
-      >
-        <ArrowLeft className="w-4 h-4 mr-1" />
-        Kembali
-      </button>
+      <nav aria-label="Breadcrumb" className="mb-6 text-sm text-gray-600 hidden lg:block">
+        <ol className="flex items-center space-x-1.5">
+          <li>
+            <Link href="/" className="hover:text-orange-600 hover:underline">
+              Beranda
+            </Link>
+          </li>
+          <li>
+            <FaChevronRight className="w-3 h-3 text-gray-400" />
+          </li>
+          <li>
+            <Link
+              href="/beli"
+              className="hover:text-orange-600 hover:underline"
+            >
+              Beli Mobil Bekas
+            </Link>
+          </li>
+          <li>
+            <FaChevronRight className="w-3 h-3 text-gray-400" />
+          </li>
+          <li>
+            <Link
+              href={`/beli/${brandSlug}`}
+              className="hover:text-orange-600 hover:underline"
+            >
+              {product.brand}
+            </Link>
+          </li>
+          <li>
+            <FaChevronRight className="w-3 h-3 text-gray-400" />
+          </li>
+          <li>
+            <Link
+              href={`/beli/${brandSlug}/${modelSlug}`}
+              className="hover:text-orange-600 hover:underline"
+            >
+              {product.model}
+            </Link>
+          </li>
+          <li>
+            <FaChevronRight className="w-3 h-3 text-gray-400" />
+          </li>
+          <li className="truncate">
+            <span className="font-medium text-gray-800" aria-current="page">
+              {`Jual Mobil ${product.carName}`}
+            </span>
+          </li>
+        </ol>
+      </nav>
 
       <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-        <div className="lg:w-3/5">
+        <div className="lg:w-2/3">
           <ImageCarDetails
             images={product.images}
             carName={product.carName}
             isMobile={isMobile}
             onImageClick={openModal}
           />
-        </div>
 
-        {/* Kolom Detail */}
-        <div className="lg:w-1/2">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-              {carName}
-            </h1>
-            <p className="text-sm text-gray-500 mb-4">
-              {brand} / {model} {variant ? `/ ${variant}` : ""}
-            </p>
+          {/* Product Details*/}
+          <div className="p-4 lg:p-8 mt-8 rounded-3xl border-t border-b border-gray-300 lg:border-none shadow-lg bg-white">
+            <div className="flex flex-col mb-4 lg:mb-8 border-b border-gray-300">
+              {/* <div className="flex flex-col items-start space-y-2">
+                <div className="flex justify-between items-start w-full">
+                  <div className="block lg:hidden">
+                    <div className="flex flex-col lg:flex-row items-start lg:items-center space-x-2">
+                      <h1 className="text-xl text-gray-700">
+                        {product.carName}
+                      </h1>
+                      <span className="text-gray-400 hidden lg:block">-</span>
+                      <p className="text-sm text-gray-500">
+                        {product.brand} / {product.model}{" "}
+                        {product.variant ? `/ ${product.variant}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-            <p className="text-3xl font-semibold text-orange-600 mb-5">
-              {formattedPrice}
-            </p>
+                <p className="text-orange-500 font-semibold text-xl mb-2">
+                  Rp {product.price.toLocaleString("id-ID")}
+                </p>
+              </div> */}
 
-            {/* Status Ketersediaan */}
-            <div
-              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mb-6 ${
-                status === "Terjual"
-                  ? "bg-red-100 text-red-800"
-                  : "bg-green-100 text-green-800 "
-              }`}
-            >
-              {status === "Terjual" ? (
-                <XCircle className="w-4 h-4 mr-1.5" />
-              ) : (
-                <CheckCircle className="w-4 h-4 mr-1.5" />
-              )}
-              {status || "Tersedia"}{" "}
-              {/* Default ke Tersedia jika status null/undefined */}
+              <div className="flex justify-between mb-3">
+                <h1 className="text-md mt-1 text-gray-700">
+                  Spesifikasi Utama
+                </h1>
+                <div
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs lg:text-sm font-medium  ${
+                    product.status === "Terjual"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-green-100 text-green-800"
+                  }`}
+                >
+                  {product.status === "Terjual" ? (
+                    <XCircle className="w-4 h-4 mr-1 lg:mr-1.5" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4 mr-1 lg:mr-1.5" />
+                  )}
+                  {product.status}
+                </div>
+              </div>
             </div>
 
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
-              Spesifikasi Utama
-            </h2>
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <SpecItem
-                icon={Gauge}
-                label="Jarak Tempuh"
-                value={formattedMileage}
-              />
-              <SpecItem
-                icon={Settings}
-                label="Transmisi"
-                value={transmission}
-              />
-              <SpecItem icon={Fuel} label="Bahan Bakar" value={fuelType} />
-              <SpecItem
-                icon={CalendarDays}
-                label="Tahun Rakit"
-                value={yearOfAssembly}
-              />
+            <div className="grid grid-cols-2 gap-x-14 gap-y-6 lg:flex lg:justify-between lg:gap-x-6 mb-4 lg:mb-8 border-b lg:border-none border-gray-300">
+              <div className="flex items-center space-x-2">
+                <FaRoad className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                <div className="flex flex-col">
+                  <p className="text-xs text-gray-700">Kilometer</p>
+                  <span className="text-gray-900 font-medium text-sm">
+                    {product.travelDistance.toLocaleString("id-ID")} KM
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <GiGearStickPattern className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                <div className="flex flex-col">
+                  <p className="text-xs text-gray-700">Transmisi</p>
+                  <span className="text-gray-900 font-medium text-sm">
+                    {product.transmission}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <BsFuelPumpFill className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                <div className="flex flex-col">
+                  <p className="text-xs text-gray-700">Bahan Bakar</p>
+                  <span className="text-gray-900 font-medium text-sm">
+                    {product.fuelType}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <MdOutlineColorLens className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                <div className="flex flex-col">
+                  <p className="text-xs text-gray-700">Warna</p>
+                  <span className="text-gray-900 font-medium text-sm">
+                    {product.carColor}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <FileCheck className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                <div className="flex flex-col">
+                  <p className="text-xs text-gray-700">Masa Berlaku STNK</p>
+                  <span className="text-gray-900 font-medium text-sm">
+                    {product.stnkExpiry}
+                  </span>
+                </div>
+              </div>
+
+              <div className="block lg:hidden">
+                <div className="flex items-center space-x-2">
+                  <FaRegCalendarAlt className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Plat Nomor</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {product.plateNumber}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <h1 className="block lg:hidden text-md text-gray-700 mb-3">
+                Detail Spesifikasi
+              </h1>
             </div>
 
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">
-              Detail Lainnya
-            </h2>
-            <div className="space-y-3 text-sm">
-              <SpecItem icon={Car} label="Tipe Bodi" value={type} />
-              <SpecItem icon={Palette} label="Warna" value={carColor} />
-              <SpecItem
-                icon={Gem}
-                label="Kapasitas Mesin"
-                value={cc ? `${cc} CC` : "-"}
-              />
-              <SpecItem
-                icon={GitBranch}
-                label="Sistem Penggerak"
-                value={driveSystem}
-              />
-              <SpecItem icon={Tag} label="Nomor Plat" value={plateNumber} />
-              <SpecItem
-                icon={CalendarDays}
-                label="Masa Berlaku STNK"
-                value={formattedSTNK}
-              />
-            </div>
+            <div className="flex flex-col lg:flex-row justify-between gap-4">
+              <div className="flex flex-col flex-2 gap-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-gray-600 text-sm">Merk</p>
+                  <span className="text-gray-900 text-sm font-medium">
+                    {product.brand}
+                  </span>
+                </div>
 
-            {/* Tombol Aksi (Contoh) */}
-            <div className="mt-8 pt-6 border-t">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                Tertarik dengan mobil ini?
-              </h3>
-              <button className="w-full bg-green-500 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-600 transition duration-200">
-                Hubungi via WhatsApp
-              </button>
+                <div className="flex items-center justify-between">
+                  <p className="text-gray-600 text-sm">Model</p>
+                  <span className="text-gray-900 text-sm font-medium">
+                    {product.model}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <p className="text-gray-600 text-sm">Variant</p>
+                  <span className="text-gray-900 text-sm font-medium">
+                    {product.variant}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <p className="text-gray-600 text-sm">Kapasitas Mesin</p>
+                  <span className="text-gray-900 text-sm font-medium">
+                    {product.cc} CC
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col flex-2 gap-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-gray-600 text-sm">Sistem Penggerak</p>
+                  <span className="text-gray-900 text-sm font-medium">
+                    {product.driveSystem}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <p className="text-gray-600 text-sm">Tipe</p>
+                  <span className="text-gray-900 text-sm font-medium">
+                    {product.type}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <p className="text-gray-600 text-sm">Plat Nomor</p>
+                  <span className="text-gray-900 text-sm font-medium">
+                    {product.plateNumber}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <p className="text-gray-600 text-sm">Tahun Perakitan</p>
+                  <span className="text-gray-900 text-sm font-medium">
+                    {product.yearOfAssembly}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

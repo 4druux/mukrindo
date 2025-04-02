@@ -61,7 +61,7 @@ function AppHeader() {
           isTop ? "bg-gray-50" : "shadow-md bg-white"
         }`}
       >
-        <div className="flex items-center justify-between px-4 sm:px-[6vw] md:px-[9vw] lg:px-[10vw] py-3 lg:py-6">
+        <div className="flex items-center justify-between px-2 sm:px-[6vw] md:px-[9vw] lg:px-[10vw] py-3 lg:py-6">
           {/* Logo */}
           <Link href="/">
             <div className="flex items-center">

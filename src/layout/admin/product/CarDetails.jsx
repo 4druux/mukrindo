@@ -88,7 +88,7 @@ const CarDetails = ({ productId }) => {
         <div className="text-center">
           <p className="text-red-500 text-lg mb-4">{error}</p>
           <button
-            onClick={() => router.back()}
+            onClick={() => router.back("/admin")}
             className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded"
           >
             Go Back
@@ -104,7 +104,7 @@ const CarDetails = ({ productId }) => {
         <div className="text-center">
           <p className="text-gray-500 text-lg mb-4">Product not found.</p>
           <button
-            onClick={() => router.back()}
+            onClick={() => router.back("/admin")}
             className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded"
           >
             Go Back
@@ -118,7 +118,7 @@ const CarDetails = ({ productId }) => {
     <div className="mt-4 lg:mt-0">
       <div className="hidden lg:block">
         <button
-          onClick={() => router.back()}
+          onClick={() => router.back("/admin")}
           className="flex items-center bg-orange-400 hover:bg-orange-500 text-white py-2 px-4 rounded-full mb-4 cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

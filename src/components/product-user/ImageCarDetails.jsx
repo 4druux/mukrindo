@@ -27,7 +27,7 @@ const ImageCarDetails = ({ images, carName, onImageClick, isMobile }) => {
   }
 
   return (
-    <div className="px-2 lg:px-0">
+    <div className="px-2">
       {/* Main Image */}
       <div className="lg:flex-1 relative lg:min-w-0">
         <div className="relative aspect-[16/9] rounded-2xl mb-4 lg:mb-0 transition-all duration-500 ease-in-out overflow-hidden">

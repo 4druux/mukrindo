@@ -21,7 +21,7 @@ export default function ClientLayout({ children }) {
     <>
       <HeaderProvider>
         {!isAdminPage && <AppHeader />}
-        <div className="mb-14 md:mb-0 sm:px-[6vw] md:px-[9vw] lg:px-[10vw] bg-gray-50">
+        <div className="mb-20 md:mb-0 sm:px-[6vw] md:px-[9vw] lg:px-[10vw] bg-gray-50">
           {children}
         </div>
       </HeaderProvider>

@@ -150,7 +150,7 @@ const ProductByPrice = () => {
         emptyMessage={emptyMessage}
       />
 
-      <div className="flex flex-col items-end mt-4">
+      <div className="flex flex-col items-center lg:items-end mt-4">
         <p className="text-sm text-gray-500">
           Hanya menampilkan {displayedProducts.slice(0, 9).length} dari{" "}
           {products.length} Mobil

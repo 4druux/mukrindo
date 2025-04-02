@@ -1,4 +1,4 @@
-// app/admin/detail-mobil/[slug]/page.jsx
+// app/beli-mobil/[slug]/page.jsx
 
 import CarDetails from "@/layout/user/product/CarDetails";
 import React from "react";
