@@ -1,13 +1,17 @@
-// components/product-user/CarImage.jsx
+// components/product-user/home/CarImage.jsx
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { FaShoppingBag } from "react-icons/fa";
-import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
+
+// Import Swiper
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
 import { Navigation, A11y } from "swiper/modules";
+
+// Import Icon
+import { FaShoppingBag } from "react-icons/fa";
+import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 
 const CarImage = ({ images, altText, status }) => {
   const [activeIndex, setActiveIndex] = useState(0);

@@ -1,10 +1,14 @@
-// layout/user/product/Carousel.jsx 
+// layout/user/product/Carousel.jsx
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+
+// Import Swiper
 import { Swiper, SwiperSlide } from "swiper/react";
 import { A11y, Autoplay } from "swiper/modules";
 import "swiper/css";
-import Image from "next/image";
+
+// Import Icon
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 
 const Carousel = ({
@@ -115,7 +119,7 @@ const Carousel = ({
               {index === currentSlide && (
                 <div
                   ref={index === currentSlide ? progressRef : null}
-                  className="absolute inset-0 bg-orange-500 h-full rounded-full z-10 transition-all duration-[5000ms] ease-linear"
+                  className="absolute inset-0 bg-gray-50 h-full rounded-full z-10 transition-all duration-[5000ms] ease-linear"
                   style={{ width: "0%" }}
                 ></div>
               )}

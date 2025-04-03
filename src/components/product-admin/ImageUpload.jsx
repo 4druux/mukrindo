@@ -1,12 +1,16 @@
 //components/common/ImageUpload.jsx
 "use client";
 import { useEffect, useState } from "react";
-import { Trash2, UploadCloud, Plus, Pencil } from "lucide-react";
+import ModalCropImage from "../common/ModalCropImage";
+
+// Import Swiper
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
-import ModalCropImage from "../common/ModalCropImage";
+
+// Import Icon
+import { Trash2, UploadCloud, Plus, Pencil } from "lucide-react";
 
 export default function ImageUpload({ mediaFiles, setMediaFiles }) {
   const [internalMediaFiles, setInternalMediaFiles] = useState(

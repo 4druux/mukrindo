@@ -1,11 +1,15 @@
 // utils/generateSlug.js
-const generateSlug = (carName, id) => {
-  const cleanedCarName = carName
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric with -
-    .replace(/^-+|-+$/g, ""); // Remove leading/trailing -
+const generateSlug = (text, id = null) => {
+  // Ubah carName -> text, buat id opsional
+  if (!text) return ""; // Tambahkan pengecekan jika text kosong
 
-  return `${cleanedCarName}-${id}`;
+  const cleanedText = String(text) // Pastikan input adalah string
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-") // Ganti karakter non-alphanumeric dengan '-'
+    .replace(/^-+|-+$/g, ""); // Hapus '-' di awal/akhir
+
+  // Kembalikan slug dengan ID jika ID ada, jika tidak hanya cleanedText
+  return id ? `${cleanedText}-${id}` : cleanedText;
 };
 
 export default generateSlug;

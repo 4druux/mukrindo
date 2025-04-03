@@ -25,7 +25,7 @@
     &::before,
     &::after {
       content: "";
-      @apply absolute top-0 h-full w-6 z-10 pointer-events-none from-white to-transparent;
+      @apply absolute top-0 h-full w-6 z-2 pointer-events-none from-white to-transparent;
     }
     &::before {
       @apply -left-1 bg-gradient-to-r;

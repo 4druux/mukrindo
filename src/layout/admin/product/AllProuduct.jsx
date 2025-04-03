@@ -10,10 +10,10 @@ import { BsFuelPumpFill } from "react-icons/bs";
 import { GiGearStickPattern } from "react-icons/gi";
 import { FaBoxOpen, FaEye, FaRegCalendarAlt, FaRoad } from "react-icons/fa";
 import { Ellipsis, Plus, SquarePen, Trash2 } from "lucide-react";
-import Pagination from "@/components/common/Pagination";
+import Pagination from "@/components/global/Pagination";
 import { useProducts } from "@/context/ProductContext";
-import SkeletonAllProduct from "@/components/skeleton/SkeletonAllProduct";
-import CarImage from "@/components/product-user/CarImage";
+import SkeletonAllProduct from "@/components/skeleton/skeleton-admin/SkeletonAllProduct";
+import CarImage from "@/components/product-user/home/CarImage";
 
 const AllProducts = () => {
   const { products, loading, error, deleteProduct, updateProductStatus } =

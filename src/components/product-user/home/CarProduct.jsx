@@ -1,13 +1,15 @@
-// src/components/product-user/CarProduct.jsx
+// src/components/product-user/home/CarProduct.jsx
 import React from "react";
 import Link from "next/link";
-import SkeletonAllProduct from "@/components/skeleton/SkeletonAllProduct";
 import generateSlug from "@/utils/generateSlug";
+
+// Import Icon
 import { BsFuelPumpFill } from "react-icons/bs";
 import { FaRegCalendarAlt, FaRoad } from "react-icons/fa";
 import { GiGearStickPattern } from "react-icons/gi";
 import { MdOutlineColorLens } from "react-icons/md";
-import CarImage from "@/components/product-user/CarImage";
+import CarImage from "@/components/product-user/home/CarImage";
+import SkeletonAllProduct from "@/components/skeleton/skeleton-user/SkeletonAllProduct";
 
 const CarProduct = ({
   products,

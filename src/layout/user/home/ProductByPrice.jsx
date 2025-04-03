@@ -2,7 +2,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import { useProducts } from "@/context/ProductContext";
-import CarProduct from "@/components/product-user/CarProduct";
+import CarProduct from "@/components/product-user/home/CarProduct";
 import Link from "next/link";
 
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";

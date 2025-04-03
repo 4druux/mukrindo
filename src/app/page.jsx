@@ -1,8 +1,8 @@
 // Home.js
-import CarForm from "@/layout/user/product/CarForm";
-import Carousel from "@/layout/user/product/Carousel";
-import ProductByPrice from "@/layout/user/product/ProductByPrice";
-import ProductByRecom from "@/layout/user/product/ProductByRecom";
+import CarForm from "@/layout/user/home/CarForm";
+import Carousel from "@/layout/user/home/Carousel";
+import ProductByPrice from "@/layout/user/home/ProductByPrice";
+import ProductByRecom from "@/layout/user/home/ProductByRecom";
 
 export default function Home() {
   const bannerImages = [

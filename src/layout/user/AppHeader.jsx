@@ -52,7 +52,7 @@ function AppHeader() {
   };
 
   const notchedBackgroundSvg =
-    "data:image/svg+xml,%3Csvg width='300' height='70' viewBox='0 0 300 70' fill='none' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'%3E%3Cpath d='M0 70 L0 20 A 30 20 0 0 1 20 0 L122 0 A 20 20 0 0 0 178 0 L280 0 A 30 20 0 0 1 300 20 L300 70 Z' fill='white'/%3E%3C/svg%3E";
+    "data:image/svg+xml,%3Csvg width='300' height='70' viewBox='0 0 300 70' fill='none' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'%3E%3Cpath d='M0 70 L0 20 A 20 20 0 0 1 20 0 L122 0 A 20 20 0 0 0 178 0 L280 0 A 20 20 0 0 1 300 20 L300 70 Z' fill='white'/%3E%3C/svg%3E";
 
   return (
     <>

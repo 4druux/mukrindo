@@ -1,14 +1,18 @@
 // components/CarImageModal.js
 "use client";
 
+import { useState, useEffect } from "react";
+import Image from "next/image";
+
+// Import Swiper
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/thumbs";
 import "swiper/css/navigation";
 import { FreeMode, Thumbs, Navigation } from "swiper/modules";
-import { useState, useEffect } from "react";
-import Image from "next/image";
+
+// Import Icon
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const CarImageModal = ({
@@ -46,11 +50,11 @@ const CarImageModal = ({
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          className="absolute right-3 top-1 lg:right-5 lg:top-4 bg-white hover:bg-orange-100 rounded-full p-2 z-20 cursor-pointer group/close" // Beri nama group berbeda jika perlu
+          className="absolute right-3 top-1 lg:right-5 lg:top-4 bg-white/80 hover:bg-white rounded-full p-2 z-20 cursor-pointer group/close" // Beri nama group berbeda jika perlu
           onClick={onClose}
           aria-label="Close modal"
         >
-          <X className="w-4 h-4 lg:w-5 lg:h-5 text-gray-600 group-hover/close:text-orange-600" />
+          <X className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700" />
         </button>
 
         <Swiper
@@ -109,6 +113,7 @@ const CarImageModal = ({
             {modalActiveIndex + 1} / {images.length}
           </div>
         </div>
+
         {/* Thumbnail Modal */}
         <Swiper
           onSwiper={setThumbsSwiperModal}
