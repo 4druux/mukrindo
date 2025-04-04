@@ -115,7 +115,13 @@ const ProductByRecom = () => {
 
   return (
     <div>
-      <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
+      <h1 className="text-xl font-medium text-gray-700 mb-4">
+        Mobil Pilihan Terbaik
+      </h1>
+      <div
+        className="flex space-x-2 mb-4 overflow-x-auto pb-2"
+        style={{ scrollbarWidth: "none" }}
+      >
         <button
           onClick={() => setActiveFilter(FILTER_TYPES.RECOMMENDATION)}
           className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
@@ -157,14 +163,12 @@ const ProductByRecom = () => {
           Tahun Terbaru
         </button>
       </div>
-
       <CarProduct
         products={displayedProducts.slice(0, 9)}
         loading={loading}
         onProductClick={handleProductClick}
         emptyMessage={emptyMessage}
       />
-
       <div className="flex flex-col items-center lg:items-end mt-4">
         <p className="text-sm text-gray-500">
           Hanya menampilkan {displayedProducts.slice(0, 9).length} dari{" "}

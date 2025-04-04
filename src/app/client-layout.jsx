@@ -37,9 +37,9 @@ export default function ClientLayout({ children }) {
   return (
     <>
       <HeaderProvider>
-        {showHeader && <AppHeader />}
-        <div className="sm:px-[6vw] md:px-[9vw] lg:px-[10vw] bg-gray-50">
-          {children}
+        <div className="min-h-screen bg-gray-50">
+          {showHeader && <AppHeader />}
+          <div className="sm:px-[6vw] md:px-[9vw] lg:px-[10vw]">{children}</div>
         </div>
       </HeaderProvider>
     </>

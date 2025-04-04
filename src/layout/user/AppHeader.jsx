@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MdPersonOutline, MdKeyboardArrowDown } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
-import { HiMenuAlt3 } from "react-icons/hi";
 import {
   FaHome,
   FaShoppingBag,
@@ -18,6 +17,7 @@ import { FaArrowsRotate } from "react-icons/fa6";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "@/layout/user/SearchBar";
 import { useHeader } from "@/context/HeaderContext";
+import { Heart } from "lucide-react";
 
 function AppHeader() {
   const { isSearchOpen, toggleSearch } = useHeader();
@@ -120,7 +120,7 @@ function AppHeader() {
                       }`}
                     >
                       <Link
-                        href="/beli-mobil"
+                        href="/beli"
                         className="block px-4 py-2 text-sm font-medium  text-gray-600 hover:text-orange-600 hover:bg-orange-50"
                       >
                         Mobil Bekas
@@ -163,9 +163,14 @@ function AppHeader() {
                 className="w-5 h-5 text-gray-600 hover:text-orange-600 cursor-pointer"
                 onClick={toggleSearch}
               />
-              <button className="relative flex items-center space-x-2 rounded-full py-1.5 px-3 bg-gray-100 hover:bg-gray-200">
-                <MdPersonOutline className="w-5 h-5 text-gray-700" />
-                <HiMenuAlt3 className="w-5 h-5 text-gray-700" />
+              <button className="relative flex items-center space-x-3 rounded-full py-1.5 px-3 bg-gray-100 hover:bg-gray-200">
+                <div className="relative group">
+                  <Heart className="w-5 h-5 text-gray-700 cursor-pointer" />
+                  <span className="absolute -top-2 -right-2 flex items-center justify-center w-3 h-3 text-xs text-white bg-red-500 rounded-full group-hover:animate-bounce transition-all duration-300 ease-in-out">
+                    1
+                  </span>
+                </div>
+                <MdPersonOutline className="w-6 h-6 text-gray-700 cursor-pointer" />
               </button>
             </div>
           </div>
@@ -205,21 +210,17 @@ function AppHeader() {
               </p>
             </Link>
             <Link
-              href="/beli-mobil"
+              href="/beli"
               className="flex flex-col items-center gap-1 cursor-pointer"
             >
               <FaShoppingBag
                 className={`w-5 h-5 ${
-                  pathname === "/beli-mobil"
-                    ? "text-orange-600"
-                    : "text-gray-700"
+                  pathname === "/beli" ? "text-orange-600" : "text-gray-700"
                 }`}
               />
               <p
                 className={`${
-                  pathname === "/beli-mobil"
-                    ? "text-orange-600"
-                    : "text-gray-700"
+                  pathname === "/beli" ? "text-orange-600" : "text-gray-700"
                 } font-medium`}
               >
                 Beli Mobil

@@ -77,7 +77,7 @@ const Carousel = ({
 
   return (
     <div
-      className="relative w-full max-h-[50vh] md:max-h-[60vh] overflow-hidden aspect-[16/9] rounded-2xl cursor-pointer"
+      className="relative w-full max-h-[50vh] md:max-h-[60vh] overflow-hidden aspect-[16/9] rounded-none md:rounded-2xl cursor-pointer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

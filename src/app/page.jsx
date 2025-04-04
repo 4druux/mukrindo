@@ -15,17 +15,14 @@ export default function Home() {
   ];
 
   return (
-    <div className="px-2">
-      <p className="pt-4 lg:pt-10 border-t-2 border-gray-200"></p>
+    <div>
+      <p className="lg:pt-10 border-t-2 border-gray-200"></p>
       <Carousel images={bannerImages} />
-      <CarForm />
-      <div className="">
-        <p className="text-xl font-medium text-gray-700 mb-2">
-          Mobil Pilihan Terbaik
-        </p>
+      <div className="px-3 lg:px-0 space-y-8 mt-4 pb-8">
+        <CarForm />
         <ProductByRecom />
+        <ProductByPrice />
       </div>
-      <ProductByPrice />
     </div>
   );
 }

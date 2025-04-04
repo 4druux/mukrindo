@@ -93,12 +93,15 @@ const ProductByPrice = () => {
   }.`;
 
   return (
-    <div className="py-8">
+    <div>
       <h1 className="text-xl font-medium text-gray-700 mb-4">
         Mobil Pilihan Sesuai Budget
       </h1>
 
-      <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
+      <div
+        className="flex space-x-2 mb-4 overflow-x-auto pb-2"
+        style={{ scrollbarWidth: "none" }}
+      >
         <button
           onClick={() => setActivePriceFilter(PRICE_FILTER_TYPES.ALL)}
           className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${

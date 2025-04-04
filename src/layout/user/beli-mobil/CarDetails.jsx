@@ -4,11 +4,11 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useProducts } from "@/context/ProductContext";
-import generateSlug from "@/utils/generateSlug";
 import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import CarImage from "@/components/global/CarImage";
 import CarProduct from "@/components/global/CarProduct";
 import CarImageModal from "@/components/global/CarImageModal";
+import CarPricingInfo from "@/components/product-user/beli-mobil/CarPricingInfo";
 
 // Import Icon
 import { ArrowLeft } from "lucide-react";
@@ -109,14 +109,17 @@ const CarDetails = ({ productId }) => {
     );
   }
 
-  const brandSlug = generateSlug(product.brand);
-  const modelSlug = generateSlug(product.model);
-
   const breadcrumbItems = [
     { label: "Beranda", href: "/" },
-    { label: "Beli Mobil Bekas", href: "/beli" },
-    { label: product.brand, href: `/beli/${brandSlug}` },
-    { label: product.model, href: `/beli/${brandSlug}/${modelSlug}` },
+    { label: "Beli Mobil", href: "/beli" },
+    {
+      label: product.brand,
+      href: `/beli?search=${encodeURIComponent(product.brand)}`,
+    },
+    {
+      label: product.model,
+      href: `/beli?search=${encodeURIComponent(product.model)}`,
+    },
     { label: product.carName, href: "" },
   ];
 
@@ -124,8 +127,8 @@ const CarDetails = ({ productId }) => {
     <div className="">
       <BreadcrumbNav items={breadcrumbItems} />
 
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-        <div className="lg:w-2/3">
+      <div className="flex flex-col lg:flex-row gap-4">
+        <div className="lg:w-3/5">
           <CarImage
             images={product.images}
             carName={product.carName}
@@ -139,7 +142,9 @@ const CarDetails = ({ productId }) => {
           </div>
         </div>
 
-        {/* <div className="lg:w-1/3"></div> */}
+        <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
+          <CarPricingInfo product={product} />
+        </div>
       </div>
 
       {/* Modal */}

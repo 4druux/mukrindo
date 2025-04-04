@@ -1,7 +1,8 @@
-// layout/user/product/CarForm.jsx 
+// layout/user/product/CarForm.jsx
 "use client";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
+import { formatNumber, unformatNumber } from "@/utils/formatNumber";
 import carData from "@/utils/carData";
 import React, { useState } from "react";
 
@@ -14,6 +15,13 @@ const CarForm = () => {
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedPrice, setSelectedPrice] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
+
+  const [productData, setProductData] = useState({
+    brand: "",
+    model: "",
+    phoneNumber: "",
+    yearOfAssembly: "",
+  });
 
   const brandOptionsForSelect = Object.keys(carData).map((brand) => ({
     value: brand,
@@ -33,10 +41,23 @@ const CarForm = () => {
     "Ro150.000.000 - Rp300.000.000",
     ">Rp300.000.000",
   ];
+
   const priceOptionsForSelect = priceOptionsData.map((price) => ({
     value: price,
     label: price,
   }));
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    let updatedValue = value;
+    if (name === "phoneNumber") {
+      updatedValue = unformatNumber(value);
+    }
+    setProductData((prevData) => ({
+      ...prevData,
+      [name]: updatedValue,
+    }));
+  };
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 30 }, (_, i) => currentYear - i).map(
@@ -160,14 +181,12 @@ const CarForm = () => {
 
               <Input
                 label="No Handphone"
-                id="phone"
-                name="phone"
-                placeholderTexts={[
-                  "No handphone anda",
-                  "No handphone anda",
-                  "No handphone anda",
-                ]}
-                prefix="+62"
+                id="phoneNumber"
+                name="phoneNumber"
+                value={productData.phoneNumber}
+                onChange={handleChange}
+                formatter={formatNumber}
+                prefix="+62 "
               />
             </div>
 
@@ -193,7 +212,7 @@ const CarForm = () => {
   };
 
   return (
-    <div className="my-4 lg:my-8">
+    <div>
       <div className="flex w-full bg-gray-200 lg:w-fit rounded-t-3xl shadow-lg">
         {/* Tab Beli Mobil */}
         <button

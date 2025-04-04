@@ -3,12 +3,15 @@ import React, { useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useHeader } from "@/context/HeaderContext";
+import { useRouter } from "next/navigation";
 import AnimatedPlaceholder from "@/components/common/AnimatedPlaceholder";
 import SearchModal from "@/components/hedaer-user/SearchModal";
 
 const SearchBar = () => {
   const { isSearchOpen, searchQuery, setSearchQuery, toggleSearch } =
     useHeader();
+  const router = useRouter(); // 2. Initialize useRouter
+
   const placeholderTexts = [
     "Beli mobil bekas terbaru",
     "Jual mobil saya",
@@ -30,6 +33,27 @@ const SearchBar = () => {
       scale: 1,
       transition: { duration: 0.2, ease: "easeOut" },
     },
+  };
+
+  const handleSearchSubmit = () => {
+    if (searchQuery.trim()) {
+      // Hanya navigasi jika ada query
+      // Encode query untuk URL safety
+      const encodedQuery = encodeURIComponent(searchQuery.trim());
+      // Arahkan ke halaman /beli dengan query search
+      router.push(`/beli?search=${encodedQuery}`);
+      toggleSearch(); // Tutup search bar/modal setelah navigasi
+    }
+    // Opsional: Jika query kosong, mungkin tidak melakukan apa-apa atau
+    // arahkan ke /beli tanpa query: router.push('/beli'); toggleSearch();
+  };
+
+  // 4. Fungsi untuk menangani penekanan tombol Enter di input
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault(); // Mencegah default behavior (misal form submit jika ada)
+      handleSearchSubmit(); // Panggil fungsi submit
+    }
   };
 
   const handleClearSearch = () => setSearchQuery("");
@@ -65,10 +89,12 @@ const SearchBar = () => {
                   )}
                   <input
                     value={searchQuery}
+                    onKeyDown={handleKeyDown}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="relative z-10 w-full h-full outline-none bg-transparent text-sm"
                     type="text"
                     placeholder=""
+                    autoFocus
                   />
                 </div>
                 {searchQuery && (
