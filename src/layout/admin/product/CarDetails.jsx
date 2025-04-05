@@ -1,8 +1,10 @@
+// layout/admin/product/CarDetails.jsx
 "use client";
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useProducts } from "@/context/ProductContext";
+
+// Import Components
 import SkeletonCarDetails from "@/components/skeleton/skeleton-admin/SkeletonCarDetails";
 import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import CarImage from "@/components/global/CarImage";
@@ -113,7 +115,7 @@ const CarDetails = ({ productId }) => {
   ];
 
   return (
-    <div className="mt-4 lg:mt-0">
+    <div className="">
       <BreadcrumbNav items={breadcrumbItems} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -122,10 +124,10 @@ const CarDetails = ({ productId }) => {
           carName={product.carName}
           isMobile={isMobile}
           onImageClick={openModal}
+          isAdminRoute={true}
         />
-
         {/* Product Details*/}
-        <CarProduct product={product} />
+        <CarProduct product={product} isAdminRoute={true} />
       </div>
 
       {/* Modal */}

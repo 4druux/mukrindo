@@ -1,6 +1,8 @@
-// components/common/Pagination.jsx
+// components/global/Pagination.jsx
 import React from "react";
 import ReactPaginate from "react-paginate";
+
+// Import Icons
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
 
 const Pagination = ({ pageCount, currentPage, onPageChange }) => {

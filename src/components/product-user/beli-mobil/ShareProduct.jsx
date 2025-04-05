@@ -1,5 +1,5 @@
 // components/product-user/beli-mobil/ShareProduct.jsx
-import React, { useState, useEffect, useRef } from "react";
+import  { useState, useEffect, useRef } from "react";
 import ShareMobile from "./ShareMobile";
 import ShareDekstop from "./ShareDekstop";
 

@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Bell, X } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
+import { useState, useRef, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+
+// Import Icons
+import { Bell, X } from "lucide-react";
 
 export default function NotificationDropdown() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

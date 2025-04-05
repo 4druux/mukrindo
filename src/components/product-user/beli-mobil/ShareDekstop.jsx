@@ -1,5 +1,5 @@
 // components/product-user/beli-mobil/ShareDekstop.jsx
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 // Import Icon
 import { FaCopy, FaCheck } from "react-icons/fa";

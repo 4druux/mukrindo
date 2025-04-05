@@ -1,11 +1,10 @@
-// components/Header.js
+// layout/user/AppHeader.jsx
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { MdPersonOutline, MdKeyboardArrowDown } from "react-icons/md";
+import { MdPersonOutline } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
 import {
   FaHome,
@@ -24,7 +23,6 @@ function AppHeader() {
   const [isTop, setIsTop] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const router = useRouter();
 
   const pathname =
     typeof window !== "undefined" ? window.location.pathname : "/";
@@ -61,7 +59,7 @@ function AppHeader() {
           isTop ? "bg-gray-50" : "shadow-md bg-white"
         }`}
       >
-        <div className="flex items-center justify-between px-2 sm:px-[6vw] md:px-[9vw] lg:px-[10vw] py-3 lg:py-6">
+        <div className="flex items-center justify-between px-3 sm:px-[6vw] md:px-[9vw] lg:px-[10vw] py-3 lg:py-6">
           {/* Logo */}
           <Link href="/">
             <div className="flex items-center">
@@ -79,62 +77,13 @@ function AppHeader() {
           <div className="flex items-center justify-end">
             <div className="hidden md:flex items-center space-x-6">
               <Link
-                href="/"
+                href="/beli"
                 className={`text-sm font-medium hover:text-orange-600 ${
                   pathname === "/" ? "text-orange-600" : "text-gray-700"
                 }`}
               >
-                Beranda
+                Beli Mobil
               </Link>
-
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className={`text-sm font-medium  hover:text-orange-600 flex items-center gap-1 group cursor-pointer ${
-                    isDropdownOpen ? "text-orange-600" : "text-gray-700"
-                  }`}
-                >
-                  Beli Mobil
-                  <motion.span
-                    className="inline-block"
-                    animate={{ rotate: isDropdownOpen ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
-                    style={{ transformOrigin: "center" }}
-                  >
-                    <MdKeyboardArrowDown
-                      className={`group-hover:text-orange-600 ${
-                        isDropdownOpen ? "text-orange-600" : "text-gray-700"
-                      }`}
-                    />
-                  </motion.span>
-                </button>
-                <AnimatePresence>
-                  {isDropdownOpen && (
-                    <motion.div
-                      initial="closed"
-                      animate="open"
-                      exit="closed"
-                      variants={dropDownVariant}
-                      className={`absolute -left-10 top-full border border-gray-100 shadow-md rounded-lg py-2 mt-4 z-10 min-w-[160px] ${
-                        isTop ? "bg-gray-50" : "bg-white"
-                      }`}
-                    >
-                      <Link
-                        href="/beli"
-                        className="block px-4 py-2 text-sm font-medium  text-gray-600 hover:text-orange-600 hover:bg-orange-50"
-                      >
-                        Mobil Bekas
-                      </Link>
-                      <Link
-                        href="/simulasi-budget"
-                        className="block px-4 py-2 text-sm font-medium  text-gray-600 hover:text-orange-600 hover:bg-orange-50"
-                      >
-                        Simulasi Budget
-                      </Link>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
 
               <Link
                 href="/jual-mobil"
@@ -146,6 +95,18 @@ function AppHeader() {
               >
                 Jual Mobil
               </Link>
+
+              <Link
+                href="/simulasi-budget"
+                className={`text-sm font-medium hover:text-orange-600 ${
+                  pathname === "/simulasi-budget"
+                    ? "text-orange-600"
+                    : "text-gray-700"
+                }`}
+              >
+                Simulasi Budget
+              </Link>
+
               <Link
                 href="/tukar-tambah"
                 className={`text-sm font-medium hover:text-orange-600 relative ${
@@ -157,21 +118,56 @@ function AppHeader() {
                 Tukar Tambah
               </Link>
             </div>
+
             <div className="hidden md:block border-l border-gray-400 h-7 mx-4" />
-            <div className="flex items-center space-x-4">
-              <FiSearch
-                className="w-5 h-5 text-gray-600 hover:text-orange-600 cursor-pointer"
-                onClick={toggleSearch}
-              />
-              <button className="relative flex items-center space-x-3 rounded-full py-1.5 px-3 bg-gray-100 hover:bg-gray-200">
-                <div className="relative group">
-                  <Heart className="w-5 h-5 text-gray-700 cursor-pointer" />
-                  <span className="absolute -top-2 -right-2 flex items-center justify-center w-3 h-3 text-xs text-white bg-red-500 rounded-full group-hover:animate-bounce transition-all duration-300 ease-in-out">
-                    1
-                  </span>
-                </div>
-                <MdPersonOutline className="w-6 h-6 text-gray-700 cursor-pointer" />
-              </button>
+
+            <FiSearch
+              className="w-5 h-5 text-gray-600 cursor-pointer mx-0 lg:mr-4"
+              onClick={toggleSearch}
+            />
+
+            <div className="block md:hidden border-l border-gray-400 h-7 mx-4" />
+
+            <div className="flex items-center space-x-3 lg:space-x-4 bg-gray-100 px-2 lg:px-4 rounded-full border border-gray-300">
+              <div className="relative group">
+                <Heart className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700 cursor-pointer" />
+                <span className="absolute -top-2 -right-2 flex items-center justify-center w-3 h-3 text-xs text-white bg-red-500 rounded-full group-hover:animate-bounce transition-all duration-300 ease-in-out">
+                  1
+                </span>
+              </div>
+
+              <div className="relative" ref={dropdownRef}>
+                <button onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+                  <MdPersonOutline className="w-5 h-5 lg:w-6 lg:h-6 text-gray-700 cursor-pointer mt-1.5" />
+                </button>
+
+                <AnimatePresence>
+                  {isDropdownOpen && (
+                    <motion.div
+                      initial="closed"
+                      animate="open"
+                      exit="closed"
+                      variants={dropDownVariant}
+                      className={`absolute -right-2 lg:-left-10 mt-2 w-28 rounded-lg shadow-lg z-20 ${
+                        isTop ? "bg-gray-50" : "bg-white"
+                      }`}
+                    >
+                      <Link
+                        href="/sign-in"
+                        className="block w-full text-left text-xs font-medium px-4 py-2 text-gray-700 hover:text-gray-700 hover:bg-orange-100 rounded-t-lg cursor-pointer"
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        href="/sign-up"
+                        className="block w-full text-left text-xs font-medium px-4 py-2 text-gray-700 hover:text-gray-700 hover:bg-orange-100 rounded-t-lg cursor-pointer"
+                      >
+                        Sign Up
+                      </Link>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </div>

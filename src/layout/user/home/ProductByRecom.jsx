@@ -1,9 +1,9 @@
 // layout/user/product/ProductByRecom.jsx
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
-import { useProducts } from "@/context/ProductContext";
-import CarProduct from "@/components/product-user/home/CarProduct";
 import Link from "next/link";
+import { useState, useEffect, useMemo } from "react";
+import { useProducts } from "@/context/ProductContext";
+import CarProductCard from "@/components/global/CarProductCard";
 
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";
 const MAX_VIEWED_ITEMS = 10;
@@ -163,12 +163,14 @@ const ProductByRecom = () => {
           Tahun Terbaru
         </button>
       </div>
-      <CarProduct
+
+      <CarProductCard
         products={displayedProducts.slice(0, 9)}
         loading={loading}
         onProductClick={handleProductClick}
         emptyMessage={emptyMessage}
       />
+
       <div className="flex flex-col items-center lg:items-end mt-4">
         <p className="text-sm text-gray-500">
           Hanya menampilkan {displayedProducts.slice(0, 9).length} dari{" "}

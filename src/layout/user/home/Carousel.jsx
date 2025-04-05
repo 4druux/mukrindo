@@ -1,6 +1,6 @@
 // layout/user/product/Carousel.jsx
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import  { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
 // Import Swiper

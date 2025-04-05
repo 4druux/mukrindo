@@ -1,7 +1,7 @@
 //components/common/ModalCropImage.jsx
 import { getCroppedImg } from "@/utils/cropImage";
 import { XIcon } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import Cropper from "react-easy-crop";
 
 export default function ModalCropImage({ mediaSrc, onCropComplete, onClose }) {

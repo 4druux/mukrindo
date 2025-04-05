@@ -1,6 +1,6 @@
-// components/product-user/home/CarImage.jsx
+// components/product-user/home/CarImageCard.jsx
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 
 // Import Swiper
@@ -13,7 +13,7 @@ import { Navigation, A11y } from "swiper/modules";
 import { FaShoppingBag } from "react-icons/fa";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 
-const CarImage = ({ images, altText, status }) => {
+const CarImageCard = ({ images, altText, status }) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const validImages = Array.isArray(images) && images.length > 0 ? images : [];
@@ -97,7 +97,7 @@ const CarImage = ({ images, altText, status }) => {
             <div className="hidden lg:block">
               <button
                 aria-label="Previous Slide"
-                className={`swiper-button-prev-custom absolute mt-0.5 top-1/2 left-2 transform -translate-y-1/2 z-10 p-2 
+                className={`swiper-button-prev-custom absolute top-1/2 left-2 transform -translate-y-1/2 z-10 p-2 
                 bg-black/30 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 
                 hover:bg-black/50 cursor-pointer ${
                   status === "Terjual" ? "hidden" : ""
@@ -152,4 +152,4 @@ const CarImage = ({ images, altText, status }) => {
   );
 };
 
-export default CarImage;
+export default CarImageCard;

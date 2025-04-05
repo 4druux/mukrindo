@@ -1,9 +1,10 @@
 // layout/user/product/CarDetails.jsx
 "use client";
-import React, { useState, useEffect } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useProducts } from "@/context/ProductContext";
+
+// Import Components
 import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import CarImage from "@/components/global/CarImage";
 import CarProduct from "@/components/global/CarProduct";
@@ -124,25 +125,29 @@ const CarDetails = ({ productId }) => {
   ];
 
   return (
-    <div className="">
+    <div className="pb-10">
       <BreadcrumbNav items={breadcrumbItems} />
 
       <div className="flex flex-col lg:flex-row gap-4">
-        <div className="lg:w-3/5">
+        <div className="lg:w-3/4">
           <CarImage
             images={product.images}
             carName={product.carName}
             isMobile={isMobile}
             onImageClick={openModal}
+            isAdminRoute={false}
           />
 
           {/* Product Details*/}
-          <div className="mt-4 lg:mt-8">
-            <CarProduct product={product} />
+          <div className="space-y-4 mt-4 lg:mt-8">
+            <div className="block lg:hidden">
+              <CarPricingInfo product={product} />
+            </div>
+            <CarProduct product={product} isAdminRoute={false} />
           </div>
         </div>
 
-        <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
+        <div className="hidden lg:block lg:w-1/2 lg:sticky lg:top-24 self-start">
           <CarPricingInfo product={product} />
         </div>
       </div>

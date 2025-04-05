@@ -1,17 +1,33 @@
 // components/product-user/beli-mobil/CarPricingInfo.jsx
-import React from "react";
-import { RefreshCw, ArrowRight, Calculator } from "lucide-react";
+import React, { useState } from "react";
+import { RefreshCw, ArrowRight, Calculator, Heart } from "lucide-react";
 
 const CarPricingInfo = ({ product }) => {
   if (!product) {
     return null;
   }
 
+  const [isLiked, setIsLiked] = useState(false);
+
+  const handleLikeClick = () => {
+    setIsLiked(!isLiked);
+  };
+
   return (
-    <div className="p-4 lg:p-8 rounded-3xl border-t border-b border-gray-300 lg:border-none shadow-lg bg-white">
-      <h1 className="text-lg font-semibold text-gray-700 mb-4">
-        {product.carName} {product.yearOfAssembly}
-      </h1>
+    <div className="p-4 lg:p-8 rounded-t-3xl lg:rounded-3xl border-t border-b border-gray-300 lg:border-none lg:shadow-lg bg-white">
+      <div className="flex justify-between w-full gap-10 mb-4">
+        <h1 className="text-lg font-semibold text-gray-700">
+          {product.carName} {product.yearOfAssembly}
+        </h1>
+
+        <div className="block lg:hidden" onClick={handleLikeClick}>
+          <Heart
+            className={`w-6 h-6 mt-1 ${
+              isLiked ? "text-red-500 fill-red-500" : "text-gray-700 fill-none"
+            }`}
+          />
+        </div>
+      </div>
 
       <div className="flex items-center text-sm text-gray-600 space-x-2 border-b border-gray-300 pb-4">
         <span> {product.travelDistance.toLocaleString("id-ID")} KM</span>
@@ -34,18 +50,18 @@ const CarPricingInfo = ({ product }) => {
       {/* Estimasi Pembiayaan */}
       <div className="mt-4 p-4 bg-orange-50 rounded-xl">
         <h2 className="text-md text-gray-700 mb-2">Estimasi Pembiayaan</h2>
-        <div className="flex justify-between text-sm mb-1 p-3 bg-white rounded-lg">
-          <div>
+        <div className="flex flex-col lg:flex-row space-y-3 lg:space-y-0 justify-between text-sm mb-1 p-3 bg-white rounded-lg">
+          <div className="border-b border-gray-200 lg:border-none pb-2 lg:pb-0 flex justify-between lg:flex-col">
             <p className="text-gray-500">Tenor</p>
             <p className="font-medium text-gray-800">5 Tahun</p>
           </div>
-          <div>
+          <div className="border-b border-gray-200 lg:border-none pb-2 lg:pb-0 flex justify-between lg:flex-col">
             <p className="text-gray-500">TDP</p>
-            <p className="font-medium text-gray-800">Rp 24.529.025</p>{" "}
+            <p className="font-medium text-gray-800">Rp 24.529.025</p>
           </div>
-          <div>
+          <div className="flex justify-between lg:flex-col">
             <p className="text-gray-500">Cicilan per bulan</p>
-            <p className="font-medium text-gray-800">Rp 2.905.125</p>{" "}
+            <p className="font-medium text-gray-800">Rp 2.905.125</p>
           </div>
         </div>
         <p className="text-xs text-gray-500 mb-6">

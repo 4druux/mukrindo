@@ -5,7 +5,7 @@ import NotificationDropdown from "@/components/header-admin/NotificationDropdown
 import UserDropdown from "@/components/header-admin/UserDropdown";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState, useEffect, useRef } from "react";
+import  { useState, useEffect, useRef } from "react";
 import { AlignLeft, Ellipsis, Search, X } from "lucide-react";
 import AnimatedPlaceholder from "@/components/common/AnimatedPlaceholder";
 import { useRouter } from "next/navigation";

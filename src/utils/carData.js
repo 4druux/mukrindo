@@ -167,7 +167,7 @@ const carData = {
       "1.5 Ultimate CVT",
       "1.5 Cross CVT",
     ],
-    PajeroSport: [
+    "Pajero Sport": [
       "2.4 Exceed M/T",
       "2.4 Dakar A/T",
       "2.4 Dakar Ultimate A/T",

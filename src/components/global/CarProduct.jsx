@@ -1,18 +1,25 @@
-// src/components/product-user/beli-mobil/CarProduct.jsx
+// src/components/global/CarProduct.jsx
 import React from "react";
+
+// Import Icon
 import { BsFuelPumpFill } from "react-icons/bs";
 import { GiGearStickPattern } from "react-icons/gi";
 import { FaRegCalendarAlt, FaRoad } from "react-icons/fa";
 import { MdOutlineColorLens } from "react-icons/md";
 import { CheckCircle, FileCheck, XCircle } from "lucide-react";
 
-const CarProduct = ({ product }) => {
+const CarProduct = ({ product, isAdminRoute = false }) => {
   if (!product) {
     return null;
   }
 
   return (
-    <div className="p-4 lg:p-8 rounded-3xl border-t border-b border-gray-300 lg:border-none shadow-lg bg-white">
+    <div
+      className={`p-4 lg:p-8 lg:rounded-3xl lg:border-none lg:shadow-lg bg-white ${
+        isAdminRoute ? "rounded-t-3xl border-t border-gray-300" : "border-t border-b border-gray-200"
+      }
+    `}
+    >
       {/* Header Spesifikasi Utama & Status */}
       <div className="flex flex-col mb-4 lg:mb-8 border-b border-gray-300">
         <div className="flex justify-between mb-3">

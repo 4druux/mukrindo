@@ -1,5 +1,8 @@
+// export in AllProuduct, CarShop, useFilterAndSuggest
+
 // components/global/AllFilter.jsx
-import React, { useState, useRef, useEffect } from "react";
+// Import Icons
+import { useState, useRef, useEffect } from "react";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 
 export const ALL_FILTER_TYPES = {

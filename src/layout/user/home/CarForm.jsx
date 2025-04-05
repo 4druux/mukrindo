@@ -4,7 +4,7 @@ import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
 import { formatNumber, unformatNumber } from "@/utils/formatNumber";
 import carData from "@/utils/carData";
-import React, { useState } from "react";
+import  { useState } from "react";
 
 // Import Icon
 import { FaCar, FaExchangeAlt, FaMoneyBillWave } from "react-icons/fa";

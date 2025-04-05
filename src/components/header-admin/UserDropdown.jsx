@@ -1,9 +1,11 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, CircleUser, LogOut, Settings2 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
+import { useState, useRef, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+
+// Import Icons
+import { ChevronDown, CircleUser, LogOut, Settings2 } from "lucide-react";
 
 export default function UserDropdown() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -40,7 +42,9 @@ export default function UserDropdown() {
             alt="User"
           />
         </span>
-        <span className="mr-1 font-medium text-sm hidden lg:block">Mukrindo</span>
+        <span className="mr-1 font-medium text-sm hidden lg:block">
+          Mukrindo
+        </span>
         <div
           className={`transition-transform duration-200 ${
             isDropdownOpen ? "rotate-180" : ""

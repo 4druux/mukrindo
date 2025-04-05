@@ -1,5 +1,5 @@
 // components/product/CarBrands.jsx
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Select from "../common/Select";
 
 const CarBrands = ({ carData, brand, model, variant, onChange }) => {

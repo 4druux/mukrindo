@@ -1,11 +1,13 @@
-// components/product-user/beli-mobil/CarImage.jsx
-"use client";
+// export in CarProductCard, CarDetails (admin), CarDetails (user)
 
-import { Swiper, SwiperSlide } from "swiper/react";
-import ShareProduct from "../product-user/beli-mobil/ShareProduct";
-import { useRouter, usePathname } from "next/navigation";
+// components/global/CarImage.jsx
+"use client";
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
+// Import Component
+import ShareProduct from "../product-user/beli-mobil/ShareProduct";
 
 // Import Swiper
 import "swiper/css";
@@ -13,19 +15,23 @@ import "swiper/css/free-mode";
 import "swiper/css/thumbs";
 import "swiper/css/navigation";
 import { FreeMode, Thumbs } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 // Import Icon
 import { ArrowLeft, Heart } from "lucide-react";
 
-const CarImage = ({ images, carName, onImageClick, isMobile }) => {
+const CarImage = ({
+  images,
+  carName,
+  onImageClick,
+  isMobile,
+  isAdminRoute = false,
+}) => {
   const router = useRouter();
-  const pathname = usePathname();
   const [activeIndex, setActiveIndex] = useState(0);
   const [mainSwiper, setMainSwiper] = useState(null);
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
-
-  const isAdminRoute = pathname.startsWith("/admin");
 
   const handleLikeClick = () => {
     setIsLiked(!isLiked);
@@ -106,7 +112,7 @@ const CarImage = ({ images, carName, onImageClick, isMobile }) => {
                 />
 
                 <div
-                  className="relative group cursor-pointer"
+                  className="relative group cursor-pointer hidden lg:block"
                   onClick={handleLikeClick}
                 >
                   <div className="bg-white/80 hover:bg-white p-2 rounded-full shadow transition">
@@ -126,6 +132,13 @@ const CarImage = ({ images, carName, onImageClick, isMobile }) => {
                    pointer-events-none z-20"
                   >
                     Bookmark
+                  </span>
+                </div>
+
+                <div className="block lg:hidden bg-white/80 hover:bg-white p-2 rounded-full shadow transition">
+                  <Heart className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700 cursor-pointer" />
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center w-3 h-3 text-xs text-white bg-red-500 rounded-full group-hover:animate-bounce transition-all duration-300 ease-in-out">
+                    1
                   </span>
                 </div>
               </div>

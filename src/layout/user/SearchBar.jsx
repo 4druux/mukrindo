@@ -1,5 +1,5 @@
 // layout/user/SearchBar.jsx
-import React, { useEffect } from "react";
+import  { useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useHeader } from "@/context/HeaderContext";

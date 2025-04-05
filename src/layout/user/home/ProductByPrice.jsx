@@ -1,9 +1,9 @@
 // layout/user/product/ProductByPrice.jsx
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
-import { useProducts } from "@/context/ProductContext";
-import CarProduct from "@/components/product-user/home/CarProduct";
 import Link from "next/link";
+import  { useState, useEffect, useMemo } from "react";
+import { useProducts } from "@/context/ProductContext";
+import CarProductCard from "@/components/global/CarProductCard";
 
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";
 const MAX_VIEWED_ITEMS = 10;
@@ -146,7 +146,7 @@ const ProductByPrice = () => {
         </button>
       </div>
 
-      <CarProduct
+      <CarProductCard
         products={displayedProducts.slice(0, 9)}
         loading={loading}
         onProductClick={handleProductClick}
