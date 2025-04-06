@@ -15,8 +15,10 @@ const CarProduct = ({ product, isAdminRoute = false }) => {
 
   return (
     <div
-      className={`p-4 lg:p-8 lg:rounded-3xl lg:border-none lg:shadow-lg bg-white ${
-        isAdminRoute ? "rounded-t-3xl border-t border-gray-300" : "border-t border-b border-gray-200"
+      className={`p-4 lg:p-8 lg:rounded-3xl lg:border-none lg:shadow-md bg-white ${
+        isAdminRoute
+          ? "rounded-t-3xl border-t border-gray-300"
+          : "border-t border-b border-gray-200"
       }
     `}
     >

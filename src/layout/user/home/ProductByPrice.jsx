@@ -1,7 +1,7 @@
 // layout/user/product/ProductByPrice.jsx
 "use client";
 import Link from "next/link";
-import  { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useProducts } from "@/context/ProductContext";
 import CarProductCard from "@/components/global/CarProductCard";
 
@@ -94,12 +94,12 @@ const ProductByPrice = () => {
 
   return (
     <div>
-      <h1 className="text-xl font-medium text-gray-700 mb-4">
+      <h1 className="text-lg lg:text-xl font-medium text-gray-700 mb-2 lg:mb-4 px-2">
         Mobil Pilihan Sesuai Budget
       </h1>
 
       <div
-        className="flex space-x-2 mb-4 overflow-x-auto pb-2"
+        className="flex space-x-2 mb-4 overflow-x-auto lg:pb-2 px-2"
         style={{ scrollbarWidth: "none" }}
       >
         <button

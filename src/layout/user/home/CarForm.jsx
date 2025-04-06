@@ -4,7 +4,7 @@ import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
 import { formatNumber, unformatNumber } from "@/utils/formatNumber";
 import carData from "@/utils/carData";
-import  { useState } from "react";
+import { useState } from "react";
 
 // Import Icon
 import { FaCar, FaExchangeAlt, FaMoneyBillWave } from "react-icons/fa";
@@ -26,11 +26,12 @@ const CarForm = () => {
   const brandOptionsForSelect = Object.keys(carData).map((brand) => ({
     value: brand,
     label: brand,
+    ImgUrl: carData[brand].ImgUrl,
   }));
 
   const modelOptionsForSelect =
-    selectedBrand && carData[selectedBrand]
-      ? Object.keys(carData[selectedBrand]).map((model) => ({
+    selectedBrand && carData[selectedBrand]?.Model
+      ? Object.keys(carData[selectedBrand].Model).map((model) => ({
           value: model,
           label: model,
         }))
@@ -71,7 +72,7 @@ const CarForm = () => {
     switch (activeTab) {
       case "beli":
         return (
-          <div className="bg-white rounded-b-2xl lg:rounded-tr-2xl shadow-lg p-4 md:p-6 w-full mx-auto">
+          <div className="bg-white lg:rounded-b-3xl lg:rounded-tr-3xl shadow-md p-4 md:p-6 w-full mx-auto">
             <h1 className="text-md font-medium text-gray-700 mb-4">
               Cari Mobil yang Anda Inginkan
             </h1>
@@ -80,7 +81,7 @@ const CarForm = () => {
               <Select
                 label="Merek"
                 title="Pilih Merek"
-                description="Pilih Merek Mobil Anda"
+                description="Pilih Merek Mobil"
                 options={brandOptionsForSelect}
                 value={selectedBrand}
                 onChange={(value) => {
@@ -93,7 +94,11 @@ const CarForm = () => {
               <Select
                 label="Model"
                 title="Pilih Model"
-                description="Pilih Model Mobil Anda"
+                description={
+                  selectedBrand
+                    ? "Pilih Model Mobil"
+                    : "Pilih Merek Mobil Terlebih Dahulu!"
+                }
                 options={modelOptionsForSelect}
                 value={selectedModel}
                 onChange={setSelectedModel}
@@ -138,7 +143,7 @@ const CarForm = () => {
       case "jual":
       case "tukar":
         return (
-          <div className="bg-white rounded-b-2xl lg:rounded-tr-2xl shadow-lg p-4 md:p-6 w-full mx-auto">
+          <div className="bg-white lg:rounded-b-3xl lg:rounded-tr-3xl shadow-md p-4 md:p-6 w-full mx-auto">
             <h1 className="text-md font-medium text-gray-700 mb-4">
               Informasi Mobil Kamu
             </h1>
@@ -148,6 +153,7 @@ const CarForm = () => {
               <div>
                 <Select
                   label="Merek"
+                  description="Pilih Merek Mobil Anda"
                   options={brandOptionsForSelect}
                   value={selectedBrand}
                   onChange={(value) => {
@@ -162,6 +168,11 @@ const CarForm = () => {
               <div>
                 <Select
                   label="Model"
+                  description={
+                    selectedBrand
+                      ? "Pilih Model Mobil Anda"
+                      : "Pilih Merek Mobil Anda Terlebih Dahulu!"
+                  }
                   options={modelOptionsForSelect}
                   value={selectedModel}
                   onChange={setSelectedModel}
@@ -213,7 +224,7 @@ const CarForm = () => {
 
   return (
     <div>
-      <div className="flex w-full bg-gray-200 lg:w-fit rounded-t-3xl shadow-lg">
+      <div className="flex w-full bg-gray-200 lg:w-fit rounded-t-3xl shadow-md">
         {/* Tab Beli Mobil */}
         <button
           onClick={() => setActiveTab("beli")}

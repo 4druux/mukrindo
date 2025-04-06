@@ -12,7 +12,7 @@ const EmptyProductDisplay = ({
   return (
     <div className="flex justify-center items-center h-[50vh] text-center">
       <div className="flex flex-col sm:flex-row gap-4 items-center text-center sm:text-left">
-        <FaBoxOpen className="w-24 h-24 sm:w-36 sm:h-36 text-gray-400" />
+        <FaBoxOpen className="w-24 h-24 sm:w-36 sm:h-36 text-gray-500" />
         <div className="flex flex-col text-gray-600 mt-4 sm:mt-0">
           <p className="text-2xl font-semibold">Oops!</p>
           <p>{emptyMessage}</p>

@@ -14,7 +14,7 @@ const CarPricingInfo = ({ product }) => {
   };
 
   return (
-    <div className="p-4 lg:p-8 rounded-t-3xl lg:rounded-3xl border-t border-b border-gray-300 lg:border-none lg:shadow-lg bg-white">
+    <div className="p-4 lg:p-8 rounded-t-3xl lg:rounded-3xl border-t border-b border-gray-300 lg:border-none lg:shadow-md bg-white">
       <div className="flex justify-between w-full gap-10 mb-4">
         <h1 className="text-lg font-semibold text-gray-700">
           {product.carName} {product.yearOfAssembly}
@@ -69,7 +69,7 @@ const CarPricingInfo = ({ product }) => {
         </p>
         <button
           className="flex items-center justify-center gap-2 py-3 bg-orange-600 text-white rounded-full
-         hover:bg-orange-700 transition duration-200 cursor-pointer w-full mb-1"
+         hover:bg-orange-500 transition duration-200 cursor-pointer w-3/5 mb-1 mx-auto"
         >
           <Calculator className="w-5 h-5" />
           <span className="text-sm">Hitung Ulang</span>
@@ -82,15 +82,15 @@ const CarPricingInfo = ({ product }) => {
       {/* Tombol Aksi */}
       <div className="mt-4 flex flex-col lg:flex-row gap-3 w-full">
         <button
-          className="flex items-center justify-center gap-2 p-4 border border-orange-600 text-orange-600 
+          className="flex items-center justify-center gap-2 py-3.5 border border-orange-600 text-orange-600 
         rounded-full hover:bg-orange-50 transition duration-200 cursor-pointer lg:w-1/2"
         >
           <RefreshCw className="w-5 h-5" />
           <span className="text-sm">Tukar Tambah</span>
         </button>
         <button
-          className="flex items-center justify-center gap-2 p-4 bg-orange-600 text-white rounded-full
-         hover:bg-orange-700 transition duration-200 cursor-pointer lg:w-1/2"
+          className="flex items-center justify-center gap-2 py-4 bg-orange-600 text-white rounded-full
+         hover:bg-orange-500 transition duration-200 cursor-pointer lg:w-1/2"
         >
           <span className="text-sm">Cek Sekarang</span>
           <ArrowRight className="w-5 h-5" />

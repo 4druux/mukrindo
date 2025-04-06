@@ -7,7 +7,7 @@ import { useSidebar } from "@/context/SidebarContext";
 import { useProducts } from "@/context/ProductContext";
 
 // Import Components
-import AllFilter, { ALL_FILTER_TYPES } from "@/components/global/AllFilter";
+import ShortProduct, { SHORT_BY } from "@/components/global/ShortProduct";
 import { useFilterAndSuggest } from "@/hooks/useFilterAndSuggest";
 import ActiveSearchFilters from "@/components/global/ActiveSearchFilter";
 import CarProductCard from "@/components/global/CarProductCard";
@@ -106,7 +106,7 @@ const AllProducts = () => {
     useFilterAndSuggest({
       initialProducts: products || [],
       searchQuery: searchQuery,
-      initialFilter: ALL_FILTER_TYPES.LATEST,
+      initialFilter: SHORT_BY.LATEST,
       options: {
         searchFields: [
           "carName",
@@ -167,33 +167,41 @@ const AllProducts = () => {
     return result;
   }, [searchQuery, products]);
 
-  const handleClearSearch = () => {
-    const currentPath = window.location.pathname;
-    router.push(currentPath);
+  const handleClearAllAdminFilters = () => {
+    // Hapus hanya query 'search' dari URL admin
+    const currentPath = window.location.pathname; // Tetap di halaman admin
+    router.push(currentPath); // Navigasi ke path tanpa query
+    setSearchQuery(""); // Juga clear context sidebar
   };
 
-  const handleRemoveBrandFilter = () => {
+  const handleRemoveAdminSearchPart = (partToRemove) => {
+    let newSearchQuery = "";
     const currentPath = window.location.pathname;
-    if (splitSearchFilter.modelQuery) {
+
+    if (partToRemove === "brand" && splitSearchFilter.modelQuery) {
+      newSearchQuery = splitSearchFilter.modelQuery;
+    } else if (partToRemove === "model" && splitSearchFilter.brand) {
+      newSearchQuery = splitSearchFilter.brand;
+    }
+    // Jika partToRemove 'full' atau bagian terakhir, query jadi kosong
+
+    setSearchQuery(newSearchQuery); // Update context sidebar
+
+    if (newSearchQuery) {
       router.push(
-        `${currentPath}?search=${encodeURIComponent(
-          splitSearchFilter.modelQuery // Hanya pakai model query
-        )}`
+        `${currentPath}?search=${encodeURIComponent(newSearchQuery)}`
       );
     } else {
-      handleClearSearch(); // Hapus semua jika hanya brand
+      router.push(currentPath); // Hapus query jika kosong
     }
   };
 
-  const handleRemoveModelFilter = () => {
-    const currentPath = window.location.pathname;
-    if (splitSearchFilter.brand) {
-      router.push(
-        `${currentPath}?search=${encodeURIComponent(splitSearchFilter.brand)}` // Hanya pakai brand
-      );
-    } else {
-      handleClearSearch(); // Hapus semua jika hanya model query
-    }
+  // Handler ini kemungkinan tidak akan dipanggil di admin, tapi perlu ada
+  const handleRemoveAdminFilterParam = (paramName) => {
+    console.warn(
+      `Attempted to remove URL filter param "${paramName}" from admin page. This is not expected.`
+    );
+    // Tidak melakukan apa-apa karena admin tidak pakai filter URL ini
   };
 
   useEffect(() => {
@@ -217,18 +225,18 @@ const AllProducts = () => {
   }
 
   const isPriceFilterActive = [
-    ALL_FILTER_TYPES.PRICE_UNDER_150,
-    ALL_FILTER_TYPES.PRICE_BETWEEN_150_300,
-    ALL_FILTER_TYPES.PRICE_OVER_300,
+    SHORT_BY.PRICE_UNDER_150,
+    SHORT_BY.PRICE_BETWEEN_150_300,
+    SHORT_BY.PRICE_OVER_300,
   ].includes(activeFilter);
 
   let emptyMessage = "Belum ada produk mobil tersedia.";
   if (searchQuery) {
     emptyMessage = `Tidak ada produk mobil yang cocok dengan pencarian "${searchQuery}".`;
-    if (activeFilter !== ALL_FILTER_TYPES.LATEST || isPriceFilterActive) {
+    if (activeFilter !== SHORT_BY.LATEST || isPriceFilterActive) {
       emptyMessage += ` Coba sesuaikan filter Anda atau periksa ejaan pencarian.`;
     }
-  } else if (activeFilter !== ALL_FILTER_TYPES.LATEST || isPriceFilterActive) {
+  } else if (activeFilter !== SHORT_BY.LATEST || isPriceFilterActive) {
     emptyMessage = `Tidak ada produk mobil yang cocok dengan filter yang dipilih.`;
   }
 
@@ -260,13 +268,13 @@ const AllProducts = () => {
 
       {!loading && searchQuery && (
         <ActiveSearchFilters
+          searchParams={searchParams} // Kirim searchParams (meskipun filter detail tidak dipakai)
           splitResult={splitSearchFilter}
-          onClearSearch={handleClearSearch}
-          onRemoveBrand={handleRemoveBrandFilter}
-          onRemoveModel={handleRemoveModelFilter}
+          onClearAll={handleClearAllAdminFilters}
+          onRemoveSearchPart={handleRemoveAdminSearchPart}
+          onRemoveFilterParam={handleRemoveAdminFilterParam} // Handler dummy
         />
       )}
-
       {!loading &&
         processedProducts.length === 0 &&
         suggestedQuery &&
@@ -285,10 +293,11 @@ const AllProducts = () => {
         )}
 
       <div className="mt-4">
-        <AllFilter
+        <ShortProduct
           activeFilter={activeFilter}
           setActiveFilter={setActiveFilter}
-          excludeFilters={[ALL_FILTER_TYPES.RECOMMENDATION]}
+          excludeFilters={[SHORT_BY.RECOMMENDATION]}
+          isAdminRoute={true}
         />
       </div>
 

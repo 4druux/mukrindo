@@ -40,11 +40,23 @@ const Select = ({ label, options, value, onChange, description, title }) => {
           isDropdownOpen ? "border-orange-500" : "border-gray-300"
         }`}
       >
-        <span className="text-xs">
-          {value
-            ? options.find((opt) => opt.value === value)?.label || value
-            : `Pilih ${label}`}
+        <span className="text-xs flex items-center gap-1">
+          {value ? (
+            <>
+              {options.find((opt) => opt.value === value)?.ImgUrl && (
+                <img
+                  src={options.find((opt) => opt.value === value)?.ImgUrl}
+                  alt={options.find((opt) => opt.value === value)?.label}
+                  className="w-4 h-4 object-cover"
+                />
+              )}
+              {options.find((opt) => opt.value === value)?.label || value}
+            </>
+          ) : (
+            `Pilih ${label}`
+          )}
         </span>
+
         <div
           className={`w-4 h-4 transition-transform ${
             isDropdownOpen ? "rotate-180" : ""
@@ -99,7 +111,18 @@ const Select = ({ label, options, value, onChange, description, title }) => {
                   key={option.value}
                   className="flex items-center text-sm justify-between py-2 px-3 hover:bg-gray-100 cursor-pointer"
                 >
-                  <span>{option.label}</span>
+                  <div className="flex items-center gap-2">
+                    {option.ImgUrl && (
+                      <img
+                        src={option.ImgUrl}
+                        alt={option.label}
+                        className="w-5 h-5 object-cover"
+                      />
+                    )}
+
+                    <span>{option.label}</span>
+                  </div>
+
                   <input
                     type="radio"
                     name={label}

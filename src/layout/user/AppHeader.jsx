@@ -12,6 +12,7 @@ import {
   FaKey,
   FaMoneyBillWaveAlt,
 } from "react-icons/fa";
+import { usePathname } from "next/navigation";
 import { FaArrowsRotate } from "react-icons/fa6";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "@/layout/user/SearchBar";
@@ -23,9 +24,7 @@ function AppHeader() {
   const [isTop, setIsTop] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-
-  const pathname =
-    typeof window !== "undefined" ? window.location.pathname : "/";
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => setIsTop(window.scrollY <= 50);
@@ -79,7 +78,7 @@ function AppHeader() {
               <Link
                 href="/beli"
                 className={`text-sm font-medium hover:text-orange-600 ${
-                  pathname === "/" ? "text-orange-600" : "text-gray-700"
+                  pathname === "/beli" ? "text-orange-600" : "text-gray-700"
                 }`}
               >
                 Beli Mobil

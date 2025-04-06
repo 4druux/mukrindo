@@ -7,8 +7,8 @@ const CarBrands = ({ carData, brand, model, variant, onChange }) => {
   const [filteredVariants, setFilteredVariants] = useState([]);
 
   useEffect(() => {
-    if (brand) {
-      const models = carData[brand] ? Object.keys(carData[brand]) : [];
+    if (brand && carData[brand]?.Model) {
+      const models = Object.keys(carData[brand].Model);
       setFilteredModels(models);
     } else {
       setFilteredModels([]);
@@ -16,8 +16,8 @@ const CarBrands = ({ carData, brand, model, variant, onChange }) => {
   }, [brand, carData]);
 
   useEffect(() => {
-    if (brand && model) {
-      const variants = carData[brand]?.[model] || [];
+    if (brand && model && carData[brand]?.Model?.[model]) {
+      const variants = carData[brand].Model[model];
       setFilteredVariants(variants);
     } else {
       setFilteredVariants([]);
@@ -27,7 +27,9 @@ const CarBrands = ({ carData, brand, model, variant, onChange }) => {
   const brandOptions = Object.keys(carData).map((b) => ({
     value: b,
     label: b,
+    ImgUrl: carData[b].ImgUrl,
   }));
+
   const modelOptions = filteredModels.map((m) => ({ value: m, label: m }));
   const variantOptions = filteredVariants.map((v) => ({ value: v, label: v }));
 
@@ -49,7 +51,9 @@ const CarBrands = ({ carData, brand, model, variant, onChange }) => {
         name="model"
         value={model}
         title="Model Mobil"
-        description="Pilih Model Mobil"
+        description={
+          brand ? "Pilih Model Mobil" : "Pilih Merek Mobil Terlebih Dahulu!"
+        }
         onChange={(value) => onChange("model", value, variant, "")}
         options={modelOptions}
         disabled={!brand}
@@ -60,7 +64,9 @@ const CarBrands = ({ carData, brand, model, variant, onChange }) => {
         name="variant"
         value={variant}
         title="Varian Mobil"
-        description="Pilih Varian Mobil"
+        description={
+          model ? "Pilih Varian Mobil" : "Pilih Model Mobil Terlebih Dahulu!"
+        }
         onChange={(value) => onChange("variant", value, model, brand)}
         options={variantOptions}
         disabled={!model}

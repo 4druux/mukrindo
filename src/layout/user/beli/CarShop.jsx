@@ -6,13 +6,14 @@ import Link from "next/link";
 import { useProducts } from "@/context/ProductContext";
 
 // Import Components
-import AllFilter, { ALL_FILTER_TYPES } from "@/components/global/AllFilter";
+import ShortProduct, { SHORT_BY } from "@/components/global/ShortProduct";
 import Pagination from "@/components/global/Pagination";
 import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import { useFilterAndSuggest } from "@/hooks/useFilterAndSuggest";
 import CarProductCard from "@/components/global/CarProductCard";
 import ActiveSearchFilters from "@/components/global/ActiveSearchFilter";
 import EmptyProductDisplay from "@/components/global/EmptyProductDisplay";
+import SearchFilters from "@/components/product-user/beli/SearchFilters";
 
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";
 const MAX_VIEWED_ITEMS = 10;
@@ -54,9 +55,10 @@ const CarShop = () => {
 
   const { processedProducts, suggestedQuery, activeFilter, setActiveFilter } =
     useFilterAndSuggest({
-      initialProducts: allProducts || products || [],
+      initialProducts:
+        allProducts && allProducts.length > 0 ? allProducts : products || [],
       searchQuery: searchQuery,
-      initialFilter: ALL_FILTER_TYPES.RECOMMENDATION,
+      initialFilter: SHORT_BY.RECOMMENDATION,
       options: {
         recentlyViewed: recentlyViewed,
         searchFields: [
@@ -69,6 +71,7 @@ const CarShop = () => {
           "variant",
           "transmission",
           "fuelType",
+          "type",
         ],
         suggestionTargets: ["brand", "model", "carName"],
       },
@@ -83,35 +86,34 @@ const CarShop = () => {
     };
     if (!searchQuery) return result;
 
-    const productsSource = allProducts || products || [];
-    if (productsSource.length === 0) return result; // Tidak bisa split tanpa data produk
+    const productsSource =
+      allProducts && allProducts.length > 0 ? allProducts : products || [];
+    if (productsSource.length === 0) return result;
 
     const uniqueBrands = [
       ...new Set(
         productsSource.map((p) => p.brand?.toLowerCase()).filter(Boolean)
       ),
     ];
-    uniqueBrands.sort((a, b) => b.length - a.length); // Prioritaskan nama brand lebih panjang
+    uniqueBrands.sort((a, b) => b.length - a.length);
 
     let foundBrand = null;
     let remainingQuery = searchQuery;
     let originalBrandName = null;
 
     for (const brand of uniqueBrands) {
-      // Cek apakah query dimulai dengan brand + spasi atau sama persis
       if (
         searchQuery.toLowerCase().startsWith(brand + " ") ||
         searchQuery.toLowerCase() === brand
       ) {
         originalBrandName =
           productsSource.find((p) => p.brand?.toLowerCase() === brand)?.brand ||
-          brand.charAt(0).toUpperCase() + brand.slice(1); // Ambil nama asli atau capitalize
+          brand.charAt(0).toUpperCase() + brand.slice(1);
         foundBrand = brand;
-        // Ambil sisa query hanya jika ada spasi setelah brand
         if (searchQuery.toLowerCase().startsWith(brand + " ")) {
           remainingQuery = searchQuery.substring(brand.length).trim();
         } else {
-          remainingQuery = ""; // Jika hanya brand, tidak ada sisa query
+          remainingQuery = "";
         }
         break;
       }
@@ -119,9 +121,8 @@ const CarShop = () => {
 
     if (originalBrandName) {
       result.brand = originalBrandName;
-      result.modelQuery = remainingQuery || null; // Set null jika kosong
+      result.modelQuery = remainingQuery || null;
     } else {
-      // Jika tidak ada brand yang cocok di awal, anggap seluruh query adalah 'model'
       result.modelQuery = searchQuery;
     }
 
@@ -141,26 +142,38 @@ const CarShop = () => {
       });
       if (splitSearchFilter.modelQuery) {
         items.push({ label: splitSearchFilter.modelQuery, href: "" });
-        // Pastikan link brand benar
         items[items.length - 2].href = `/beli?search=${encodeURIComponent(
           splitSearchFilter.brand
         )}`;
       } else {
-        // Jika hanya brand, link brand tidak aktif di breadcrumb terakhir
         items[items.length - 1].href = "";
       }
-      items[1].href = "/beli"; // Pastikan link "Beli Mobil" aktif
+      items[1].href = "/beli";
     } else if (searchQuery) {
-      // Jika ada query tapi tidak ada brand terdeteksi
       items.push({ label: `Pencarian: "${searchQuery}"`, href: "" });
       items[1].href = "/beli";
     } else {
-      // Halaman Beli Mobil tanpa search
       items[1].href = "";
     }
 
+    const urlParams = new URLSearchParams(searchParams);
+    const activeUrlFilters = [];
+    if (urlParams.get("brand"))
+      activeUrlFilters.push(`${urlParams.get("brand")}`);
+    if (urlParams.get("model"))
+      activeUrlFilters.push(`${urlParams.get("model")}`);
+
+    if (
+      activeUrlFilters.length > 0 &&
+      !splitSearchFilter.brand &&
+      !searchQuery
+    ) {
+      items.push({ label: `${activeUrlFilters.join(", ")}`, href: "" });
+      items[1].href = "/beli";
+    }
+
     return items;
-  }, [searchQuery, splitSearchFilter]);
+  }, [searchQuery, splitSearchFilter, searchParams]);
 
   // --- Logika Pagination ---
   const indexOfLastProduct = (currentPage + 1) * PRODUCTS_PER_PAGE;
@@ -191,56 +204,78 @@ const CarShop = () => {
   }
 
   // --- Pesan Jika Kosong ---
-  const isPriceFilterActive = [
-    ALL_FILTER_TYPES.PRICE_UNDER_150,
-    ALL_FILTER_TYPES.PRICE_BETWEEN_150_300,
-    ALL_FILTER_TYPES.PRICE_OVER_300,
-  ].includes(activeFilter);
+  const isAnyFilterActive = useMemo(() => {
+    const params = new URLSearchParams(searchParams);
+    const hasUrlFilter = [
+      "brand",
+      "model",
+      "type",
+      "fuelType",
+      "yearMin",
+      "yearMax",
+      "priceMin",
+      "priceMax",
+    ].some((key) => params.has(key));
+
+    const isShortProductFilterActive = activeFilter !== SHORT_BY.RECOMMENDATION;
+    return hasUrlFilter || isShortProductFilterActive;
+  }, [searchParams, activeFilter]);
 
   let emptyMessage = "Belum ada produk mobil tersedia.";
   if (searchQuery) {
     emptyMessage = `Tidak ada produk mobil yang cocok dengan pencarian "${searchQuery}".`;
-    if (
-      activeFilter !== ALL_FILTER_TYPES.RECOMMENDATION ||
-      isPriceFilterActive
-    ) {
+    if (isAnyFilterActive) {
       emptyMessage += ` Coba sesuaikan filter Anda atau periksa ejaan pencarian.`;
     }
-  } else if (
-    activeFilter !== ALL_FILTER_TYPES.RECOMMENDATION ||
-    isPriceFilterActive
-  ) {
+  } else if (isAnyFilterActive) {
     emptyMessage = `Tidak ada produk mobil yang cocok dengan filter yang dipilih.`;
   }
 
-  const handleClearSearch = () => {
+  const handleClearAllFilters = () => {
     router.push("/beli");
   };
 
-  const handleRemoveBrandFilter = () => {
-    if (splitSearchFilter.modelQuery) {
-      router.push(
-        `/beli?search=${encodeURIComponent(splitSearchFilter.modelQuery)}`
-      );
-    } else {
-      handleClearSearch();
+  const handleRemoveSearchPart = (partToRemove) => {
+    const currentParams = new URLSearchParams(searchParams);
+    let newSearchQuery = "";
+
+    if (partToRemove === "brand" && splitSearchFilter.modelQuery) {
+      newSearchQuery = splitSearchFilter.modelQuery;
+    } else if (partToRemove === "model" && splitSearchFilter.brand) {
+      newSearchQuery = splitSearchFilter.brand;
     }
+
+    if (newSearchQuery) {
+      currentParams.set("search", newSearchQuery);
+    } else {
+      currentParams.delete("search");
+    }
+
+    const queryString = currentParams.toString();
+    router.push(`/beli${queryString ? `?${queryString}` : ""}`);
   };
 
-  const handleRemoveModelFilter = () => {
-    if (splitSearchFilter.brand) {
-      router.push(
-        `/beli?search=${encodeURIComponent(splitSearchFilter.brand)}`
-      );
+  const handleRemoveFilterParam = (paramNameToRemove) => {
+    const currentParams = new URLSearchParams(searchParams);
+
+    if (paramNameToRemove === "priceMin" || paramNameToRemove === "priceMax") {
+      currentParams.delete("priceMin");
+      currentParams.delete("priceMax");
     } else {
-      handleClearSearch();
+      currentParams.delete(paramNameToRemove);
     }
+
+    const queryString = currentParams.toString();
+    router.push(`/beli${queryString ? `?${queryString}` : ""}`);
   };
 
   return (
-    <div>
-      <div className="flex flex-col lg:flex-row gap-4">
-        <div className="lg:w-1/4 hidden lg:block"></div>
+    <div className="">
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* SearchFilters di sidebar */}
+        <div className="hidden lg:block lg:w-1/4 lg:sticky lg:top-24 self-start">
+          <SearchFilters />
+        </div>
 
         <div className="lg:w-3/4 w-full">
           <BreadcrumbNav items={breadcrumbItems} />
@@ -250,14 +285,19 @@ const CarShop = () => {
               : "Menampilkan"}
             {!loading && ` ${processedProducts.length} Mobil`}
           </h1>
-          {!loading && searchQuery && (
+
+          {/* Panggil ActiveSearchFilters  */}
+          {!loading && searchParams.toString().length > 0 && (
             <ActiveSearchFilters
+              searchParams={searchParams}
               splitResult={splitSearchFilter}
-              onClearSearch={handleClearSearch}
-              onRemoveBrand={handleRemoveBrandFilter}
-              onRemoveModel={handleRemoveModelFilter}
+              onClearAll={handleClearAllFilters}
+              onRemoveSearchPart={handleRemoveSearchPart}
+              onRemoveFilterParam={handleRemoveFilterParam}
+              isAdminRoute={false}
             />
           )}
+
           {/* Saran Pencarian */}
           {!loading &&
             processedProducts.length === 0 &&
@@ -274,11 +314,13 @@ const CarShop = () => {
                 ?
               </p>
             )}
-          {/* Filter Utama */}
-          <AllFilter
+
+          {/* ShortProduct (Filter Cepat) */}
+          <ShortProduct
             activeFilter={activeFilter}
             setActiveFilter={setActiveFilter}
           />
+
           <CarProductCard
             products={currentProducts}
             loading={loading}
@@ -286,7 +328,9 @@ const CarShop = () => {
             onProductClick={handleProductClick}
             emptyMessage={null}
             isCarShopRoute={true}
+            skeletonCount={PRODUCTS_PER_PAGE}
           />
+
           {/* Pagination */}
           {!loading &&
             currentProducts.length > 0 &&
@@ -299,6 +343,7 @@ const CarShop = () => {
                 onPageChange={handlePageChange}
               />
             )}
+
           {/* Produk Kosong */}
           {processedProducts.length === 0 && !loading && (
             <EmptyProductDisplay

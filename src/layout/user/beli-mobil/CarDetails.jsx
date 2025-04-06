@@ -129,7 +129,7 @@ const CarDetails = ({ productId }) => {
       <BreadcrumbNav items={breadcrumbItems} />
 
       <div className="flex flex-col lg:flex-row gap-4">
-        <div className="lg:w-3/4">
+        <div className="lg:w-3/5">
           <CarImage
             images={product.images}
             carName={product.carName}
