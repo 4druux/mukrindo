@@ -2,11 +2,20 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 
-const Select = ({ label, options, value, onChange, description, title }) => {
+const Select = ({
+  label,
+  options,
+  value,
+  onChange,
+  description,
+  title,
+  searchOption = false,
+}) => {
   // Added title prop
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -24,7 +33,25 @@ const Select = ({ label, options, value, onChange, description, title }) => {
   const handleOptionClick = (selectedValue) => {
     onChange(selectedValue);
     setIsDropdownOpen(false);
+    setSearchTerm("");
   };
+
+  const handleReset = () => {
+    onChange("");
+    setIsDropdownOpen(false);
+    setSearchTerm("");
+  };
+
+  const handleClearSearch = (e) => {
+    e.stopPropagation();
+    setSearchTerm("");
+  };
+
+  const filteredOptions = searchOption
+    ? options.filter((option) =>
+        option.label.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : options;
 
   const dropDownVariant = {
     open: { opacity: 1, y: 0, transition: { duration: 0.2 } },
@@ -36,8 +63,8 @@ const Select = ({ label, options, value, onChange, description, title }) => {
       <label className="block text-sm font-medium text-gray-700">{label}</label>
       <div
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        className={`mt-1 flex items-center justify-between border rounded-xl shadow-sm text-sm py-2.5 px-3 cursor-pointer ${
-          isDropdownOpen ? "border-orange-500" : "border-gray-300"
+        className={`mt-1 flex items-center justify-between border rounded-xl text-sm py-2.5 px-3 cursor-pointer ${
+          isDropdownOpen ? "border-orange-300" : "border-gray-300"
         }`}
       >
         <span className="text-xs flex items-center gap-1">
@@ -82,10 +109,7 @@ const Select = ({ label, options, value, onChange, description, title }) => {
                 )}
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsDropdownOpen(!isDropdownOpen);
-                    onChange("");
-                  }}
+                  onClick={handleReset}
                   className="text-red-600 hover:underline text-sm cursor-pointer"
                 >
                   Reset
@@ -98,41 +122,72 @@ const Select = ({ label, options, value, onChange, description, title }) => {
                   {description}
                 </span>
               )}
+
+              {searchOption && (
+                <div className="relative my-2">
+                  <input
+                    type="text"
+                    placeholder={`Cari ${label}...`}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full border border-gray-300 rounded-full px-2 py-1 my-2 text-sm placeholder:text-xs
+                  focus:outline-none focus:ring-1 focus:ring-orange-300"
+                  />
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      onClick={handleClearSearch}
+                      className="absolute inset-y-0 right-0 flex items-center pr-2 text-gray-400 hover:text-gray-600 cursor-pointer" // Posisi absolut di kanan
+                      aria-label="Hapus pencarian"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              )}
+
               <div className="border-b-2 border-gray-300" />
             </div>
 
             {/* Scrollable Options Container */}
             <div
-              className="overflow-y-auto max-h-52 mt-2"
+              className="overflow-y-auto max-h-52 mt-1"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
-              {options.map((option) => (
-                <label
-                  key={option.value}
-                  className="flex items-center text-sm justify-between py-2 px-3 hover:bg-gray-100 cursor-pointer"
-                >
-                  <div className="flex items-center gap-2">
-                    {option.ImgUrl && (
-                      <img
-                        src={option.ImgUrl}
-                        alt={option.label}
-                        className="w-5 h-5 object-cover"
-                      />
-                    )}
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((option) => (
+                  <label
+                    key={option.value}
+                    className="flex items-center text-sm justify-between py-2 px-3 hover:bg-gray-100 cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      {option.ImgUrl && (
+                        <img
+                          src={option.ImgUrl}
+                          alt={option.label}
+                          className="w-5 h-5 object-cover"
+                        />
+                      )}
 
-                    <span>{option.label}</span>
-                  </div>
+                      <span>{option.label}</span>
+                    </div>
 
-                  <input
-                    type="radio"
-                    name={label}
-                    value={option.value}
-                    checked={value === option.value}
-                    onChange={() => handleOptionClick(option.value)}
-                    className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded-full"
-                  />
-                </label>
-              ))}
+                    <input
+                      type="radio"
+                      name={label}
+                      value={option.value}
+                      checked={value === option.value}
+                      onChange={() => handleOptionClick(option.value)}
+                      className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded-full"
+                    />
+                  </label>
+                ))
+              ) : (
+                <div className="text-center text-sm text-gray-500 py-2 px-3">
+                  Tidak ada hasil ditemukan.
+                </div>
+              )}
             </div>
           </motion.div>
         )}

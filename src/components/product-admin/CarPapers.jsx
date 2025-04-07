@@ -6,7 +6,7 @@ import Input from "../common/Input";
 
 const CarPapers = ({ data, onChange }) => {
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 30 }, (_, i) => currentYear - i).map(
+  const years = Array.from({ length: 26 }, (_, i) => currentYear - i).map(
     (year) => ({
       value: year.toString(),
       label: year.toString(),

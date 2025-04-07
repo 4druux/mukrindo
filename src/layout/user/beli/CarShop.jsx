@@ -261,6 +261,12 @@ const CarShop = () => {
     if (paramNameToRemove === "priceMin" || paramNameToRemove === "priceMax") {
       currentParams.delete("priceMin");
       currentParams.delete("priceMax");
+    } else if (
+      paramNameToRemove === "yearMin" ||
+      paramNameToRemove === "yearMax"
+    ) {
+      currentParams.delete("yearMin");
+      currentParams.delete("yearMax");
     } else {
       currentParams.delete(paramNameToRemove);
     }

@@ -29,7 +29,7 @@ const Input = ({
           name={name}
           value={formattedValue}
           onChange={onChange}
-          className="mt-1 block w-full border border-gray-300 rounded-xl text-sm shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+          className="mt-1 block w-full border border-gray-300 rounded-xl text-sm py-2 px-3 focus:outline-none focus:border-orange-300"
           {...props}
         />
         {placeholderTexts && !hasValue && (

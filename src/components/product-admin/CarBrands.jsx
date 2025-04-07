@@ -44,6 +44,7 @@ const CarBrands = ({ carData, brand, model, variant, onChange }) => {
         description="Pilih Merek Mobil"
         onChange={(value) => onChange("brand", value, "", "")}
         options={brandOptions}
+        searchOption={true}
       />
       <Select
         label="Model Mobil"

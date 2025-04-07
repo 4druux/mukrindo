@@ -5,6 +5,17 @@
   font-family: "Poppins", sans-serif;
 }
 
+.custom-toast {
+  font-size: 13px;
+  font-weight: 450;
+  border-radius: 999px !important;
+}
+
+/* style: {
+  borderRadius: "100vw",
+  fontSize: ".9rem",
+} */
+
 @layer utilities {
   .vertical-gradient-fade {
     &::before,

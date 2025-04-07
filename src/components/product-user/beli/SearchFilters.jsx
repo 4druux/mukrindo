@@ -2,19 +2,22 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import carData from "@/utils/carData";
-import { formatYear } from "@/utils/formatYear";
-import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
 import RangePrice from "@/components/common/RangePrice";
 
 // Import Icons
 import { ArrowRight, RefreshCw } from "lucide-react";
+import InputYear from "@/components/common/InputYear";
+import toast from "react-hot-toast";
 
 export const INITIAL_PRICE_RANGE = [50000000, 1500000000];
 
 const SearchFilters = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const [yearMinError, setYearMinError] = useState("");
+  const [yearMaxError, setYearMaxError] = useState("");
 
   const [productData, setProductData] = useState({
     brand: "",
@@ -58,6 +61,36 @@ const SearchFilters = () => {
       : [];
   }, [productData.brand]);
 
+  const validateYears = (minYear, maxYear) => {
+    let minError = "";
+    let maxError = "";
+    const currentYear = new Date().getFullYear();
+    const parsedMin = parseInt(minYear, 10);
+    const parsedMax = parseInt(maxYear, 10);
+
+    if (minYear && (minYear.length !== 4 || isNaN(parsedMin))) {
+      minError = "Tahun minimal tidak valid, contoh: 2012.";
+    }
+
+    if (!minError && minYear && parsedMin > currentYear) {
+      minError = `Tahun minimal tidak boleh melebihi ${currentYear}.`;
+    }
+
+    if (maxYear && (maxYear.length !== 4 || isNaN(parsedMax))) {
+      maxError = `Tahun maksimal tidak valid, contoh: ${currentYear}.`;
+    }
+
+    if (!maxError && maxYear && parsedMax > currentYear) {
+      maxError = `Tahun maksimal tidak boleh melebihi ${currentYear}.`;
+    }
+
+    if (!minError && !maxError && minYear && maxYear && parsedMin > parsedMax) {
+      maxError = "Harus lebih besar dari tahun minimal.";
+    }
+
+    return { yearMinError: minError, yearMaxError: maxError };
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProductData((prevData) => ({
@@ -65,6 +98,15 @@ const SearchFilters = () => {
       [name]: value,
     }));
   };
+
+  useEffect(() => {
+    const { yearMinError: minErr, yearMaxError: maxErr } = validateYears(
+      productData.yearMin,
+      productData.yearMax
+    );
+    setYearMinError(minErr);
+    setYearMaxError(maxErr);
+  }, [productData.yearMin, productData.yearMax]);
 
   const handleFilterChange = (name, value) => {
     setProductData((prevData) => {
@@ -104,6 +146,22 @@ const SearchFilters = () => {
   }, [searchParams]);
 
   const handleApplyFilters = () => {
+    const { yearMinError: minErr, yearMaxError: maxErr } = validateYears(
+      productData.yearMin,
+      productData.yearMax
+    );
+    setYearMinError(minErr);
+    setYearMaxError(maxErr);
+    if (minErr) {
+      toast.error("Tahun Minimal Tidak Valid", { className: "custom-toast" });
+      return;
+    }
+
+    if (maxErr) {
+      toast.error("Tahun Maksimal Tidak Valid", { className: "custom-toast" });
+      return;
+    }
+
     const params = new URLSearchParams(searchParams);
 
     params.delete("search");
@@ -120,10 +178,12 @@ const SearchFilters = () => {
     if (productData.fuelType) params.set("fuelType", productData.fuelType);
     else params.delete("fuelType");
 
-    if (productData.yearMin) params.set("yearMin", productData.yearMin);
+    if (productData.yearMin && !minErr)
+      params.set("yearMin", productData.yearMin);
     else params.delete("yearMin");
 
-    if (productData.yearMax) params.set("yearMax", productData.yearMax);
+    if (productData.yearMax && !maxErr)
+      params.set("yearMax", productData.yearMax);
     else params.delete("yearMax");
 
     if (productData.priceRange[0] !== INITIAL_PRICE_RANGE[0]) {
@@ -237,42 +297,37 @@ const SearchFilters = () => {
         {/* Tahun */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">Tahun</label>
-          <div className="flex gap-2">
-            <Input
+          <div className="flex gap-2 items-start">
+            <InputYear
               id="yearMin"
               name="yearMin"
               placeholderTexts={["Min Tahun", "Min Tahun", "Min Tahun"]}
               value={productData.yearMin}
               onChange={handleChange}
-              formatter={formatYear}
-              type="text"
-              min="2000"
-              max={new Date().getFullYear()}
+              error={yearMinError}
             />
-            <Input
+
+            <InputYear
               id="yearMax"
               name="yearMax"
               placeholderTexts={["Max Tahun", "Max Tahun", "Max Tahun"]}
               value={productData.yearMax}
               onChange={handleChange}
-              formatter={formatYear}
-              type="text"
-              min="2000"
-              max={new Date().getFullYear()}
+              error={yearMaxError}
             />
           </div>
         </div>
       </div>
 
-      <div className="border-b border-gray-200" />
+      <div className="border-b border-gray-200 -mt-2" />
 
       {/* Tombol */}
-      <div className="flex flex-col items-center gap-2 p-5">
+      <div className="flex flex-col items-center gap-2 p-5 -mt-1">
         {isFilterActive && (
           <button
             onClick={handleReset}
             className="flex items-center justify-center gap-2 py-2 border border-orange-600 text-orange-600
-          rounded-full hover:bg-orange-50 transition duration-200 cursor-pointer w-full"
+            rounded-full hover:bg-orange-50 transition duration-200 cursor-pointer w-full"
           >
             <RefreshCw className="w-5 h-5" />
             <span className="text-sm">Reset Filter</span>
@@ -282,7 +337,7 @@ const SearchFilters = () => {
         <button
           onClick={handleApplyFilters}
           className="flex items-center justify-center gap-2 py-2.5 bg-orange-600 text-white rounded-full
-        hover:bg-orange-500 transition duration-200 cursor-pointer w-full"
+          hover:bg-orange-500 transition duration-200 cursor-pointer w-full"
         >
           <span className="text-sm">Tampilkan Mobil</span>
           <ArrowRight className="w-5 h-5" />

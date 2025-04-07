@@ -6,8 +6,8 @@ import { formatNumber } from "@/utils/formatNumber";
 
 const RangePrice = ({ value, onChange, min = 50000000, max = 1500000000 }) => {
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-700">Harga</label>
+    <div className="flex flex-col">
+      <label className="text-sm font-medium text-gray-700 mb-2">Harga</label>
       <Slider
         range
         min={min}
@@ -22,7 +22,7 @@ const RangePrice = ({ value, onChange, min = 50000000, max = 1500000000 }) => {
           { borderColor: "#f97316", backgroundColor: "#f97316" },
         ]}
       />
-      <div className="flex justify-between text-sm text-gray-700">
+      <div className="flex justify-between text-sm mt-1 text-gray-700">
         <span>{formatNumber(value[0], "Rp ")}</span>
         <span>-</span>
         <span>{formatNumber(value[1], "Rp ")}</span>

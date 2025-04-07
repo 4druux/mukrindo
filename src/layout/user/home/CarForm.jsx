@@ -1,27 +1,72 @@
 // layout/user/product/CarForm.jsx
 "use client";
+import React, { useState, useMemo, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
-import { formatNumber, unformatNumber } from "@/utils/formatNumber";
+import RangePrice from "@/components/common/RangePrice";
 import carData from "@/utils/carData";
-import { useState } from "react";
+import InputYear from "@/components/common/InputYear";
+import toast from "react-hot-toast";
+import {
+  formatNumberPhone,
+  unformatNumberPhone,
+} from "@/utils/formatNumberPhone";
 
 // Import Icon
 import { FaCar, FaExchangeAlt, FaMoneyBillWave } from "react-icons/fa";
 
+export const INITIAL_PRICE_RANGE = [50000000, 1500000000];
+
 const CarForm = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState("beli");
-  const [selectedBrand, setSelectedBrand] = useState("");
-  const [selectedModel, setSelectedModel] = useState("");
-  const [selectedPrice, setSelectedPrice] = useState("");
-  const [selectedYear, setSelectedYear] = useState("");
+
+  const [yearMinError, setYearMinError] = useState("");
+  const [yearMaxError, setYearMaxError] = useState("");
 
   const [productData, setProductData] = useState({
     brand: "",
     model: "",
+    priceRange: [...INITIAL_PRICE_RANGE],
+    yearMin: "",
+    yearMax: "",
+    year: "",
     phoneNumber: "",
-    yearOfAssembly: "",
   });
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    const initialFilters = {
+      brand: params.get("brand") || "",
+      model: params.get("model") || "",
+      yearMin: params.get("yearMin") || "",
+      yearMax: params.get("yearMax") || "",
+      priceRange: [
+        Number(params.get("priceMin")) || INITIAL_PRICE_RANGE[0],
+        Number(params.get("priceMax")) || INITIAL_PRICE_RANGE[1],
+      ],
+      // Pertahankan nilai state yang tidak ada di URL jika sudah ada
+      year: productData.year,
+      phoneNumber: productData.phoneNumber,
+    };
+    // Hanya set state jika ada perubahan dari URL untuk mencegah loop tak terbatas
+    if (
+      JSON.stringify(initialFilters) !==
+      JSON.stringify({
+        brand: productData.brand,
+        model: productData.model,
+        yearMin: productData.yearMin,
+        yearMax: productData.yearMax,
+        priceRange: productData.priceRange,
+        year: productData.year,
+        phoneNumber: productData.phoneNumber,
+      })
+    ) {
+      setProductData((prevData) => ({ ...prevData, ...initialFilters }));
+    }
+  }, [searchParams]);
 
   const brandOptionsForSelect = Object.keys(carData).map((brand) => ({
     value: brand,
@@ -29,45 +74,132 @@ const CarForm = () => {
     ImgUrl: carData[brand].ImgUrl,
   }));
 
-  const modelOptionsForSelect =
-    selectedBrand && carData[selectedBrand]?.Model
-      ? Object.keys(carData[selectedBrand].Model).map((model) => ({
+  // Opsi untuk Select Model (bergantung pada merek yang dipilih)
+  const modelOptionsForSelect = useMemo(() => {
+    return productData.brand && carData[productData.brand]?.Model
+      ? Object.keys(carData[productData.brand].Model).map((model) => ({
           value: model,
           label: model,
         }))
       : [];
+  }, [productData.brand]);
 
-  const priceOptionsData = [
-    "< Rp150.000.000",
-    "Ro150.000.000 - Rp300.000.000",
-    ">Rp300.000.000",
-  ];
-
-  const priceOptionsForSelect = priceOptionsData.map((price) => ({
-    value: price,
-    label: price,
-  }));
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    let updatedValue = value;
-    if (name === "phoneNumber") {
-      updatedValue = unformatNumber(value);
-    }
-    setProductData((prevData) => ({
-      ...prevData,
-      [name]: updatedValue,
-    }));
-  };
-
+  // Opsi untuk Select Tahun (untuk tab jual/tukar)
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 30 }, (_, i) => currentYear - i).map(
+  const years = Array.from({ length: 26 }, (_, i) => currentYear - i).map(
     (year) => ({
       value: year.toString(),
       label: year.toString(),
     })
   );
 
+  const validateYears = (minYear, maxYear) => {
+    let minError = "";
+    let maxError = "";
+    const currentYear = new Date().getFullYear();
+    const parsedMin = parseInt(minYear, 10);
+    const parsedMax = parseInt(maxYear, 10);
+
+    if (minYear && (minYear.length !== 4 || isNaN(parsedMin))) {
+      minError = "Tahun minimal tidak valid, contoh: 2012.";
+    }
+
+    if (!minError && minYear && parsedMin > currentYear) {
+      minError = `Tahun minimal tidak boleh melebihi ${currentYear}.`;
+    }
+
+    if (maxYear && (maxYear.length !== 4 || isNaN(parsedMax))) {
+      maxError = `Tahun maksimal tidak valid, contoh: ${currentYear}.`;
+    }
+
+    if (!maxError && maxYear && parsedMax > currentYear) {
+      maxError = `Tahun maksimal tidak boleh melebihi ${currentYear}.`;
+    }
+
+    if (!minError && !maxError && minYear && maxYear && parsedMin > parsedMax) {
+      maxError = "Harus lebih besar dari tahun minimal.";
+    }
+
+    return { yearMinError: minError, yearMaxError: maxError };
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    let updatedValue = value;
+
+    if (name === "phoneNumber") {
+      const rawValue = unformatNumberPhone(value);
+      updatedValue = formatNumberPhone(rawValue);
+    }
+
+    setProductData((prevData) => ({
+      ...prevData,
+      [name]: name === "yearMin" || name === "yearMax" ? value : updatedValue,
+    }));
+  };
+
+  useEffect(() => {
+    const { yearMinError: minErr, yearMaxError: maxErr } = validateYears(
+      productData.yearMin,
+      productData.yearMax
+    );
+    setYearMinError(minErr);
+    setYearMaxError(maxErr);
+  }, [productData.yearMin, productData.yearMax]);
+
+  // Handler  (Select, RangePrice)
+  const handleFilterChange = (name, value) => {
+    setProductData((prevData) => {
+      const newData = { ...prevData, [name]: value };
+      // Reset model jika merek berubah
+      if (name === "brand") {
+        newData.model = "";
+      }
+
+      return newData;
+    });
+  };
+
+  // Fungsi untuk menerapkan filter di tab 'beli'
+  const handleSearchCar = () => {
+    const { yearMinError: minErr, yearMaxError: maxErr } = validateYears(
+      productData.yearMin,
+      productData.yearMax
+    );
+    setYearMinError(minErr);
+    setYearMaxError(maxErr);
+
+    if (minErr) {
+      toast.error("Tahun Minimal Tidak Valid", { className: "custom-toast" });
+      return;
+    }
+    if (maxErr) {
+      toast.error("Tahun Maksimal Tidak Valid", { className: "custom-toast" });
+      return;
+    }
+    const params = new URLSearchParams();
+
+    if (productData.brand) params.set("brand", productData.brand);
+    if (productData.model) params.set("model", productData.model);
+    if (productData.yearMin && !minErr)
+      params.set("yearMin", productData.yearMin);
+    if (productData.yearMax && !maxErr)
+      params.set("yearMax", productData.yearMax);
+
+    if (productData.priceRange[0] !== INITIAL_PRICE_RANGE[0]) {
+      params.set("priceMin", String(productData.priceRange[0]));
+    }
+    if (productData.priceRange[1] !== INITIAL_PRICE_RANGE[1]) {
+      params.set("priceMax", String(productData.priceRange[1]));
+    }
+
+    params.delete("page");
+
+    const queryString = params.toString();
+    router.push(`/beli${queryString ? `?${queryString}` : ""}`);
+  };
+
+  // Fungsi render form berdasarkan tab aktif
   const renderForm = () => {
     switch (activeTab) {
       case "beli":
@@ -82,12 +214,10 @@ const CarForm = () => {
                 label="Merek"
                 title="Pilih Merek"
                 description="Pilih Merek Mobil"
+                searchOption={true}
                 options={brandOptionsForSelect}
-                value={selectedBrand}
-                onChange={(value) => {
-                  setSelectedBrand(value);
-                  setSelectedModel("");
-                }}
+                value={productData.brand}
+                onChange={(value) => handleFilterChange("brand", value)}
               />
 
               {/* Select Model */}
@@ -95,33 +225,55 @@ const CarForm = () => {
                 label="Model"
                 title="Pilih Model"
                 description={
-                  selectedBrand
+                  productData.brand
                     ? "Pilih Model Mobil"
                     : "Pilih Merek Mobil Terlebih Dahulu!"
                 }
+                // options={[
+                //   { value: "", label: "Semua Model" },
+                //   ...modelOptionsForSelect,
+                // ]}
                 options={modelOptionsForSelect}
-                value={selectedModel}
-                onChange={setSelectedModel}
+                value={productData.model}
+                onChange={(value) => handleFilterChange("model", value)}
+                disabled={!productData.brand}
               />
 
-              {/* Select Harga */}
-              <Select
-                label="Harga"
-                options={priceOptionsForSelect}
-                value={selectedPrice}
-                onChange={setSelectedPrice}
-                title="Pilih Harga"
+              {/* Range Harga */}
+              <RangePrice
+                value={productData.priceRange}
+                onChange={(range) => handleFilterChange("priceRange", range)}
+                initialRange={INITIAL_PRICE_RANGE}
               />
 
-              {/* Select Tahun */}
-              <Select
-                label="Tahun"
-                title="Pilih Tahun"
-                description="Pilih Tahun Mobil Anda"
-                value={selectedYear}
-                onChange={setSelectedYear}
-                options={years}
-              />
+              {/* Input Tahun Min & Max */}
+              <div className="flex flex-col items-start">
+                <label className="text-sm font-medium text-gray-700 block">
+                  Tahun
+                </label>
+                <div className="flex gap-4 w-full items-start">
+                  <div className="w-full">
+                    <InputYear
+                      id="yearMin"
+                      name="yearMin"
+                      placeholderTexts={["Min Tahun", "Min Tahun", "Min Tahun"]}
+                      value={productData.yearMin}
+                      onChange={handleChange}
+                      error={yearMinError}
+                    />
+                  </div>
+                  <div className="w-full">
+                    <InputYear
+                      id="yearMax"
+                      name="yearMax"
+                      placeholderTexts={["Max Tahun", "Max Tahun", "Max Tahun"]}
+                      value={productData.yearMax}
+                      onChange={handleChange}
+                      error={yearMaxError}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-4">
@@ -131,8 +283,9 @@ const CarForm = () => {
               </p>
               <button
                 className="w-full md:w-auto py-3 px-16 rounded-full text-sm text-white font-medium transition-colors duration-200
-                  bg-orange-500 hover:bg-orange-600"
+                  bg-orange-500 hover:bg-orange-600 cursor-pointer"
                 type="button"
+                onClick={handleSearchCar}
               >
                 Temukan Mobil
               </button>
@@ -150,54 +303,55 @@ const CarForm = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {/* Select Merek */}
-              <div>
-                <Select
-                  label="Merek"
-                  description="Pilih Merek Mobil Anda"
-                  options={brandOptionsForSelect}
-                  value={selectedBrand}
-                  onChange={(value) => {
-                    setSelectedBrand(value);
-                    setSelectedModel("");
-                  }}
-                  title="Pilih Merek"
-                />
-              </div>
+              <Select
+                label="Merek"
+                title="Pilih Merek"
+                description="Pilih Merek Mobil Anda"
+                searchOption={true}
+                options={brandOptionsForSelect}
+                value={productData.brand}
+                onChange={(value) => handleFilterChange("brand", value)}
+              />
 
               {/* Select Model */}
-              <div>
-                <Select
-                  label="Model"
-                  description={
-                    selectedBrand
-                      ? "Pilih Model Mobil Anda"
-                      : "Pilih Merek Mobil Anda Terlebih Dahulu!"
-                  }
-                  options={modelOptionsForSelect}
-                  value={selectedModel}
-                  onChange={setSelectedModel}
-                  title="Pilih Model"
-                />
-              </div>
+              <Select
+                label="Model"
+                description={
+                  productData.brand
+                    ? "Pilih Model Mobil Anda"
+                    : "Pilih Merek Mobil Anda Terlebih Dahulu!"
+                }
+                // options={[
+                //   { value: "", label: "Pilih Model" },
+                //   ...modelOptionsForSelect,
+                // ]}
+                options={modelOptionsForSelect}
+                value={productData.model}
+                onChange={(value) => handleFilterChange("model", value)}
+                title="Pilih Model"
+                disabled={!productData.brand}
+              />
 
-              {/* Tahun jual/tukar tambah */}
+              {/* Select Tahun */}
               <Select
                 label="Tahun"
                 title="Pilih Tahun"
                 description="Pilih Tahun Mobil Anda"
-                value={selectedYear}
-                onChange={setSelectedYear}
+                value={productData.year}
+                onChange={(value) => handleFilterChange("year", value)}
                 options={years}
               />
 
+              {/* Input No Handphone */}
               <Input
                 label="No Handphone"
                 id="phoneNumber"
                 name="phoneNumber"
                 value={productData.phoneNumber}
                 onChange={handleChange}
-                formatter={formatNumber}
                 prefix="+62 "
+                placeholderTexts={["812-3456-7890"]}
+                type="tel"
               />
             </div>
 
@@ -211,6 +365,7 @@ const CarForm = () => {
                 className="w-full md:w-auto py-3 px-16 rounded-full text-sm text-white font-medium transition-colors duration-200
                   bg-orange-500 hover:bg-orange-600"
                 type="button"
+                // onClick={handleSubmitJualTukar} // Anda perlu membuat fungsi ini nanti
               >
                 {activeTab === "jual" ? "Jual Sekarang" : "Lanjut Tukar"}
               </button>
