@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import AppHeader from "@/layout/user/AppHeader";
 import { HeaderProvider } from "@/context/HeaderContext";
-import { Toaster } from "react-hot-toast";
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
@@ -38,7 +37,6 @@ export default function ClientLayout({ children }) {
   return (
     <>
       <HeaderProvider>
-        <Toaster position="top-right" reverseOrder={true} />
         <div className="min-h-screen bg-gray-50">
           {showHeader && <AppHeader />}
           <div className="sm:px-[6vw] md:px-[9vw] lg:px-[10vw]">{children}</div>

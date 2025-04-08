@@ -12,6 +12,7 @@ const Select = ({
   description,
   title,
   searchOption = false,
+  error = "",
 }) => {
   // Added title prop
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -65,7 +66,7 @@ const Select = ({
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         className={`mt-1 flex items-center justify-between border rounded-xl text-sm py-2.5 px-3 cursor-pointer ${
           isDropdownOpen ? "border-orange-300" : "border-gray-300"
-        }`}
+        } ${error ? " border-red-500" : "border-gray-300"}`}
       >
         <span className="text-xs flex items-center gap-1">
           {value ? (
@@ -192,6 +193,10 @@ const Select = ({
           </motion.div>
         )}
       </AnimatePresence>
+
+      <div className="mt-1 min-h-[1rem]">
+        {error && <p className="text-xs text-red-500">{error}</p>}
+      </div>
     </div>
   );
 };

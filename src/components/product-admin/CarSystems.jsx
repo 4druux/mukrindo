@@ -3,7 +3,7 @@
 import React from "react";
 import Select from "../common/Select";
 
-const CarSystems = ({ data, onChange }) => {
+const CarSystems = ({ data, onChange, errors }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {/* Sistem Penggerak */}
@@ -12,6 +12,7 @@ const CarSystems = ({ data, onChange }) => {
         id="driveSystem"
         name="driveSystem"
         value={data.driveSystem}
+        error={errors.driveSystem}
         title="Sistem Penggerak"
         description="Jenis Sistem Penggerak"
         onChange={(value) =>
@@ -36,6 +37,7 @@ const CarSystems = ({ data, onChange }) => {
         id="transmission"
         name="transmission"
         value={data.transmission}
+        error={errors.transmission}
         title="Transmisi"
         description="Jenis Transmisi"
         onChange={(value) =>
@@ -53,6 +55,7 @@ const CarSystems = ({ data, onChange }) => {
         id="fuelType"
         name="fuelType"
         value={data.fuelType}
+        error={errors.fuelType}
         title="Bahan Bakar"
         description="Jenis Bahan Bakar"
         onChange={(value) => onChange({ target: { name: "fuelType", value } })}

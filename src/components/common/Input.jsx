@@ -11,6 +11,8 @@ const Input = ({
   type = "text",
   formatter,
   prefix,
+  className = "",
+  error = "",
   placeholderTexts,
   ...props
 }) => {
@@ -29,7 +31,9 @@ const Input = ({
           name={name}
           value={formattedValue}
           onChange={onChange}
-          className="mt-1 block w-full border border-gray-300 rounded-xl text-sm py-2 px-3 focus:outline-none focus:border-orange-300"
+          className={`mt-1 block w-full border focus:outline-none focus:border-orange-300 rounded-xl text-sm py-2 px-3 ${
+            error ? "border-red-500 focus:border-red-500" : "border-gray-300"
+          }`}
           {...props}
         />
         {placeholderTexts && !hasValue && (
@@ -38,6 +42,11 @@ const Input = ({
             placeholderTexts={placeholderTexts}
           />
         )}
+      </div>
+
+      {/* pesan error */}
+      <div className="mt-1 min-h-[1rem]">
+        {error && <p className="text-xs text-red-500">{error}</p>}
       </div>
     </div>
   );

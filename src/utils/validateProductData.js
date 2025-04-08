@@ -1,5 +1,8 @@
 // utils/validateProductData.js
 export const validateProductData = (productData, mediaFiles) => {
+  const errors = {}; // Inisialisasi objek error kosong
+  const requiredMessage = "Wajib di Isi"; // Pesan error standar
+
   const {
     carName,
     brand,
@@ -16,27 +19,38 @@ export const validateProductData = (productData, mediaFiles) => {
     plateNumber,
     yearOfAssembly,
     price,
-    status,
   } = productData;
 
-  if (!carName) return "Nama mobil harus diisi.";
-  if (!brand) return "Merek mobil harus diisi.";
-  if (!model) return "Model mobil harus diisi.";
-  if (!variant) return "Varian mobil harus diisi.";
-  if (!type) return "Tipe mobil harus diisi.";
-  if (!carColor) return "Warna mobil harus diisi.";
-  if (!cc) return "Kapasitas mesin (CC) harus diisi.";
-  if (!travelDistance) return "Jarak tempuh (KM) harus diisi.";
-  if (!driveSystem) return "Sistem penggerak harus diisi.";
-  if (!transmission) return "Transmisi harus diisi.";
-  if (!fuelType) return "Jenis bahan bakar harus diisi.";
-  if (!stnkExpiry) return "Masa berlaku STNK harus diisi.";
-  if (!plateNumber) return "Nomor plat harus diisi.";
-  if (!yearOfAssembly) return "Tahun perakitan harus diisi.";
-  if (!price) return "Harga mobil harus diisi.";
-  if (!status) return "Status mobil harus diisi";
-  if (!["Tersedia", "Terjual"].includes(status)) return "Status tidak valid";
-  if (mediaFiles.length === 0) return "Minimal harus ada satu gambar.";
+  if (!carName) errors.carName = requiredMessage;
+  if (!brand) errors.brand = requiredMessage;
+  if (!model) errors.model = requiredMessage;
+  if (!variant) errors.variant = requiredMessage;
+  if (!type) errors.type = requiredMessage;
+  if (!carColor) errors.carColor = requiredMessage;
+  if (!cc) errors.cc = requiredMessage;
+  if (!travelDistance) errors.travelDistance = requiredMessage;
+  if (!driveSystem) errors.driveSystem = requiredMessage;
+  if (!transmission) errors.transmission = requiredMessage;
+  if (!fuelType) errors.fuelType = requiredMessage;
+  if (!stnkExpiry) errors.stnkExpiry = requiredMessage;
+  if (!plateNumber) errors.plateNumber = requiredMessage;
+  if (!yearOfAssembly) errors.yearOfAssembly = requiredMessage;
+  if (!price) errors.price = requiredMessage;
 
-  return null; // Tidak ada error
+  // Validasi status (jika perlu, misal memastikan nilainya valid)
+  // if (status && !["Tersedia", "Terjual"].includes(status)) errors.status = "Status tidak valid";
+
+  // Validasi gambar tetap ada
+  if (mediaFiles.length === 0) {
+    errors.mediaFiles = "Minimal harus ada satu gambar.";
+  } else {
+    // Cek apakah semua gambar sudah di-crop (jika validasi ini masih relevan saat submit)
+    const uncropped = mediaFiles.some((file) => !file.cropped);
+    if (uncropped) {
+      errors.mediaFiles = "Selesaikan proses crop untuk semua gambar.";
+      // Atau bisa juga error spesifik per gambar jika state memungkinkan
+    }
+  }
+
+  return errors; // Kembalikan objek errors
 };

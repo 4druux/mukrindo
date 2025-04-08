@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Select from "../common/Select";
 
-const CarBrands = ({ carData, brand, model, variant, onChange }) => {
+const CarBrands = ({ carData, brand, model, variant, onChange, errors }) => {
   const [filteredModels, setFilteredModels] = useState([]);
   const [filteredVariants, setFilteredVariants] = useState([]);
 
@@ -40,6 +40,7 @@ const CarBrands = ({ carData, brand, model, variant, onChange }) => {
         id="brand"
         name="brand"
         value={brand}
+        error={errors.brand}
         title="Merek Mobil"
         description="Pilih Merek Mobil"
         onChange={(value) => onChange("brand", value, "", "")}
@@ -51,6 +52,7 @@ const CarBrands = ({ carData, brand, model, variant, onChange }) => {
         id="model"
         name="model"
         value={model}
+        error={errors.model}
         title="Model Mobil"
         description={
           brand ? "Pilih Model Mobil" : "Pilih Merek Mobil Terlebih Dahulu!"
@@ -64,6 +66,7 @@ const CarBrands = ({ carData, brand, model, variant, onChange }) => {
         id="variant"
         name="variant"
         value={variant}
+        error={errors.variant}
         title="Varian Mobil"
         description={
           model ? "Pilih Varian Mobil" : "Pilih Model Mobil Terlebih Dahulu!"

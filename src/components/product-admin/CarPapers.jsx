@@ -4,7 +4,7 @@ import React from "react";
 import Select from "../common/Select";
 import Input from "../common/Input";
 
-const CarPapers = ({ data, onChange }) => {
+const CarPapers = ({ data, onChange, errors }) => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 26 }, (_, i) => currentYear - i).map(
     (year) => ({
@@ -25,6 +25,7 @@ const CarPapers = ({ data, onChange }) => {
           "Masa Berlaku STNK anda",
         ]}
         value={data.stnkExpiry}
+        error={errors.stnkExpiry}
         onChange={(e) => onChange(e)}
       />
       {/* Plat Nomor */}
@@ -33,6 +34,7 @@ const CarPapers = ({ data, onChange }) => {
         id="plateNumber"
         name="plateNumber"
         value={data.plateNumber}
+        error={errors.plateNumber}
         title="Plat Nomor"
         description="Jenis Plat Nomor"
         onChange={(value) =>
@@ -49,6 +51,7 @@ const CarPapers = ({ data, onChange }) => {
         id="yearOfAssembly"
         name="yearOfAssembly"
         value={data.yearOfAssembly}
+        error={errors.yearOfAssembly}
         title="Tahun Perakitan"
         description="Tahun Perakitan Mobil Anda"
         onChange={(value) =>

@@ -13,7 +13,6 @@ import { formatNumber, unformatNumber } from "@/utils/formatNumber";
 import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import carData from "@/utils/carData";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
 import axios from "axios";
 
 const AddProduct = () => {
@@ -37,21 +36,10 @@ const AddProduct = () => {
   });
   const [mediaFiles, setMediaFiles] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
-  const [errors, setErrors] = useState({});
+  const [error, setError] = useState(null);
   const router = useRouter();
   const { mutateProducts } = useProducts();
   const API_ENDPOINT = "http://localhost:5000/api/products";
-
-  const clearErrorOnChange = (name) => {
-    if (errors[name]) {
-      setErrors((prevErrors) => {
-        const newErrors = { ...prevErrors };
-        delete newErrors[name]; // Hapus error untuk field ini
-        return newErrors;
-      });
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,7 +51,6 @@ const AddProduct = () => {
       ...prevData,
       [name]: updatedValue,
     }));
-    clearErrorOnChange(name); // Bersihkan error saat user mengetik/memilih
   };
 
   const handleBrandChange = (field, value, modelValue, variantValue) => {
@@ -78,58 +65,30 @@ const AddProduct = () => {
           ? ""
           : variantValue,
     }));
-    // Bersihkan error untuk brand, model, dan variant saat salah satu berubah
-    if (errors.brand || errors.model || errors.variant) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors.brand;
-        delete newErrors.model;
-        delete newErrors.variant;
-        return newErrors;
-      });
-    }
-  };
-
-  const handleMediaFilesChange = (newFiles) => {
-    setMediaFiles(newFiles);
-    clearErrorOnChange("mediaFiles"); // Bersihkan error mediaFiles
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitError(null);
-    setErrors({});
-
-    const validationErrors = validateProductData(productData, mediaFiles);
-    console.log("Validation Errors:", validationErrors); // <-- Tambahkan ini
-
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors); // Set error spesifik per field
-      toast.error("Harap periksa kembali data yang Anda masukkan.", {
-        className: "custom-toast",
-      });
-
-      const firstErrorKey = Object.keys(validationErrors)[0];
-      const errorElement = document.getElementById(firstErrorKey); // Pastikan komponen punya id={name}
-      if (errorElement) {
-        errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+    setError(null);
+    const validationError = validateProductData(productData, mediaFiles);
+    if (validationError) {
+      setError(validationError);
       return;
     }
-
+    if (mediaFiles.length === 0) {
+      setError("Minimal harus ada satu gambar.");
+      return;
+    }
     setLoading(true);
 
     try {
-      // Cek crop sebelum konversi (jika belum divalidasi di validateProductData)
-      const uncropped = mediaFiles.find((fileObj) => !fileObj.cropped);
-      if (uncropped) {
-        throw new Error("Selesaikan proses crop untuk semua gambar.");
-      }
-
       const base64Images = await Promise.all(
         mediaFiles.map((fileObj) => {
           return new Promise((resolve, reject) => {
-            // Asumsi fileObj.cropped adalah Blob hasil crop
+            if (!fileObj.cropped) {
+              reject(new Error("Gambar belum di-crop."));
+              return;
+            }
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result);
             reader.onerror = reject;
@@ -148,13 +107,25 @@ const AddProduct = () => {
       console.log("Produk berhasil ditambahkan:", response.data);
       mutateProducts();
 
-      // Reset form (termasuk errors) setelah sukses
       setProductData({
-        /* ... initial state ... */
+        carName: "",
+        brand: "",
+        model: "",
+        variant: "",
+        type: "",
+        carColor: "",
+        cc: "",
+        travelDistance: "",
+        driveSystem: "",
+        transmission: "",
+        fuelType: "",
+        stnkExpiry: "",
+        plateNumber: "",
+        yearOfAssembly: "",
+        price: "",
+        status: "Tersedia",
       });
       setMediaFiles([]);
-      setErrors({});
-      setSubmitError(null);
 
       router.push("/admin");
     } catch (error) {
@@ -163,8 +134,7 @@ const AddProduct = () => {
         error.response?.data?.message ||
         error.message ||
         "Gagal menambahkan produk. Silakan coba lagi.";
-      setSubmitError(errorMessage);
-      setErrors((prev) => ({ ...prev, submit: errorMessage }));
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -180,17 +150,17 @@ const AddProduct = () => {
 
       <div className="p-6 rounded-xl shadow-lg bg-white">
         <h2 className="text-2xl font-medium mb-4">Tambah Produk Mobil</h2>
-        {submitError && <div className="text-red-500 mb-4">{submitError}</div>}
+        {error && <div className="text-red-500 mb-4">{error}</div>}
         {loading && <div className="text-orange-500 mb-4">Menambahkan...</div>}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Image Upload */}
           <div>
             <label className="block text-sm mb-2 font-medium text-gray-700">
               Gambar Mobil
             </label>
             <ImageUpload
               mediaFiles={mediaFiles}
-              setMediaFiles={handleMediaFilesChange}
-              error={errors.mediaFiles}
+              setMediaFiles={setMediaFiles}
             />
           </div>
           <Input
@@ -198,13 +168,12 @@ const AddProduct = () => {
             id="carName"
             name="carName"
             placeholderTexts={[
-              "Contoh: Toyota Avanza G 2021 Bekas",
-              "Contoh: Honda Brio Satya E CVT 2022",
-              "Contoh: Mitsubishi Xpander Ultimate 2019",
+              "Nama mobil anda",
+              "Nama mobil anda",
+              "Nama mobil anda",
             ]}
             value={productData.carName}
             onChange={handleChange}
-            error={errors.carName}
           />
           <CarBrands
             carData={carData}
@@ -212,7 +181,6 @@ const AddProduct = () => {
             model={productData.model}
             variant={productData.variant}
             onChange={handleBrandChange}
-            errors={errors}
           />
           <Select
             label="Tipe Mobil"
@@ -221,7 +189,6 @@ const AddProduct = () => {
             value={productData.type}
             title="Tipe Mobil"
             description="Jenis Tipe Mobil"
-            error={errors.type}
             onChange={(value) =>
               handleChange({ target: { name: "type", value } })
             }
@@ -264,7 +231,6 @@ const AddProduct = () => {
             ]}
             value={productData.carColor}
             onChange={handleChange}
-            error={errors.carColor}
           />
           <Input
             label="Kapasitas Mesin (CC)"
@@ -278,7 +244,6 @@ const AddProduct = () => {
             value={productData.cc}
             onChange={handleChange}
             formatter={formatNumber}
-            error={errors.cc}
           />
           <Input
             label="Jarak Tempuh (KM)"
@@ -292,7 +257,6 @@ const AddProduct = () => {
             value={productData.travelDistance}
             onChange={handleChange}
             formatter={formatNumber}
-            error={errors.travelDistance}
           />
           <CarSystems
             data={{
@@ -301,7 +265,6 @@ const AddProduct = () => {
               fuelType: productData.fuelType,
             }}
             onChange={handleChange}
-            errors={errors}
           />
           {/* CarPapers */}
           <CarPapers
@@ -311,7 +274,6 @@ const AddProduct = () => {
               yearOfAssembly: productData.yearOfAssembly,
             }}
             onChange={handleChange}
-            errors={errors}
           />
           <Input
             label="Harga Mobil"
@@ -320,9 +282,9 @@ const AddProduct = () => {
             value={productData.price}
             onChange={handleChange}
             formatter={formatNumber}
-            error={errors.price}
             prefix="Rp "
           />
+
           {/* Status Select */}
           <Select
             label="Status"
@@ -337,6 +299,7 @@ const AddProduct = () => {
               { value: "Terjual", label: "Terjual" },
             ]}
           />
+
           {/* Submit Button */}
           <div className="col-span-2 flex justify-end space-x-2 sm:space-x-4 mt-4">
             <button

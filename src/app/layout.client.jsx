@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import ClientLayout from "./client-layout";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { ProductProvider } from "@/context/ProductContext";
+import { Toaster } from "react-hot-toast";
 
 export default function RootLayoutClient({ children }) {
   const pathname = usePathname();
@@ -15,6 +16,7 @@ export default function RootLayoutClient({ children }) {
   return (
     <ProductProvider>
       <SidebarProvider>
+        <Toaster position="top-right" reverseOrder={true} />
         {isAdminPage ? children : <ClientLayout>{children}</ClientLayout>}
       </SidebarProvider>
     </ProductProvider>

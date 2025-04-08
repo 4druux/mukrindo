@@ -65,23 +65,24 @@ const SearchFilters = () => {
     let minError = "";
     let maxError = "";
     const currentYear = new Date().getFullYear();
+    const minimumAllowedYear = 2000;
     const parsedMin = parseInt(minYear, 10);
     const parsedMax = parseInt(maxYear, 10);
 
-    if (minYear && (minYear.length !== 4 || isNaN(parsedMin))) {
-      minError = "Tahun minimal tidak valid, contoh: 2012.";
+    if (!minError && minYear && parsedMin < minimumAllowedYear) {
+      minError = `Min tahun ${minimumAllowedYear} keatas.`;
     }
 
     if (!minError && minYear && parsedMin > currentYear) {
-      minError = `Tahun minimal tidak boleh melebihi ${currentYear}.`;
-    }
-
-    if (maxYear && (maxYear.length !== 4 || isNaN(parsedMax))) {
-      maxError = `Tahun maksimal tidak valid, contoh: ${currentYear}.`;
+      minError = `Max tahun ${currentYear}.`;
     }
 
     if (!maxError && maxYear && parsedMax > currentYear) {
-      maxError = `Tahun maksimal tidak boleh melebihi ${currentYear}.`;
+      maxError = `Max tahun ${currentYear}.`;
+    }
+
+    if (!maxError && maxYear && parsedMax < minimumAllowedYear) {
+      maxError = `Min tahun ${minimumAllowedYear} keatas.`;
     }
 
     if (!minError && !maxError && minYear && maxYear && parsedMin > parsedMax) {
@@ -296,12 +297,12 @@ const SearchFilters = () => {
 
         {/* Tahun */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Tahun</label>
+          <label className="text-sm font-medium text-gray-700 mb-3">Tahun</label>
           <div className="flex gap-2 items-start">
             <InputYear
               id="yearMin"
               name="yearMin"
-              placeholderTexts={["Min Tahun", "Min Tahun", "Min Tahun"]}
+              label="Min Tahun"
               value={productData.yearMin}
               onChange={handleChange}
               error={yearMinError}
@@ -310,7 +311,7 @@ const SearchFilters = () => {
             <InputYear
               id="yearMax"
               name="yearMax"
-              placeholderTexts={["Max Tahun", "Max Tahun", "Max Tahun"]}
+              label="Max Tahun"
               value={productData.yearMax}
               onChange={handleChange}
               error={yearMaxError}
@@ -319,10 +320,10 @@ const SearchFilters = () => {
         </div>
       </div>
 
-      <div className="border-b border-gray-200 -mt-2" />
+      <div className="border-b border-gray-200" />
 
       {/* Tombol */}
-      <div className="flex flex-col items-center gap-2 p-5 -mt-1">
+      <div className="flex flex-col items-center gap-2 p-5">
         {isFilterActive && (
           <button
             onClick={handleReset}

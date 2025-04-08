@@ -1,34 +1,61 @@
 // utils/formatNumberPhone.js
 
-// Fungsi untuk memformat nomor telepon saat pengguna mengetik
-export const formatNumberPhone = (value) => {
-  if (!value) return value;
+export const formatNumberPhone = (value, prefix = "") => {
+  if (!value) return prefix;
 
-  // Hapus semua karakter non-digit kecuali jika itu adalah awal dari string kosong setelah prefix
-  const phoneNumber = value.replace(/\D/g, "");
+  // Pastikan value adalah string sebelum memanipulasinya
+  let phoneNumber = String(value);
 
-  // Batasi panjang nomor telepon (misalnya, maksimal 13 digit setelah 0/8)
-  const maxLength = 13;
+  // Hapus prefix jika ada di awal (ini sudah benar)
+  if (prefix && phoneNumber.startsWith(prefix)) {
+    phoneNumber = phoneNumber.substring(prefix.length);
+  }
+  // Hapus semua karakter non-digit
+  phoneNumber = phoneNumber.replace(/\D/g, "");
+
+  // Batasi panjang nomor (tanpa prefix)
+  const maxLength = 12;
   const truncatedPhoneNumber = phoneNumber.slice(0, maxLength);
 
-  // Terapkan format XXXX-XXXX-XXXX...
-  let formattedNumber = "";
+  // Format dengan tanda hubung
+  let formattedDigits = "";
   if (truncatedPhoneNumber.length > 0) {
-    formattedNumber += truncatedPhoneNumber.substring(0, 4);
+    formattedDigits += truncatedPhoneNumber.substring(0, 3);
   }
-  if (truncatedPhoneNumber.length > 4) {
-    formattedNumber += "-" + truncatedPhoneNumber.substring(4, 8);
+  if (truncatedPhoneNumber.length > 3) {
+    formattedDigits += "-" + truncatedPhoneNumber.substring(3, 7);
   }
-  if (truncatedPhoneNumber.length > 8) {
-    formattedNumber += "-" + truncatedPhoneNumber.substring(8);
+  if (truncatedPhoneNumber.length > 7) {
+    formattedDigits += "-" + truncatedPhoneNumber.substring(7);
   }
 
-  return formattedNumber;
+  // Kembalikan prefix + nomor terformat HANYA jika ada digit setelah pembersihan
+  // Jika tidak ada digit (formattedDigits kosong), kembalikan prefix saja.
+  return formattedDigits ? `${prefix}${formattedDigits}` : prefix;
 };
 
-// Fungsi untuk menghapus format dan prefix, mengembalikan hanya digit
-export const unformatNumberPhone = (value) => {
+export const unformatNumberPhone = (value, prefix = "") => {
   if (!value) return "";
-  // Hapus prefix "+62 " dan semua karakter non-digit
-  return value.replace(/^\+62\s*/, "").replace(/\D/g, "");
+
+  let phoneNumber = String(value); // Pastikan string
+  const prefixDigits = prefix ? prefix.replace(/\D/g, "") : ""; // Dapatkan digit dari prefix, misal "62"
+
+  // 1. Cek jika input dimulai PERSIS dengan prefix (termasuk spasi jika ada)
+  if (prefix && phoneNumber.startsWith(prefix)) {
+    // Ambil bagian setelah prefix dan hapus non-digit
+    return phoneNumber.substring(prefix.length).replace(/\D/g, "");
+  }
+
+  // 2. Jika tidak dimulai dengan prefix persis (misal karena backspace menghapus spasi),
+  //    cek apakah digit dalam input SAMA PERSIS dengan digit dalam prefix.
+  const valueDigits = phoneNumber.replace(/\D/g, "");
+  if (prefixDigits && valueDigits === prefixDigits) {
+    // Jika ya, berarti pengguna menghapus kembali ke kondisi hanya prefix.
+    // Kembalikan string kosong agar formatNumberPhone hanya menampilkan prefix.
+    return "";
+  }
+
+  // 3. Jika tidak cocok dengan kondisi di atas, berarti ada digit lain atau format berbeda.
+  //    Kembalikan semua digit yang ditemukan di input.
+  return valueDigits;
 };
