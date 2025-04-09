@@ -4,7 +4,14 @@ import React from "react";
 import Select from "../common/Select";
 import Input from "../common/Input";
 
-const CarPapers = ({ data, onChange, errors }) => {
+const CarPapers = ({
+  data,
+  onChange,
+  errors,
+  stnkExpiryRef,
+  plateNumberRef,
+  yearOfAssemblyRef,
+}) => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 26 }, (_, i) => currentYear - i).map(
     (year) => ({
@@ -16,6 +23,7 @@ const CarPapers = ({ data, onChange, errors }) => {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {/* Masa Berlaku STNK */}
       <Input
+        ref={stnkExpiryRef}
         label="Masa Berlaku STNK"
         id="stnkExpiry"
         name="stnkExpiry"
@@ -30,6 +38,7 @@ const CarPapers = ({ data, onChange, errors }) => {
       />
       {/* Plat Nomor */}
       <Select
+        ref={plateNumberRef}
         label="Plat Nomor"
         id="plateNumber"
         name="plateNumber"
@@ -47,6 +56,7 @@ const CarPapers = ({ data, onChange, errors }) => {
       />
       {/* Tahun Perakitan */}
       <Select
+        ref={yearOfAssemblyRef}
         label="Tahun Perakitan"
         id="yearOfAssembly"
         name="yearOfAssembly"

@@ -1,7 +1,7 @@
 //components/common/ModalCropImage.jsx
 import { getCroppedImg } from "@/utils/cropImage";
 import { XIcon } from "lucide-react";
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Cropper from "react-easy-crop";
 
 export default function ModalCropImage({ mediaSrc, onCropComplete, onClose }) {
@@ -33,11 +33,11 @@ export default function ModalCropImage({ mediaSrc, onCropComplete, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/20 flex justify-center items-center z-9999"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="bg-gray-100 w-full max-w-lg rounded-xl overflow-hidden shadow-xl"
+        className="bg-gray-100 w-full max-w-lg md:max-w-2xl rounded-xl overflow-hidden shadow-xl mx-2"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-4 border-b border-gray-700 flex justify-between">

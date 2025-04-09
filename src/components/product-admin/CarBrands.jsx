@@ -2,7 +2,17 @@
 import { useState, useEffect } from "react";
 import Select from "../common/Select";
 
-const CarBrands = ({ carData, brand, model, variant, onChange, errors }) => {
+const CarBrands = ({
+  carData,
+  brand,
+  model,
+  variant,
+  onChange,
+  errors,
+  brandRef,
+  modelRef,
+  variantRef,
+}) => {
   const [filteredModels, setFilteredModels] = useState([]);
   const [filteredVariants, setFilteredVariants] = useState([]);
 
@@ -36,6 +46,7 @@ const CarBrands = ({ carData, brand, model, variant, onChange, errors }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Select
+        ref={brandRef}
         label="Merek Mobil"
         id="brand"
         name="brand"
@@ -48,6 +59,7 @@ const CarBrands = ({ carData, brand, model, variant, onChange, errors }) => {
         searchOption={true}
       />
       <Select
+        ref={modelRef}
         label="Model Mobil"
         id="model"
         name="model"
@@ -62,6 +74,7 @@ const CarBrands = ({ carData, brand, model, variant, onChange, errors }) => {
         disabled={!brand}
       />
       <Select
+        ref={variantRef}
         label="Varian Mobil"
         id="variant"
         name="variant"

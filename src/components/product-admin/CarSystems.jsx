@@ -3,11 +3,19 @@
 import React from "react";
 import Select from "../common/Select";
 
-const CarSystems = ({ data, onChange, errors }) => {
+const CarSystems = ({
+  data,
+  onChange,
+  errors,
+  driveSystemRef,
+  transmissionRef,
+  fuelTypeRef,
+}) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {/* Sistem Penggerak */}
       <Select
+        ref={driveSystemRef}
         label="Sistem Penggerak"
         id="driveSystem"
         name="driveSystem"
@@ -33,6 +41,7 @@ const CarSystems = ({ data, onChange, errors }) => {
       />
       {/* Transmisi */}
       <Select
+        ref={transmissionRef}
         label="Transmisi"
         id="transmission"
         name="transmission"
@@ -51,6 +60,7 @@ const CarSystems = ({ data, onChange, errors }) => {
       />
       {/* Bahan Bakar */}
       <Select
+        ref={fuelTypeRef}
         label="Bahan Bakar"
         id="fuelType"
         name="fuelType"

@@ -60,12 +60,6 @@ export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
     };
   }, [internalMediaFiles]);
 
-  useEffect(() => {
-    if (internalMediaFiles !== mediaFiles) {
-      setMediaFiles(internalMediaFiles);
-    }
-  }, [internalMediaFiles, setMediaFiles, mediaFiles]);
-
   const handleAddImage = () => {
     if (internalMediaFiles.length < 10) {
       setInternalMediaFiles([
@@ -78,12 +72,15 @@ export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
   const handleRemoveImage = (index) => {
     const updatedFiles = internalMediaFiles.filter((_, i) => i !== index);
     setInternalMediaFiles(updatedFiles);
+    setMediaFiles(updatedFiles); // <-- TAMBAHKAN BARIS INI
+
     if (activeOverlayIndex === index) {
       setActiveOverlayIndex(null);
     } else if (activeOverlayIndex > index) {
       setActiveOverlayIndex(activeOverlayIndex - 1);
     }
   };
+
   const handleImageChange = (index, event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -96,13 +93,17 @@ export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
     reader.onload = () => {
       const updatedFiles = [...internalMediaFiles];
       if (file.type === "image/gif") {
+        // Langsung update karena GIF tidak di-crop
         updatedFiles[index] = { original: file, cropped: file };
         setInternalMediaFiles(updatedFiles);
+        setMediaFiles(updatedFiles); // <-- TAMBAHKAN BARIS INI (untuk GIF)
       } else {
+        // Untuk non-GIF, update internal dulu, lalu trigger crop
         updatedFiles[index] = { original: file, cropped: null };
         setInternalMediaFiles(updatedFiles);
         setCropSource(reader.result);
         setCroppingIndex(index);
+        // Jangan panggil setMediaFiles di sini, tunggu handleCropComplete
       }
     };
     reader.onerror = (error) => {
@@ -124,6 +125,7 @@ export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
           cropped: croppedFile, // croppedFile should be a Blob
         };
         setInternalMediaFiles(updatedFiles);
+        setMediaFiles(updatedFiles); // <-- TAMBAHKAN BARIS INI
       }
     }
     setCroppingIndex(null);

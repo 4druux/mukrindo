@@ -1,6 +1,6 @@
 // AddProduct.jsx
 "use client";
-import { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useProducts } from "@/context/ProductContext";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
@@ -35,6 +35,24 @@ const AddProduct = () => {
     price: "",
     status: "Tersedia",
   });
+
+  // Refs auto open/focus
+  const carNameInputRef = useRef(null);
+  const brandSelectRef = useRef(null);
+  const modelSelectRef = useRef(null);
+  const variantSelectRef = useRef(null);
+  const typeSelectRef = useRef(null);
+  const carColorInputRef = useRef(null);
+  const ccInputRef = useRef(null);
+  const travelDistanceInputRef = useRef(null);
+  const driveSystemSelectRef = useRef(null);
+  const transmissionSelectRef = useRef(null);
+  const fuelTypeSelectRef = useRef(null);
+  const stnkExpiryInputRef = useRef(null);
+  const plateNumberSelectRef = useRef(null);
+  const yearOfAssemblySelectRef = useRef(null);
+  const priceInputRef = useRef(null);
+
   const [mediaFiles, setMediaFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
@@ -47,11 +65,13 @@ const AddProduct = () => {
     if (errors[name]) {
       setErrors((prevErrors) => {
         const newErrors = { ...prevErrors };
-        delete newErrors[name]; // Hapus error untuk field ini
+        delete newErrors[name];
         return newErrors;
       });
     }
   };
+
+  const inputTimers = useRef({});
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -63,8 +83,59 @@ const AddProduct = () => {
       ...prevData,
       [name]: updatedValue,
     }));
-    clearErrorOnChange(name); // Bersihkan error saat user mengetik/memilih
+    clearErrorOnChange(name);
+
+    if (inputTimers.current[name]) {
+      clearTimeout(inputTimers.current[name]);
+    }
+
+    if (!value) {
+      return;
+    }
+
+    const inactivityDelay = 750;
+
+    // logic auto focus/open
+    if (name === "carName") {
+      inputTimers.current[name] = setTimeout(() => {
+        brandSelectRef.current?.openDropdown();
+      }, inactivityDelay);
+    } else if (name === "type" && value) {
+      setTimeout(() => carColorInputRef.current?.focus(), 50);
+    } else if (name === "carColor") {
+      inputTimers.current[name] = setTimeout(() => {
+        ccInputRef.current?.focus();
+      }, inactivityDelay);
+    } else if (name === "cc") {
+      inputTimers.current[name] = setTimeout(() => {
+        travelDistanceInputRef.current?.focus();
+      }, inactivityDelay);
+    } else if (name === "travelDistance") {
+      inputTimers.current[name] = setTimeout(() => {
+        driveSystemSelectRef.current?.openDropdown();
+      }, inactivityDelay);
+    } else if (name === "driveSystem" && value) {
+      setTimeout(() => transmissionSelectRef.current?.openDropdown(), 50);
+    } else if (name === "transmission" && value) {
+      setTimeout(() => fuelTypeSelectRef.current?.openDropdown(), 50);
+    } else if (name === "fuelType" && value) {
+      setTimeout(() => stnkExpiryInputRef.current?.focus(), 50);
+    } else if (name === "stnkExpiry") {
+      inputTimers.current[name] = setTimeout(() => {
+        plateNumberSelectRef.current?.openDropdown();
+      }, inactivityDelay);
+    } else if (name === "plateNumber" && value) {
+      setTimeout(() => yearOfAssemblySelectRef.current?.openDropdown(), 50);
+    } else if (name === "yearOfAssembly" && value) {
+      setTimeout(() => priceInputRef.current?.focus(), 50);
+    }
   };
+
+  useEffect(() => {
+    return () => {
+      Object.values(inputTimers.current).forEach(clearTimeout);
+    };
+  }, []);
 
   const handleBrandChange = (field, value, modelValue, variantValue) => {
     setProductData((prev) => ({
@@ -78,7 +149,7 @@ const AddProduct = () => {
           ? ""
           : variantValue,
     }));
-    // Bersihkan error untuk brand, model, dan variant saat salah satu berubah
+
     if (errors.brand || errors.model || errors.variant) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -88,11 +159,20 @@ const AddProduct = () => {
         return newErrors;
       });
     }
+
+    // logic auto focus/open
+    if (field === "brand" && value) {
+      setTimeout(() => modelSelectRef.current?.openDropdown(), 50);
+    } else if (field === "model" && value) {
+      setTimeout(() => variantSelectRef.current?.openDropdown(), 50);
+    } else if (field === "variant" && value) {
+      setTimeout(() => typeSelectRef.current?.openDropdown(), 50);
+    }
   };
 
   const handleMediaFilesChange = (newFiles) => {
     setMediaFiles(newFiles);
-    clearErrorOnChange("mediaFiles"); // Bersihkan error mediaFiles
+    clearErrorOnChange("mediaFiles");
   };
 
   const handleSubmit = async (e) => {
@@ -101,16 +181,15 @@ const AddProduct = () => {
     setErrors({});
 
     const validationErrors = validateProductData(productData, mediaFiles);
-    console.log("Validation Errors:", validationErrors); // <-- Tambahkan ini
 
     if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors); // Set error spesifik per field
+      setErrors(validationErrors);
       toast.error("Harap periksa kembali data yang Anda masukkan.", {
         className: "custom-toast",
       });
 
       const firstErrorKey = Object.keys(validationErrors)[0];
-      const errorElement = document.getElementById(firstErrorKey); // Pastikan komponen punya id={name}
+      const errorElement = document.getElementById(firstErrorKey);
       if (errorElement) {
         errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
       }
@@ -120,16 +199,13 @@ const AddProduct = () => {
     setLoading(true);
 
     try {
-      // Cek crop sebelum konversi (jika belum divalidasi di validateProductData)
-      const uncropped = mediaFiles.find((fileObj) => !fileObj.cropped);
-      if (uncropped) {
-        throw new Error("Selesaikan proses crop untuk semua gambar.");
-      }
-
       const base64Images = await Promise.all(
         mediaFiles.map((fileObj) => {
           return new Promise((resolve, reject) => {
-            // Asumsi fileObj.cropped adalah Blob hasil crop
+            if (!fileObj.cropped) {
+              reject(new Error("Gambar belum di-crop."));
+              return;
+            }
             const reader = new FileReader();
             reader.onload = () => resolve(reader.result);
             reader.onerror = reject;
@@ -144,13 +220,30 @@ const AddProduct = () => {
       };
 
       const response = await axios.post(API_ENDPOINT, submitData);
+      toast.success("Produk berhasil ditambahkan.", {
+        className: "custom-toast",
+      });
+      console.log("Product ditambahkan:", response.data);
 
-      console.log("Produk berhasil ditambahkan:", response.data);
       mutateProducts();
 
-      // Reset form (termasuk errors) setelah sukses
       setProductData({
-        /* ... initial state ... */
+        carName: "",
+        brand: "",
+        model: "",
+        variant: "",
+        type: "",
+        carColor: "",
+        cc: "",
+        travelDistance: "",
+        driveSystem: "",
+        transmission: "",
+        fuelType: "",
+        stnkExpiry: "",
+        plateNumber: "",
+        yearOfAssembly: "",
+        price: "",
+        status: "Tersedia",
       });
       setMediaFiles([]);
       setErrors({});
@@ -163,11 +256,19 @@ const AddProduct = () => {
         error.response?.data?.message ||
         error.message ||
         "Gagal menambahkan produk. Silakan coba lagi.";
+      setErrors(errorMessage);
       setSubmitError(errorMessage);
-      setErrors((prev) => ({ ...prev, submit: errorMessage }));
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[80vh] bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-orange-500"></div>
+      </div>
+    );
+  }
 
   const breadcrumbItems = [
     { label: "Beranda", href: "/admin" },
@@ -193,7 +294,9 @@ const AddProduct = () => {
               error={errors.mediaFiles}
             />
           </div>
+
           <Input
+            ref={carNameInputRef}
             label="Nama Mobil"
             id="carName"
             name="carName"
@@ -206,7 +309,11 @@ const AddProduct = () => {
             onChange={handleChange}
             error={errors.carName}
           />
+
           <CarBrands
+            brandRef={brandSelectRef}
+            modelRef={modelSelectRef}
+            variantRef={variantSelectRef}
             carData={carData}
             brand={productData.brand}
             model={productData.model}
@@ -214,7 +321,9 @@ const AddProduct = () => {
             onChange={handleBrandChange}
             errors={errors}
           />
+
           <Select
+            ref={typeSelectRef}
             label="Tipe Mobil"
             id="type"
             name="type"
@@ -253,7 +362,9 @@ const AddProduct = () => {
               },
             ]}
           />
+
           <Input
+            ref={carColorInputRef}
             label="Warna Mobil"
             id="carColor"
             name="carColor"
@@ -266,7 +377,9 @@ const AddProduct = () => {
             onChange={handleChange}
             error={errors.carColor}
           />
+
           <Input
+            ref={ccInputRef}
             label="Kapasitas Mesin (CC)"
             id="cc"
             name="cc"
@@ -280,7 +393,9 @@ const AddProduct = () => {
             formatter={formatNumber}
             error={errors.cc}
           />
+
           <Input
+            ref={travelDistanceInputRef}
             label="Jarak Tempuh (KM)"
             id="travelDistance"
             name="travelDistance"
@@ -294,7 +409,11 @@ const AddProduct = () => {
             formatter={formatNumber}
             error={errors.travelDistance}
           />
+
           <CarSystems
+            driveSystemRef={driveSystemSelectRef}
+            transmissionRef={transmissionSelectRef}
+            fuelTypeRef={fuelTypeSelectRef}
             data={{
               driveSystem: productData.driveSystem,
               transmission: productData.transmission,
@@ -303,8 +422,11 @@ const AddProduct = () => {
             onChange={handleChange}
             errors={errors}
           />
-          {/* CarPapers */}
+
           <CarPapers
+            stnkExpiryRef={stnkExpiryInputRef}
+            plateNumberRef={plateNumberSelectRef}
+            yearOfAssemblyRef={yearOfAssemblySelectRef}
             data={{
               stnkExpiry: productData.stnkExpiry,
               plateNumber: productData.plateNumber,
@@ -313,7 +435,9 @@ const AddProduct = () => {
             onChange={handleChange}
             errors={errors}
           />
+
           <Input
+            ref={priceInputRef}
             label="Harga Mobil"
             id="price"
             name="price"
@@ -323,7 +447,7 @@ const AddProduct = () => {
             error={errors.price}
             prefix="Rp "
           />
-          {/* Status Select */}
+
           <Select
             label="Status"
             id="status"
@@ -337,6 +461,7 @@ const AddProduct = () => {
               { value: "Terjual", label: "Terjual" },
             ]}
           />
+
           {/* Submit Button */}
           <div className="col-span-2 flex justify-end space-x-2 sm:space-x-4 mt-4">
             <button
@@ -352,7 +477,7 @@ const AddProduct = () => {
               className="cursor-pointer bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
               disabled={loading}
             >
-              {loading ? "Menambahkan..." : "Tambah Produk"}
+              Tambah Produk
             </button>
           </div>
         </form>

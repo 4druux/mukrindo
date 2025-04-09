@@ -77,8 +77,8 @@ function AppHeader() {
             <div className="hidden md:flex items-center space-x-6">
               <Link
                 href="/beli"
-                className={`text-sm font-medium hover:text-orange-600 ${
-                  pathname === "/beli" ? "text-orange-600" : "text-gray-700"
+                className={`text-sm font-medium hover:text-orange-500 ${
+                  pathname === "/beli" ? "text-orange-500" : "text-gray-700"
                 }`}
               >
                 Beli Mobil
@@ -86,9 +86,9 @@ function AppHeader() {
 
               <Link
                 href="/jual-mobil"
-                className={`text-sm font-medium hover:text-orange-600 ${
+                className={`text-sm font-medium hover:text-orange-500 ${
                   pathname === "/jual-mobil"
-                    ? "text-orange-600"
+                    ? "text-orange-500"
                     : "text-gray-700"
                 }`}
               >
@@ -97,9 +97,9 @@ function AppHeader() {
 
               <Link
                 href="/simulasi-budget"
-                className={`text-sm font-medium hover:text-orange-600 ${
+                className={`text-sm font-medium hover:text-orange-500 ${
                   pathname === "/simulasi-budget"
-                    ? "text-orange-600"
+                    ? "text-orange-500"
                     : "text-gray-700"
                 }`}
               >
@@ -108,9 +108,9 @@ function AppHeader() {
 
               <Link
                 href="/tukar-tambah"
-                className={`text-sm font-medium hover:text-orange-600 relative ${
+                className={`text-sm font-medium hover:text-orange-500 relative ${
                   pathname === "/tukar-tambah"
-                    ? "text-orange-600"
+                    ? "text-orange-500"
                     : "text-gray-700"
                 }`}
               >
