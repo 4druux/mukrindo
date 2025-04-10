@@ -1,5 +1,5 @@
 // contexts/HeaderContext.js
-import  { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext } from "react";
 
 const HeaderContext = createContext();
 
@@ -15,11 +15,18 @@ export const HeaderProvider = ({ children }) => {
     if (isSearchOpen) setSearchQuery("");
   };
 
+  const toggleBookmarkSidebar = () => {
+    setIsBookmarkSidebarOpen((prev) => !prev);
+  };
+  const [isBookmarkSidebarOpen, setIsBookmarkSidebarOpen] = useState(false);
+
   const contextValue = {
     isSearchOpen,
     toggleSearch,
     searchQuery,
     setSearchQuery,
+    isBookmarkSidebarOpen,
+    toggleBookmarkSidebar,
   };
 
   return (

@@ -5,6 +5,23 @@
   font-family: "Poppins", sans-serif;
 }
 
+::-webkit-scrollbar {
+  width: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fff;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #232a34;
+}
+
 .custom-toast {
   font-size: 13px;
   font-weight: 450;

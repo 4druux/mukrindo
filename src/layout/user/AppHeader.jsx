@@ -17,10 +17,12 @@ import { FaArrowsRotate } from "react-icons/fa6";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "@/layout/user/SearchBar";
 import { useHeader } from "@/context/HeaderContext";
+import { useProducts } from "@/context/ProductContext";
 import { Heart } from "lucide-react";
 
 function AppHeader() {
-  const { isSearchOpen, toggleSearch } = useHeader();
+  const { isSearchOpen, toggleSearch, toggleBookmarkSidebar } = useHeader();
+  const { bookmarkCount } = useProducts();
   const [isTop, setIsTop] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -128,12 +130,18 @@ function AppHeader() {
             <div className="block md:hidden border-l border-gray-400 h-7 mx-4" />
 
             <div className="flex items-center space-x-3 lg:space-x-4 bg-gray-100 px-2 lg:px-4 rounded-full border border-gray-300">
-              <div className="relative group">
+              <button
+                onClick={toggleBookmarkSidebar}
+                className="relative group focus:outline-none"
+                aria-label={`Lihat ${bookmarkCount} item tersimpan`}
+              >
                 <Heart className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700 cursor-pointer" />
-                <span className="absolute -top-2 -right-2 flex items-center justify-center w-3 h-3 text-xs text-white bg-red-500 rounded-full group-hover:animate-bounce transition-all duration-300 ease-in-out">
-                  1
-                </span>
-              </div>
+                {bookmarkCount > -1 && (
+                  <span className="absolute -top-2 -right-2 flex items-center justify-center w-2 h-2 p-1.5 text-[10px] text-white bg-red-500 rounded-full group-hover:animate-bounce transition-all duration-300 ease-in-out">
+                    {bookmarkCount}
+                  </span>
+                )}
+              </button>
 
               <div className="relative" ref={dropdownRef}>
                 <button onClick={() => setIsDropdownOpen(!isDropdownOpen)}>

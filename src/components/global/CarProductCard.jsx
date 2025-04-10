@@ -1,10 +1,11 @@
 // src/components/global/CarProductCard.jsx
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import generateSlug from "@/utils/generateSlug";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Import Components
+import { useProducts } from "@/context/ProductContext";
 import CarImageCard from "@/components/global/CarImageCard";
 import SkeletonAllProductUser from "@/components/skeleton/skeleton-user/SkeletonAllProduct";
 import SkeletonAllProductAdmin from "@/components/skeleton/skeleton-admin/SkeletonAllProduct";
@@ -39,10 +40,7 @@ const CarProductCard = ({
     console.error("Error loading products:", error);
   }
 
-  const [isLiked, setIsLiked] = useState(false);
-  const handleLikeClick = () => {
-    setIsLiked(!isLiked);
-  };
+  const { isBookmarked, toggleBookmark } = useProducts();
 
   const SkeletonComponent = isAdminRoute
     ? SkeletonAllProductAdmin
@@ -70,6 +68,8 @@ const CarProductCard = ({
               product.carName,
               product._id
             )}`;
+
+            const liked = isBookmarked(product._id);
 
             return (
               <div
@@ -149,11 +149,17 @@ const CarProductCard = ({
                 {!isAdminRoute && (
                   <>
                     <div className="absolute top-2 right-2 z-10">
-                      <div className="relative group cursor-pointer">
+                      <div
+                        className="relative group cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmark(product._id);
+                        }}
+                      >
                         <div className="bg-black/30 p-2 rounded-full shadow transition">
                           <Heart
                             className={`w-4 h-4 lg:w-5 lg:h-5 ${
-                              isLiked
+                              liked
                                 ? "text-red-500 fill-red-500"
                                 : "text-white fill-none"
                             }`}

@@ -1,5 +1,7 @@
 // components/product-user/beli-mobil/CarPricingInfo.jsx
 import React, { useState } from "react";
+
+import { useProducts } from "@/context/ProductContext";
 import { RefreshCw, ArrowRight, Calculator, Heart } from "lucide-react";
 
 const CarPricingInfo = ({ product }) => {
@@ -7,11 +9,8 @@ const CarPricingInfo = ({ product }) => {
     return null;
   }
 
-  const [isLiked, setIsLiked] = useState(false);
-
-  const handleLikeClick = () => {
-    setIsLiked(!isLiked);
-  };
+  const { isBookmarked, toggleBookmark } = useProducts();
+  const liked = isBookmarked(product._id);
 
   return (
     <div className="p-4 lg:p-8 rounded-t-3xl lg:rounded-3xl border-t border-b border-gray-300 lg:border-none lg:shadow-md bg-white">
@@ -20,10 +19,16 @@ const CarPricingInfo = ({ product }) => {
           {product.carName} {product.yearOfAssembly}
         </h1>
 
-        <div className="block lg:hidden" onClick={handleLikeClick}>
+        <div
+          className="block lg:hidden"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleBookmark(product._id);
+          }}
+        >
           <Heart
             className={`w-6 h-6 mt-1 ${
-              isLiked ? "text-red-500 fill-red-500" : "text-gray-700 fill-none"
+              liked ? "text-red-500 fill-red-500" : "text-gray-700 fill-none"
             }`}
           />
         </div>

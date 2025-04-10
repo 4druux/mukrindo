@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import AppHeader from "@/layout/user/AppHeader";
 import { HeaderProvider } from "@/context/HeaderContext";
+import BookmarkRightbar from "@/layout/user/BookmarkRightbar";
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
@@ -39,6 +40,7 @@ export default function ClientLayout({ children }) {
       <HeaderProvider>
         <div className="min-h-screen bg-gray-50">
           {showHeader && <AppHeader />}
+          <BookmarkRightbar />
           <div className="sm:px-[6vw] md:px-[9vw] lg:px-[10vw]">{children}</div>
         </div>
       </HeaderProvider>

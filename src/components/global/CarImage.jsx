@@ -2,11 +2,13 @@
 
 // components/global/CarImage.jsx
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 // Import Component
+import { useHeader } from "@/context/HeaderContext";
+import { useProducts } from "@/context/ProductContext";
 import ShareProduct from "../product-user/beli-mobil/ShareProduct";
 
 // Import Swiper
@@ -21,21 +23,22 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { ArrowLeft, Heart } from "lucide-react";
 
 const CarImage = ({
+  productId,
   images,
   carName,
   onImageClick,
   isMobile,
   isAdminRoute = false,
 }) => {
+  const { toggleBookmarkSidebar } = useHeader();
+  const { bookmarkCount, toggleBookmark, isBookmarked } = useProducts();
+  const [isSticky, setIsSticky] = useState(false);
   const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
   const [mainSwiper, setMainSwiper] = useState(null);
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
-  const [isLiked, setIsLiked] = useState(false);
 
-  const handleLikeClick = () => {
-    setIsLiked(!isLiked);
-  };
+  const liked = isBookmarked(productId);
 
   if (!images || images.length === 0) {
     return (
@@ -44,6 +47,23 @@ const CarImage = ({
       </div>
     );
   }
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const shouldBeSticky = window.scrollY > 10;
+      if (shouldBeSticky !== isSticky) {
+        setIsSticky(shouldBeSticky);
+      }
+    };
+
+    if (!isAdminRoute) {
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      handleScroll();
+      return () => window.removeEventListener("scroll", handleScroll);
+    } else {
+      setIsSticky(false);
+    }
+  }, [isAdminRoute, isSticky]);
 
   return (
     <div className="">
@@ -81,65 +101,108 @@ const CarImage = ({
             ))}
           </Swiper>
 
-          {/* Tombol Kembali */}
-          <button
-            onClick={() => router.back()}
-            className="absolute top-2 lg:top-4 left-1 lg:left-2 z-10 cursor-pointer transition"
-            aria-label="Kembali"
-          >
-            <div className="relative group">
-              <div className="bg-white/80 hover:bg-white p-2 rounded-full shadow transition">
-                <ArrowLeft className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700" />
-              </div>
-              <span
-                className="absolute left-1/2 ml-1 -translate-x-1/2 top-full mt-2
+          {/* Tombol Kembali admin*/}
+          {isAdminRoute && (
+            <button
+              onClick={() => router.back()}
+              className="absolute top-2 lg:top-4 left-1 lg:left-2 z-10 cursor-pointer transition"
+              aria-label="Kembali"
+            >
+              <div className="relative group">
+                <div className="bg-white/80 hover:bg-white p-2 rounded-full shadow transition">
+                  <ArrowLeft className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700" />
+                </div>
+                <span
+                  className="absolute left-1/2 ml-1 -translate-x-1/2 top-full mt-2
                    whitespace-nowrap rounded-lg bg-black/50 px-2 py-1 text-xs text-white
                    opacity-0 group-hover:opacity-100 transition-opacity duration-300
                    invisible group-hover:visible
                    pointer-events-none z-20"
-              >
-                Kembali
-              </span>
-            </div>
-          </button>
+                >
+                  Kembali
+                </span>
+              </div>
+            </button>
+          )}
 
           {!isAdminRoute && (
-            <div className="absolute top-2 lg:top-4 right-3 z-10 cursor-pointer transition">
-              <div className="flex items-center gap-3">
-                <ShareProduct
-                  title={`Lihat mobil ini: ${carName}`}
-                  isMobile={isMobile}
-                />
-
-                <div
-                  className="relative group cursor-pointer hidden lg:block"
-                  onClick={handleLikeClick}
-                >
-                  <div className="bg-white/80 hover:bg-white p-2 rounded-full shadow transition">
-                    <Heart
-                      className={`w-4 h-4 lg:w-5 lg:h-5 ${
-                        isLiked
-                          ? "text-red-500 fill-red-500"
-                          : "text-gray-700 fill-none"
-                      }`}
-                    />
-                  </div>
-                  <span
-                    className="absolute left-3 -translate-x-1/2 top-full mt-2
+            <div>
+              <div className="absolute top-2 lg:top-4 left-1 lg:left-2 z-10 cursor-pointer transition">
+                <div className="flex items-center gap-3">
+                  <button onClick={() => router.back()} aria-label="Kembali">
+                    <div className="relative group">
+                      <div className="bg-white/80 hover:bg-white p-2 rounded-full shadow transition">
+                        <ArrowLeft className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700" />
+                      </div>
+                      <span
+                        className="absolute left-1/2 ml-1 -translate-x-1/2 top-full mt-2
                    whitespace-nowrap rounded-lg bg-black/50 px-2 py-1 text-xs text-white
                    opacity-0 group-hover:opacity-100 transition-opacity duration-300
                    invisible group-hover:visible
                    pointer-events-none z-20"
-                  >
-                    Bookmark
-                  </span>
-                </div>
+                      >
+                        Kembali
+                      </span>
+                    </div>
+                  </button>
 
-                <div className="block lg:hidden bg-white/80 hover:bg-white p-2 rounded-full shadow transition">
-                  <Heart className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700 cursor-pointer" />
-                  <span className="absolute -top-1 -right-1 flex items-center justify-center w-3 h-3 text-xs text-white bg-red-500 rounded-full group-hover:animate-bounce transition-all duration-300 ease-in-out">
-                    1
-                  </span>
+                  <p
+                    className={`text-xs text-gray-700 block lg:hidden ${
+                      isSticky ? "block " : "hidden"
+                    }`}
+                  >
+                    {carName}
+                  </p>
+                </div>
+              </div>
+
+              <div className="absolute top-2 lg:top-4 right-3 z-10 cursor-pointer transition">
+                <div className="flex items-center gap-3">
+                  <ShareProduct
+                    title={`Lihat mobil ini: ${carName}`}
+                    isMobile={isMobile}
+                  />
+
+                  <div
+                    className="relative group cursor-pointer hidden lg:block"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleBookmark(productId);
+                    }}
+                  >
+                    <div className="bg-white/80 hover:bg-white p-2 rounded-full shadow transition">
+                      <Heart
+                        className={`w-4 h-4 lg:w-5 lg:h-5 ${
+                          liked
+                            ? "text-red-500 fill-red-500"
+                            : "text-gray-700 fill-none"
+                        }`}
+                      />
+                    </div>
+                    <span
+                      className="absolute left-3 -translate-x-1/2 top-full mt-2
+                   whitespace-nowrap rounded-lg bg-black/50 px-2 py-1 text-xs text-white
+                   opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                   invisible group-hover:visible
+                   pointer-events-none z-20"
+                    >
+                      Bookmark
+                    </span>
+                  </div>
+
+                  <div className="block lg:hidden">
+                    <button
+                      onClick={toggleBookmarkSidebar}
+                      className="bg-white/80 hover:bg-white p-2 rounded-full shadow"
+                    >
+                      <Heart className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700 cursor-pointer" />
+                      {bookmarkCount > 0 && (
+                        <span className="absolute -top-1 -right-1 flex items-center justify-center w-3 h-3 p-2 text-[10px] text-white bg-red-500 rounded-full group-hover:animate-bounce transition-all duration-300 ease-in-out">
+                          {bookmarkCount}
+                        </span>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

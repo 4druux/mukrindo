@@ -1,5 +1,11 @@
 "use client";
-import  { createContext, useContext, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useCallback,
+  useState,
+  useEffect,
+} from "react";
 import axios from "axios";
 import useSWR from "swr";
 
@@ -24,6 +30,8 @@ export const ProductProvider = ({ children }) => {
   const products = data || [];
   const loading = swrLoading;
   const error = swrError;
+
+  const [bookmarks, setBookmarks] = useState(new Set());
 
   const deleteProduct = async (productId) => {
     try {
@@ -82,6 +90,44 @@ export const ProductProvider = ({ children }) => {
     }
   }, []);
 
+  useEffect(() => {
+    const storedBookmarks = localStorage.getItem("bookmarks");
+    if (storedBookmarks) {
+      try {
+        const parsedBookmarks = JSON.parse(storedBookmarks);
+        if (Array.isArray(parsedBookmarks)) {
+          setBookmarks(new Set(parsedBookmarks));
+        } else {
+          console.warn("Format bookmark tersimpan tidak valid. Mereset.");
+          localStorage.removeItem("bookmarks");
+        }
+      } catch (error) {
+        console.error("Error parsing bookmarks dari localStorage:", error);
+        localStorage.removeItem("bookmarks");
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("bookmarks", JSON.stringify(Array.from(bookmarks)));
+  }, [bookmarks]);
+
+  // Fungsi untuk menambah/menghapus bookmark
+  const toggleBookmark = (productId) => {
+    setBookmarks((prevBookmarks) => {
+      const newBookmarks = new Set(prevBookmarks); // Buat salinan Set
+      if (newBookmarks.has(productId)) {
+        newBookmarks.delete(productId); // Hapus jika sudah ada
+      } else {
+        newBookmarks.add(productId); // Tambahkan jika belum ada
+      }
+      return newBookmarks; // Kembalikan Set baru untuk update state
+    });
+  };
+
+  // Fungsi helper untuk memeriksa apakah ID produk sudah di-bookmark
+  const isBookmarked = (productId) => bookmarks.has(productId);
+
   const contextValue = {
     products,
     loading,
@@ -91,6 +137,10 @@ export const ProductProvider = ({ children }) => {
     updateProductStatus,
     fetchProductById,
     incrementProductView,
+    bookmarks, // Set bookmark (mungkin tidak perlu diekspos langsung)
+    bookmarkCount: bookmarks.size, // Jumlah bookmark
+    toggleBookmark,
+    isBookmarked,
   };
 
   return (
