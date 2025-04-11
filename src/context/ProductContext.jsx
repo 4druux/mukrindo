@@ -115,17 +115,16 @@ export const ProductProvider = ({ children }) => {
   // Fungsi untuk menambah/menghapus bookmark
   const toggleBookmark = (productId) => {
     setBookmarks((prevBookmarks) => {
-      const newBookmarks = new Set(prevBookmarks); // Buat salinan Set
+      const newBookmarks = new Set(prevBookmarks);
       if (newBookmarks.has(productId)) {
-        newBookmarks.delete(productId); // Hapus jika sudah ada
+        newBookmarks.delete(productId);
       } else {
-        newBookmarks.add(productId); // Tambahkan jika belum ada
+        newBookmarks.add(productId);
       }
-      return newBookmarks; // Kembalikan Set baru untuk update state
+      return newBookmarks;
     });
   };
 
-  // Fungsi helper untuk memeriksa apakah ID produk sudah di-bookmark
   const isBookmarked = (productId) => bookmarks.has(productId);
 
   const contextValue = {
@@ -137,8 +136,8 @@ export const ProductProvider = ({ children }) => {
     updateProductStatus,
     fetchProductById,
     incrementProductView,
-    bookmarks, // Set bookmark (mungkin tidak perlu diekspos langsung)
-    bookmarkCount: bookmarks.size, // Jumlah bookmark
+    bookmarks,
+    bookmarkCount: bookmarks.size,
     toggleBookmark,
     isBookmarked,
   };

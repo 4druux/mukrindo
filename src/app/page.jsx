@@ -20,8 +20,8 @@ export default function Home() {
       <Carousel images={bannerImages} />
       <div className=" space-y-8 mt-4 pb-8">
         <CarForm />
-        {/* <ProductByRecom />
-        <ProductByPrice /> */}
+        <ProductByRecom />
+        <ProductByPrice />
       </div>
     </div>
   );

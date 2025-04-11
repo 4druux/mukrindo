@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect, useMemo } from "react";
 import { useProducts } from "@/context/ProductContext";
 import CarProductCard from "@/components/global/CarProductCard";
+import CarProductCardSwipe from "@/components/product-user/home/CarProductCardSwipe";
 
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";
 const MAX_VIEWED_ITEMS = 10;
@@ -115,16 +116,26 @@ const ProductByRecom = () => {
 
   return (
     <div>
-      <h1 className="text-lg lg:text-xl font-medium text-gray-700 mb-2 lg:mb-4 px-2">
-        Mobil Pilihan Terbaik
-      </h1>
+      <div className="flex justify-between items-center mb-2 lg:mb-4 px-2">
+        <h1 className="text-md lg:text-xl font-medium text-gray-700">
+          Mobil Pilihan Terbaik
+        </h1>
+        <div className="block lg:hidden">
+          <Link href="/beli">
+            <p className="text-xs text-orange-500 font-medium hover:text-orange-600 hover:text-underline hover:underline cursor-pointer">
+              Tampilkan Semua
+            </p>
+          </Link>
+        </div>
+      </div>
+
       <div
         className="flex space-x-2 mb-4 overflow-x-auto lg:pb-2 px-2"
         style={{ scrollbarWidth: "none" }}
       >
         <button
           onClick={() => setActiveFilter(FILTER_TYPES.RECOMMENDATION)}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
+          className={`px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full transition-colors cursor-pointer whitespace-nowrap ${
             activeFilter === FILTER_TYPES.RECOMMENDATION
               ? "bg-orange-100 text-orange-500 border border-orange-500"
               : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
@@ -134,7 +145,7 @@ const ProductByRecom = () => {
         </button>
         <button
           onClick={() => setActiveFilter(FILTER_TYPES.LATEST)}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
+          className={`px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full transition-colors cursor-pointer whitespace-nowrap ${
             activeFilter === FILTER_TYPES.LATEST
               ? "bg-orange-100 text-orange-500 border border-orange-500"
               : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
@@ -144,7 +155,7 @@ const ProductByRecom = () => {
         </button>
         <button
           onClick={() => setActiveFilter(FILTER_TYPES.PRICE_ASC)}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
+          className={`px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full transition-colors cursor-pointer whitespace-nowrap ${
             activeFilter === FILTER_TYPES.PRICE_ASC
               ? "bg-orange-100 text-orange-500 border border-orange-500"
               : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
@@ -154,7 +165,7 @@ const ProductByRecom = () => {
         </button>
         <button
           onClick={() => setActiveFilter(FILTER_TYPES.YEAR_DESC)}
-          className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
+          className={`px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full transition-colors cursor-pointer whitespace-nowrap ${
             activeFilter === FILTER_TYPES.YEAR_DESC
               ? "bg-orange-100 text-orange-500 border border-orange-500"
               : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
@@ -164,23 +175,25 @@ const ProductByRecom = () => {
         </button>
       </div>
 
-      <CarProductCard
+      <CarProductCardSwipe
         products={displayedProducts.slice(0, 9)}
         loading={loading}
         onProductClick={handleProductClick}
         emptyMessage={emptyMessage}
       />
 
-      <div className="flex flex-col items-center lg:items-end mt-4">
-        <p className="text-sm text-gray-500">
-          Hanya menampilkan {displayedProducts.slice(0, 9).length} dari{" "}
-          {products.length} Mobil
-        </p>
-        <Link href="/beli">
-          <p className="text-sm text-orange-500 font-medium hover:text-orange-600 hover:text-underline hover:underline cursor-pointer">
-            Tampilkan Semua Mobil
+      <div className="hidden lg:block">
+        <div className="flex flex-col items-end">
+          <p className="text-sm text-gray-500">
+            Hanya menampilkan {displayedProducts.slice(0, 9).length} dari{" "}
+            {products.length} Mobil
           </p>
-        </Link>
+          <Link href="/beli">
+            <p className="text-sm text-orange-500 font-medium hover:text-orange-600 hover:text-underline hover:underline cursor-pointer">
+              Tampilkan Semua Mobil
+            </p>
+          </Link>
+        </div>
       </div>
     </div>
   );

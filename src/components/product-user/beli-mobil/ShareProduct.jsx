@@ -1,5 +1,6 @@
 // components/product-user/beli-mobil/ShareProduct.jsx
-import  { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import ShareMobile from "./ShareMobile";
 import ShareDekstop from "./ShareDekstop";
 
@@ -12,11 +13,18 @@ const ShareProduct = ({
   url: propUrl,
   title = "Check this out!",
   isMobile,
+  buttonClass,
+  iconClass,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [currentUrl, setCurrentUrl] = useState("");
   const [copySuccess, setCopySuccess] = useState("");
   const buttonRef = useRef(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     const urlToShare = propUrl || window.location.href;
@@ -105,16 +113,13 @@ const ShareProduct = ({
       <div ref={buttonRef} className="relative group">
         <button
           onClick={handleShareClick}
-          className={`p-2 rounded-full shadow transition cursor-pointer ${
-            isPopoverOpen ? "bg-white" : "bg-white/80 hover:bg-white"
-          }`}
+          className={buttonClass}
           aria-haspopup="dialog"
-          aria-expanded={isPopoverOpen}
           aria-controls={
             isMobile ? "share-popover-mobile" : "share-popover-desktop"
           }
         >
-          <Share2 className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700" />
+          <Share2 className={iconClass} />
         </button>
         <span
           className={`absolute left-1/2 -translate-x-1/2 top-full mt-2
@@ -129,18 +134,20 @@ const ShareProduct = ({
         </span>
       </div>
 
-      {/* --- Render Popover Sesuai Kondisi --- */}
-      {isMobile ? (
-        <ShareMobile
-          isOpen={isPopoverOpen}
-          onClose={closePopover}
-          url={currentUrl}
-          title={title}
-          shareOptions={shareOptions}
-          onCopy={handleCopyUrl}
-          copySuccess={copySuccess}
-        />
-      ) : (
+      {isMobile && isClient ? (
+        createPortal(
+          <ShareMobile
+            isOpen={isPopoverOpen}
+            onClose={closePopover}
+            url={currentUrl}
+            title={title}
+            shareOptions={shareOptions}
+            onCopy={handleCopyUrl}
+            copySuccess={copySuccess}
+          />,
+          document.body
+        )
+      ) : !isMobile ? (
         <ShareDekstop
           isOpen={isPopoverOpen}
           onClose={closePopover}
@@ -151,7 +158,7 @@ const ShareProduct = ({
           copySuccess={copySuccess}
           buttonRef={buttonRef}
         />
-      )}
+      ) : null}
     </div>
   );
 };
