@@ -23,6 +23,7 @@ const SearchFilters = () => {
     brand: "",
     model: "",
     type: "",
+    transmission: "",
     fuelType: "",
     priceRange: [...INITIAL_PRICE_RANGE],
     yearMin: "",
@@ -35,6 +36,7 @@ const SearchFilters = () => {
       brand: params.get("brand") || "",
       model: params.get("model") || "",
       type: params.get("type") || "",
+      transmission: params.get("transmission") || "",
       fuelType: params.get("fuelType") || "",
       yearMin: params.get("yearMin") || "",
       yearMax: params.get("yearMax") || "",
@@ -124,6 +126,7 @@ const SearchFilters = () => {
       brand: "",
       model: "",
       type: "",
+      transmission: "",
       fuelType: "",
       priceRange: [...INITIAL_PRICE_RANGE],
       yearMin: "",
@@ -138,6 +141,7 @@ const SearchFilters = () => {
       params.has("brand") ||
       params.has("model") ||
       params.has("type") ||
+      params.has("transmission") ||
       params.has("fuelType") ||
       params.has("yearMin") ||
       params.has("yearMax") ||
@@ -175,6 +179,10 @@ const SearchFilters = () => {
 
     if (productData.type) params.set("type", productData.type);
     else params.delete("type");
+
+    if (productData.transmission)
+      params.set("transmission", productData.transmission);
+    else params.delete("transmission");
 
     if (productData.fuelType) params.set("fuelType", productData.fuelType);
     else params.delete("fuelType");
@@ -278,6 +286,22 @@ const SearchFilters = () => {
           ]}
         />
 
+        {/* Transmisi */}
+        <Select
+          label="Transmisi"
+          id="transmission"
+          name="transmission"
+          value={productData.transmission}
+          title="Transmisi"
+          description="Jenis Transmisi"
+          onChange={(value) => handleFilterChange("transmission", value)}
+          options={[
+            { value: "manual", label: "Manual" },
+            { value: "automatic", label: "Automatic" },
+            { value: "cvt", label: "CVT" },
+          ]}
+        />
+
         {/* Bahan Bakar */}
         <Select
           label="Bahan Bakar"
@@ -297,7 +321,9 @@ const SearchFilters = () => {
 
         {/* Tahun */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 mb-3">Tahun</label>
+          <label className="text-sm font-medium text-gray-700 mb-3">
+            Tahun
+          </label>
           <div className="flex gap-2 items-start">
             <InputYear
               id="yearMin"

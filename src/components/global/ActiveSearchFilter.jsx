@@ -9,6 +9,7 @@ const displayableFilterParams = [
   "brand",
   "model",
   "type",
+  "transmission",
   "fuelType",
   "yearMin",
   "yearMax",

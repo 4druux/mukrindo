@@ -210,6 +210,7 @@ const CarShop = () => {
       "brand",
       "model",
       "type",
+      "transmission",
       "fuelType",
       "yearMin",
       "yearMax",
