@@ -22,7 +22,7 @@ const RangePrice = ({ value, onChange, min = 50000000, max = 1500000000 }) => {
           { borderColor: "#f97316", backgroundColor: "#f97316" },
         ]}
       />
-      <div className="flex justify-between text-xs mt-1 text-gray-700">
+      <div className="flex justify-between text-xs lg:text-sm mt-1 text-gray-700">
         <span>{formatNumber(value[0], "Rp ")}</span>
         <span>-</span>
         <span>{formatNumber(value[1], "Rp ")}</span>
