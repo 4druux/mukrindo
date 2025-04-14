@@ -1,7 +1,7 @@
 // src/components/global/BookmarkRightbar.jsx
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,21 +14,21 @@ import { X, Heart } from "lucide-react";
 import { FaRoad, FaRegCalendarAlt } from "react-icons/fa";
 import { GiGearStickPattern } from "react-icons/gi";
 
-const sidebarVariants = {
-  hidden: { x: "100%" },
-  visible: { x: 0, transition: { type: "tween", duration: 0.3 } },
-  exit: { x: "100%", transition: { type: "tween", duration: 0.3 } },
-};
-
-const overlayVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.3 } },
-  exit: { opacity: 0, transition: { duration: 0.3 } },
-};
-
 const BookmarkRightbar = () => {
   const { bookmarks, products, toggleBookmark, loading } = useProducts();
   const { toggleBookmarkSidebar, isBookmarkSidebarOpen } = useHeader();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkIsMobile();
+    window.addEventListener("resize", checkIsMobile);
+    return () => {
+      window.removeEventListener("resize", checkIsMobile);
+    };
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = isBookmarkSidebarOpen ? "hidden" : "auto";
@@ -36,6 +36,44 @@ const BookmarkRightbar = () => {
       document.body.style.overflow = "auto";
     };
   }, [isBookmarkSidebarOpen]);
+
+  const sidebarVariants = {
+    hidden: isMobile ? { y: "100%" } : { x: "100%" },
+    visible: {
+      ...(isMobile ? { y: 0 } : { x: 0 }),
+      transition: {
+        type: "tween",
+        duration: 0.5,
+        ease: "easeInOut",
+      },
+    },
+    exit: {
+      ...(isMobile ? { y: "100%" } : { x: "100%" }),
+      transition: {
+        type: "tween",
+        duration: 0.5,
+        ease: "easeInOut",
+      },
+    },
+  };
+
+  const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.3,
+        ease: "easeInOut",
+      },
+    },
+    exit: {
+      opacity: 0,
+      transition: {
+        duration: 0.3,
+        ease: "easeInOut",
+      },
+    },
+  };
 
   // Filter produk yang ada di daftar bookmark
   const bookmarkedProducts = products.filter((product) =>
@@ -65,7 +103,11 @@ const BookmarkRightbar = () => {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="fixed top-0 right-0 h-full w-full max-w-xl lg:rounded-l-2xl bg-white shadow-xl z-50 flex flex-col pb-4"
+            className={`fixed ${
+              isMobile
+                ? "bottom-0 left-0 w-full h-full"
+                : "top-0 right-0 h-full max-w-xl lg:rounded-l-2xl"
+            } bg-white shadow-xl z-50 flex flex-col pb-4`}
           >
             {/* Header Sidebar */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">

@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 
 export const INITIAL_PRICE_RANGE = [50000000, 1500000000];
 
-const SearchFilters = () => {
+const SearchFilters = ({ onActionComplete = () => {} }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -133,6 +133,7 @@ const SearchFilters = () => {
       yearMax: "",
     });
     router.push("/beli");
+    onActionComplete();
   };
 
   const isFilterActive = useMemo(() => {
@@ -210,16 +211,21 @@ const SearchFilters = () => {
 
     const queryString = params.toString();
     router.push(`/beli${queryString ? `?${queryString}` : ""}`);
+
+    onActionComplete();
   };
 
   return (
     <div
-      className="rounded-3xl overflow-auto bg-white shadow-md flex flex-col"
+      className="rounded-none md:rounded-3xl pb-4 md:pb-0 overflow-auto bg-white shadow-none md:shadow-md flex flex-col"
       style={{ scrollbarWidth: "none" }}
     >
       <div className="p-5 space-y-4">
-        <h1 className="text-lg font-medium text-gray-700">Filter Pencarian</h1>
-
+        <div className="hidden lg:block">
+          <h1 className="text-lg font-medium text-gray-700">
+            Filter Pencarian
+          </h1>
+        </div>
         {/* Harga */}
         <RangePrice
           value={productData.priceRange}

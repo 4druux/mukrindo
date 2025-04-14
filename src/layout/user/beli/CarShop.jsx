@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useProducts } from "@/context/ProductContext";
+import { Filter, X } from "lucide-react";
 
 // Import Components
 import ShortProduct, { SHORT_BY } from "@/components/global/ShortProduct";
@@ -14,6 +15,7 @@ import CarProductCard from "@/components/global/CarProductCard";
 import ActiveSearchFilters from "@/components/global/ActiveSearchFilter";
 import EmptyProductDisplay from "@/components/global/EmptyProductDisplay";
 import SearchFilters from "@/components/product-user/beli/SearchFilters";
+import { AnimatePresence, motion } from "framer-motion";
 
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";
 const MAX_VIEWED_ITEMS = 10;
@@ -46,6 +48,8 @@ const CarShop = () => {
   const router = useRouter();
   const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const [isMobileSearchFiltersOpen, setIsMobileSearchFiltersOpen] =
+    useState(false);
 
   useEffect(() => {
     setRecentlyViewed(getRecentlyViewed());
@@ -276,6 +280,33 @@ const CarShop = () => {
     router.push(`/beli${queryString ? `?${queryString}` : ""}`);
   };
 
+  useEffect(() => {
+    document.body.style.overflow = isMobileSearchFiltersOpen
+      ? "hidden"
+      : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isMobileSearchFiltersOpen]);
+
+  const mobileFilterPanelVariants = {
+    hidden: { x: "100%" },
+    visible: {
+      x: 0,
+      transition: { type: "tween", duration: 0.4, ease: "easeInOut" },
+    },
+    exit: {
+      x: "100%",
+      transition: { type: "tween", duration: 0.3, ease: "easeInOut" },
+    },
+  };
+
+  const overlayVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.3 } },
+    exit: { opacity: 0, transition: { duration: 0.3 } },
+  };
+
   return (
     <div className="">
       <div className="flex flex-col lg:flex-row gap-6">
@@ -366,6 +397,64 @@ const CarShop = () => {
           )}
         </div>
       </div>
+
+      {!isMobileSearchFiltersOpen && (
+        <button
+          onClick={() => setIsMobileSearchFiltersOpen(true)}
+          className="lg:hidden fixed bottom-30 -left-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-r-full shadow-lg z-40 flex items-center gap-2 hover:from-orange-600 hover:to-orange-700 transition-all duration-300" // Sedikit penyesuaian style
+          aria-label="Buka Filter"
+        >
+          <Filter className="w-4 h-4" />
+        </button>
+      )}
+
+      <AnimatePresence>
+        {isMobileSearchFiltersOpen && (
+          <>
+            {/* Overlay */}
+            <motion.div
+              key="mobile-filter-overlay"
+              variants={overlayVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              onClick={() => setIsMobileSearchFiltersOpen(false)}
+              className="fixed inset-0 bg-black/60 z-50 lg:hidden"
+              aria-hidden="true"
+            />
+
+            {/* Panel Konten Filter */}
+            <motion.div
+              key="mobile-filter-panel"
+              variants={mobileFilterPanelVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="fixed bottom-0 right-0 w-2/3 h-screen bg-white rounded-l-2xl shadow-xl z-50 flex flex-col lg:hidden"
+            >
+              {/* Header Panel */}
+              <div className="flex justify-between items-center p-4 border-b border-gray-200 flex-shrink-0">
+                <h2 className="text-lg font-medium text-gray-800">
+                  Filter Mobil
+                </h2>
+                <button
+                  onClick={() => setIsMobileSearchFiltersOpen(false)}
+                  className="p-1 rounded-full hover:bg-gray-100"
+                  aria-label="Tutup Filter"
+                >
+                  <X className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+
+              <div className="flex-grow overflow-y-auto rounded-bl-2xl mb-2">
+                <SearchFilters
+                  onActionComplete={() => setIsMobileSearchFiltersOpen(false)}
+                />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
