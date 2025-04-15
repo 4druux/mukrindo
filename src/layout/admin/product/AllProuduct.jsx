@@ -255,11 +255,11 @@ const AllProducts = () => {
         <div className="flex items-end justify-end">
           <button
             onClick={() => router.push("/admin/add-product")}
-            className="flex items-center space-x-1 px-3 py-1 lg:px-4 lg:py-2 rounded-full bg-orange-100 hover:bg-orange-200
-          cursor-pointer transition-colors mb-4 lg:mb-0"
+            className="flex items-center space-x-1 px-3 py-1 lg:px-4 lg:py-2 rounded-full border border-orange-500 bg-orange-100 hover:bg-orange-500
+          cursor-pointer transition-colors mb-4 lg:mb-0 group"
           >
-            <Plus className="text-orange-500 w-4 md:w-5" />
-            <span className="text-xs md:text-sm mt-1 text-orange-500">
+            <Plus className="text-orange-500 group-hover:text-white w-4 md:w-5" />
+            <span className="text-xs md:text-sm mt-1 text-orange-500 group-hover:text-white">
               Tambah Produk
             </span>
           </button>

@@ -584,8 +584,8 @@ const EditProduct = ({ productId }) => {
             <button
               type="button"
               onClick={() => router.back()}
-              className="cursor-pointer border text-gray-600 border-gray-500 hover:bg-orange-100 hover:border-orange-500
-            hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
+              className="cursor-pointer border text-orange-600 border-orange-500 hover:bg-orange-100 hover:border-orange-500 
+              hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
               disabled={loadingUpdate}
             >
               Kembali
@@ -595,7 +595,7 @@ const EditProduct = ({ productId }) => {
               className={`text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline ${
                 loadingUpdate
                   ? "bg-orange-500 opacity-55 cursor-not-allowed"
-                  : "bg-orange-500 hover:bg-orange-600 cursor-pointer"
+                  : "bg-orange-600 hover:bg-orange-500 cursor-pointer"
               }`}
               disabled={loadingUpdate}
             >
