@@ -1,6 +1,6 @@
-// layout/user/product/Carousel.jsx
+// layout/user/product/HomeCarousel.jsx
 "use client";
-import  { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
 // Import Swiper
@@ -11,7 +11,7 @@ import "swiper/css";
 // Import Icon
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 
-const Carousel = ({
+const HomeCarousel = ({
   images,
   onSlideChangeTransitionStart,
   onSlideChangeTransitionEnd,
@@ -161,4 +161,4 @@ const Carousel = ({
   );
 };
 
-export default Carousel;
+export default HomeCarousel;

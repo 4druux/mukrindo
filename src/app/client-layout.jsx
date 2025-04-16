@@ -41,7 +41,7 @@ export default function ClientLayout({ children }) {
         <div className="min-h-screen bg-gray-50">
           {showHeader && <AppHeader />}
           <BookmarkRightbar />
-          <div className="sm:px-[6vw] md:px-[9vw] lg:px-[10vw]">{children}</div>
+          <div className="">{children}</div>
         </div>
       </HeaderProvider>
     </>

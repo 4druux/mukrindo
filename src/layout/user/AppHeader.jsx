@@ -60,7 +60,7 @@ function AppHeader() {
           isTop ? "bg-gray-50" : "shadow-md bg-white"
         }`}
       >
-        <div className="flex items-center justify-between px-3 sm:px-[6vw] md:px-[9vw] lg:px-[10vw] py-3 lg:py-6">
+        <div className="container flex items-center justify-between px-3 py-3 lg:py-5">
           {/* Logo */}
           <Link href="/">
             <div className="flex items-center">
@@ -98,17 +98,6 @@ function AppHeader() {
               </Link>
 
               <Link
-                href="/simulasi-budget"
-                className={`text-sm font-medium hover:text-orange-500 ${
-                  pathname === "/simulasi-budget"
-                    ? "text-orange-500"
-                    : "text-gray-700"
-                }`}
-              >
-                Simulasi Budget
-              </Link>
-
-              <Link
                 href="/tukar-tambah"
                 className={`text-sm font-medium hover:text-orange-500 relative ${
                   pathname === "/tukar-tambah"
@@ -117,6 +106,17 @@ function AppHeader() {
                 }`}
               >
                 Tukar Tambah
+              </Link>
+
+              <Link
+                href="/simulasi-budget"
+                className={`text-sm font-medium hover:text-orange-500 ${
+                  pathname === "/simulasi-budget"
+                    ? "text-orange-500"
+                    : "text-gray-700"
+                }`}
+              >
+                Simulasi Budget
               </Link>
             </div>
 

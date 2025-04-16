@@ -1,6 +1,6 @@
 // Home.js
 import CarForm from "@/layout/user/home/CarForm";
-import Carousel from "@/layout/user/home/Carousel";
+import HomeCarousel from "@/layout/user/home/HomeCarousel";
 import ProductByPrice from "@/layout/user/home/ProductByPrice";
 import ProductByRecom from "@/layout/user/home/ProductByRecom";
 
@@ -15,9 +15,9 @@ export default function Home() {
   ];
 
   return (
-    <div>
+    <div className="container">
       <p className="lg:pt-10 border-t-2 border-gray-200"></p>
-      <Carousel images={bannerImages} />
+      <HomeCarousel images={bannerImages} />
       <div className=" space-y-8 mt-4 pb-8">
         <CarForm />
         <ProductByRecom />

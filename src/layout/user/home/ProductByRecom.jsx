@@ -182,10 +182,15 @@ const ProductByRecom = () => {
         emptyMessage={emptyMessage}
       />
 
+      <p className="text-xs text-center text-gray-500 block lg:hidden">
+        Menampilkan {displayedProducts.slice(0, 9).length} dari{" "}
+        {products.length} Mobil
+      </p>
+
       <div className="hidden lg:block">
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col items-center">
           <p className="text-sm text-gray-500">
-            Hanya menampilkan {displayedProducts.slice(0, 9).length} dari{" "}
+            Menampilkan {displayedProducts.slice(0, 9).length} dari{" "}
             {products.length} Mobil
           </p>
           <Link href="/beli">

@@ -5,6 +5,20 @@
   font-family: "Poppins", sans-serif;
 }
 
+@media (min-width: 768px) {
+  .container {
+    padding-left: 9vw;
+    padding-right: 9vw;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding-left: 10vw;
+    padding-right: 10vw;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 7px;
 }
