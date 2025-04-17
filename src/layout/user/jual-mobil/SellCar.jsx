@@ -12,6 +12,8 @@ import carData from "@/utils/carData";
 import { FaCheck } from "react-icons/fa";
 import Step1Form from "@/components/product-user/jual-mobil/Step1Form";
 import Step2Form from "@/components/product-user/jual-mobil/Step2Form";
+import Step3Form from "@/components/product-user/jual-mobil/Step3Form"; // Import Step3Form
+import { getCityOptions } from "@/utils/locationData";
 
 const PHONE_PREFIX = "(+62) ";
 
@@ -23,6 +25,7 @@ const SellCar = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
+    // Step 1 fields
     brand: initialBrand,
     model: initialModel,
     variant: "",
@@ -32,11 +35,20 @@ const SellCar = ({
     color: "",
     travelDistance: "",
     price: "",
+    // Step 2 fields
     name: "",
     phoneNumber: initialPhoneNumber
       ? formatNumberPhone(initialPhoneNumber, PHONE_PREFIX)
       : PHONE_PREFIX,
     email: "",
+    // Step 3 fields
+    inspectionLocationType: "showroom",
+    showroomAddress: "",
+    province: "",
+    city: "",
+    fullAddress: "",
+    inspectionDate: "",
+    inspectionTime: "",
   });
   const [errors, setErrors] = useState({});
 
@@ -54,9 +66,8 @@ const SellCar = ({
   // --- End Refs ---
 
   useEffect(() => {
-    // ... (useEffect yang sudah ada tetap sama) ...
     setFormData((prev) => ({
-      // ... (isi useEffect tetap sama) ...
+      ...prev,
       brand: initialBrand || prev.brand,
       model: initialModel || prev.model,
       year: initialYear || prev.year,
@@ -66,15 +77,16 @@ const SellCar = ({
         ? prev.phoneNumber
         : PHONE_PREFIX,
     }));
+
     if (initialBrand && initialBrand !== formData.brand) {
-      setFormData((prev) => ({ ...prev, model: initialModel || "" }));
-    }
-    if (initialModel && initialBrand !== formData.brand) {
-      setFormData((prev) => ({ ...prev, model: "" }));
+      setFormData((prev) => ({
+        ...prev,
+        model: initialModel || "",
+        variant: "",
+      }));
     }
   }, [initialBrand, initialModel, initialYear, initialPhoneNumber]);
 
-  // --- Dynamic Options (Mirip AddProduct, termasuk Variant) ---
   const brandOptions = useMemo(
     () =>
       Object.keys(carData).map((brand) => ({
@@ -124,40 +136,34 @@ const SellCar = ({
   };
   // --- End Clear Error Logic ---
 
-  // --- Modified handleChange (Mirip AddProduct) ---
   const handleChange = (e) => {
     const { name, value } = e.target;
     let updatedValue = value;
 
     if (name === "price" || name === "travelDistance") {
-      const unformattedNum = unformatNumber(value); // unformatNumber returns number (0 or parsed int)
-      // Simpan string kosong jika 0 atau tidak valid, jika valid simpan ANGKA nya
+      const unformattedNum = unformatNumber(value);
       updatedValue = unformattedNum > 0 ? unformattedNum : "";
     } else if (name === "phoneNumber") {
-      // Logika phone number tetap sama
       const rawValue = unformatNumberPhone(value, PHONE_PREFIX);
       const numericValue = rawValue.replace(/\D/g, "");
       updatedValue = formatNumberPhone(numericValue, PHONE_PREFIX);
     }
-    // Untuk field lain (color, stnkExpiry, dll), updatedValue adalah value asli (string)
 
     setFormData((prev) => ({
       ...prev,
-      // Pastikan tidak menyimpan undefined/null
       [name]: updatedValue ?? "",
     }));
-    clearErrorOnChange(name); // Clear error on change
+    clearErrorOnChange(name);
 
-    // Auto focus/open logic timer
     if (inputTimers.current[name]) {
       clearTimeout(inputTimers.current[name]);
     }
 
     if (!value) {
-      return; // Jangan trigger auto-focus jika value kosong
+      return;
     }
 
-    const inactivityDelay = 750; // Delay seperti di AddProduct
+    const inactivityDelay = 2000;
 
     // Auto focus logic for Step 1 inputs
     if (name === "stnkExpiry") {
@@ -316,50 +322,110 @@ const SellCar = ({
     );
   };
 
-  const handleNextStep = () => {
-    if (validateStep1()) {
-      setCurrentStep(2);
-      window.scrollTo(0, 0);
-    } else {
-      toast.error("Harap lengkapi semua informasi mobil dengan benar.", {
+  const validateStep3 = () => {
+    const newErrors = {};
+    if (!formData.inspectionLocationType) {
+      newErrors.inspectionLocationType = "Pilih lokasi inspeksi.";
+    } else if (formData.inspectionLocationType === "showroom") {
+      if (!formData.showroomAddress)
+        newErrors.showroomAddress = "Pilih alamat showroom.";
+    } else if (formData.inspectionLocationType === "rumah") {
+      if (!formData.province) newErrors.province = "Provinsi wajib diisi.";
+      if (!formData.city) newErrors.city = "Kota/Kabupaten wajib diisi.";
+      if (!formData.fullAddress.trim())
+        newErrors.fullAddress = "Alamat lengkap wajib diisi.";
+    }
+
+    // Validasi field umum (tanggal & jam) hanya jika lokasi sudah dipilih
+    if (formData.inspectionLocationType) {
+      if (!formData.inspectionDate)
+        newErrors.inspectionDate = "Tanggal inspeksi wajib diisi.";
+      if (!formData.inspectionTime)
+        newErrors.inspectionTime = "Jam inspeksi wajib diisi.";
+    }
+
+    setErrors(newErrors);
+    // Scroll to first error
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorKey = Object.keys(newErrors)[0];
+      const errorElement = document.getElementById(firstErrorKey);
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      toast.error("Harap lengkapi informasi lokasi & jadwal inspeksi.", {
         className: "custom-toast",
       });
+    }
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleNextStep = () => {
+    if (currentStep === 1) {
+      if (validateStep1()) {
+        setCurrentStep(2);
+        window.scrollTo(0, 0);
+      } else {
+        toast.error("Harap lengkapi semua informasi mobil dengan benar.", {
+          className: "custom-toast",
+        });
+      }
+    } else if (currentStep === 2) {
+      if (validateStep2()) {
+        setCurrentStep(3); // Lanjut ke Step 3
+        window.scrollTo(0, 0);
+      } else {
+        toast.error("Harap lengkapi informasi kontak Anda dengan benar.", {
+          className: "custom-toast",
+        });
+      }
     }
   };
 
   const handlePreviousStep = () => {
-    setCurrentStep(1);
-    window.scrollTo(0, 0);
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+      window.scrollTo(0, 0);
+    }
   };
 
   const handleSubmit = () => {
-    if (validateStep2()) {
+    if (validateStep3()) {
       const rawPhoneNumber = unformatNumberPhone(
         formData.phoneNumber,
         PHONE_PREFIX
       );
-      // Pastikan data numerik dikirim tanpa format
       const submissionData = {
         ...formData,
         phoneNumber: rawPhoneNumber,
         travelDistance: unformatNumber(formData.travelDistance),
         price: unformatNumber(formData.price),
+        ...(formData.inspectionLocationType === "showroom" && {
+          province: undefined,
+          city: undefined,
+          fullAddress: undefined,
+        }),
+        ...(formData.inspectionLocationType === "rumah" && {
+          showroomAddress: undefined,
+        }),
       };
+
+      // Hapus properti undefined jika ada
+      Object.keys(submissionData).forEach((key) => {
+        if (submissionData[key] === undefined) {
+          delete submissionData[key];
+        }
+      });
+
       console.log("Data Siap Dikirim:", submissionData);
       toast.success("Permintaan Anda sedang diproses!");
-      // TODO: Tambahkan logika pengiriman data ke API jika ada
-      // Reset form atau navigasi mungkin diperlukan di sini
-    } else {
-      toast.error("Harap lengkapi informasi kontak Anda dengan benar.", {
-        className: "custom-toast",
-      });
     }
   };
 
   // ... (renderStepper tetap sama) ...
   const renderStepper = () => (
-    <div className="h-3/4 flex flex-col justify-between relative">
-      <div className="z-10 bg-white pb-2">
+    <div className="h-full flex flex-col justify-between relative">
+      {/* Step 1 */}
+      <div className="z-10 bg-white pb-2 flex items-center">
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
             currentStep >= 1
@@ -369,25 +435,63 @@ const SellCar = ({
         >
           {currentStep > 1 ? <FaCheck size={16} /> : "1"}
         </div>
+        <span
+          className={`ml-2 text-sm font-medium ${
+            currentStep >= 1 ? "text-gray-700" : "text-gray-500"
+          }`}
+        >
+          Info Mobil
+        </span>
       </div>
-
+      {/* Connector 1-2 */}
       <div
-        className={`absolute top-4 left-4 bottom-4 border-l-2 border-dashed ${
-          currentStep > 1 ? "border-orange-600" : "border-gray-300"
-        }
-      `}
-      ></div>
-
-      <div className="z-10 bg-white pt-2">
+        className="absolute top-4 left-4 h-[calc(50%-1rem)] border-l-2 border-dashed z-0
+          border-orange-600"
+      ></div>{" "}
+      {/* Selalu orange setelah step 1 */}
+      {/* Step 2 */}
+      <div className="z-10 bg-white py-2 flex items-center">
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
             currentStep >= 2
               ? "bg-orange-600 text-white"
-              : "bg-gray-200 text-gray-500"
+              : "bg-gray-300 text-gray-500"
           }`}
         >
-          2
+          {currentStep > 2 ? <FaCheck size={16} /> : "2"}
         </div>
+        <span
+          className={`ml-2 text-sm font-medium ${
+            currentStep >= 2 ? "text-gray-700" : "text-gray-500"
+          }`}
+        >
+          Info Kontak
+        </span>
+      </div>
+      {/* Connector 2-3 */}
+      <div
+        className={`absolute top-1/2 left-4 h-[calc(50%-1rem)] border-l-2 border-dashed z-0 ${
+          currentStep > 2 ? "border-orange-600" : "border-gray-300"
+        }`}
+      ></div>
+      {/* Step 3 */}
+      <div className="z-10 bg-white pt-2 flex items-center">
+        <div
+          className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+            currentStep >= 3
+              ? "bg-orange-600 text-white"
+              : "bg-gray-300 text-gray-500"
+          }`}
+        >
+          3
+        </div>
+        <span
+          className={`ml-2 text-sm font-medium ${
+            currentStep >= 3 ? "text-gray-700" : "text-gray-500"
+          }`}
+        >
+          Lokasi Inspeksi
+        </span>
       </div>
     </div>
   );
@@ -396,21 +500,20 @@ const SellCar = ({
     <div className="container mx-auto -mt-10 md:-mt-16 lg:-mt-20 relative z-20 px-4 md:px-0">
       <div className="bg-white shadow-lg p-4 md:p-8 rounded-xl md:rounded-2xl">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="w-full md:w-28 flex-shrink-0">{renderStepper()}</div>
+          <div className="w-full md:w-1/8 flex-shrink-0">{renderStepper()}</div>
+          {/* Form di kanan */}
           <div className="flex-1 min-w-0">
             {currentStep === 1 && (
               <Step1Form
-                // --- Pass new props ---
                 formData={formData}
                 handleChange={handleChange}
                 handleSelectChange={handleSelectChange}
                 errors={errors}
-                onNext={handleNextStep}
+                onNext={handleNextStep} // Tetap onNext
                 brandOptions={brandOptions}
                 modelOptions={modelOptions}
-                variantOptions={variantOptions} // Pass dynamic variant options
-                formatNumber={formatNumber} // Pass formatter function
-                // Pass refs
+                variantOptions={variantOptions}
+                formatNumber={formatNumber}
                 brandRef={brandSelectRef}
                 modelRef={modelSelectRef}
                 variantRef={variantSelectRef}
@@ -420,18 +523,27 @@ const SellCar = ({
                 colorRef={colorInputRef}
                 travelDistanceRef={travelDistanceInputRef}
                 priceRef={priceInputRef}
-                // --- End pass new props ---
               />
             )}
             {currentStep === 2 && (
               <Step2Form
                 formData={formData}
-                handleChange={handleChange} // Gunakan handleChange yang sudah dimodifikasi
+                handleChange={handleChange}
                 errors={errors}
-                onSubmit={handleSubmit}
+                onSubmit={handleNextStep} // Tombol di Step 2 sekarang memanggil handleNextStep
                 onBack={handlePreviousStep}
                 PHONE_PREFIX={PHONE_PREFIX}
-                // Anda bisa menambahkan refs untuk input di Step 2 jika perlu auto-focus di sana
+              />
+            )}
+            {currentStep === 3 && ( // Render Step3Form
+              <Step3Form
+                formData={formData}
+                handleChange={handleChange}
+                handleSelectChange={handleSelectChange}
+                errors={errors}
+                onSubmit={handleSubmit} // Tombol di Step 3 memanggil handleSubmit
+                onBack={handlePreviousStep}
+                // Tidak perlu pass cityOptions jika dihitung di dalam Step3Form
               />
             )}
           </div>

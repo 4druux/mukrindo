@@ -60,7 +60,7 @@ const Step2Form = ({
           onClick={onSubmit}
           className="cursor-pointer bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
         >
-          Jual Sekarang
+          Selanjutnya
         </button>
       </div>
     </div>

@@ -201,7 +201,7 @@ const Select = forwardRef(
                         value={option.value}
                         checked={value === option.value}
                         onChange={() => handleOptionClick(option.value)}
-                        className="h-4 w-4 text-orange-500 focus:ring-orange-500 border-gray-300 rounded-full"
+                        className="form-radio h-4 w-4 accent-orange-600"
                       />
                     </label>
                   ))
