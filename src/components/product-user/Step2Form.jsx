@@ -6,17 +6,20 @@ const Step2Form = ({
   formData,
   handleChange,
   errors,
-  onSubmit,
+  onNext,
   onBack,
-  PHONE_PREFIX, // Terima dari SellCar
+  PHONE_PREFIX,
+  currentStep,
+  totalCarSteps,
 }) => {
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-800 mb-1">
+      <h2 className="text-lg font-medium text-gray-700 mb-1">
         Informasi Kontak Kamu
       </h2>
-      <p className="text-sm text-gray-500 mb-6">
-        Kami akan menghubungimu berdasarkan informasi ini.
+      <p className="text-sm text-gray-700 mb-6">
+        Selesaikan {currentStep} dari {totalCarSteps.length} langkah dan kami
+        akan menghubungimu berdasarkan informasi ini.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <Input
@@ -57,7 +60,7 @@ const Step2Form = ({
         </button>
         <button
           type="button"
-          onClick={onSubmit}
+          onClick={onNext}
           className="cursor-pointer bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
         >
           Selanjutnya

@@ -10,6 +10,7 @@ import CarSystems from "@/components/product-admin/CarSystems";
 import CarPapers from "@/components/product-admin/CarPapers";
 import { validateProductData } from "@/utils/validateProductData";
 import { formatNumber, unformatNumber } from "@/utils/formatNumber";
+import { carColorOptions } from "@/utils/carColorOptions";
 import carData from "@/utils/carData";
 import SkeletonEditProduct from "@/components/skeleton/skeleton-admin/SkeletonEditProduct";
 import { useProducts } from "@/context/ProductContext";
@@ -43,7 +44,7 @@ const EditProduct = ({ productId }) => {
   const modelSelectRef = useRef(null);
   const variantSelectRef = useRef(null);
   const typeSelectRef = useRef(null);
-  const carColorInputRef = useRef(null);
+  const carColorSelectRef = useRef(null);
   const ccInputRef = useRef(null);
   const travelDistanceInputRef = useRef(null);
   const driveSystemSelectRef = useRef(null);
@@ -108,7 +109,7 @@ const EditProduct = ({ productId }) => {
         brandSelectRef.current?.openDropdown();
       }, inactivityDelay);
     } else if (name === "type" && value) {
-      setTimeout(() => carColorInputRef.current?.focus(), 50);
+      setTimeout(() => carColorSelectRef.current?.openDropdown(), 50);
     } else if (name === "carColor") {
       inputTimers.current[name] = setTimeout(() => {
         ccInputRef.current?.focus();
@@ -491,14 +492,18 @@ const EditProduct = ({ productId }) => {
             ]}
           />
 
-          <Input
-            ref={carColorInputRef}
+          <Select
+            ref={carColorSelectRef}
             label="Warna Mobil"
             id="carColor"
             name="carColor"
-            placeholderTexts={["Warna mobil anda"]}
+            title=" Warna Mobil"
+            description="Pilih Warna Mobil"
+            options={carColorOptions}
             value={productData.carColor}
-            onChange={handleChange}
+            onChange={(value) =>
+              handleChange({ target: { name: "carColor", value } })
+            }
             error={errors.carColor}
           />
 

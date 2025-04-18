@@ -16,7 +16,11 @@ const Step3Form = ({
   handleSelectChange,
   errors,
   onSubmit,
+  onNext,
   onBack,
+  currentStep,
+  totalCarSteps,
+  isSellRoute = false,
 }) => {
   const handleLocationTypeChange = (e) => {
     const { name, value } = e.target;
@@ -49,19 +53,18 @@ const Step3Form = ({
     return getCityOptions(formData.province);
   }, [formData.province]);
 
-  const MUKRINDO_MAPS_URL = "https://maps.app.goo.gl/Yzri7iGL8dZb1W8z6";
-
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-800 mb-1">
+      <h2 className="text-lg font-medium text-gray-700 mb-1">
         Lokasi & Jadwal Inspeksi
       </h2>
-      <p className="text-sm text-gray-500 mb-6">
-        Pilih lokasi dan jadwal yang paling nyaman untukmu.
+      <p className="text-sm text-gray-700 mb-6">
+        Selesaikan {currentStep} dari {totalCarSteps.length} langkah dan pilih
+        lokasi dan jadwal yang paling nyaman untukmu.
       </p>
 
       {/* Pilihan Lokasi Inspeksi */}
-      <div className="mb-6">
+      <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Lokasi Inspeksi
         </label>
@@ -75,10 +78,12 @@ const Step3Form = ({
               onChange={handleLocationTypeChange}
               className="form-radio h-4 w-4 accent-orange-600"
             />
-            <span className="text-sm font-medium text-gray-700">
+
+            <span className="text-xs lg:text-sm  font-medium text-gray-700">
               Showroom Mukrindo Motor
             </span>
           </label>
+
           <label className="flex items-center space-x-2 cursor-pointer">
             <input
               type="radio"
@@ -88,9 +93,28 @@ const Step3Form = ({
               onChange={handleLocationTypeChange}
               className="form-radio h-4 w-4 accent-orange-600"
             />
-            <span className="text-sm font-medium text-gray-700">Rumah</span>
+            <span className="text-xs lg:text-sm font-medium text-gray-700">
+              Rumah
+            </span>
           </label>
         </div>
+
+        {formData.inspectionLocationType === "showroom" && (
+          <>
+            <div className="mt-2">
+              <a
+                href="https://maps.app.goo.gl/Yzri7iGL8dZb1W8z6"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-orange-500 hover:text-orange-600 hover:underline inline-flex items-center cursor-pointer"
+              >
+                <MapPin size={12} className="mr-1" />
+                Lihat Peta Lokasi
+              </a>
+            </div>
+          </>
+        )}
+
         {errors.inspectionLocationType && (
           <p className="mt-1 text-xs text-red-600">
             {errors.inspectionLocationType}
@@ -99,36 +123,19 @@ const Step3Form = ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        {/* --- Opsi jika Showroom dipilih --- */}
         {formData.inspectionLocationType === "showroom" && (
           <>
-            <div>
-              <Select
-                label="Pilih Showroom"
-                id="showroomAddress"
-                name="showroomAddress"
-                title="Alamat Showroom"
-                description="showroom Mukrindo Motor"
-                options={showroomOptions}
-                value={formData.showroomAddress}
-                onChange={(value) =>
-                  handleSelectChange("showroomAddress", value)
-                }
-                error={errors.showroomAddress}
-              />
-
-              <div className="-mt-3 z-10">
-                <a
-                  href={MUKRINDO_MAPS_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-orange-500 hover:text-orange-600 hover:underline inline-flex items-center cursor-pointer"
-                >
-                  <MapPin size={12} className="mr-1" />
-                  Lihat Peta Lokasic
-                </a>
-              </div>
-            </div>
+            <Select
+              label="Alamat Showroom"
+              id="showroomAddress"
+              name="showroomAddress"
+              title="Alamat Showroom"
+              description="showroom Mukrindo Motor"
+              options={showroomOptions}
+              value={formData.showroomAddress}
+              onChange={(value) => handleSelectChange("showroomAddress", value)}
+              error={errors.showroomAddress}
+            />
 
             <Input
               label="Tanggal Inspeksi"
@@ -140,6 +147,7 @@ const Step3Form = ({
               error={errors.inspectionDate}
               min={new Date().toISOString().split("T")[0]}
             />
+
             <Select
               label="Jam Inspeksi"
               id="inspectionTime"
@@ -154,7 +162,6 @@ const Step3Form = ({
           </>
         )}
 
-        {/* --- Opsi jika Rumah dipilih --- */}
         {formData.inspectionLocationType === "rumah" && (
           <>
             <Select
@@ -235,10 +242,10 @@ const Step3Form = ({
         </button>
         <button
           type="button"
-          onClick={onSubmit}
+          onClick={isSellRoute ? onSubmit : onNext}
           className="cursor-pointer bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
         >
-          Jual Sekarang
+          {isSellRoute ? "Jual Sekarang" : "Selanjutnya"}
         </button>
       </div>
     </div>

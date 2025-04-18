@@ -2,9 +2,6 @@
 import React from "react";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
-// formatNumber tidak perlu diimport di sini karena sudah di-pass sebagai prop
-
-// const dummyOptions = { ... }; // Tidak digunakan lagi
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 26 }, (_, i) => currentYear - i).map(
@@ -20,10 +17,13 @@ const Step1Form = ({
   handleSelectChange,
   errors,
   onNext,
+  currentStep,
+  totalCarSteps,
   brandOptions,
   modelOptions,
   variantOptions,
   formatNumber,
+  colorOptions,
   brandRef,
   modelRef,
   variantRef,
@@ -33,14 +33,16 @@ const Step1Form = ({
   colorRef,
   travelDistanceRef,
   priceRef,
+  isSellRoute = false,
 }) => {
   return (
     <div>
       <h2 className="text-lg font-medium text-gray-700 mb-1">
         Informasi Mobil Kamu
       </h2>
-      <p className="text-sm text-gray-500 mb-6">
-        Lengkapi detail mobil yang ingin kamu jual.
+      <p className="text-sm text-gray-700 mb-6">
+        Selesaikan {currentStep} dari {totalCarSteps.length} langkah dan
+        lengkapi detail mobil {isSellRoute ? "yang ingin kamu jual" : "anda"}
       </p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Select
@@ -72,6 +74,7 @@ const Step1Form = ({
           onChange={(value) => handleSelectChange("model", value)}
           disabled={!formData.brand}
           error={errors.model}
+          searchOption={true}
         />
         <Select
           ref={variantRef}
@@ -119,6 +122,7 @@ const Step1Form = ({
           onChange={(value) => handleSelectChange("transmission", value)}
           error={errors.transmission}
         />
+
         <Input
           ref={stnkExpiryRef}
           label="Masa Berlaku STNK"
@@ -129,23 +133,20 @@ const Step1Form = ({
           onChange={handleChange}
           error={errors.stnkExpiry}
         />
-        <Input
+
+        <Select
           ref={colorRef}
-          id="color"
           label="Warna Mobil Anda"
+          id="color"
           name="color"
+          title="Pilih Warna"
+          description="Pilih warna mobil Anda saat ini"
+          options={colorOptions}
           value={formData.color}
-          onChange={handleChange}
-          placeholderTexts={[
-            "Merah",
-            "Biru",
-            "Hitam",
-            "Putih",
-            "Abu-Abu",
-            "Ungu",
-          ]}
+          onChange={(value) => handleSelectChange("color", value)}
           error={errors.color}
         />
+
         <Input
           ref={travelDistanceRef}
           label="Jarak Tempuh (KM)"
@@ -157,17 +158,22 @@ const Step1Form = ({
           formatter={formatNumber}
           error={errors.travelDistance}
         />
-        <Input
-          ref={priceRef}
-          label="Harga Mobil"
-          id="price"
-          name="price"
-          value={formData.price}
-          onChange={handleChange}
-          formatter={formatNumber}
-          error={errors.price}
-          prefix="Rp "
-        />
+
+        {isSellRoute && (
+          <>
+            <Input
+              ref={priceRef}
+              label="Harga Mobil"
+              id="price"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              formatter={formatNumber}
+              error={errors.price}
+              prefix="Rp "
+            />
+          </>
+        )}
       </div>
       <div className="flex justify-end mt-4">
         <button

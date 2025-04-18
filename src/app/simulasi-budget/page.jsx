@@ -1,11 +1,31 @@
+"use client";
+
 import React from "react";
+import { useSearchParams } from "next/navigation";
+import SellCar from "@/layout/user/jual-mobil/SellCar";
+import CarouselGlobal from "@/components/global/CarouselGlobal";
 
 const BudgetSimulationPage = () => {
+  const searchParams = useSearchParams();
+
+  const initialBrand = searchParams.get("brand") || "";
+  const initialModel = searchParams.get("model") || "";
+  const initialYear = searchParams.get("year") || "";
+  const initialPhoneNumberRaw = searchParams.get("phoneNumber") || "";
   return (
-    <div className="container">
-      <div className=" lg:pt-10 border-t-2 border-gray-200">
-        ini simulasi budget
-      </div>
+    <div className="min-h-screen">
+      <CarouselGlobal
+        imageUrl="/images/placeholder-banner.jpg"
+        imageAlt="Simulasi Budget Pembelian Mobil"
+        title="Simulasi Budget Pembelian Mobil"
+        subtitle="Hitung Estimasi Cicilan dengan Mudah"
+      />
+      <SellCar
+        initialBrand={initialBrand}
+        initialModel={initialModel}
+        initialYear={initialYear}
+        initialPhoneNumber={initialPhoneNumberRaw}
+      />
     </div>
   );
 };

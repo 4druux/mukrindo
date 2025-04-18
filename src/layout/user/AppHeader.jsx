@@ -80,7 +80,7 @@ function AppHeader() {
               <Link
                 href="/beli"
                 className={`text-sm font-medium hover:text-orange-500 ${
-                  pathname === "/beli" ? "text-orange-500" : "text-gray-700"
+                  pathname === "/beli" ? "text-orange-600" : "text-gray-700"
                 }`}
               >
                 Beli Mobil
@@ -90,7 +90,7 @@ function AppHeader() {
                 href="/jual-mobil"
                 className={`text-sm font-medium hover:text-orange-500 ${
                   pathname === "/jual-mobil"
-                    ? "text-orange-500"
+                    ? "text-orange-600"
                     : "text-gray-700"
                 }`}
               >
@@ -101,7 +101,7 @@ function AppHeader() {
                 href="/tukar-tambah"
                 className={`text-sm font-medium hover:text-orange-500 relative ${
                   pathname === "/tukar-tambah"
-                    ? "text-orange-500"
+                    ? "text-orange-600"
                     : "text-gray-700"
                 }`}
               >
@@ -112,7 +112,7 @@ function AppHeader() {
                 href="/simulasi-budget"
                 className={`text-sm font-medium hover:text-orange-500 ${
                   pathname === "/simulasi-budget"
-                    ? "text-orange-500"
+                    ? "text-orange-600"
                     : "text-gray-700"
                 }`}
               >

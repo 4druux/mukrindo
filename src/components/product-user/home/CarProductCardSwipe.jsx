@@ -52,7 +52,7 @@ const CarProductCardSwipe = ({
             return (
               <div
                 key={product._id}
-                className="w-72 md:w-auto flex-shrink-0 md:flex-shrink rounded-2xl bg-white overflow-hidden transition-shadow duration-200 relative shadow-md hover:shadow-xl flex flex-col"
+                className="w-72 md:w-auto flex-shrink-0 md:flex-shrink rounded-2xl bg-white overflow-hidden transition-shadow duration-200 relative shadow-md lg:hover:shadow-xl flex flex-col"
                 onClick={() => onProductClick(product)}
               >
                 <Link

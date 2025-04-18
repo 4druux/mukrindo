@@ -89,9 +89,19 @@ const Select = forwardRef(
             isDropdownOpen ? "border-orange-300" : "border-gray-300"
           } ${error ? " border-red-500" : "border-gray-300"}`}
         >
-          <span className="text-xs flex items-center gap-1">
+          <span className="text-sm flex items-center gap-1">
             {value ? (
               <>
+                {options.find((opt) => opt.value === value)?.hex && (
+                  <span
+                    className="w-4 h-4 inline-block shadow-sm"
+                    style={{
+                      backgroundColor: options.find(
+                        (opt) => opt.value === value
+                      )?.hex,
+                    }}
+                  ></span>
+                )}
                 {options.find((opt) => opt.value === value)?.ImgUrl && (
                   <img
                     src={options.find((opt) => opt.value === value)?.ImgUrl}
@@ -127,7 +137,9 @@ const Select = forwardRef(
               <div className="px-3 sticky top-0 z-10">
                 <div className="flex items-center justify-between">
                   {title && (
-                    <span className="font-semibold text-sm">{title}</span>
+                    <span className="font-normal text-sm">
+                      {title}
+                    </span>
                   )}
                   <button
                     type="button"
@@ -184,6 +196,13 @@ const Select = forwardRef(
                       className="flex items-center text-sm justify-between py-2 px-3 hover:bg-gray-100 cursor-pointer"
                     >
                       <div className="flex items-center gap-2">
+                        {option.hex && (
+                          <span
+                            className="w-4 h-4 inline-block shadow-sm"
+                            style={{ backgroundColor: option.hex }}
+                          ></span>
+                        )}
+
                         {option.ImgUrl && (
                           <img
                             src={option.ImgUrl}

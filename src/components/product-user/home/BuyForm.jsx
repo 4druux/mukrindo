@@ -100,7 +100,7 @@ const BuyForm = ({
         />
 
         {/* Input Tahun Min & Max */}
-        <div className="flex flex-col items-start">
+        <div className="flex flex-col items-start mt-4 lg:mt-0">
           <label className="text-sm font-medium text-gray-700 block mb-1">
             Tahun
           </label>
