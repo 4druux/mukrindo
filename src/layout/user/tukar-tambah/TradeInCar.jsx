@@ -758,7 +758,7 @@ const TradeInCar = ({
         PHONE_PREFIX
       );
       const submissionData = {
-        // Data Mobil Lama (Step 1)
+        // Step 1
         tradeInBrand: formData.brand,
         tradeInModel: formData.model,
         tradeInVariant: formData.variant,
@@ -766,13 +766,13 @@ const TradeInCar = ({
         tradeInTransmission: formData.transmission,
         tradeInStnkExpiry: formData.stnkExpiry,
         tradeInColor: formData.color,
-        tradeInTravelDistance: unformatNumber(formData.travelDistance), // Kirim angka
-        tradeInPrice: unformatNumber(formData.price), // Kirim angka
-        // Data Kontak (Step 2)
+        tradeInTravelDistance: unformatNumber(formData.travelDistance),
+        tradeInPrice: unformatNumber(formData.price),
+        //  Step 2
         customerName: formData.name,
-        customerPhoneNumber: rawPhoneNumber, // Kirim nomor tanpa format
+        customerPhoneNumber: rawPhoneNumber,
         customerEmail: formData.email,
-        // Data Inspeksi (Step 3)
+        // Step 3
         inspectionLocationType: formData.inspectionLocationType,
         inspectionShowroomAddress:
           formData.inspectionLocationType === "showroom"
@@ -792,7 +792,7 @@ const TradeInCar = ({
             : undefined,
         inspectionDate: formData.inspectionDate,
         inspectionTime: formData.inspectionTime,
-        // Preferensi Mobil Baru (Step 4)
+        // Step 4
         newCarBrandPreference: formData.newCarBrand || undefined,
         newCarModelPreference: formData.newCarModel || undefined,
         newCarVariantPreference: formData.newCarVariant || undefined,
@@ -801,7 +801,6 @@ const TradeInCar = ({
         newCarPriceRangePreference: formData.newCarPriceRange || undefined,
       };
 
-      // Hapus properti undefined sebelum mengirim (opsional, tergantung backend)
       Object.keys(submissionData).forEach((key) => {
         if (submissionData[key] === undefined) {
           delete submissionData[key];
