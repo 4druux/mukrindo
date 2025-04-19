@@ -13,8 +13,11 @@ import Step2Form from "@/components/product-user/Step2Form";
 import Step3Form from "@/components/product-user/Step3Form";
 import Stepper from "@/components/global/Stepper";
 import { carColorOptions as staticCarColorOptions } from "@/utils/carColorOptions";
+import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
 
 const PHONE_PREFIX = "(+62) ";
+const QUICK_OPEN_DELAY = 50;
+const INACTIVITY_DELAY = 10000;
 
 const SellCar = ({
   initialBrand = "",
@@ -29,20 +32,25 @@ const SellCar = ({
     { id: 3, label: "Lokasi Inspeksi" },
   ];
   const [formData, setFormData] = useState({
+    // Step 1
     brand: initialBrand,
     model: initialModel,
     variant: "",
-    year: initialYear,
     transmission: "",
-    stnkExpiry: "",
     color: "",
+    year: initialYear,
+    stnkExpiry: "",
     travelDistance: "",
     price: "",
+
+    // Step 2
     name: "",
     phoneNumber: initialPhoneNumber
       ? formatNumberPhone(initialPhoneNumber, PHONE_PREFIX)
       : PHONE_PREFIX,
     email: "",
+
+    // Step 3
     inspectionLocationType: "showroom",
     showroomAddress: "",
     province: "",
@@ -52,17 +60,131 @@ const SellCar = ({
     inspectionTime: "",
   });
   const [errors, setErrors] = useState({});
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState("");
 
+  // Step 1 Refs
   const brandSelectRef = useRef(null);
   const modelSelectRef = useRef(null);
   const variantSelectRef = useRef(null);
-  const yearSelectRef = useRef(null);
   const transmissionSelectRef = useRef(null);
-  const stnkExpiryInputRef = useRef(null);
   const colorSelectRef = useRef(null);
+  const yearSelectRef = useRef(null);
+  const stnkExpiryInputRef = useRef(null);
   const travelDistanceInputRef = useRef(null);
   const priceInputRef = useRef(null);
-  const inputTimers = useRef({});
+
+  // Step 3 Refs
+  const showroomAddressInputRef = useRef(null);
+  const provinceSelectRef = useRef(null);
+  const citySelectRef = useRef(null);
+  const fullAddressInputRef = useRef(null);
+  const inspectionDateInputRef = useRef(null);
+  const inspectionTimeInputRef = useRef(null);
+
+  const allRefs = useMemo(
+    () => ({
+      // Step 1
+      brand: brandSelectRef,
+      model: modelSelectRef,
+      variant: variantSelectRef,
+      transmission: transmissionSelectRef,
+      color: colorSelectRef,
+      year: yearSelectRef,
+      stnkExpiry: stnkExpiryInputRef,
+      travelDistance: travelDistanceInputRef,
+      price: priceInputRef,
+
+      // Step 3
+      showroomAddress: showroomAddressInputRef,
+      province: provinceSelectRef,
+      city: citySelectRef,
+      fullAddress: fullAddressInputRef,
+      inspectionDate: inspectionDateInputRef,
+      inspectionTime: inspectionTimeInputRef,
+    }),
+    []
+  );
+
+  const sellCarTransitions = useMemo(
+    () => ({
+      // Step 1 Transitions
+      brand: {
+        target: "model",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      model: {
+        target: "variant",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      variant: {
+        target: "transmission",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      transmission: {
+        target: "color",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      color: {
+        target: "year",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      year: {
+        target: "stnkExpiry",
+        action: "focus",
+        delay: QUICK_OPEN_DELAY,
+      },
+      stnkExpiry: {
+        target: "travelDistance",
+        action: "focus",
+        delay: QUICK_OPEN_DELAY,
+      },
+      travelDistance: {
+        target: "price",
+        action: "focus",
+        delay: INACTIVITY_DELAY,
+        type: "inactivity",
+      },
+
+      // Step 3 Transitions
+      showroomAddress: {
+        target: "inspectionDate",
+        action: "focus",
+        delay: QUICK_OPEN_DELAY,
+      },
+      province: {
+        target: "city",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      city: {
+        target: "inspectionDate",
+        action: "focus",
+        delay: QUICK_OPEN_DELAY,
+      },
+      inspectionDate: {
+        target: "inspectionTime",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      inspectionTime: {
+        target: "fullAddress",
+        action: "focus",
+        delay: QUICK_OPEN_DELAY,
+      },
+    }),
+    []
+  );
+
+  const { handleAutoAdvance } = useAutoAdvanceFocus(
+    allRefs,
+    sellCarTransitions
+  );
 
   useEffect(() => {
     setFormData((prev) => ({
@@ -132,11 +254,12 @@ const SellCar = ({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const wasPreviouslyEmpty = !formData[name];
     let updatedValue = value;
 
     if (name === "price" || name === "travelDistance") {
       const unformattedNum = unformatNumber(value);
-      updatedValue = unformattedNum > 0 ? unformattedNum : "";
+      updatedValue = unformattedNum >= 0 ? unformattedNum.toString() : "";
     } else if (name === "phoneNumber") {
       const rawValue = unformatNumberPhone(value, PHONE_PREFIX);
       const numericValue = rawValue.replace(/\D/g, "");
@@ -149,28 +272,15 @@ const SellCar = ({
     }));
     clearErrorOnChange(name);
 
-    if (inputTimers.current[name]) {
-      clearTimeout(inputTimers.current[name]);
-    }
-
-    if (!value) {
-      return;
-    }
-
-    const inactivityDelay = 2000;
-
-    if (name === "stnkExpiry") {
-      setTimeout(() => colorSelectRef.current?.openDropdown(), 50);
-    } else if (name === "travelDistance") {
-      inputTimers.current[name] = setTimeout(() => {
-        priceInputRef.current?.focus();
-      }, inactivityDelay);
+    if (wasPreviouslyEmpty && updatedValue) {
+      handleAutoAdvance(name, updatedValue);
     }
   };
 
   const handleSelectChange = (name, value) => {
+    const wasPreviouslyEmpty = !formData[name];
     setFormData((prev) => {
-      const newData = { ...prev, [name]: value };
+      const newData = { ...prev, [name]: value ?? "" };
       if (name === "brand") {
         newData.model = "";
         newData.variant = "";
@@ -182,33 +292,10 @@ const SellCar = ({
     });
     clearErrorOnChange(name);
 
-    const quickOpenDelay = 50;
-    if (name === "brand" && value) {
-      setTimeout(() => modelSelectRef.current?.openDropdown(), quickOpenDelay);
-    } else if (name === "model" && value) {
-      setTimeout(
-        () => variantSelectRef.current?.openDropdown(),
-        quickOpenDelay
-      );
-    } else if (name === "variant" && value) {
-      setTimeout(() => yearSelectRef.current?.openDropdown(), quickOpenDelay);
-    } else if (name === "year" && value) {
-      setTimeout(
-        () => transmissionSelectRef.current?.openDropdown(),
-        quickOpenDelay
-      );
-    } else if (name === "transmission" && value) {
-      setTimeout(() => stnkExpiryInputRef.current?.focus(), quickOpenDelay);
-    } else if (name === "color" && value) {
-      setTimeout(() => travelDistanceInputRef.current?.focus(), quickOpenDelay);
+    if (wasPreviouslyEmpty && value) {
+      handleAutoAdvance(name, value);
     }
   };
-
-  useEffect(() => {
-    return () => {
-      Object.values(inputTimers.current).forEach(clearTimeout);
-    };
-  }, []);
 
   const validatePhoneNumber = (numberValue) => {
     const rawNumber = unformatNumberPhone(numberValue, PHONE_PREFIX);
@@ -334,6 +421,13 @@ const SellCar = ({
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleTermsChange = (e) => {
+    setTermsAccepted(e.target.checked);
+    if (termsError) {
+      setTermsError("");
+    }
+  };
+
   const handleNextStep = () => {
     if (currentStep === 1) {
       if (validateStep1()) {
@@ -364,7 +458,19 @@ const SellCar = ({
   };
 
   const handleSubmit = () => {
+    setTermsError("");
     if (validateStep3()) {
+      if (!termsAccepted) {
+        const errorMessage =
+          "*Silahkan centang Syarat dan ketentuan serta Kebijakan Privasi";
+        setTermsError(errorMessage);
+        const errorElement = document.getElementById("terms-checkbox-label");
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return;
+      }
+
       const rawPhoneNumber = unformatNumberPhone(
         formData.phoneNumber,
         PHONE_PREFIX
@@ -452,8 +558,17 @@ const SellCar = ({
                 onSubmit={handleSubmit}
                 onBack={handlePreviousStep}
                 isSellRoute={true}
+                termsAccepted={termsAccepted}
+                termsError={termsError}
+                onTermsChange={handleTermsChange}
                 currentStep={currentStep}
                 totalCarSteps={sellCarSteps}
+                showroomAddressRef={showroomAddressInputRef}
+                provinceRef={provinceSelectRef}
+                cityRef={citySelectRef}
+                fullAddressRef={fullAddressInputRef}
+                inspectionDateRef={inspectionDateInputRef}
+                inspectionTimeRef={inspectionTimeInputRef}
               />
             )}
           </div>

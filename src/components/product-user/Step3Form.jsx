@@ -21,6 +21,15 @@ const Step3Form = ({
   currentStep,
   totalCarSteps,
   isSellRoute = false,
+  termsAccepted,
+  termsError,
+  onTermsChange,
+  showroomAddressRef,
+  provinceRef,
+  cityRef,
+  fullAddressRef,
+  inspectionDateRef,
+  inspectionTimeRef,
 }) => {
   const handleLocationTypeChange = (e) => {
     const { name, value } = e.target;
@@ -126,6 +135,7 @@ const Step3Form = ({
         {formData.inspectionLocationType === "showroom" && (
           <>
             <Select
+              ref={showroomAddressRef}
               label="Alamat Showroom"
               id="showroomAddress"
               name="showroomAddress"
@@ -138,6 +148,7 @@ const Step3Form = ({
             />
 
             <Input
+              ref={inspectionDateRef}
               label="Tanggal Inspeksi"
               id="inspectionDate"
               type="date"
@@ -149,6 +160,7 @@ const Step3Form = ({
             />
 
             <Select
+              ref={inspectionTimeRef}
               label="Jam Inspeksi"
               id="inspectionTime"
               name="inspectionTime"
@@ -165,6 +177,7 @@ const Step3Form = ({
         {formData.inspectionLocationType === "rumah" && (
           <>
             <Select
+              ref={provinceRef}
               label="Provinsi"
               id="province"
               name="province"
@@ -178,7 +191,9 @@ const Step3Form = ({
               }}
               error={errors.province}
             />
+
             <Select
+              ref={cityRef}
               label="Kota/Kabupaten"
               id="city"
               name="city"
@@ -194,7 +209,9 @@ const Step3Form = ({
               disabled={!formData.province || cityOptions.length === 0}
               error={errors.city}
             />
+
             <Input
+              ref={inspectionDateRef}
               label="Tanggal Inspeksi"
               id="inspectionDate"
               type="date"
@@ -204,7 +221,9 @@ const Step3Form = ({
               error={errors.inspectionDate}
               min={new Date().toISOString().split("T")[0]}
             />
+
             <Select
+              ref={inspectionTimeRef}
               label="Jam Inspeksi"
               id="inspectionTime"
               name="inspectionTime"
@@ -215,8 +234,10 @@ const Step3Form = ({
               onChange={(value) => handleSelectChange("inspectionTime", value)}
               error={errors.inspectionTime}
             />
+
             <div className="md:col-span-2">
               <Input
+                ref={fullAddressRef}
                 label="Alamat Lengkap Rumah"
                 id="fullAddress"
                 name="fullAddress"
@@ -230,23 +251,72 @@ const Step3Form = ({
         )}
       </div>
 
-      {/* Tombol Navigasi */}
-      <div className="flex justify-end space-x-2 sm:space-x-4 mt-4">
-        <button
-          type="button"
-          onClick={onBack}
-          className="cursor-pointer border text-orange-600 border-orange-500 hover:bg-orange-100 hover:border-orange-500
+      <div
+        className={` mt-4 ${
+          isSellRoute
+            ? "flex flex-col lg:flex-row lg:justify-between gap-6 lg:gap-0 lg:items-center"
+            : ""
+        }`}
+      >
+        {isSellRoute && (
+          <div className="">
+            <label
+              id="terms-checkbox-label"
+              className="flex items-center space-x-2 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                name="termsAccepted"
+                checked={termsAccepted}
+                onChange={onTermsChange}
+                className="form-checkbox h-4 w-4 accent-orange-600 rounded border-gray-300 cursor-pointer"
+              />
+              <span className="text-xs text-gray-700">
+                Saya setuju dengan{" "}
+                <a
+                  href="/syarat-ketentuan"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-orange-600 hover:underline font-medium"
+                >
+                  Syarat dan Ketentuan
+                </a>{" "}
+                serta{" "}
+                <a
+                  href="/kebijakan-privasi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-orange-600 hover:underline font-medium"
+                >
+                  Kebijakan Privasi
+                </a>{" "}
+                dari Mukrindo Motor
+              </span>
+            </label>
+            {termsError && (
+              <p className="mt-1 ml-5 text-[10px] text-red-600">{termsError}</p>
+            )}
+          </div>
+        )}
+
+        {/* Tombol Navigasi */}
+        <div className="flex justify-end space-x-2 sm:space-x-4">
+          <button
+            type="button"
+            onClick={onBack}
+            className="cursor-pointer border text-orange-600 border-orange-500 hover:bg-orange-100 hover:border-orange-500
                 hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
-        >
-          Kembali
-        </button>
-        <button
-          type="button"
-          onClick={isSellRoute ? onSubmit : onNext}
-          className="cursor-pointer bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
-        >
-          {isSellRoute ? "Jual Sekarang" : "Selanjutnya"}
-        </button>
+          >
+            Kembali
+          </button>
+          <button
+            type="button"
+            onClick={isSellRoute ? onSubmit : onNext}
+            className="cursor-pointer bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
+          >
+            {isSellRoute ? "Jual Sekarang" : "Selanjutnya"}
+          </button>
+        </div>
       </div>
     </div>
   );

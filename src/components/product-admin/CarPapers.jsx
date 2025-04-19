@@ -27,11 +27,7 @@ const CarPapers = ({
         label="Masa Berlaku STNK"
         id="stnkExpiry"
         name="stnkExpiry"
-        placeholderTexts={[
-          "Masa Berlaku STNK anda",
-          "Masa Berlaku STNK anda",
-          "Masa Berlaku STNK anda",
-        ]}
+        type="date"
         value={data.stnkExpiry}
         error={errors.stnkExpiry}
         onChange={(e) => onChange(e)}

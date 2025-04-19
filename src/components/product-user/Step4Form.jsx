@@ -1,7 +1,6 @@
 import React from "react";
 import Select from "@/components/common/Select";
 
-// Opsi rentang harga tetap statis (atau bisa dibuat dinamis jika perlu)
 const priceRangeOptions = [
   { value: "0-100", label: "Rp 0 - 100 Juta" },
   { value: "101-200", label: "Rp 101 - 200 Juta" },
@@ -18,23 +17,22 @@ const Step4Form = ({
   onBack,
   currentStep,
   totalCarSteps,
-  // --- Terima Opsi Dinamis ---
+  termsAccepted,
+  onTermsChange,
+  termsError,
   brandOptions,
   modelOptions,
   variantOptions,
   transmissionOptions,
-  colorOptions, // Terima opsi warna (sudah termasuk hex dari TradeInCar)
-  // --- Terima Refs ---
+  colorOptions,
   brandRef,
   modelRef,
   variantRef,
   transmissionRef,
   colorRef,
   priceRangeRef,
-  // --- Terima Status Loading ---
   isLoading,
 }) => {
-  // Logika disabled berdasarkan state formData dan ketersediaan opsi
   const noBrandSelected = !formData.newCarBrand;
   const noModelSelected = !formData.newCarModel;
   const noVariantSelected = !formData.newCarVariant;
@@ -62,11 +60,10 @@ const Step4Form = ({
           <p className="ml-3 text-gray-600">Memuat opsi mobil...</p>
         </div>
       )}
-      {/* Tampilkan Form jika tidak loading */}
+
       {!isLoading && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            {/* 1. Merek */}
             <Select
               ref={brandRef}
               label="Merek Mobil Baru"
@@ -82,10 +79,10 @@ const Step4Form = ({
               value={formData.newCarBrand}
               onChange={(value) => handleSelectChange("newCarBrand", value)}
               error={errors.newCarBrand}
-              searchOption={true} // Aktifkan search jika banyak merek
-              disabled={isLoading || brandOptions.length === 0} // Disable jika loading atau tidak ada opsi
+              searchOption={true}
+              disabled={isLoading || brandOptions.length === 0}
             />
-            {/* 2. Model */}
+
             <Select
               ref={modelRef}
               id="newCarModel"
@@ -102,10 +99,10 @@ const Step4Form = ({
               options={modelOptions}
               value={formData.newCarModel}
               onChange={(value) => handleSelectChange("newCarModel", value)}
-              disabled={isLoading || noBrandSelected || noModelsAvailable} // Disable jika loading, merek belum dipilih, atau tidak ada model
+              disabled={isLoading || noBrandSelected || noModelsAvailable}
               error={errors.newCarModel}
             />
-            {/* 3. Varian */}
+
             <Select
               ref={variantRef}
               id="newCarVariant"
@@ -122,10 +119,10 @@ const Step4Form = ({
               options={variantOptions}
               value={formData.newCarVariant}
               onChange={(value) => handleSelectChange("newCarVariant", value)}
-              disabled={isLoading || noModelSelected || noVariantsAvailable} // Disable jika loading, model belum dipilih, atau tidak ada varian
+              disabled={isLoading || noModelSelected || noVariantsAvailable}
               error={errors.newCarVariant}
             />
-            {/* 4. Transmisi */}
+
             <Select
               ref={transmissionRef}
               id="newCarTransmission"
@@ -139,7 +136,7 @@ const Step4Form = ({
                   ? "Tidak ada transmisi tersedia"
                   : "Pilih preferensi transmisi tersedia"
               }
-              options={transmissionOptions} // Gunakan opsi dinamis
+              options={transmissionOptions}
               value={formData.newCarTransmission}
               onChange={(value) =>
                 handleSelectChange("newCarTransmission", value)
@@ -147,9 +144,9 @@ const Step4Form = ({
               error={errors.newCarTransmission}
               disabled={
                 isLoading || noVariantSelected || noTransmissionsAvailable
-              } // Disable jika loading, varian belum dipilih, atau tidak ada transmisi
+              }
             />
-            {/* 5. Warna */}
+
             <Select
               ref={colorRef}
               id="newCarColor"
@@ -163,21 +160,21 @@ const Step4Form = ({
                   ? "Tidak ada warna tersedia"
                   : "Pilih preferensi warna tersedia"
               }
-              options={colorOptions} // Gunakan opsi dinamis (sudah ada hex)
+              options={colorOptions}
               value={formData.newCarColor}
               onChange={(value) => handleSelectChange("newCarColor", value)}
               error={errors.newCarColor}
               disabled={
                 isLoading || noTransmissionSelected || noColorsAvailable
-              } // Disable jika loading, transmisi belum dipilih, atau tidak ada warna
+              }
             />
-            {/* 6. Rentang Harga (Tetap Statis) */}
+
             <Select
               ref={priceRangeRef}
               label="Rentang Harga"
               id="newCarPriceRange"
               name="newCarPriceRange"
-              options={priceRangeOptions} // Tetap statis
+              options={priceRangeOptions}
               value={formData.newCarPriceRange}
               onChange={(value) =>
                 handleSelectChange("newCarPriceRange", value)
@@ -185,32 +182,73 @@ const Step4Form = ({
               title="Pilih Rentang Harga"
               description="Pilih rentang harga mobil baru"
               error={errors.newCarPriceRange}
-              disabled={isLoading} // Hanya disable saat loading awal
+              disabled={isLoading}
             />
-          </div>
-          {/* Tombol Kembali dan Submit */}
-          <div className="flex justify-end space-x-2 sm:space-x-4 mt-4">
-            <button
-              type="button"
-              onClick={onBack}
-              className="cursor-pointer border text-orange-600 border-orange-500 hover:bg-orange-100 hover:border-orange-500
-              hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
-            >
-              Kembali
-            </button>
-            <button
-              type="button"
-              onClick={onSubmit}
-              disabled={isLoading} // Disable tombol submit saat loading
-              className={`cursor-pointer bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline ${
-                isLoading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-            >
-              Tukar Sekarang
-            </button>
           </div>
         </>
       )}
+
+      <div className="flex flex-col lg:flex-row lg:justify-between gap-6 lg:gap-0 lg:items-center mt-4">
+        <div className="">
+          <label
+            id="terms-checkbox-label"
+            className="flex items-center space-x-2 cursor-pointer"
+          >
+            <input
+              type="checkbox"
+              name="termsAccepted"
+              checked={termsAccepted}
+              onChange={onTermsChange}
+              className="form-checkbox h-4 w-4 accent-orange-600 rounded border-gray-300 cursor-pointer"
+            />
+            <span className="text-xs text-gray-700">
+              Saya setuju dengan{" "}
+              <a
+                href="/syarat-ketentuan"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-orange-600 hover:underline font-medium"
+              >
+                Syarat dan Ketentuan
+              </a>{" "}
+              serta{" "}
+              <a
+                href="/kebijakan-privasi"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-orange-600 hover:underline font-medium"
+              >
+                Kebijakan Privasi
+              </a>{" "}
+              dari Mukrindo Motor
+            </span>
+          </label>
+          {termsError && (
+            <p className="mt-1 ml-5 text-[10px] text-red-600">{termsError}</p>
+          )}
+        </div>
+
+        <div className="flex justify-end space-x-2 sm:space-x-4">
+          <button
+            type="button"
+            onClick={onBack}
+            className="cursor-pointer border text-orange-600 border-orange-500 hover:bg-orange-100 hover:border-orange-500
+              hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
+          >
+            Kembali
+          </button>
+          <button
+            type="button"
+            onClick={onSubmit}
+            disabled={isLoading}
+            className={`cursor-pointer bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline ${
+              isLoading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            Tukar Sekarang
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

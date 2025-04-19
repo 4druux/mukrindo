@@ -93,19 +93,7 @@ const Step1Form = ({
           disabled={!formData.model || variantOptions.length === 0}
           error={errors.variant}
         />
-        <Select
-          ref={yearRef}
-          label="Tahun"
-          id="year"
-          name="year"
-          options={years}
-          value={formData.year}
-          onChange={(value) => handleSelectChange("year", value)}
-          title="Pilih Tahun"
-          description="Pilih Tahun Mobil Anda"
-          disabled={!formData.variant}
-          error={errors.year}
-        />
+
         <Select
           ref={transmissionRef}
           id="transmission"
@@ -123,6 +111,33 @@ const Step1Form = ({
           error={errors.transmission}
         />
 
+        <Select
+          ref={colorRef}
+          label="Warna Mobil"
+          id="color"
+          name="color"
+          title="Pilih Warna"
+          description="Pilih warna mobil Anda saat ini"
+          options={colorOptions}
+          value={formData.color}
+          onChange={(value) => handleSelectChange("color", value)}
+          error={errors.color}
+        />
+
+        <Select
+          ref={yearRef}
+          label="Tahun"
+          id="year"
+          name="year"
+          options={years}
+          value={formData.year}
+          onChange={(value) => handleSelectChange("year", value)}
+          title="Pilih Tahun"
+          description="Pilih Tahun Mobil Anda"
+          disabled={!formData.variant}
+          error={errors.year}
+        />
+
         <Input
           ref={stnkExpiryRef}
           label="Masa Berlaku STNK"
@@ -134,24 +149,12 @@ const Step1Form = ({
           error={errors.stnkExpiry}
         />
 
-        <Select
-          ref={colorRef}
-          label="Warna Mobil Anda"
-          id="color"
-          name="color"
-          title="Pilih Warna"
-          description="Pilih warna mobil Anda saat ini"
-          options={colorOptions}
-          value={formData.color}
-          onChange={(value) => handleSelectChange("color", value)}
-          error={errors.color}
-        />
-
         <Input
           ref={travelDistanceRef}
           label="Jarak Tempuh (KM)"
           id="travelDistance"
           name="travelDistance"
+          inputMode="numeric"
           placeholderTexts={["50.000", "120.000", "200.000", "300.000"]}
           value={formData.travelDistance}
           onChange={handleChange}
@@ -166,6 +169,7 @@ const Step1Form = ({
               label="Harga Mobil"
               id="price"
               name="price"
+              inputMode="numeric"
               value={formData.price}
               onChange={handleChange}
               formatter={formatNumber}

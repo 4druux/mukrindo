@@ -2,21 +2,30 @@
 "use client";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import axios from "axios";
+
+// Import Components
+import { useProducts } from "@/context/ProductContext";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
+import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import ImageUpload from "@/components/product-admin/ImageUpload";
 import CarBrands from "@/components/product-admin/CarBrands";
 import CarSystems from "@/components/product-admin/CarSystems";
 import CarPapers from "@/components/product-admin/CarPapers";
+import SkeletonEditProduct from "@/components/skeleton/skeleton-admin/SkeletonEditProduct";
+// Import Utils
 import { validateProductData } from "@/utils/validateProductData";
 import { formatNumber, unformatNumber } from "@/utils/formatNumber";
 import { carColorOptions } from "@/utils/carColorOptions";
 import carData from "@/utils/carData";
-import SkeletonEditProduct from "@/components/skeleton/skeleton-admin/SkeletonEditProduct";
-import { useProducts } from "@/context/ProductContext";
-import axios from "axios";
-import BreadcrumbNav from "@/components/common/BreadcrumbNav";
-import toast from "react-hot-toast";
+
+// Import Hooks
+import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
+
+const QUICK_OPEN_DELAY = 50;
+const INACTIVITY_DELAY = 10000;
 
 const EditProduct = ({ productId }) => {
   const [productData, setProductData] = useState({
@@ -68,6 +77,113 @@ const EditProduct = ({ productId }) => {
 
   const API_ENDPOINT = "http://localhost:5000/api/products";
 
+  const allRefs = useMemo(
+    () => ({
+      carName: carNameInputRef,
+      brand: brandSelectRef,
+      model: modelSelectRef,
+      variant: variantSelectRef,
+      type: typeSelectRef,
+      carColor: carColorSelectRef,
+      cc: ccInputRef,
+      travelDistance: travelDistanceInputRef,
+      driveSystem: driveSystemSelectRef,
+      transmission: transmissionSelectRef,
+      fuelType: fuelTypeSelectRef,
+      stnkExpiry: stnkExpiryInputRef,
+      plateNumber: plateNumberSelectRef,
+      yearOfAssembly: yearOfAssemblySelectRef,
+      price: priceInputRef,
+    }),
+    []
+  );
+
+  const addProductTransitions = useMemo(
+    () => ({
+      carName: {
+        target: "brand",
+        action: "openDropdown",
+        delay: INACTIVITY_DELAY,
+        type: "inactivity",
+      },
+      brand: {
+        target: "model",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      model: {
+        target: "variant",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      variant: {
+        target: "type",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      type: {
+        target: "carColor",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      carColor: {
+        target: "cc",
+        action: "focus",
+        delay: INACTIVITY_DELAY,
+        type: "inactivity",
+      },
+      cc: {
+        target: "travelDistance",
+        action: "focus",
+        delay: INACTIVITY_DELAY,
+        type: "inactivity",
+      },
+      travelDistance: {
+        target: "driveSystem",
+        action: "openDropdown",
+        delay: INACTIVITY_DELAY,
+        type: "inactivity",
+      },
+      driveSystem: {
+        target: "transmission",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      transmission: {
+        target: "fuelType",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      fuelType: {
+        target: "stnkExpiry",
+        action: "focus",
+        delay: QUICK_OPEN_DELAY,
+      },
+      stnkExpiry: {
+        target: "plateNumber",
+        action: "openDropdown",
+        delay: INACTIVITY_DELAY,
+        type: "inactivity",
+      },
+      plateNumber: {
+        target: "yearOfAssembly",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      yearOfAssembly: {
+        target: "price",
+        action: "focus",
+        delay: QUICK_OPEN_DELAY,
+      },
+    }),
+    []
+  );
+
+  const { handleAutoAdvance } = useAutoAdvanceFocus(
+    allRefs,
+    addProductTransitions
+  );
+
   const clearErrorOnChange = (name) => {
     if (errors[name]) {
       setErrors((prevErrors) => {
@@ -78,11 +194,9 @@ const EditProduct = ({ productId }) => {
     }
   };
 
-  // Timer input
-  const inputTimers = useRef({});
-
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const wasPreviouslyEmpty = !productData[name];
     let updatedValue = value;
     if (name === "price" || name === "cc" || name === "travelDistance") {
       updatedValue = unformatNumber(value);
@@ -93,60 +207,13 @@ const EditProduct = ({ productId }) => {
     }));
     clearErrorOnChange(name);
 
-    if (inputTimers.current[name]) {
-      clearTimeout(inputTimers.current[name]);
-    }
-
-    if (!value) {
-      return;
-    }
-
-    const inactivityDelay = 750;
-
-    // logic auto focus/open
-    if (name === "carName") {
-      inputTimers.current[name] = setTimeout(() => {
-        brandSelectRef.current?.openDropdown();
-      }, inactivityDelay);
-    } else if (name === "type" && value) {
-      setTimeout(() => carColorSelectRef.current?.openDropdown(), 50);
-    } else if (name === "carColor") {
-      inputTimers.current[name] = setTimeout(() => {
-        ccInputRef.current?.focus();
-      }, inactivityDelay);
-    } else if (name === "cc") {
-      inputTimers.current[name] = setTimeout(() => {
-        travelDistanceInputRef.current?.focus();
-      }, inactivityDelay);
-    } else if (name === "travelDistance") {
-      inputTimers.current[name] = setTimeout(() => {
-        driveSystemSelectRef.current?.openDropdown();
-      }, inactivityDelay);
-    } else if (name === "driveSystem" && value) {
-      setTimeout(() => transmissionSelectRef.current?.openDropdown(), 50);
-    } else if (name === "transmission" && value) {
-      setTimeout(() => fuelTypeSelectRef.current?.openDropdown(), 50);
-    } else if (name === "fuelType" && value) {
-      setTimeout(() => stnkExpiryInputRef.current?.focus(), 50);
-    } else if (name === "stnkExpiry") {
-      inputTimers.current[name] = setTimeout(() => {
-        plateNumberSelectRef.current?.openDropdown();
-      }, inactivityDelay);
-    } else if (name === "plateNumber" && value) {
-      setTimeout(() => yearOfAssemblySelectRef.current?.openDropdown(), 50);
-    } else if (name === "yearOfAssembly" && value) {
-      setTimeout(() => priceInputRef.current?.focus(), 50);
+    if (wasPreviouslyEmpty && updatedValue) {
+      handleAutoAdvance(name, updatedValue);
     }
   };
 
-  // Auto focus/open clean
-  useEffect(() => {
-    return () => {
-      Object.values(inputTimers.current).forEach(clearTimeout);
-    };
-  }, []);
-
   const handleBrandChange = (field, value, modelValue, variantValue) => {
+    const wasPreviouslyEmpty = !productData[field];
     setProductData((prev) => ({
       ...prev,
       brand: field === "brand" ? value : prev.brand,
@@ -158,6 +225,7 @@ const EditProduct = ({ productId }) => {
           ? ""
           : variantValue,
     }));
+
     if (errors.brand || errors.model || errors.variant) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -168,13 +236,8 @@ const EditProduct = ({ productId }) => {
       });
     }
 
-    // logic auto focus/open
-    if (field === "brand" && value) {
-      setTimeout(() => modelSelectRef.current?.openDropdown(), 50);
-    } else if (field === "model" && value) {
-      setTimeout(() => variantSelectRef.current?.openDropdown(), 50);
-    } else if (field === "variant" && value) {
-      setTimeout(() => typeSelectRef.current?.openDropdown(), 50);
+    if (wasPreviouslyEmpty && value) {
+      handleAutoAdvance(field, value);
     }
   };
 
@@ -524,6 +587,7 @@ const EditProduct = ({ productId }) => {
             label="Jarak Tempuh (KM)"
             id="travelDistance"
             name="travelDistance"
+            inputMode="numeric"
             placeholderTexts={["Jarak tempuh mobil anda"]}
             value={productData.travelDistance}
             onChange={handleChange}
@@ -562,6 +626,7 @@ const EditProduct = ({ productId }) => {
             label="Harga Mobil"
             id="price"
             name="price"
+            inputMode="numeric"
             value={productData.price}
             onChange={handleChange}
             formatter={formatNumber}

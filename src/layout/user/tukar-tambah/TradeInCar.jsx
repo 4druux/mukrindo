@@ -15,8 +15,10 @@ import Stepper from "@/components/global/Stepper";
 import carData from "@/utils/carData";
 import { useProducts } from "@/context/ProductContext";
 import { carColorOptions as staticCarColorOptions } from "@/utils/carColorOptions";
+import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
 
 const PHONE_PREFIX = "(+62) ";
+const QUICK_OPEN_DELAY = 50;
 
 const TradeInCar = ({
   initialBrand = "",
@@ -38,18 +40,19 @@ const TradeInCar = ({
     brand: initialBrand,
     model: initialModel,
     variant: "",
-    year: initialYear,
     transmission: "",
-    stnkExpiry: "",
     color: "",
+    year: initialYear,
+    stnkExpiry: "",
     travelDistance: "",
-    price: "",
+
     // Step 2
     name: "",
     phoneNumber: initialPhoneNumber
       ? formatNumberPhone(initialPhoneNumber, PHONE_PREFIX)
       : PHONE_PREFIX,
     email: "",
+
     // Step 3
     inspectionLocationType: "showroom",
     showroomAddress: "",
@@ -58,6 +61,7 @@ const TradeInCar = ({
     fullAddress: "",
     inspectionDate: "",
     inspectionTime: "",
+
     // Step 4
     newCarBrand: "",
     newCarModel: "",
@@ -67,17 +71,26 @@ const TradeInCar = ({
     newCarPriceRange: "",
   });
   const [errors, setErrors] = useState({});
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState("");
 
-  // --- Refs ---
   // Step 1 Refs
   const brandSelectRef = useRef(null);
   const modelSelectRef = useRef(null);
   const variantSelectRef = useRef(null);
-  const yearSelectRef = useRef(null);
   const transmissionSelectRef = useRef(null);
-  const stnkExpiryInputRef = useRef(null);
   const colorSelectRef = useRef(null);
+  const yearSelectRef = useRef(null);
+  const stnkExpiryInputRef = useRef(null);
   const travelDistanceInputRef = useRef(null);
+
+  // Step 3 Refs
+  const showroomAddressInputRef = useRef(null);
+  const provinceSelectRef = useRef(null);
+  const citySelectRef = useRef(null);
+  const fullAddressInputRef = useRef(null);
+  const inspectionDateInputRef = useRef(null);
+  const inspectionTimeInputRef = useRef(null);
 
   // Step 4 Refs
   const newCarBrandRef = useRef(null);
@@ -87,7 +100,137 @@ const TradeInCar = ({
   const newCarColorRef = useRef(null);
   const newCarPriceRangeRef = useRef(null);
 
-  const inputTimers = useRef({});
+  const allRefs = useMemo(
+    () => ({
+      // Step 1
+      brand: brandSelectRef,
+      model: modelSelectRef,
+      variant: variantSelectRef,
+      transmission: transmissionSelectRef,
+      color: colorSelectRef,
+      year: yearSelectRef,
+      stnkExpiry: stnkExpiryInputRef,
+      travelDistance: travelDistanceInputRef,
+
+      // Step 3
+      showroomAddress: showroomAddressInputRef,
+      province: provinceSelectRef,
+      city: citySelectRef,
+      fullAddress: fullAddressInputRef,
+      inspectionDate: inspectionDateInputRef,
+      inspectionTime: inspectionTimeInputRef,
+
+      // Step 4
+      newCarBrand: newCarBrandRef,
+      newCarModel: newCarModelRef,
+      newCarVariant: newCarVariantRef,
+      newCarTransmission: newCarTransmissionRef,
+      newCarColor: newCarColorRef,
+      newCarPriceRange: newCarPriceRangeRef,
+    }),
+    []
+  );
+
+  const tradeInTransitions = useMemo(
+    () => ({
+      // Step 1 Transitions
+      brand: {
+        target: "model",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      model: {
+        target: "variant",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      variant: {
+        target: "transmission",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      transmission: {
+        target: "color",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      color: {
+        target: "year",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      year: {
+        target: "stnkExpiry",
+        action: "focus",
+        delay: QUICK_OPEN_DELAY,
+      },
+      stnkExpiry: {
+        target: "travelDistance",
+        action: "focus",
+        delay: QUICK_OPEN_DELAY,
+      },
+
+      // Step 3 Transitions
+      showroomAddress: {
+        target: "inspectionDate",
+        action: "focus",
+        delay: QUICK_OPEN_DELAY,
+      },
+      province: {
+        target: "city",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      city: {
+        target: "inspectionDate",
+        action: "focus",
+        delay: QUICK_OPEN_DELAY,
+      },
+      inspectionDate: {
+        target: "inspectionTime",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      inspectionTime: {
+        target: "fullAddress",
+        action: "focus",
+        delay: QUICK_OPEN_DELAY,
+      },
+
+      // Step 4 Transitions
+      newCarBrand: {
+        target: "newCarModel",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      newCarModel: {
+        target: "newCarVariant",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      newCarVariant: {
+        target: "newCarTransmission",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      newCarTransmission: {
+        target: "newCarColor",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      newCarColor: {
+        target: "newCarPriceRange",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+    }),
+    []
+  );
+
+  const { handleAutoAdvance } = useAutoAdvanceFocus(
+    allRefs,
+    tradeInTransitions
+  );
 
   // --- Effect untuk Inisialisasi Data Awal ---
   useEffect(() => {
@@ -302,11 +445,11 @@ const TradeInCar = ({
   // --- Handler untuk Input Biasa ---
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const wasPreviouslyEmpty = !formData[name];
     let updatedValue = value;
 
     if (name === "price" || name === "travelDistance") {
       const unformattedNum = unformatNumber(value);
-      // Izinkan 0 atau angka positif, tapi simpan string kosong jika 0 untuk placeholder
       updatedValue = unformattedNum >= 0 ? unformattedNum.toString() : "";
     } else if (name === "phoneNumber") {
       const rawValue = unformatNumberPhone(value, PHONE_PREFIX);
@@ -316,27 +459,21 @@ const TradeInCar = ({
 
     setFormData((prev) => ({
       ...prev,
-      [name]: updatedValue ?? "", // Pastikan tidak null/undefined
+      [name]: updatedValue ?? "",
     }));
     clearErrorOnChange(name);
 
-    // --- Logika Auto Focus untuk Input (jika masih relevan) ---
-    if (inputTimers.current[name]) {
-      clearTimeout(inputTimers.current[name]);
-    }
-    if (!value) return; // Jangan trigger jika value kosong
-    const inactivityDelay = 750; // Sesuaikan delay jika perlu
-    if (name === "stnkExpiry") {
-      setTimeout(() => colorSelectRef.current?.openDropdown(), 50);
+    if (wasPreviouslyEmpty && updatedValue) {
+      handleAutoAdvance(name, updatedValue);
     }
   };
 
-  // --- Handler untuk Select (Termasuk Reset Step 4) ---
+  // --- Handler untuk Select  ---
   const handleSelectChange = (name, value) => {
+    const wasPreviouslyEmpty = !formData[name];
     setFormData((prev) => {
       const newData = { ...prev, [name]: value ?? "" };
 
-      // Reset Step 1 jika brand/model/variant mobil lama berubah
       if (name === "brand") {
         newData.model = "";
         newData.variant = "";
@@ -344,7 +481,6 @@ const TradeInCar = ({
         newData.variant = "";
       }
 
-      // Reset Step 4 jika brand/model/variant/transmisi mobil BARU berubah
       if (name === "newCarBrand") {
         newData.newCarModel = "";
         newData.newCarVariant = "";
@@ -365,42 +501,10 @@ const TradeInCar = ({
     });
     clearErrorOnChange(name);
 
-    // Step 1 Auto Open
-    if (name === "brand" && value) {
-      setTimeout(() => modelSelectRef.current?.openDropdown(), 50);
-    } else if (name === "model" && value) {
-      setTimeout(() => variantSelectRef.current?.openDropdown(), 50);
-    } else if (name === "variant" && value) {
-      setTimeout(() => yearSelectRef.current?.openDropdown(), 50);
-    } else if (name === "year" && value) {
-      setTimeout(() => transmissionSelectRef.current?.openDropdown(), 50);
-    } else if (name === "transmission" && value) {
-      setTimeout(() => stnkExpiryInputRef.current?.focus(), 50);
-    } else if (name === "color" && value) {
-      setTimeout(() => travelDistanceInputRef.current?.focus(), 50);
-    }
-
-    // Step 4 Auto Open
-    else if (name === "newCarBrand" && value) {
-      setTimeout(() => newCarModelRef.current?.openDropdown(), 50);
-    } else if (name === "newCarModel" && value) {
-      setTimeout(() => newCarVariantRef.current?.openDropdown(), 50);
-    } else if (name === "newCarVariant" && value) {
-      setTimeout(() => newCarTransmissionRef.current?.openDropdown(), 50);
-    } else if (name === "newCarTransmission" && value) {
-      setTimeout(() => newCarColorRef.current?.openDropdown(), 50);
-    } else if (name === "newCarColor" && value) {
-      // Fokus atau buka dropdown price range setelah memilih warna
-      setTimeout(() => newCarPriceRangeRef.current?.openDropdown(), 50);
+    if (wasPreviouslyEmpty && value) {
+      handleAutoAdvance(name, value);
     }
   };
-
-  // --- Effect Cleanup Timer ---
-  useEffect(() => {
-    return () => {
-      Object.values(inputTimers.current).forEach(clearTimeout);
-    };
-  }, []);
 
   // --- Fungsi Scroll ke Error Pertama ---
   const scrollToFirstError = (newErrors) => {
@@ -564,43 +668,26 @@ const TradeInCar = ({
 
   const validateStep4 = () => {
     const newErrors = {};
-    // Validasi berdasarkan opsi yang tersedia dan pilihan pengguna
     if (!formData.newCarBrand) {
       newErrors.newCarBrand = "Merek mobil baru wajib diisi.";
     }
-    // Wajibkan Model jika Merek dipilih DAN ada opsi Model
-    if (
-      formData.newCarBrand &&
-      availableNewCarModels.length > 0 &&
-      !formData.newCarModel
-    ) {
-      newErrors.newCarModel = "Model mobil baru wajib diisi.";
+
+    if (!formData.newCarModel) {
+      newErrors.newCarModel = "Merek mobil baru wajib diisi.";
     }
-    // Wajibkan Varian jika Model dipilih DAN ada opsi Varian
-    if (
-      formData.newCarModel &&
-      availableNewCarVariants.length > 0 &&
-      !formData.newCarVariant
-    ) {
+
+    if (!formData.newCarVariant) {
       newErrors.newCarVariant = "Varian mobil baru wajib diisi.";
     }
-    // Wajibkan Transmisi jika Varian dipilih DAN ada opsi Transmisi
-    if (
-      formData.newCarVariant &&
-      availableNewCarTransmissions.length > 0 &&
-      !formData.newCarTransmission
-    ) {
-      newErrors.newCarTransmission = "Transmisi wajib diisi.";
+
+    if (!formData.newCarTransmission) {
+      newErrors.newCarTransmission = "Transmisi mobil baru wajib diisi.";
     }
-    // Wajibkan Warna jika Transmisi dipilih DAN ada opsi Warna
-    if (
-      formData.newCarTransmission &&
-      availableNewCarColors.length > 0 &&
-      !formData.newCarColor
-    ) {
-      newErrors.newCarColor = "Warna wajib diisi.";
+
+    if (!formData.newCarColor) {
+      newErrors.newCarColor = "Warna mobil baru wajib diisi.";
     }
-    // Validasi Price Range (jika masih diperlukan dan wajib)
+
     if (!formData.newCarPriceRange) {
       newErrors.newCarPriceRange = "Rentang harga wajib diisi.";
     }
@@ -615,7 +702,13 @@ const TradeInCar = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  // --- Navigasi Step ---
+  const handleTermsChange = (e) => {
+    setTermsAccepted(e.target.checked);
+    if (termsError) {
+      setTermsError("");
+    }
+  };
+
   const handleNextStep = () => {
     let isValid = false;
     if (currentStep === 1) {
@@ -632,9 +725,7 @@ const TradeInCar = ({
         });
     } else if (currentStep === 3) {
       isValid = validateStep3();
-      // Toast error sudah di dalam validateStep3
     }
-    // Tidak ada validasi saat lanjut dari step 3 ke 4, validasi step 4 terjadi saat submit
 
     if (isValid && currentStep < TradeInCarSteps.length) {
       setCurrentStep(currentStep + 1);
@@ -647,13 +738,21 @@ const TradeInCar = ({
       setCurrentStep(currentStep - 1);
       window.scrollTo(0, 0); // Scroll ke atas saat ganti step
     }
-    // Jika ingin kembali dari step 1, bisa tambahkan navigasi router.back()
   };
 
-  // --- Handler Submit Akhir ---
   const handleSubmit = () => {
     if (validateStep4()) {
-      // Validasi step terakhir sebelum submit
+      if (!termsAccepted) {
+        const errorMessage =
+          "*Silahkan centang Syarat dan ketentuan serta Kebijakan Privasi";
+        setTermsError(errorMessage);
+        const errorElement = document.getElementById("terms-checkbox-label");
+        if (errorElement) {
+          errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+        return;
+      }
+
       const rawPhoneNumber = unformatNumberPhone(
         formData.phoneNumber,
         PHONE_PREFIX
@@ -772,6 +871,12 @@ const TradeInCar = ({
                 onNext={handleNextStep}
                 onBack={handlePreviousStep}
                 isSellRoute={false}
+                showroomAddressRef={showroomAddressInputRef}
+                provinceRef={provinceSelectRef}
+                cityRef={citySelectRef}
+                fullAddressRef={fullAddressInputRef}
+                inspectionDateRef={inspectionDateInputRef}
+                inspectionTimeRef={inspectionTimeInputRef}
               />
             )}
             {currentStep === 4 && (
@@ -783,20 +888,20 @@ const TradeInCar = ({
                 errors={errors}
                 onSubmit={handleSubmit}
                 onBack={handlePreviousStep}
-                // --- Kirim Opsi Dinamis ---
+                termsAccepted={termsAccepted}
+                termsError={termsError}
+                onTermsChange={handleTermsChange}
                 brandOptions={availableNewCarBrands}
                 modelOptions={availableNewCarModels}
                 variantOptions={availableNewCarVariants}
                 transmissionOptions={availableNewCarTransmissions}
-                colorOptions={availableNewCarColors} // Kirim opsi warna dengan hex
-                // --- Kirim Refs Step 4 ---
+                colorOptions={availableNewCarColors}
                 brandRef={newCarBrandRef}
                 modelRef={newCarModelRef}
                 variantRef={newCarVariantRef}
                 transmissionRef={newCarTransmissionRef}
                 colorRef={newCarColorRef}
-                priceRangeRef={newCarPriceRangeRef} // Kirim ref price range
-                // --- Kirim Status Loading ---
+                priceRangeRef={newCarPriceRangeRef}
                 isLoading={productsLoading}
               />
             )}

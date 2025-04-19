@@ -89,11 +89,7 @@ const TradeInForm = ({
     if (rawPhoneNumber) params.set("phoneNumber", rawPhoneNumber);
 
     const queryString = params.toString();
-    if (router.pathname === "/tukar-tambah") {
-      router.push(`/tukar-tambah${queryString ? `?${queryString}` : ""}`);
-    } else {
-      router.push(`/jual-mobil${queryString ? `?${queryString}` : ""}`);
-    }
+    router.push(`/tukar-tambah${queryString ? `?${queryString}` : ""}`);
   };
 
   return (
