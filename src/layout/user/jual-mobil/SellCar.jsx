@@ -2,17 +2,23 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
-import {
-  formatNumberPhone,
-  unformatNumberPhone,
-} from "@/utils/formatNumberPhone";
-import { formatNumber, unformatNumber } from "@/utils/formatNumber";
-import carData from "@/utils/carData";
+
+// Import Components
 import Step1Form from "@/components/product-user/Step1Form";
 import Step2Form from "@/components/product-user/Step2Form";
 import Step3Form from "@/components/product-user/Step3Form";
 import Stepper from "@/components/global/Stepper";
+
+// Import Utils
+import {
+  formatNumberPhone,
+  unformatNumberPhone,
+} from "@/utils/formatNumberPhone";
 import { carColorOptions as staticCarColorOptions } from "@/utils/carColorOptions";
+import { formatNumber, unformatNumber } from "@/utils/formatNumber";
+import carData from "@/utils/carData";
+
+// Import Hooks
 import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
 
 const PHONE_PREFIX = "(+62) ";
@@ -26,11 +32,16 @@ const SellCar = ({
   initialPhoneNumber = "",
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [errors, setErrors] = useState({});
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState("");
+
   const sellCarSteps = [
     { id: 1, label: "Info Mobil" },
     { id: 2, label: "Info Kontak" },
     { id: 3, label: "Lokasi Inspeksi" },
   ];
+
   const [formData, setFormData] = useState({
     // Step 1
     brand: initialBrand,
@@ -59,9 +70,6 @@ const SellCar = ({
     inspectionDate: "",
     inspectionTime: "",
   });
-  const [errors, setErrors] = useState({});
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [termsError, setTermsError] = useState("");
 
   // Step 1 Refs
   const brandSelectRef = useRef(null);
@@ -241,6 +249,7 @@ const SellCar = ({
     return [];
   }, [formData.brand, formData.model]);
 
+  // Clear Error
   const clearErrorOnChange = (name) => {
     if (errors[name] || (name === "phoneNumber" && errors.phoneFormat)) {
       setErrors((prevErrors) => {
@@ -252,6 +261,7 @@ const SellCar = ({
     }
   };
 
+  // Handle Input
   const handleChange = (e) => {
     const { name, value } = e.target;
     const wasPreviouslyEmpty = !formData[name];
@@ -277,6 +287,7 @@ const SellCar = ({
     }
   };
 
+  // Handle Select
   const handleSelectChange = (name, value) => {
     const wasPreviouslyEmpty = !formData[name];
     setFormData((prev) => {
@@ -537,6 +548,7 @@ const SellCar = ({
                 totalCarSteps={sellCarSteps}
               />
             )}
+
             {currentStep === 2 && (
               <Step2Form
                 formData={formData}
@@ -549,6 +561,7 @@ const SellCar = ({
                 totalCarSteps={sellCarSteps}
               />
             )}
+
             {currentStep === 3 && (
               <Step3Form
                 formData={formData}

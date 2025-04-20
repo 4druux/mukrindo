@@ -471,6 +471,7 @@ const EditProduct = ({ productId }) => {
 
   const breadcrumbItems = [
     { label: "Beranda", href: "/admin" },
+    { label: "Produk", href: "/admin/products" },
     { label: "Edit Produk", href: "" },
   ];
 
@@ -479,7 +480,7 @@ const EditProduct = ({ productId }) => {
       <BreadcrumbNav items={breadcrumbItems} />
 
       <div className="p-6 rounded-xl shadow-lg bg-white">
-        <h2 className="text-2xl font-medium mb-4">Edit Produk Mobil</h2>
+        <h2 className="text-xl font-medium mb-4">Edit Produk Mobil</h2>
         {submitError && <div className="text-red-500 mb-4">{submitError}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">

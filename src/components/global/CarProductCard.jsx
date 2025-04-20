@@ -58,13 +58,13 @@ const CarProductCard = ({
             .map((_, index) => <SkeletonComponent key={index} />)
         : products.map((product) => {
             const detailUrl = isAdminRoute
-              ? `/admin/car-details/${generateSlug(
+              ? `/admin/products/car-details/${generateSlug(
                   product.carName,
                   product._id
                 )}`
               : `/beli-mobil/${generateSlug(product.carName, product._id)}`;
 
-            const editUrl = `/admin/edit-product/${generateSlug(
+            const editUrl = `/admin/products/edit-product/${generateSlug(
               product.carName,
               product._id
             )}`;
@@ -237,13 +237,13 @@ const CarProductCard = ({
                     </div>
 
                     {/* View Count dan Tombol Aksi */}
-                    <div className="px-4 pb-3 pt-1 mt-auto">
+                    <div className="px-4 pb-4 pt-1 mt-auto">
                       <div className="flex justify-between items-center border-t border-gray-200">
-                        <div className="flex items-center space-x-1 text-xs text-gray-500">
+                        <div className="flex items-center space-x-1 mt-2 text-xs text-gray-500">
                           <FaEye />
                           <span>Dilihat {product.viewCount || 0} kali</span>
                         </div>
-                        <div className="flex items-center md:space-x-1">
+                        <div className="flex items-center md:space-x-1 mt-2">
                           <Link
                             href={editUrl}
                             onClick={(e) => e.stopPropagation()}

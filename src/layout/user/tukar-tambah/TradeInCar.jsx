@@ -2,23 +2,61 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
-import {
-  formatNumberPhone,
-  unformatNumberPhone,
-} from "@/utils/formatNumberPhone";
-import { formatNumber, unformatNumber } from "@/utils/formatNumber";
+
+// Import Components
 import Step1Form from "@/components/product-user/Step1Form";
 import Step2Form from "@/components/product-user/Step2Form";
 import Step3Form from "@/components/product-user/Step3Form";
 import Step4Form from "@/components/product-user/Step4Form";
 import Stepper from "@/components/global/Stepper";
-import carData from "@/utils/carData";
 import { useProducts } from "@/context/ProductContext";
+import { useTradeIn } from "@/context/TradeInContext";
+
+// Import Utils
+import {
+  formatNumberPhone,
+  unformatNumberPhone,
+} from "@/utils/formatNumberPhone";
 import { carColorOptions as staticCarColorOptions } from "@/utils/carColorOptions";
+import { formatNumber, unformatNumber } from "@/utils/formatNumber";
+import carData from "@/utils/carData";
+
+// Import Hooks
 import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
 
 const PHONE_PREFIX = "(+62) ";
 const QUICK_OPEN_DELAY = 50;
+
+const initialFormData = {
+  // Step 1
+  brand: "",
+  model: "",
+  variant: "",
+  transmission: "",
+  color: "",
+  year: "",
+  stnkExpiry: "",
+  travelDistance: "",
+  // Step 2
+  name: "",
+  phoneNumber: PHONE_PREFIX,
+  email: "",
+  // Step 3
+  inspectionLocationType: "showroom",
+  showroomAddress: "",
+  province: "",
+  city: "",
+  fullAddress: "",
+  inspectionDate: "",
+  inspectionTime: "",
+  // Step 4
+  newCarBrand: "",
+  newCarModel: "",
+  newCarVariant: "",
+  newCarTransmission: "",
+  newCarColor: "",
+  newCarPriceRange: "",
+};
 
 const TradeInCar = ({
   initialBrand = "",
@@ -28,6 +66,11 @@ const TradeInCar = ({
 }) => {
   const { products, loading: productsLoading } = useProducts();
   const [currentStep, setCurrentStep] = useState(1);
+  const [errors, setErrors] = useState({});
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [termsError, setTermsError] = useState("");
+  const { isSubmitting, submitTradeInRequest } = useTradeIn();
+
   const TradeInCarSteps = [
     { id: 1, label: "Info Mobil" },
     { id: 2, label: "Info Kontak" },
@@ -36,43 +79,14 @@ const TradeInCar = ({
   ];
 
   const [formData, setFormData] = useState({
-    // Step 1
-    brand: initialBrand,
-    model: initialModel,
-    variant: "",
-    transmission: "",
-    color: "",
-    year: initialYear,
-    stnkExpiry: "",
-    travelDistance: "",
-
-    // Step 2
-    name: "",
+    ...initialFormData,
+    brand: initialBrand || initialFormData.brand,
+    model: initialModel || initialFormData.model,
+    year: initialYear || initialFormData.year,
     phoneNumber: initialPhoneNumber
       ? formatNumberPhone(initialPhoneNumber, PHONE_PREFIX)
-      : PHONE_PREFIX,
-    email: "",
-
-    // Step 3
-    inspectionLocationType: "showroom",
-    showroomAddress: "",
-    province: "",
-    city: "",
-    fullAddress: "",
-    inspectionDate: "",
-    inspectionTime: "",
-
-    // Step 4
-    newCarBrand: "",
-    newCarModel: "",
-    newCarVariant: "",
-    newCarTransmission: "",
-    newCarColor: "",
-    newCarPriceRange: "",
+      : initialFormData.phoneNumber,
   });
-  const [errors, setErrors] = useState({});
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [termsError, setTermsError] = useState("");
 
   // Step 1 Refs
   const brandSelectRef = useRef(null);
@@ -232,7 +246,6 @@ const TradeInCar = ({
     tradeInTransitions
   );
 
-  // --- Effect untuk Inisialisasi Data Awal ---
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -246,16 +259,13 @@ const TradeInCar = ({
         : PHONE_PREFIX,
     }));
 
-    // Reset model/variant jika brand awal berubah
     if (initialBrand && initialBrand !== formData.brand) {
       setFormData((prev) => ({
         ...prev,
         model: initialModel || "",
         variant: "",
       }));
-    }
-    // Reset variant jika model awal berubah (dan brand sama)
-    else if (
+    } else if (
       initialModel &&
       initialModel !== formData.model &&
       initialBrand === formData.brand
@@ -267,12 +277,11 @@ const TradeInCar = ({
     initialModel,
     initialYear,
     initialPhoneNumber,
-    formData.brand, // Tambahkan dependensi jika perlu
-    formData.model, // Tambahkan dependensi jika perlu
+    formData.brand,
+    formData.model,
   ]);
 
-  // --- Opsi Select untuk Step 1 (Mobil Lama dari carData) ---
-  const tradeInBrandOptions = useMemo(
+  const brandOptions = useMemo(
     () =>
       Object.keys(carData).map((brand) => ({
         value: brand,
@@ -281,7 +290,7 @@ const TradeInCar = ({
     []
   );
 
-  const tradeInModelOptions = useMemo(() => {
+  const modelOptions = useMemo(() => {
     return formData.brand && carData[formData.brand]?.Model
       ? Object.keys(carData[formData.brand].Model).map((model) => ({
           value: model,
@@ -290,7 +299,7 @@ const TradeInCar = ({
       : [];
   }, [formData.brand]);
 
-  const tradeInVariantOptions = useMemo(() => {
+  const variantOptions = useMemo(() => {
     const variantsArray =
       formData.brand &&
       formData.model &&
@@ -305,14 +314,10 @@ const TradeInCar = ({
     return [];
   }, [formData.brand, formData.model]);
 
-  // --- Filter Produk Tersedia dari Context ---
   const availableProducts = useMemo(() => {
     if (productsLoading || !products) return [];
-    // Filter hanya produk yang statusnya "Tersedia"
     return products.filter((p) => p.status === "Tersedia");
   }, [products, productsLoading]);
-
-  // --- Opsi Select DINAMIS untuk Step 4 (Mobil Baru dari Context) ---
 
   // 1. Opsi Merek Mobil Baru
   const availableNewCarBrands = useMemo(() => {
@@ -362,7 +367,6 @@ const TradeInCar = ({
     formData.newCarModel,
   ]);
 
-  // --- Helper Memo: Filter produk berdasarkan Merek, Model, Varian yang dipilih ---
   const filteredProductsByBMV = useMemo(() => {
     if (
       !formData.newCarBrand ||
@@ -404,16 +408,14 @@ const TradeInCar = ({
     )
       return [];
 
-    // Filter lagi berdasarkan transmisi yang dipilih
     const filteredByBMVT = filteredProductsByBMV.filter(
       (p) => p.transmission === formData.newCarTransmission
     );
 
     const colors = new Set(
-      filteredByBMVT.map((p) => p.carColor).filter(Boolean) // Ambil carColor dari produk
+      filteredByBMVT.map((p) => p.carColor).filter(Boolean)
     );
 
-    // Map warna unik ke objek dari staticCarColorOptions untuk mendapatkan hex
     const colorMap = new Map(
       staticCarColorOptions.map((opt) => [opt.value, opt])
     );
@@ -425,12 +427,12 @@ const TradeInCar = ({
         return {
           value: colorName,
           label: colorName,
-          hex: colorOption ? colorOption.hex : "#D3D3D3", // Default hex jika tidak ditemukan
+          hex: colorOption ? colorOption.hex : "#D3D3D3",
         };
       });
   }, [productsLoading, filteredProductsByBMV, formData.newCarTransmission]);
 
-  // --- Fungsi Clear Error ---
+  // Clear Error
   const clearErrorOnChange = (name) => {
     if (errors[name] || (name === "phoneNumber" && errors.phoneFormat)) {
       setErrors((prevErrors) => {
@@ -442,7 +444,7 @@ const TradeInCar = ({
     }
   };
 
-  // --- Handler untuk Input Biasa ---
+  // Handle Input
   const handleChange = (e) => {
     const { name, value } = e.target;
     const wasPreviouslyEmpty = !formData[name];
@@ -468,7 +470,7 @@ const TradeInCar = ({
     }
   };
 
-  // --- Handler untuk Select  ---
+  // Handle Select
   const handleSelectChange = (name, value) => {
     const wasPreviouslyEmpty = !formData[name];
     setFormData((prev) => {
@@ -506,12 +508,10 @@ const TradeInCar = ({
     }
   };
 
-  // --- Fungsi Scroll ke Error Pertama ---
   const scrollToFirstError = (newErrors) => {
     const firstErrorKey = Object.keys(newErrors)[0];
     if (firstErrorKey) {
       let errorElement = document.getElementById(firstErrorKey);
-      // Fallback jika ID tidak ditemukan (misal untuk Select), coba gunakan Ref
       if (!errorElement) {
         const refMap = {
           brand: brandSelectRef,
@@ -522,15 +522,15 @@ const TradeInCar = ({
           stnkExpiry: stnkExpiryInputRef,
           color: colorSelectRef,
           travelDistance: travelDistanceInputRef,
-          name: null, // Asumsi input biasa punya ID
-          phoneNumber: null, // Asumsi input biasa punya ID
-          email: null, // Asumsi input biasa punya ID
-          showroomAddress: null, // Tergantung implementasi Step 3
-          province: null, // Tergantung implementasi Step 3
-          city: null, // Tergantung implementasi Step 3
-          fullAddress: null, // Tergantung implementasi Step 3
-          inspectionDate: null, // Tergantung implementasi Step 3
-          inspectionTime: null, // Tergantung implementasi Step 3
+          name: null,
+          phoneNumber: null,
+          email: null,
+          showroomAddress: null,
+          province: null,
+          city: null,
+          fullAddress: null,
+          inspectionDate: null,
+          inspectionTime: null,
           newCarBrand: newCarBrandRef,
           newCarModel: newCarModelRef,
           newCarVariant: newCarVariantRef,
@@ -539,11 +539,9 @@ const TradeInCar = ({
           newCarPriceRange: newCarPriceRangeRef,
         };
         const errorRef = refMap[firstErrorKey];
-        // Coba akses elemen DOM dari ref (mungkin perlu disesuaikan tergantung struktur komponen Select/Input)
         errorElement =
-          errorRef?.current?.containerRef?.current || errorRef?.current; // Coba beberapa kemungkinan
+          errorRef?.current?.containerRef?.current || errorRef?.current;
         if (errorElement && typeof errorElement.querySelector === "function") {
-          // Coba cari input/button di dalam elemen ref
           errorElement = errorElement.querySelector(
             'input, button, div[role="button"]'
           );
@@ -556,12 +554,9 @@ const TradeInCar = ({
           block: "center",
           inline: "nearest",
         });
-        // Optional: Tambahkan sedikit fokus visual jika memungkinkan
         if (typeof errorElement.focus === "function") {
-          // errorElement.focus({ preventScroll: true }); // Fokus tanpa scroll ulang
         }
       } else {
-        // Fallback: scroll ke atas halaman jika elemen tidak ditemukan/tidak bisa di-scroll
         console.warn(
           `Could not find or scroll to element for error key: ${firstErrorKey}`
         );
@@ -570,7 +565,6 @@ const TradeInCar = ({
     }
   };
 
-  // --- Fungsi Validasi ---
   const validateStep1 = () => {
     const newErrors = {};
     if (!formData.brand) newErrors.brand = "Merek wajib diisi.";
@@ -618,14 +612,13 @@ const TradeInCar = ({
     );
     if (!formData.name.trim()) newErrors.name = "Nama wajib diisi.";
     if (!rawPhoneNumber) newErrors.phoneNumber = "No Handphone wajib diisi.";
-    else if (phoneFormatError) newErrors.phoneFormat = phoneFormatError; // Gunakan key berbeda untuk format
+    else if (phoneFormatError) newErrors.phoneFormat = phoneFormatError;
     if (!formData.email.trim()) newErrors.email = "Email wajib diisi.";
     else if (!/\S+@\S+\.\S+/.test(formData.email))
       newErrors.email = "Format email tidak valid.";
 
-    // Gabungkan error wajib dan format
     const combinedErrors = { ...newErrors };
-    if (phoneFormatError) combinedErrors.phoneNumber = phoneFormatError; // Tampilkan error format di field phone
+    if (phoneFormatError) combinedErrors.phoneNumber = phoneFormatError;
 
     setErrors(combinedErrors);
     if (Object.keys(newErrors).length > 0 || phoneFormatError) {
@@ -640,7 +633,6 @@ const TradeInCar = ({
       newErrors.inspectionLocationType = "Pilih lokasi inspeksi.";
     else if (formData.inspectionLocationType === "showroom") {
       if (!formData.showroomAddress)
-        // Asumsi ini adalah Select value
         newErrors.showroomAddress = "Pilih alamat showroom.";
     } else if (formData.inspectionLocationType === "rumah") {
       if (!formData.province) newErrors.province = "Provinsi wajib diisi.";
@@ -648,7 +640,7 @@ const TradeInCar = ({
       if (!formData.fullAddress.trim())
         newErrors.fullAddress = "Alamat lengkap wajib diisi.";
     }
-    // Validasi jadwal hanya jika lokasi sudah dipilih
+
     if (formData.inspectionLocationType) {
       if (!formData.inspectionDate)
         newErrors.inspectionDate = "Tanggal inspeksi wajib diisi.";
@@ -660,7 +652,7 @@ const TradeInCar = ({
     if (Object.keys(newErrors).length > 0) {
       scrollToFirstError(newErrors);
       toast.error("Harap lengkapi informasi lokasi & jadwal inspeksi.", {
-        className: "custom-toast", // Pastikan class ini ada di CSS global Anda
+        className: "custom-toast",
       });
     }
     return Object.keys(newErrors).length === 0;
@@ -729,18 +721,18 @@ const TradeInCar = ({
 
     if (isValid && currentStep < TradeInCarSteps.length) {
       setCurrentStep(currentStep + 1);
-      window.scrollTo(0, 0); // Scroll ke atas saat ganti step
+      window.scrollTo(0, 0);
     }
   };
 
   const handlePreviousStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
-      window.scrollTo(0, 0); // Scroll ke atas saat ganti step
+      window.scrollTo(0, 0);
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validateStep4()) {
       if (!termsAccepted) {
         const errorMessage =
@@ -757,6 +749,7 @@ const TradeInCar = ({
         formData.phoneNumber,
         PHONE_PREFIX
       );
+
       const submissionData = {
         // Step 1
         tradeInBrand: formData.brand,
@@ -807,14 +800,28 @@ const TradeInCar = ({
         }
       });
 
-      console.log("Data Siap Dikirim:", submissionData);
-      toast.success("Permintaan Anda akan diproses!", {
-        className: "custom-toast",
-      });
+      try {
+        const result = await submitTradeInRequest(submissionData);
+
+        if (result.success) {
+          console.log("Pengiriman berhasil:", result.data);
+
+          setFormData({ ...initialFormData });
+          setCurrentStep(1);
+          setTermsAccepted(false);
+          setErrors({});
+          setTermsError("");
+          window.scrollTo(0, 0);
+        } else {
+          console.error("Pengiriman gagal:", result.error);
+        }
+      } catch (error) {
+        console.error("Error saat memanggil submitTradeInRequest:", error);
+        toast.error("Gagal menghubungi server.", { className: "custom-toast" });
+      }
     }
   };
 
-  // --- Render Komponen ---
   return (
     <div className="container mx-auto -mt-10 md:-mt-16 lg:-mt-20 relative z-20 px-4 md:px-0">
       <div className="bg-white shadow-lg p-4 md:p-8 rounded-2xl">
@@ -832,9 +839,9 @@ const TradeInCar = ({
                 handleSelectChange={handleSelectChange}
                 errors={errors}
                 onNext={handleNextStep}
-                brandOptions={tradeInBrandOptions}
-                modelOptions={tradeInModelOptions}
-                variantOptions={tradeInVariantOptions}
+                brandOptions={brandOptions}
+                modelOptions={modelOptions}
+                variantOptions={variantOptions}
                 formatNumber={formatNumber}
                 colorOptions={staticCarColorOptions}
                 brandRef={brandSelectRef}
@@ -847,6 +854,7 @@ const TradeInCar = ({
                 travelDistanceRef={travelDistanceInputRef}
               />
             )}
+
             {currentStep === 2 && (
               <Step2Form
                 currentStep={currentStep}
@@ -859,6 +867,7 @@ const TradeInCar = ({
                 PHONE_PREFIX={PHONE_PREFIX}
               />
             )}
+
             {currentStep === 3 && (
               <Step3Form
                 currentStep={currentStep}
@@ -878,6 +887,7 @@ const TradeInCar = ({
                 inspectionTimeRef={inspectionTimeInputRef}
               />
             )}
+
             {currentStep === 4 && (
               <Step4Form
                 currentStep={currentStep}
@@ -901,7 +911,7 @@ const TradeInCar = ({
                 transmissionRef={newCarTransmissionRef}
                 colorRef={newCarColorRef}
                 priceRangeRef={newCarPriceRangeRef}
-                isLoading={productsLoading}
+                isLoading={productsLoading || isSubmitting}
               />
             )}
           </div>

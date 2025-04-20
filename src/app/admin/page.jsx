@@ -1,15 +1,10 @@
 import React from "react";
-import AllProducts from "@/layout/admin/product/AllProuduct";
 
 export const metadata = {
   title: "Admin Mukrindo Motor",
-  description: "This is Next.js Home for TailAdmin Dashboard Template",
+  description: "This is Admin Page for Mukrindo Motor",
 };
 
-export default function Ecommerce() {
-  return (
-    <div>
-      <AllProducts />
-    </div>
-  );
+export default function DashboardPage() {
+  return <div>Dashboard Page</div>;
 }

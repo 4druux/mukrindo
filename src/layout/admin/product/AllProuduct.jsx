@@ -8,6 +8,7 @@ import { useProducts } from "@/context/ProductContext";
 
 // Import Components
 import ShortProduct, { SHORT_BY } from "@/components/global/ShortProduct";
+import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import { useFilterAndSuggest } from "@/hooks/useFilterAndSuggest";
 import ActiveSearchFilters from "@/components/global/ActiveSearchFilter";
 import CarProductCard from "@/components/global/CarProductCard";
@@ -26,7 +27,7 @@ const AllProducts = () => {
   const searchParams = useSearchParams();
   const { searchQuery, setSearchQuery } = useSidebar();
   const [currentPage, setCurrentPage] = useState(0);
-  const productsPerPage = 9;
+  const productsPerPage = 4;
 
   useEffect(() => {
     const urlSearchQuery = searchParams.get("search");
@@ -201,7 +202,6 @@ const AllProducts = () => {
     console.warn(
       `Attempted to remove URL filter param "${paramName}" from admin page. This is not expected.`
     );
-    // Tidak melakukan apa-apa karena admin tidak pakai filter URL ini
   };
 
   useEffect(() => {
@@ -240,9 +240,16 @@ const AllProducts = () => {
     emptyMessage = `Tidak ada produk mobil yang cocok dengan filter yang dipilih.`;
   }
 
+  const breadcrumbItems = [
+    { label: "Beranda", href: "/admin" },
+    { label: "Produk", href: "" },
+  ];
+
   return (
-    <div className="p-4">
-      <h1 className="mb-4 lg:mb-10 text-2xl font-medium">Produk Manajemen</h1>
+    <div className="">
+      <BreadcrumbNav items={breadcrumbItems} />
+
+      <h1 className="mb-4 text-xl font-medium">Produk Manajemen</h1>
       <div className="mb-4 flex flex-col-reverse lg:flex-row lg:justify-between lg:items-end ">
         <h1 className="text-sm lg:text-lg font-medium text-gray-700 ">
           {" "}
@@ -254,7 +261,7 @@ const AllProducts = () => {
 
         <div className="flex items-end justify-end">
           <button
-            onClick={() => router.push("/admin/add-product")}
+            onClick={() => router.push("/admin/products/add-product")}
             className="flex items-center space-x-1 px-3 py-1 lg:px-4 lg:py-2 rounded-full border border-orange-500 bg-orange-100 hover:bg-orange-500
           cursor-pointer transition-colors mb-4 lg:mb-0 group"
           >

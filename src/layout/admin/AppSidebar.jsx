@@ -1,5 +1,5 @@
 "use client";
-import  { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -20,12 +20,16 @@ const navItems = [
   {
     icon: <MdDashboard />,
     name: "Dashboard",
-    subItems: [{ name: "All Products", path: "/admin" }],
+    subItems: [
+      { name: "Dashboard", path: "/admin" },
+      { name: "Jual Beli", path: "/admin/jual-beli" },
+      { name: "Tukar Tambah", path: "/admin/tukar-tambah" },
+    ],
   },
   {
-    name: "Forms",
+    name: "Products",
     icon: <MdFormatListBulleted />,
-    subItems: [{ name: "Form Elements", path: "/form-elements" }],
+    subItems: [{ name: "All Products", path: "/admin/products" }],
   },
   {
     name: "Tables",
