@@ -319,15 +319,12 @@ const TradeInRequestDetail = ({ requestId }) => {
               </dl>
             </section>
           </div>
-          {/* --- End Grid Container --- */}
 
-          {/* --- Inspection Info Section --- */}
           <section className="mb-6">
             <h4 className="text-base font-semibold text-gray-800 px-4 py-3 sm:px-6 bg-gray-100 border-t border-b border-gray-200">
               Informasi Inspeksi
             </h4>
             <dl>
-              {/* Lokasi Inspeksi */}
               <div
                 className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
                   isEvenInspectionRow() ? "bg-gray-50" : ""
