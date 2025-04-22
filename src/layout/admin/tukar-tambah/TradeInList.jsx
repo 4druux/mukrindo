@@ -13,7 +13,6 @@ import { formatNumberPhone } from "@/utils/formatNumberPhone";
 // Fetcher function untuk SWR
 const fetcher = (url) => axios.get(url).then((res) => res.data);
 
-// Sesuaikan dengan endpoint backend Anda
 const API_ENDPOINT = "http://localhost:5000/api/trade-in";
 const REQUESTS_PER_PAGE = 10;
 
@@ -105,7 +104,7 @@ const TradeInList = () => {
     <div>
       <BreadcrumbNav items={breadcrumbItems} />
 
-      <div className="p-6 rounded-xl shadow-lg bg-white">
+      <div className="lg:p-6 rounded-xl shadow-lg bg-white">
         <h2 className="text-xl font-medium mb-4 text-gray-700">
           Permintaan Tukar Tambah Terbaru
         </h2>
@@ -116,16 +115,13 @@ const TradeInList = () => {
           </p>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            <div
+              className="overflow-x-auto"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th
-                      scope="col"
-                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      Tanggal Masuk
-                    </th>
                     <th
                       scope="col"
                       className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -150,14 +146,12 @@ const TradeInList = () => {
                     >
                       Preferensi Mobil Baru
                     </th>
-                    {/* --- Kolom Baru Ditambahkan --- */}
                     <th
                       scope="col"
                       className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
                       Lokasi Inspeksi
                     </th>
-                    {/* --- Akhir Kolom Baru --- */}
                     <th
                       scope="col"
                       className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -169,6 +163,12 @@ const TradeInList = () => {
                       className="relative px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
                       Hubungi
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Tanggal Masuk
                     </th>
                   </tr>
                 </thead>
@@ -184,18 +184,6 @@ const TradeInList = () => {
                         transition-colors duration-150 ease-in-out
                       `}
                     >
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {new Date(request.createdAt).toLocaleDateString(
-                          "id-ID",
-                          {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }
-                        )}
-                      </td>
                       <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {request.customerName || "-"}
                       </td>
@@ -227,7 +215,7 @@ const TradeInList = () => {
                         <span
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             request.status === "Pending"
-                              ? "bg-yellow-100 text-yellow-800"
+                              ? "bg-gradient-to-r from-yellow-50 to-yellow-200 text-yellow-600"
                               : request.status === "Contacted"
                               ? "bg-blue-100 text-blue-800"
                               : request.status === "Scheduled"
@@ -250,11 +238,23 @@ const TradeInList = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Hubungi via WhatsApp"
-                          onClick={(e) => e.stopPropagation()} // Mencegah trigger handleRowClick
+                          onClick={(e) => e.stopPropagation()}
                           className="text-green-500 hover:text-green-700 transition-colors inline-block"
                         >
                           <FaWhatsapp size={20} />
                         </a>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {new Date(request.createdAt).toLocaleDateString(
+                          "id-ID",
+                          {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
                       </td>
                     </tr>
                   ))}

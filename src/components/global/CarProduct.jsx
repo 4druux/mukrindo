@@ -7,7 +7,6 @@ import { GiGearStickPattern } from "react-icons/gi";
 import { FaRegCalendarAlt, FaRoad } from "react-icons/fa";
 import { MdOutlineColorLens } from "react-icons/md";
 import { CheckCircle, FileCheck, XCircle } from "lucide-react";
-import { formatDisplayDate } from "@/utils/formatDate";
 
 const CarProduct = ({ product, isAdminRoute = false }) => {
   if (!product) {
@@ -93,7 +92,10 @@ const CarProduct = ({ product, isAdminRoute = false }) => {
           <div className="flex flex-col">
             <p className="text-xs text-gray-700">Masa Berlaku STNK</p>
             <span className="text-gray-900 font-medium text-sm">
-              {formatDisplayDate(product.stnkExpiry)}
+              {new Date(product.stnkExpiry).toLocaleDateString("id-ID", {
+                month: "short",
+                year: "numeric",
+              })}
             </span>
           </div>
         </div>

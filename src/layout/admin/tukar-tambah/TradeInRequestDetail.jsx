@@ -1,13 +1,31 @@
 // File: frontend/src/layout/admin/dashboard/TradeInRequestDetail.jsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import useSWR, { mutate } from "swr";
 import axios from "axios";
-import { FaWhatsapp } from "react-icons/fa";
-import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import { useRouter } from "next/navigation";
 import { formatNumberPhone } from "@/utils/formatNumberPhone";
+import BreadcrumbNav from "@/components/common/BreadcrumbNav";
+import { motion, AnimatePresence } from "framer-motion";
+
+// Import Icon
+import {
+  FaPhone,
+  FaUser,
+  FaWhatsapp,
+  FaEnvelope,
+  FaCar,
+  FaRoad,
+  FaMap,
+  FaCalendarAlt,
+  FaClock,
+} from "react-icons/fa";
+import { MdOutlineColorLens } from "react-icons/md";
+import { GiGearStickPattern } from "react-icons/gi";
+import { IoIosPricetags } from "react-icons/io";
+import { FileCheck } from "lucide-react";
+import { FaLocationDot } from "react-icons/fa6";
 
 // Fetcher function for SWR
 const fetcher = (url) => axios.get(url).then((res) => res.data);
@@ -16,19 +34,20 @@ const fetcher = (url) => axios.get(url).then((res) => res.data);
 const API_BASE_URL = "http://localhost:5000/api/trade-in";
 
 const TradeInRequestDetail = ({ requestId }) => {
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
   const apiUrl = `${API_BASE_URL}/${requestId}`;
   const {
     data: response,
     error,
     isLoading,
-  } = useSWR(requestId ? apiUrl : null, fetcher); // Only fetch if requestId exists
+  } = useSWR(requestId ? apiUrl : null, fetcher);
 
-  // Helper untuk menentukan apakah baris genap/ganjil untuk styling
-  // Dibuat sebagai fungsi agar bisa di-reset per section jika perlu
-  const createRowIndexer = () => {
-    let index = 0;
-    return () => index++ % 2 !== 0;
+  const [isDropdownStatusOpen, setIsDropdownStatusOpen] = useState({});
+  const dropdownRefs = useRef({});
+
+  const dropDownVariant = {
+    open: { opacity: 1, y: 0, transition: { duration: 0.2 } },
+    closed: { opacity: 0, y: -10, transition: { duration: 0.2 } },
   };
 
   if (isLoading) {
@@ -67,385 +86,68 @@ const TradeInRequestDetail = ({ requestId }) => {
     { label: "Detail Permintaan", href: "" },
   ];
 
-  const isEvenCustomerRow = createRowIndexer();
-  const isEvenOldCarRow = createRowIndexer();
-  const isEvenInspectionRow = createRowIndexer();
-  const isEvenNewCarRow = createRowIndexer();
-
   return (
     <div className="">
       <BreadcrumbNav items={breadcrumbItems} />
-      <div className="lg:p-6 rounded-xl shadow-lg bg-white">
-        {/* Header */}
-        <div className="mb-6">
-          <h3 className="text-xl leading-6 font-medium text-gray-900">
-            Detail Permintaan Tukar Tambah
-          </h3>
-          <p className="mt-1 max-w-2xl text-sm text-gray-500">
-            ID Permintaan: {request._id}
-          </p>
-
-          <p className="mt-1 max-w-2xl text-sm text-gray-500">
-            Dibuat:{" "}
-            {new Date(request.createdAt).toLocaleDateString("id-ID", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </p>
+      {/* Header */}
+      <div className="lg:rounded-xl shadow-lg bg-white">
+        <div
+          className={`lg:rounded-t-xl ${
+            request.status === "Pending"
+              ? "bg-gradient-to-r from-orange-50 to-orange-200"
+              : ""
+          }`}
+        >
+          <div className="p-3 lg:p-5">
+            <h3 className="text-md lg:text-lg leading-6 font-medium text-gray-700">
+              Detail Permintaan Tukar Tambah
+            </h3>
+            <p className="flex item-start gap-2 mt-1">
+              <span className="text-xs lg:text-sm text-gray-700">
+                {" "}
+                ID: {request._id}
+              </span>
+              <span
+                className={` text-xs leading-5 font-semibold ${
+                  request.status === "Pending"
+                    ? "text-yellow-600  animate-pulse"
+                    : request.status === "Contacted"
+                    ? "text-blue-800  animate-pulse"
+                    : request.status === "Scheduled"
+                    ? "text-indigo-800  animate-pulse"
+                    : request.status === "Completed"
+                    ? "text-green-800"
+                    : request.status === "Cancelled"
+                    ? "text-red-800"
+                    : "text-gray-800"
+                }`}
+              >
+                {request.status || "N/A"}
+              </span>
+            </p>
+          </div>
         </div>
 
-        {/* Body dengan Sections */}
-        <div className="border-t border-gray-200">
-          {/* --- Customer Info Section --- */}
-          <section className="mb-6">
-            <h4 className="text-base font-semibold text-gray-800 px-4 py-3 sm:px-6 bg-gray-100 border-b border-gray-200">
-              Informasi Pelanggan
-            </h4>
-            <dl>
-              {/* Nama Pelanggan */}
-              <div
-                className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                  isEvenCustomerRow() ? "bg-gray-50" : ""
-                }`}
-              >
-                <dt className="text-sm font-semibold text-gray-600">
-                  Nama Pelanggan
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {request.customerName || "-"}
-                </dd>
-              </div>
-              {/* No. Telepon */}
-              <div
-                className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                  isEvenCustomerRow() ? "bg-gray-50" : ""
-                }`}
-              >
-                <dt className="text-sm font-semibold text-gray-600">
-                  No. Telepon
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {request.customerPhoneNumber
-                    ? `(+62) ${formatNumberPhone(request.customerPhoneNumber)}`
-                    : "-"}
-                </dd>
-              </div>
-              {/* Email */}
-              <div
-                className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                  isEvenCustomerRow() ? "bg-gray-50" : ""
-                }`}
-              >
-                <dt className="text-sm font-semibold text-gray-600">Email</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {request.customerEmail || "-"}
-                </dd>
-              </div>
-            </dl>
-          </section>
-
-          {/* --- Grid Container for Old Car and New Car Preference --- */}
-          <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-6">
-            {/* --- Old Car Info Section --- */}
-            <section className="mb-6">
-              <h4 className="text-base font-semibold text-gray-800 px-4 py-3 sm:px-6 bg-gray-100 border-t border-b border-gray-200">
-                Informasi Mobil Lama
-              </h4>
-              <dl>
-                {/* Mobil Lama */}
-                <div
-                  className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                    isEvenOldCarRow() ? "bg-gray-50" : ""
-                  }`}
-                >
-                  <dt className="text-sm font-semibold text-gray-600">
-                    Mobil Lama
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {`${request.tradeInBrand} ${request.tradeInModel} (${request.tradeInYear})` ||
-                      "-"}
-                  </dd>
-                </div>
-                {/* Varian */}
-                <div
-                  className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                    isEvenOldCarRow() ? "bg-gray-50" : ""
-                  }`}
-                >
-                  <dt className="text-sm font-semibold text-gray-600">
-                    Varian
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {request.tradeInVariant || "-"}
-                  </dd>
-                </div>
-                {/* Transmisi */}
-                <div
-                  className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                    isEvenOldCarRow() ? "bg-gray-50" : ""
-                  }`}
-                >
-                  <dt className="text-sm font-semibold text-gray-600">
-                    Transmisi
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {request.tradeInTransmission || "-"}
-                  </dd>
-                </div>
-                {/* Warna */}
-                <div
-                  className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                    isEvenOldCarRow() ? "bg-gray-50" : ""
-                  }`}
-                >
-                  <dt className="text-sm font-semibold text-gray-600">Warna</dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {request.tradeInColor || "-"}
-                  </dd>
-                </div>
-                {/* Jarak Tempuh */}
-                <div
-                  className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                    isEvenOldCarRow() ? "bg-gray-50" : ""
-                  }`}
-                >
-                  <dt className="text-sm font-semibold text-gray-600">
-                    Jarak Tempuh (km)
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {request.tradeInTravelDistance?.toLocaleString("id-ID") ||
-                      "-"}
-                  </dd>
-                </div>
-                {/* Masa Berlaku STNK */}
-                <div
-                  className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                    isEvenOldCarRow() ? "bg-gray-50" : ""
-                  }`}
-                >
-                  <dt className="text-sm font-semibold text-gray-600">
-                    Masa Berlaku STNK
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {new Date(request.tradeInStnkExpiry).toLocaleDateString(
-                      "id-ID",
-                      {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      }
-                    )}
-                  </dd>
-                </div>
-              </dl>
-            </section>
-
-            {/* --- New Car Preference Section --- */}
-            <section className="mb-6">
-              <h4 className="text-base font-semibold text-gray-800 px-4 py-3 sm:px-6 bg-gray-100 border-t border-b border-gray-200">
-                Preferensi Mobil Baru
-              </h4>
-              <dl>
-                {/* Preferensi Mobil Baru */}
-                <div
-                  className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                    isEvenNewCarRow() ? "bg-gray-50" : ""
-                  }`}
-                >
-                  <dt className="text-sm font-semibold text-gray-600">
-                    Preferensi Mobil Baru
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {`${request.newCarBrandPreference || ""} ${
-                      request.newCarModelPreference || ""
-                    }`.trim() || "-"}
-                  </dd>
-                </div>
-                {/* Varian */}
-                <div
-                  className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                    isEvenNewCarRow() ? "bg-gray-50" : ""
-                  }`}
-                >
-                  <dt className="text-sm font-semibold text-gray-600">
-                    Varian
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {request.newCarVariantPreference || "-"}
-                  </dd>
-                </div>
-                {/* Transmisi */}
-                <div
-                  className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                    isEvenNewCarRow() ? "bg-gray-50" : ""
-                  }`}
-                >
-                  <dt className="text-sm font-semibold text-gray-600">
-                    Transmisi
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {request.newCarTransmissionPreference || "-"}
-                  </dd>
-                </div>
-                {/* Warna */}
-                <div
-                  className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                    isEvenNewCarRow() ? "bg-gray-50" : ""
-                  }`}
-                >
-                  <dt className="text-sm font-semibold text-gray-600">Warna</dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {request.newCarColorPreference || "-"}
-                  </dd>
-                </div>
-                {/* Rentang Harga */}
-                <div
-                  className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                    isEvenNewCarRow() ? "bg-gray-50" : ""
-                  }`}
-                >
-                  <dt className="text-sm font-semibold text-gray-600">
-                    Rentang Harga
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {request.newCarPriceRangePreference
-                      ? `${request.newCarPriceRangePreference} jt`
-                      : "-"}{" "}
-                  </dd>
-                </div>
-              </dl>
-            </section>
-          </div>
-
-          <section className="mb-6">
-            <h4 className="text-base font-semibold text-gray-800 px-4 py-3 sm:px-6 bg-gray-100 border-t border-b border-gray-200">
-              Informasi Inspeksi
-            </h4>
-            <dl>
-              <div
-                className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                  isEvenInspectionRow() ? "bg-gray-50" : ""
-                }`}
-              >
-                <dt className="text-sm font-semibold text-gray-600">
-                  Lokasi Inspeksi
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {request.inspectionLocationType === "showroom"
-                    ? "Showroom"
-                    : "Rumah Pelanggan" || "-"}
-                </dd>
-              </div>
-              {/* Detail Lokasi (Conditional) */}
-              {request.inspectionLocationType === "showroom" ? (
-                <div
-                  className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                    isEvenInspectionRow() ? "bg-gray-50" : ""
-                  }`}
-                >
-                  <dt className="text-sm font-semibold text-gray-600">
-                    Alamat Showroom
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                    {request.inspectionShowroomAddress || "-"}
-                  </dd>
-                </div>
-              ) : (
-                <>
-                  <div
-                    className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                      isEvenInspectionRow() ? "bg-gray-50" : ""
-                    }`}
-                  >
-                    <dt className="text-sm font-semibold text-gray-600">
-                      Provinsi
-                    </dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      {request.inspectionProvince || "-"}
-                    </dd>
-                  </div>
-                  <div
-                    className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                      isEvenInspectionRow() ? "bg-gray-50" : ""
-                    }`}
-                  >
-                    <dt className="text-sm font-semibold text-gray-600">
-                      Kota/Kabupaten
-                    </dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      {request.inspectionCity || "-"}
-                    </dd>
-                  </div>
-                  <div
-                    className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                      isEvenInspectionRow() ? "bg-gray-50" : ""
-                    }`}
-                  >
-                    <dt className="text-sm font-semibold text-gray-600">
-                      Alamat Lengkap
-                    </dt>
-                    <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                      {request.inspectionFullAddress || "-"}
-                    </dd>
-                  </div>
-                </>
-              )}
-              {/* Tanggal Inspeksi */}
-              <div
-                className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                  isEvenInspectionRow() ? "bg-gray-50" : ""
-                }`}
-              >
-                <dt className="text-sm font-semibold text-gray-600">
-                  Tanggal Inspeksi
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {new Date(request.inspectionDate).toLocaleDateString(
-                    "id-ID",
-                    {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    }
-                  )}
-                </dd>
-              </div>
-              {/* Waktu Inspeksi */}
-              <div
-                className={`py-3 sm:py-4 px-4 sm:px-6 sm:grid sm:grid-cols-3 sm:gap-4 ${
-                  isEvenInspectionRow() ? "bg-gray-50" : ""
-                }`}
-              >
-                <dt className="text-sm font-semibold text-gray-600">
-                  Waktu Inspeksi
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                  {request.inspectionTime || "-"}
-                </dd>
-              </div>
-            </dl>
-          </section>
-
-          {/* --- Status Section (Diabaikan sesuai permintaan) --- */}
-          <section>
-            <h4 className="text-base font-semibold text-gray-800 px-4 py-3 sm:px-6 bg-gray-100 border-t border-b border-gray-200">
-              Status Permintaan
-            </h4>
-            <div className="px-4 py-5 sm:px-6">
-              <div className="sm:grid sm:grid-cols-3 sm:gap-4 items-center">
-                <dt className="text-sm font-semibold text-gray-600">
-                  Update Status
-                </dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 flex items-center gap-4">
+        <div className="p-4 lg:p-6">
+          <div className="flex flex-col items-end gap-2 justify-end">
+            <p className="mt-1 text-xs  text-gray-700">
+              Dibuat: {""}
+              {new Date(request.createdAt).toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </p>
+            <section className="flex justify-end">
+              <AnimatePresence>
+                <dd className="mt-1 text-sm text-gray-900 flex items-center gap-4">
                   <select
                     id="status"
                     name="status"
-                    defaultValue={request.status || "Pending"} // Set default value based on data
-                    className="block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm disabled:opacity-70 disabled:bg-gray-100"
-                    // disabled // Anda bisa uncomment ini jika ingin disable sementara
+                    defaultValue={request.status}
+                    className="block w-full max-w-xs rounded-full px-2 py-1 bg-white border-gray-300 shadow-sm focus:outline-none"
                   >
                     {statusOptions.map((status) => (
                       <option key={status} value={status}>
@@ -453,14 +155,237 @@ const TradeInRequestDetail = ({ requestId }) => {
                       </option>
                     ))}
                   </select>
-                  {/* Logika untuk update status belum ditambahkan */}
                 </dd>
-              </div>
-            </div>
-          </section>
+              </AnimatePresence>
+            </section>
+          </div>
+          <div className="lg:px-4 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <section>
+              <h4 className="text-base font-semibold text-gray-800 py-2 border-b border-gray-200 mb-2">
+                Informasi Pelanggan
+              </h4>
+              <dl className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <FaUser className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Nama Pelanggan</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {request.customerName}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <FaPhone className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Nomor Telepon</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      (+62) {formatNumberPhone(request.customerPhoneNumber)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <FaEnvelope className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Email</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {request.customerEmail}
+                    </span>
+                  </div>
+                </div>
+              </dl>
+            </section>
+
+            <section>
+              <h4 className="text-base font-semibold text-gray-800 py-2 border-b border-gray-200 mb-2">
+                Informasi Mobil Lama
+              </h4>
+              <dl className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <FaCar className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Mobil Lama</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {`${request.tradeInBrand} ${request.tradeInModel}  ${request.tradeInVariant} (${request.tradeInYear})`}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <GiGearStickPattern className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Transmisi</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {request.tradeInTransmission}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <MdOutlineColorLens className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Warna</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {request.tradeInColor}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <FaRoad className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Warna</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {request.tradeInTravelDistance.toLocaleString("id-ID")} KM
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <FileCheck className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Masa Berlaku STNK</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {new Date(request.tradeInStnkExpiry).toLocaleDateString(
+                        "id-ID",
+                        {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        }
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </dl>
+            </section>
+
+            <section>
+              <h4 className="text-base font-semibold text-gray-800 py-2 border-b border-gray-200 mb-2">
+                Preferensi Mobil Baru
+              </h4>
+              <dl className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <FaCar className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Preferensi Mobil</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {`${request.newCarBrandPreference} ${request.newCarModelPreference}  ${request.newCarVariantPreference}`}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <GiGearStickPattern className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Transmisi</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {request.newCarTransmissionPreference}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <MdOutlineColorLens className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Warna</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {request.newCarColorPreference}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <IoIosPricetags className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Range Harga</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {request.newCarPriceRangePreference} jt
+                    </span>
+                  </div>
+                </div>
+              </dl>
+            </section>
+
+            <section>
+              <h4 className="text-base font-semibold text-gray-800 py-2 border-b border-gray-200 mb-2">
+                Informasi Inspeksi
+              </h4>
+              <dl className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <FaLocationDot className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Lokasi Inspeksi</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {request.inspectionLocationType === "showroom"
+                        ? "Showroom"
+                        : "Rumah Pelanggan"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Detail Lokasi (Conditional) */}
+                {request.inspectionLocationType === "showroom" ? (
+                  <div className="flex items-center space-x-2">
+                    <FaMap className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                    <div className="flex flex-col">
+                      <p className="text-xs text-gray-700">Alamat Showroom</p>
+                      <span className="text-gray-900 font-medium text-sm">
+                        {request.inspectionShowroomAddress}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center space-x-2">
+                      <FaMap className="text-gray-600 w-10 h-10 lg:w-14 lg:h-14" />
+                      <div className="flex flex-col">
+                        <p className="text-xs text-gray-700">
+                          Alamat Lengkap Pelanggan
+                        </p>
+                        <span className="text-gray-900 font-medium text-sm">
+                          {request.inspectionFullAddress}, {""}
+                          {request.inspectionCity}, {""}
+                          {request.inspectionProvince}
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div className="flex items-center space-x-2">
+                  <FaCalendarAlt className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Tanggal Inspeksi</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {new Date(request.inspectionDate).toLocaleDateString(
+                        "id-ID",
+                        {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        }
+                      )}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <FaClock className="text-gray-600 w-5 h-5 lg:w-8 lg:h-8" />
+                  <div className="flex flex-col">
+                    <p className="text-xs text-gray-700">Waktu Inspeksi</p>
+                    <span className="text-gray-900 font-medium text-sm">
+                      {request.inspectionTime}
+                    </span>
+                  </div>
+                </div>
+              </dl>
+            </section>
+          </div>
 
           {/* --- Action Buttons --- */}
-          <div className="flex justify-end space-x-2 sm:space-x-4 mt-6 px-4 sm:px-6">
+          <div className="flex justify-end space-x-2 sm:space-x-4 mt-12 lg:mt-8">
             <button
               type="button"
               onClick={() => router.back()} // Gunakan router.back()
@@ -470,15 +395,14 @@ const TradeInRequestDetail = ({ requestId }) => {
               Kembali
             </button>
             <button
-              type="button" // Ubah ke type="button" jika belum ada fungsi submit
+              type="button"
               onClick={() => {
-                // Logika untuk membuka WhatsApp (contoh)
                 if (request.customerPhoneNumber) {
                   const phone = request.customerPhoneNumber.startsWith("0")
                     ? "62" + request.customerPhoneNumber.substring(1)
                     : request.customerPhoneNumber.startsWith("62")
                     ? request.customerPhoneNumber
-                    : "62" + request.customerPhoneNumber; // Basic normalization
+                    : "62" + request.customerPhoneNumber;
                   window.open(`https://wa.me/${phone}`, "_blank");
                 } else {
                   alert("Nomor telepon pelanggan tidak tersedia.");
@@ -489,7 +413,6 @@ const TradeInRequestDetail = ({ requestId }) => {
               <FaWhatsapp size={20} className="mr-2" />
               <span className=" text-sm font-medium">Hubungi Pelanggan</span>
             </button>
-            {/* Tombol Simpan Status bisa ditambahkan di sini jika diperlukan nanti */}
           </div>
         </div>
       </div>
