@@ -139,7 +139,7 @@ exports.updateProduct = async (req, res) => {
     // Validasi tambahan untuk status (jika ada di updatedData)
     if (
       updatedData.status &&
-      !["available", "sold out"].includes(updatedData.status)
+      !["Tersedia", "Terjual"].includes(updatedData.status)
     ) {
       return res.status(400).json({ message: "Status tidak valid" });
     }
@@ -182,6 +182,36 @@ exports.deleteProduct = async (req, res) => {
     await Product.findByIdAndDelete(id);
 
     res.status(200).json({ message: "Produk berhasil dihapus" });
+  } catch (error) {
+    if (error.name === "CastError" && error.kind === "ObjectId") {
+      return res.status(400).json({ message: "ID Produk tidak valid" });
+    }
+    handleServerError(res, error);
+  }
+};
+
+// @desc    Increment view count for a product
+// @route   PUT /api/products/:id/increment-view
+// @access  Public (atau Private jika Anda ingin membatasi siapa yang bisa memicu ini)
+exports.incrementViewCount = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ message: "ID Produk diperlukan" });
+    }
+
+    const product = await Product.findByIdAndUpdate(
+      id,
+      { $inc: { viewCount: 1 } },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({ message: "Produk tidak ditemukan" });
+    }
+
+    res.status(200).json({ viewCount: product.viewCount });
   } catch (error) {
     if (error.name === "CastError" && error.kind === "ObjectId") {
       return res.status(400).json({ message: "ID Produk tidak valid" });

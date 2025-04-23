@@ -1,3 +1,4 @@
+// routes/productRoutes.js
 const express = require("express");
 const router = express.Router();
 const productController = require("../controllers/productController");
@@ -16,5 +17,8 @@ router.put("/:id", productController.updateProduct);
 
 // Route untuk menghapus produk berdasarkan ID
 router.delete("/:id", productController.deleteProduct);
+
+// Route baru untuk increment view count
+router.put("/:id/increment-view", productController.incrementViewCount);
 
 module.exports = router;

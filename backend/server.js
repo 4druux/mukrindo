@@ -6,7 +6,8 @@ const { createServer } = require("http");
 const app = express();
 const PORT = process.env.PORT || 5000;
 const path = require("path");
-const productRoutes = require("./routes/productRoutes"); 
+const productRoutes = require("./routes/productRoutes");
+const tradeInRoutes = require("./routes/tradeInRoutes");
 
 // Middleware
 app.use(
@@ -35,6 +36,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/products", productRoutes);
+app.use("/api/trade-in", tradeInRoutes);
 
 // 404 Route
 app.use((req, res, next) => {

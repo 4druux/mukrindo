@@ -51,8 +51,12 @@ const productSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["available", "sold out"], // Hanya terima dua nilai ini
-      default: "available", // Nilai default
+      enum: ["Tersedia", "Terjual"],
+      default: "Tersedia",
+    },
+    viewCount: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }
