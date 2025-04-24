@@ -256,7 +256,8 @@ const AllProducts = () => {
           {searchQuery
             ? `Hasil pencarian untuk "${searchQuery}"`
             : "Menampilkan"}
-          {!loading && ` ${processedProducts.length} Mobil`}
+          {!loading &&
+            ` ${currentProducts.length} dari ${processedProducts.length} Produk Mobil`}
         </h1>
 
         <div className="flex items-end justify-end">
@@ -275,11 +276,11 @@ const AllProducts = () => {
 
       {!loading && searchQuery && (
         <ActiveSearchFilters
-          searchParams={searchParams} // Kirim searchParams (meskipun filter detail tidak dipakai)
+          searchParams={searchParams}
           splitResult={splitSearchFilter}
           onClearAll={handleClearAllAdminFilters}
           onRemoveSearchPart={handleRemoveAdminSearchPart}
-          onRemoveFilterParam={handleRemoveAdminFilterParam} // Handler dummy
+          onRemoveFilterParam={handleRemoveAdminFilterParam}
         />
       )}
       {!loading &&
@@ -328,8 +329,9 @@ const AllProducts = () => {
         currentProducts.length > 0 &&
         processedProducts.length > productsPerPage && (
           <Pagination
+            key={`pagination-${activeFilter}-${searchQuery}`}
             pageCount={Math.ceil(processedProducts.length / productsPerPage)}
-            currentPage={currentPage}
+            forcePage={currentPage}
             onPageChange={handlePageChange}
           />
         )}

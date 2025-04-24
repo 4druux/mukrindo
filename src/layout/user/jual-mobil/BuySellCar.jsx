@@ -8,6 +8,7 @@ import Step1Form from "@/components/product-user/Step1Form";
 import Step2Form from "@/components/product-user/Step2Form";
 import Step3Form from "@/components/product-user/Step3Form";
 import Stepper from "@/components/global/Stepper";
+import { useBuySell } from "@/context/BuySellContext";
 
 // Import Utils
 import {
@@ -25,7 +26,34 @@ const PHONE_PREFIX = "(+62) ";
 const QUICK_OPEN_DELAY = 50;
 const INACTIVITY_DELAY = 10000;
 
-const SellCar = ({
+const initialFormData = {
+  // Step 1
+  brand: "",
+  model: "",
+  variant: "",
+  transmission: "",
+  color: "",
+  year: "",
+  stnkExpiry: "",
+  travelDistance: "",
+  price: "",
+
+  // Step 2
+  name: "",
+  phoneNumber: PHONE_PREFIX,
+  email: "",
+
+  // Step 3
+  inspectionLocationType: "showroom",
+  showroomAddress: "",
+  province: "",
+  city: "",
+  fullAddress: "",
+  inspectionDate: "",
+  inspectionTime: "",
+};
+
+const BuySellCar = ({
   initialBrand = "",
   initialModel = "",
   initialYear = "",
@@ -35,6 +63,7 @@ const SellCar = ({
   const [errors, setErrors] = useState({});
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState("");
+  const { isSubmitting, submitSellRequest } = useBuySell();
 
   const sellCarSteps = [
     { id: 1, label: "Info Mobil" },
@@ -43,32 +72,13 @@ const SellCar = ({
   ];
 
   const [formData, setFormData] = useState({
-    // Step 1
-    brand: initialBrand,
-    model: initialModel,
-    variant: "",
-    transmission: "",
-    color: "",
-    year: initialYear,
-    stnkExpiry: "",
-    travelDistance: "",
-    price: "",
-
-    // Step 2
-    name: "",
+    ...initialFormData,
+    brand: initialBrand || initialFormData.brand,
+    model: initialModel || initialFormData.model,
+    year: initialYear || initialFormData.year,
     phoneNumber: initialPhoneNumber
       ? formatNumberPhone(initialPhoneNumber, PHONE_PREFIX)
-      : PHONE_PREFIX,
-    email: "",
-
-    // Step 3
-    inspectionLocationType: "showroom",
-    showroomAddress: "",
-    province: "",
-    city: "",
-    fullAddress: "",
-    inspectionDate: "",
-    inspectionTime: "",
+      : initialFormData.phoneNumber,
   });
 
   // Step 1 Refs
@@ -468,13 +478,13 @@ const SellCar = ({
     }
   };
 
-  const handleSubmit = () => {
-    setTermsError("");
+  const handleSubmit = async () => {
     if (validateStep3()) {
       if (!termsAccepted) {
         const errorMessage =
           "*Silahkan centang Syarat dan ketentuan serta Kebijakan Privasi";
         setTermsError(errorMessage);
+        toast.error(errorMessage, { className: "custom-toast" });
         const errorElement = document.getElementById("terms-checkbox-label");
         if (errorElement) {
           errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -486,19 +496,42 @@ const SellCar = ({
         formData.phoneNumber,
         PHONE_PREFIX
       );
+
       const submissionData = {
-        ...formData,
-        phoneNumber: rawPhoneNumber,
+        // Step 1
+        brand: formData.brand,
+        model: formData.model,
+        variant: formData.variant,
+        year: formData.year,
+        transmission: formData.transmission,
+        stnkExpiry: formData.stnkExpiry,
+        color: formData.color,
         travelDistance: unformatNumber(formData.travelDistance),
         price: unformatNumber(formData.price),
-        ...(formData.inspectionLocationType === "showroom" && {
-          province: undefined,
-          city: undefined,
-          fullAddress: undefined,
-        }),
-        ...(formData.inspectionLocationType === "rumah" && {
-          showroomAddress: undefined,
-        }),
+        // Step 2
+        name: formData.name,
+        phoneNumber: rawPhoneNumber,
+        email: formData.email,
+        // Step 3
+        inspectionLocationType: formData.inspectionLocationType,
+        showroomAddress:
+          formData.inspectionLocationType === "showroom"
+            ? formData.showroomAddress
+            : undefined,
+        province:
+          formData.inspectionLocationType === "rumah"
+            ? formData.province
+            : undefined,
+        city:
+          formData.inspectionLocationType === "rumah"
+            ? formData.city
+            : undefined,
+        fullAddress:
+          formData.inspectionLocationType === "rumah"
+            ? formData.fullAddress
+            : undefined,
+        inspectionDate: formData.inspectionDate,
+        inspectionTime: formData.inspectionTime,
       };
 
       Object.keys(submissionData).forEach((key) => {
@@ -507,10 +540,26 @@ const SellCar = ({
         }
       });
 
-      console.log("Data Siap Dikirim:", submissionData);
-      toast.success("Permintaan Anda akan diproses!", {
-        className: "custom-toast",
-      });
+      console.log("Mengirim Data:", submissionData);
+
+      try {
+        const result = await submitSellRequest(submissionData);
+
+        if (result.success) {
+          console.log("Pengiriman berhasil:", result.data);
+          setFormData({ ...initialFormData });
+          setCurrentStep(1);
+          setTermsAccepted(false);
+          setErrors({});
+          setTermsError("");
+          window.scrollTo(0, 0);
+        } else {
+          console.error("Pengiriman gagal:", result.error);
+        }
+      } catch (error) {
+        console.error("Error saat memanggil submitSellRequest:", error);
+        toast.error("Gagal menghubungi server.", { className: "custom-toast" });
+      }
     }
   };
 
@@ -568,7 +617,7 @@ const SellCar = ({
                 handleChange={handleChange}
                 handleSelectChange={handleSelectChange}
                 errors={errors}
-                onSubmit={handleSubmit}
+                onSubmit={handleSubmit || isSubmitting}
                 onBack={handlePreviousStep}
                 isSellRoute={true}
                 termsAccepted={termsAccepted}
@@ -591,4 +640,4 @@ const SellCar = ({
   );
 };
 
-export default SellCar;
+export default BuySellCar;

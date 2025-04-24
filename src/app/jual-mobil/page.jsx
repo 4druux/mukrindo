@@ -2,8 +2,8 @@
 
 import React from "react";
 import { useSearchParams } from "next/navigation";
-import SellCar from "@/layout/user/jual-mobil/SellCar";
-import CarouselGlobal from "@/components/global/CarouselGlobal";
+import BuySellCar from "@/layout/user/jual-mobil/BuySellCar";
+import CarouselGlobal from "@/components/product-user/CarouselGlobal";
 
 const SellCarPage = () => {
   const searchParams = useSearchParams();
@@ -21,7 +21,7 @@ const SellCarPage = () => {
         title="Jual Mobil Cepat Laku & Aman"
         subtitle="Bebas Drama & Tipu-Tipu"
       />
-      <SellCar
+      <BuySellCar
         initialBrand={initialBrand}
         initialModel={initialModel}
         initialYear={initialYear}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import axios from "axios";
 import { formatNumberPhone } from "@/utils/formatNumberPhone";
 import { X, ChevronDown, Loader2 } from "lucide-react";
@@ -32,19 +32,20 @@ const TradeInRequestDetail = ({
   onClose,
   mutateList,
   currentRequests,
+  onStatusUpdated,
 }) => {
   const apiUrl = `${API_BASE_URL}/${requestId}`;
   const {
     data: response,
     error,
     isLoading,
+    mutate: mutateDetail,
   } = useSWR(requestId ? apiUrl : null, fetcher);
-  const [currentStatus, setCurrentStatus] = useState(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const statusOptions = ["Pending", "Contacted", "Completed", "Cancelled"];
+  const statusOptions = ["Pending", "Dihubungi", "Selesai", "Dibatalkan"];
+  const currentStatus = response?.data?.status;
 
   const dropDownVariant = {
     open: { opacity: 1, y: 0, transition: { duration: 0.2 } },
@@ -63,8 +64,7 @@ const TradeInRequestDetail = ({
       });
 
       if (updateResponse.data && updateResponse.data.success) {
-        const updatedRequestData = updateResponse.data.data;
-        setCurrentStatus(updatedRequestData.status);
+        await mutateDetail();
 
         if (mutateList && currentRequests) {
           const requestIndex = currentRequests.findIndex(
@@ -76,17 +76,12 @@ const TradeInRequestDetail = ({
               ...currentRequests.slice(0, requestIndex),
               {
                 ...currentRequests[requestIndex],
-                status: updatedRequestData.status,
+                status: newStatus,
               },
               ...currentRequests.slice(requestIndex + 1),
             ];
 
-            mutateList(
-              { success: true, data: updatedRequests },
-              {
-                revalidate: false,
-              }
-            );
+            mutateList(updatedRequests);
           } else {
             console.warn(
               "Request yang diupdate tidak ditemukan di cache list. Memaksa revalidasi."
@@ -100,9 +95,14 @@ const TradeInRequestDetail = ({
           if (mutateList) mutateList();
         }
 
+        if (onStatusUpdated) {
+          onStatusUpdated(requestId, newStatus);
+        }
+
         toast.success("Status berhasil diperbarui!", {
           className: "custom-toast",
         });
+        onClose();
       } else {
         throw new Error(
           updateResponse.data.message || "Gagal memperbarui status."
@@ -116,43 +116,54 @@ const TradeInRequestDetail = ({
         updateError.message ||
         "Gagal memperbarui status.";
       toast.error(errorMessage, { className: "custom-toast" });
+      mutateDetail();
     } finally {
       setIsUpdatingStatus(false);
     }
   };
 
   const handleContactButtonClick = async () => {
+    const tradeInRequest = response?.data;
+    if (!tradeInRequest) {
+      toast.error("Data permintaan tidak tersedia.");
+      return;
+    }
+
+    let statusUpdateSuccess = true;
     if (currentStatus === "Pending" && !isUpdatingStatus) {
       try {
-        await handleStatusUpdate("Contacted");
+        await handleStatusUpdate("Dihubungi");
       } catch (error) {
         console.error("Gagal update status saat menghubungi:", error);
-
+        statusUpdateSuccess = false;
         return;
       }
     }
 
-    if (request?.customerPhoneNumber) {
-      const phone = request.customerPhoneNumber.startsWith("0")
-        ? "62" + request.customerPhoneNumber.substring(1)
-        : request.customerPhoneNumber.startsWith("62")
-        ? request.customerPhoneNumber
-        : "62" + request.customerPhoneNumber;
+    if (
+      (currentStatus !== "Pending" || statusUpdateSuccess) &&
+      tradeInRequest.customerPhoneNumber
+    ) {
+      const phone = tradeInRequest.customerPhoneNumber.startsWith("0")
+        ? "62" + tradeInRequest.customerPhoneNumber.substring(1)
+        : tradeInRequest.customerPhoneNumber.startsWith("62")
+        ? tradeInRequest.customerPhoneNumber
+        : "62" + tradeInRequest.customerPhoneNumber;
 
-      const customerName = request.customerName || "Pelanggan";
+      const customerName = tradeInRequest.customerName || "Pelanggan";
       const companyName = "Mukrindo Motor";
       const inspectionDate = new Date(
-        request.inspectionDate
+        tradeInRequest.inspectionDate
       ).toLocaleDateString("id-ID", {
         day: "numeric",
         month: "long",
         year: "numeric",
       });
-      const inspectionTime = request.inspectionTime;
+      const inspectionTime = tradeInRequest.inspectionTime;
       const inspectionLocation =
-        request.inspectionLocationType === "showroom"
-          ? `Showroom kami di ${request.inspectionShowroomAddress}`
-          : `${request.inspectionFullAddress}, ${request.inspectionCity}, ${request.inspectionProvince}`;
+        tradeInRequest.inspectionLocationType === "showroom"
+          ? `Showroom kami di ${tradeInRequest.inspectionShowroomAddress}`
+          : `${tradeInRequest.inspectionFullAddress}, ${tradeInRequest.inspectionCity}, ${tradeInRequest.inspectionProvince}`;
 
       let message = `Halo Bapak/Ibu ${customerName},\n\n`;
       message += `Perkenalkan, Kami dari tim ${companyName}. Terima kasih sudah mengajukan permintaan tukar tambah yang Bapak/Ibu ajukan melalui website kami.\n\n`;
@@ -168,16 +179,14 @@ const TradeInRequestDetail = ({
       const encodedMessage = encodeURIComponent(message);
 
       window.open(`https://wa.me/${phone}?text=${encodedMessage}`, "_blank");
-    } else {
+
+      if (currentStatus !== "Pending") {
+        onClose();
+      }
+    } else if (!tradeInRequest.customerPhoneNumber) {
       toast.error("Nomor telepon pelanggan tidak tersedia.");
     }
   };
-
-  useEffect(() => {
-    if (response?.data?.status && currentStatus === null) {
-      setCurrentStatus(response.data.status);
-    }
-  }, [response, currentStatus]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -191,7 +200,7 @@ const TradeInRequestDetail = ({
     };
   }, [dropdownRef]);
 
-  if (isLoading) {
+  if (isLoading && !response) {
     return (
       <div className="flex-grow flex items-center justify-center p-10">
         Memuat detail permintaan...
@@ -208,7 +217,7 @@ const TradeInRequestDetail = ({
     );
   }
 
-  if (!response?.success || !response?.data) {
+  if (!isLoading && (!response?.success || !response?.data)) {
     return (
       <div className="flex-grow flex items-center justify-center p-10 text-gray-600">
         Data permintaan tidak ditemukan.
@@ -216,22 +225,20 @@ const TradeInRequestDetail = ({
     );
   }
 
-  const request = response.data;
-  if (currentStatus === null && request.status) {
-    setCurrentStatus(request.status);
-  }
+  const tradeInRequest = response.data;
 
   return (
     <div className="flex flex-col flex-grow h-full">
+      {/* Header */}
       <div
         className={`sticky top-0 z-10 flex-shrink-0 ${
           currentStatus === "Pending"
             ? "bg-gradient-to-r from-yellow-50 to-yellow-300"
-            : currentStatus === "Contacted"
+            : currentStatus === "Dihubungi"
             ? "bg-gradient-to-r from-blue-50 to-blue-300"
-            : currentStatus === "Completed"
+            : currentStatus === "Selesai"
             ? "bg-gradient-to-r from-green-50 to-green-300"
-            : currentStatus === "Cancelled"
+            : currentStatus === "Dibatalkan"
             ? "bg-gradient-to-r from-red-50 to-red-300"
             : "bg-gradient-to-r from-gray-50 to-gray-300"
         }`}
@@ -246,11 +253,11 @@ const TradeInRequestDetail = ({
                 className={`px-2 inline-flex text-[10px] leading-5 font-semibold rounded-full w-fit ${
                   currentStatus === "Pending"
                     ? "bg-gradient-to-r from-yellow-200 to-yellow-300 text-yellow-700 animate-pulse"
-                    : currentStatus === "Contacted"
+                    : currentStatus === "Dihubungi"
                     ? "bg-gradient-to-r from-blue-200 to-blue-300 text-blue-700 animate-pulse"
-                    : currentStatus === "Completed"
+                    : currentStatus === "Selesai"
                     ? "bg-gradient-to-r from-green-200 to-green-300 text-green-700 animate-pulse"
-                    : currentStatus === "Cancelled"
+                    : currentStatus === "Dibatalkan"
                     ? "bg-gradient-to-r from-red-200 to-red-300 text-red-700 animate-pulse"
                     : "bg-gradient-to-r from-gray-200 to-gray-300 text-gray-700 animate-pulse"
                 }`}
@@ -268,23 +275,25 @@ const TradeInRequestDetail = ({
           </button>
         </div>
       </div>
+
+      {/* Content */}
       <div className="flex-grow overflow-y-auto">
         <div className="p-4 lg:p-6">
           <div className="flex flex-col lg:flex-row justify-between items-end lg:items-start mb-4 lg:px-4">
             <div className="flex item-start gap-2">
               <span className="text-xs lg:text-sm text-gray-700 lg:mt-1">
-                ID: {request._id}
+                ID: {tradeInRequest._id}
               </span>
               <div className="hidden lg:block">
                 <span
                   className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full w-fit ${
                     currentStatus === "Pending"
                       ? "bg-gradient-to-r from-yellow-50 to-yellow-300 text-yellow-700 animate-pulse"
-                      : currentStatus === "Contacted"
+                      : currentStatus === "Dihubungi"
                       ? "bg-gradient-to-r from-blue-50 to-blue-300 text-blue-700 animate-pulse"
-                      : currentStatus === "Completed"
+                      : currentStatus === "Selesai"
                       ? "bg-gradient-to-r from-green-50 to-green-300 text-green-700 animate-pulse"
-                      : currentStatus === "Cancelled"
+                      : currentStatus === "Dibatalkan"
                       ? "bg-gradient-to-r from-red-50 to-red-300 text-red-700 animate-pulse"
                       : "bg-gradient-to-r from-gray-50 to-gray-300 text-gray-700 animate-pulse"
                   }`}
@@ -296,13 +305,16 @@ const TradeInRequestDetail = ({
             <div className="flex flex-col gap-1 relative" ref={dropdownRef}>
               <p className="text-xs text-gray-700">
                 Dibuat: {""}
-                {new Date(request.createdAt).toLocaleDateString("id-ID", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {new Date(tradeInRequest.createdAt).toLocaleDateString(
+                  "id-ID",
+                  {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                )}
               </p>
               <section>
                 <button
@@ -354,7 +366,9 @@ const TradeInRequestDetail = ({
               </section>
             </div>
           </div>
+
           <div className="lg:px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Informasi Pelanggan */}
             <section className="bg-gray-50 rounded-xl p-4">
               <h4 className="text-base font-semibold text-gray-800 py-2 border-b border-gray-200 mb-2">
                 Informasi Pelanggan
@@ -365,7 +379,7 @@ const TradeInRequestDetail = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Nama Pelanggan</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      {request.customerName}
+                      {tradeInRequest.customerName}
                     </span>
                   </div>
                 </div>
@@ -374,7 +388,8 @@ const TradeInRequestDetail = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Nomor Telepon</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      (+62) {formatNumberPhone(request.customerPhoneNumber)}
+                      (+62){" "}
+                      {formatNumberPhone(tradeInRequest.customerPhoneNumber)}
                     </span>
                   </div>
                 </div>
@@ -383,13 +398,14 @@ const TradeInRequestDetail = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Email</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      {request.customerEmail}
+                      {tradeInRequest.customerEmail}
                     </span>
                   </div>
                 </div>
               </dl>
             </section>
 
+            {/* Informasi Mobil Lama */}
             <section className="bg-gray-50 rounded-xl p-4">
               <h4 className="text-base font-semibold text-gray-800 py-2 border-b border-gray-200 mb-2">
                 Informasi Mobil Lama
@@ -399,7 +415,8 @@ const TradeInRequestDetail = ({
                   <FaCar className="text-gray-600 w-5 h-5 lg:w-6 lg:h-6 flex-shrink-0" />
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Mobil Lama</p>
-                    <span className="text-gray-900 font-medium text-sm">{`${request.tradeInBrand} ${request.tradeInModel} ${request.tradeInVariant} ${request.tradeInYear}`}</span>
+
+                    <span className="text-gray-900 font-medium text-sm">{`${tradeInRequest.tradeInBrand} ${tradeInRequest.tradeInModel} ${tradeInRequest.tradeInVariant} ${tradeInRequest.tradeInYear}`}</span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -407,7 +424,7 @@ const TradeInRequestDetail = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Transmisi</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      {request.tradeInTransmission}
+                      {tradeInRequest.tradeInTransmission}
                     </span>
                   </div>
                 </div>
@@ -416,7 +433,7 @@ const TradeInRequestDetail = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Warna</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      {request.tradeInColor}
+                      {tradeInRequest.tradeInColor}
                     </span>
                   </div>
                 </div>
@@ -425,7 +442,10 @@ const TradeInRequestDetail = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Jarak Tempuh</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      {request.tradeInTravelDistance.toLocaleString("id-ID")} KM
+                      {tradeInRequest.tradeInTravelDistance.toLocaleString(
+                        "id-ID"
+                      )}{" "}
+                      KM
                     </span>
                   </div>
                 </div>
@@ -434,16 +454,20 @@ const TradeInRequestDetail = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Masa Berlaku STNK</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      {new Date(request.tradeInStnkExpiry).toLocaleDateString(
-                        "id-ID",
-                        { day: "2-digit", month: "short", year: "numeric" }
-                      )}
+                      {new Date(
+                        tradeInRequest.tradeInStnkExpiry
+                      ).toLocaleDateString("id-ID", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </span>
                   </div>
                 </div>
               </dl>
             </section>
 
+            {/* Preferensi Mobil Baru */}
             <section className="bg-gray-50 rounded-xl p-4">
               <h4 className="text-base font-semibold text-gray-800 py-2 border-b border-gray-200 mb-2">
                 Preferensi Mobil Baru
@@ -453,7 +477,7 @@ const TradeInRequestDetail = ({
                   <FaCar className="text-gray-600 w-5 h-5 lg:w-6 lg:h-6 flex-shrink-0" />
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Preferensi Mobil</p>
-                    <span className="text-gray-900 font-medium text-sm">{`${request.newCarBrandPreference} ${request.newCarModelPreference} ${request.newCarVariantPreference}`}</span>
+                    <span className="text-gray-900 font-medium text-sm">{`${tradeInRequest.newCarBrandPreference} ${tradeInRequest.newCarModelPreference} ${tradeInRequest.newCarVariantPreference}`}</span>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -461,7 +485,7 @@ const TradeInRequestDetail = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Transmisi</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      {request.newCarTransmissionPreference}
+                      {tradeInRequest.newCarTransmissionPreference}
                     </span>
                   </div>
                 </div>
@@ -470,7 +494,7 @@ const TradeInRequestDetail = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Warna</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      {request.newCarColorPreference}
+                      {tradeInRequest.newCarColorPreference}
                     </span>
                   </div>
                 </div>
@@ -479,13 +503,14 @@ const TradeInRequestDetail = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Range Harga</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      {request.newCarPriceRangePreference} jt
+                      {tradeInRequest.newCarPriceRangePreference} jt
                     </span>
                   </div>
                 </div>
               </dl>
             </section>
 
+            {/* Informasi Inspeksi */}
             <section className="bg-gray-50 rounded-xl p-4">
               <h4 className="text-base font-semibold text-gray-800 py-2 border-b border-gray-200 mb-2">
                 Informasi Inspeksi
@@ -496,19 +521,20 @@ const TradeInRequestDetail = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Lokasi Inspeksi</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      {request.inspectionLocationType === "showroom"
+                      {tradeInRequest.inspectionLocationType === "showroom"
                         ? "Showroom"
                         : "Rumah Pelanggan"}
                     </span>
                   </div>
                 </div>
-                {request.inspectionLocationType === "showroom" ? (
+
+                {tradeInRequest.inspectionLocationType === "showroom" ? (
                   <div className="flex items-start space-x-2">
                     <FaMap className="text-gray-600 w-5 h-5 lg:w-6 lg:h-6 flex-shrink-0 mt-0.5" />
                     <div className="flex flex-col min-w-0">
                       <p className="text-xs text-gray-700">Alamat Showroom</p>
                       <span className="text-gray-900 font-medium text-sm break-words">
-                        {request.inspectionShowroomAddress}
+                        {tradeInRequest.inspectionShowroomAddress}
                       </span>
                     </div>
                   </div>
@@ -520,7 +546,7 @@ const TradeInRequestDetail = ({
                         Alamat Lengkap Pelanggan
                       </p>
                       {(() => {
-                        const fullAddress = `${request.inspectionFullAddress}, ${request.inspectionCity}, ${request.inspectionProvince}`;
+                        const fullAddress = `${tradeInRequest.inspectionFullAddress}, ${tradeInRequest.inspectionCity}, ${tradeInRequest.inspectionProvince}`;
                         const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
                           fullAddress
                         )}`;
@@ -544,15 +570,19 @@ const TradeInRequestDetail = ({
                     </div>
                   </div>
                 )}
+
                 <div className="flex items-center space-x-2">
                   <FaCalendarAlt className="text-gray-600 w-5 h-5 lg:w-6 lg:h-6 flex-shrink-0" />
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Tanggal Inspeksi</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      {new Date(request.inspectionDate).toLocaleDateString(
-                        "id-ID",
-                        { day: "2-digit", month: "short", year: "numeric" }
-                      )}
+                      {new Date(
+                        tradeInRequest.inspectionDate
+                      ).toLocaleDateString("id-ID", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </span>
                   </div>
                 </div>
@@ -561,7 +591,7 @@ const TradeInRequestDetail = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Waktu Inspeksi</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      {request.inspectionTime}
+                      {tradeInRequest.inspectionTime}
                     </span>
                   </div>
                 </div>

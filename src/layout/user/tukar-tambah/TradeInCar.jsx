@@ -738,6 +738,7 @@ const TradeInCar = ({
         const errorMessage =
           "*Silahkan centang Syarat dan ketentuan serta Kebijakan Privasi";
         setTermsError(errorMessage);
+        toast.error(errorMessage, { className: "custom-toast" });
         const errorElement = document.getElementById("terms-checkbox-label");
         if (errorElement) {
           errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -760,7 +761,6 @@ const TradeInCar = ({
         tradeInStnkExpiry: formData.stnkExpiry,
         tradeInColor: formData.color,
         tradeInTravelDistance: unformatNumber(formData.travelDistance),
-        tradeInPrice: unformatNumber(formData.price),
         //  Step 2
         customerName: formData.name,
         customerPhoneNumber: rawPhoneNumber,

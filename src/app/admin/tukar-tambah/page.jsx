@@ -1,8 +1,7 @@
-// File: frontend/src/app/admin/dashboard/tukar-tambah/page.jsx
 import React from "react";
 import TradeInList from "@/layout/admin/tukar-tambah/TradeInList";
 
-const TradeInListPage = ({ params }) => {
+const TradeInListPage = () => {
   return (
     <div className="">
       <TradeInList />

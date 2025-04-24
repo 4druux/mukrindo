@@ -3,7 +3,7 @@
 import React from "react";
 import { useSearchParams } from "next/navigation";
 import TradeInCar from "@/layout/user/tukar-tambah/TradeInCar";
-import CarouselGlobal from "@/components/global/CarouselGlobal";
+import CarouselGlobal from "@/components/product-user/CarouselGlobal";
 
 const TradeInCarPage = () => {
   const searchParams = useSearchParams();

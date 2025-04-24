@@ -321,7 +321,8 @@ const CarShop = () => {
             {searchQuery
               ? `Hasil pencarian untuk "${searchQuery}"`
               : "Menampilkan"}
-            {!loading && ` ${processedProducts.length} Mobil`}
+            {!loading &&
+              ` ${currentProducts.length} dari ${processedProducts.length} Mobil`}
           </h1>
 
           {/* Panggil ActiveSearchFilters  */}
@@ -374,10 +375,11 @@ const CarShop = () => {
             currentProducts.length > 0 &&
             processedProducts.length > PRODUCTS_PER_PAGE && (
               <Pagination
+                key={`pagination-${activeFilter}-${searchQuery}`}
                 pageCount={Math.ceil(
                   processedProducts.length / PRODUCTS_PER_PAGE
                 )}
-                currentPage={currentPage}
+                forcePage={currentPage}
                 onPageChange={handlePageChange}
               />
             )}
