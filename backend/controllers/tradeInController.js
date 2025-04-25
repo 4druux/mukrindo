@@ -82,7 +82,7 @@ exports.updateTradeInStatus = async (req, res) => {
     const { status } = req.body; // Ambil status baru dari body request
 
     // 1. Validasi Input Status (Penting!)
-    const allowedStatuses = ["Pending", "Contacted", "Completed", "Cancelled"];
+    const allowedStatuses = ["Pending", "Dihubungi", "Selesai", "Dibatalkan"];
     if (!status || !allowedStatuses.includes(status)) {
       return res.status(400).json({
         success: false,

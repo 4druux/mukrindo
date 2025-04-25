@@ -1,43 +1,57 @@
 const mongoose = require("mongoose");
 
-const TradeInRequestSchema = new mongoose.Schema(
+const SellRequestSchema = new mongoose.Schema(
   {
-    // Step 1: Info Mobil Lama
-    tradeInBrand: {
+    // Step 1: Info Mobil yang Dijual
+    carBrand: {
+      // Ganti nama dari tradeInBrand
       type: String,
-      required: [true, "Merek mobil lama wajib diisi"],
+      required: [true, "Merek mobil wajib diisi"],
     },
-    tradeInModel: {
+    carModel: {
+      // Ganti nama dari tradeInModel
       type: String,
-      required: [true, "Model mobil lama wajib diisi"],
+      required: [true, "Model mobil wajib diisi"],
     },
-    tradeInVariant: {
+    carVariant: {
+      // Ganti nama dari tradeInVariant
       type: String,
-      required: [true, "Varian mobil lama wajib diisi"],
+      required: [true, "Varian mobil wajib diisi"],
     },
-    tradeInYear: {
+    carYear: {
+      // Ganti nama dari tradeInYear
       type: String,
-      required: [true, "Tahun mobil lama wajib diisi"],
+      required: [true, "Tahun mobil wajib diisi"],
     },
-    tradeInTransmission: {
+    carTransmission: {
+      // Ganti nama dari tradeInTransmission
       type: String,
-      required: [true, "Transmisi mobil lama wajib diisi"],
+      required: [true, "Transmisi mobil wajib diisi"],
     },
-    tradeInStnkExpiry: {
+    carStnkExpiry: {
+      // Ganti nama dari tradeInStnkExpiry
       type: String,
       required: [true, "Tanggal STNK wajib diisi"],
     },
-    tradeInColor: {
+    carColor: {
+      // Ganti nama dari tradeInColor
       type: String,
-      required: [true, "Warna mobil lama wajib diisi"],
+      required: [true, "Warna mobil wajib diisi"],
     },
-    tradeInTravelDistance: {
+    carTravelDistance: {
+      // Ganti nama dari tradeInTravelDistance
       type: Number,
       required: [true, "Jarak tempuh wajib diisi"],
-      min: 0,
+      min: [0, "Jarak tempuh tidak boleh negatif"],
+    },
+    carPrice: {
+      // Field baru untuk harga penawaran
+      type: Number,
+      required: [true, "Harga penawaran wajib diisi"],
+      min: [1, "Harga penawaran harus positif"], // Harga tidak boleh 0 atau negatif
     },
 
-    // Step 2: Info Kontak
+    // Step 2: Info Kontak (Sama seperti TradeIn)
     customerName: {
       type: String,
       required: [true, "Nama pelanggan wajib diisi"],
@@ -46,7 +60,7 @@ const TradeInRequestSchema = new mongoose.Schema(
     customerPhoneNumber: {
       type: String,
       required: [true, "Nomor telepon wajib diisi"],
-    }, // Simpan tanpa format (+62)
+    },
     customerEmail: {
       type: String,
       required: [true, "Email wajib diisi"],
@@ -55,7 +69,7 @@ const TradeInRequestSchema = new mongoose.Schema(
       match: [/\S+@\S+\.\S+/, "Format email tidak valid"],
     },
 
-    // Step 3: Lokasi & Jadwal Inspeksi
+    // Step 3: Lokasi & Jadwal Inspeksi (Sama seperti TradeIn)
     inspectionLocationType: {
       type: String,
       required: true,
@@ -95,32 +109,7 @@ const TradeInRequestSchema = new mongoose.Schema(
       required: [true, "Jam inspeksi wajib diisi"],
     },
 
-    // Step 4: Preferensi Mobil Baru
-    newCarBrandPreference: {
-      type: String,
-      required: [true, "Preferensi merek mobil baru wajib diisi"],
-    },
-    newCarModelPreference: {
-      type: String,
-      required: [true, "Preferensi model mobil baru wajib diisi"],
-    },
-    newCarVariantPreference: {
-      type: String,
-      required: [true, "Preferensi varian mobil baru wajib diisi"],
-    },
-    newCarTransmissionPreference: {
-      type: String,
-      required: [true, "Preferensi transmisi mobil baru wajib diisi"],
-    },
-    newCarColorPreference: {
-      type: String,
-      required: [true, "Preferensi warna mobil baru wajib diisi"],
-    },
-    newCarPriceRangePreference: {
-      type: String,
-      required: [true, "Preferensi rentang harga wajib diisi"],
-    },
-
+    // Status (Sama seperti TradeIn)
     status: {
       type: String,
       enum: ["Pending", "Dihubungi", "Selesai", "Dibatalkan"],
@@ -130,4 +119,5 @@ const TradeInRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("TradeInRequest", TradeInRequestSchema);
+// Pastikan nama model unik ('SellRequest')
+module.exports = mongoose.model("SellRequest", SellRequestSchema);

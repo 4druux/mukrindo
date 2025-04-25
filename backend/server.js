@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 5000;
 const path = require("path");
 const productRoutes = require("./routes/productRoutes");
 const tradeInRoutes = require("./routes/tradeInRoutes");
+const sellRoutes = require("./routes/sellRoutes");
 
 // Middleware
 app.use(
@@ -37,6 +38,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/products", productRoutes);
 app.use("/api/trade-in", tradeInRoutes);
+app.use("/api/sell-requests", sellRoutes);
 
 // 404 Route
 app.use((req, res, next) => {
