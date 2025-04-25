@@ -267,7 +267,7 @@ export const useFilterAndSuggest = ({
     return bestSuggestion;
   }, [
     isLoading,
-    processedProducts.length, // Dependensi pada panjang hasil
+    processedProducts.length,
     searchQuery,
     initialProducts,
     suggestionTargets,
