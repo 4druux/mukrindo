@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import AppHeader from "@/layout/user/AppHeader";
+import AppFooter from "@/layout/user/AppFooter";
 import { HeaderProvider } from "@/context/HeaderContext";
 import BookmarkRightbar from "@/layout/user/BookmarkRightbar";
 
@@ -38,10 +39,11 @@ export default function ClientLayout({ children }) {
   return (
     <>
       <HeaderProvider>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 mb-25 lg:mb-0">
           {showHeader && <AppHeader />}
           <BookmarkRightbar />
           <div className="">{children}</div>
+          <AppFooter />
         </div>
       </HeaderProvider>
     </>

@@ -4,6 +4,8 @@ import React from "react";
 import { useSearchParams } from "next/navigation";
 import TradeInCar from "@/layout/user/tukar-tambah/TradeInCar";
 import CarouselGlobal from "@/components/product-user/CarouselGlobal";
+import TradeInBedge from "@/layout/user/tukar-tambah/TradeInBedge";
+import TradeInAccordion from "@/layout/user/tukar-tambah/TradeInAccordion";
 
 const TradeInCarPage = () => {
   const searchParams = useSearchParams();
@@ -26,6 +28,9 @@ const TradeInCarPage = () => {
         initialYear={initialYear}
         initialPhoneNumber={initialPhoneNumberRaw}
       />
+
+      <TradeInBedge />
+      <TradeInAccordion />
     </div>
   );
 };

@@ -20,16 +20,16 @@ const navItems = [
   {
     icon: <MdDashboard />,
     name: "Dashboard",
+    subItems: [{ name: "Dashboard", path: "/admin" }],
+  },
+  {
+    name: "Produk",
+    icon: <MdFormatListBulleted />,
     subItems: [
-      { name: "Dashboard", path: "/admin" },
+      { name: "Semua Produk", path: "/admin/products" },
       { name: "Jual Beli", path: "/admin/jual-beli" },
       { name: "Tukar Tambah", path: "/admin/tukar-tambah" },
     ],
-  },
-  {
-    name: "Products",
-    icon: <MdFormatListBulleted />,
-    subItems: [{ name: "All Products", path: "/admin/products" }],
   },
   {
     name: "Tables",

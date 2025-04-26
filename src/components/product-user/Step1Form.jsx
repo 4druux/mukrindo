@@ -37,7 +37,7 @@ const Step1Form = ({
 }) => {
   return (
     <div>
-      <h2 className="text-lg font-medium text-gray-700 mb-1">
+      <h2 className="text-lg font-semibold text-gray-700 mb-1">
         Informasi Mobil Kamu
       </h2>
       <p className="text-sm text-gray-700 mb-6">

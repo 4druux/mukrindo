@@ -4,6 +4,8 @@ import React from "react";
 import { useSearchParams } from "next/navigation";
 import BuySellCar from "@/layout/user/jual-mobil/BuySellCar";
 import CarouselGlobal from "@/components/product-user/CarouselGlobal";
+import BuySellBedge from "@/layout/user/jual-mobil/BuySellBedge";
+import BuySellAccordion from "@/layout/user/jual-mobil/BuySellAccordion";
 
 const SellCarPage = () => {
   const searchParams = useSearchParams();
@@ -27,6 +29,9 @@ const SellCarPage = () => {
         initialYear={initialYear}
         initialPhoneNumber={initialPhoneNumberRaw}
       />
+
+      <BuySellBedge />
+      <BuySellAccordion />
     </div>
   );
 };

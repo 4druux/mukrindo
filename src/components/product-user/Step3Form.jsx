@@ -64,7 +64,7 @@ const Step3Form = ({
 
   return (
     <div>
-      <h2 className="text-lg font-medium text-gray-700 mb-1">
+      <h2 className="text-lg font-semibold text-gray-700 mb-1">
         Lokasi & Jadwal Inspeksi
       </h2>
       <p className="text-sm text-gray-700 mb-6">

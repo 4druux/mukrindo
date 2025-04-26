@@ -18,7 +18,7 @@ export default function Home() {
     <div className="container mx-auto">
       <p className="lg:pt-10 border-t-2 border-gray-200"></p>
       <HomeCarousel images={bannerImages} />
-      <div className=" space-y-8 mt-4 pb-8">
+      <div className=" space-y-8 mt-4">
         <CarForm />
         <ProductByRecom />
         <ProductByPrice />

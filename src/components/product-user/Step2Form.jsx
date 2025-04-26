@@ -14,8 +14,8 @@ const Step2Form = ({
 }) => {
   return (
     <div>
-      <h2 className="text-lg font-medium text-gray-700 mb-1">
-        Informasi Kontak Kamu
+      <h2 className="text-lg font-semibold text-gray-700 mb-1">
+      Informasi Kontak Kamu
       </h2>
       <p className="text-sm text-gray-700 mb-6">
         Selesaikan {currentStep} dari {totalCarSteps.length} langkah dan kami

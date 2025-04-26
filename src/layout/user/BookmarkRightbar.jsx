@@ -11,7 +11,7 @@ import generateSlug from "@/utils/generateSlug";
 
 // Import Icons
 import { X, Heart } from "lucide-react";
-import { FaRoad, FaRegCalendarAlt } from "react-icons/fa";
+import { FaRoad, FaRegCalendarAlt, FaBoxOpen } from "react-icons/fa";
 import { GiGearStickPattern } from "react-icons/gi";
 
 const BookmarkRightbar = () => {
@@ -126,12 +126,16 @@ const BookmarkRightbar = () => {
             {/* Body Sidebar (Scrollable) */}
             <div className="flex-grow overflow-y-auto">
               {loading && bookmarkedProducts.length === 0 ? (
-                <div className="flex items-center justify-center h-[80vh] text-gray-600">
+                <div className="flex items-center justify-center h-[80vh] text-gray-600 px-30">
                   Memuat...
                 </div>
               ) : bookmarkedProducts.length === 0 ? (
-                <div className="flex items-center justify-center h-[80vh] text-gray-600">
-                  Belum ada mobil yang disimpan.
+                <div className="flex items-center gap-4 justify-center h-[80vh] text-gray-600 px-10">
+                  <FaBoxOpen className="w-24 h-24 sm:w-36 sm:h-36 text-gray-500" />
+                  <div className="flex flex-col text-gray-600 mt-4 sm:mt-0">
+                    <p className="text-2xl font-semibold">Oops!</p>
+                    Belum ada mobil yang disimpan.
+                  </div>
                 </div>
               ) : (
                 <ul className="divide-y w-full divide-gray-200">
