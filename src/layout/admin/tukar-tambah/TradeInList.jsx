@@ -81,6 +81,7 @@ const TradeInList = () => {
 
   const handleStatusUpdateFilter = (updatedRequestId, newStatus) => {
     if (
+      newStatus === TRADE_IN_STATUS_FILTER.PENDING ||
       newStatus === TRADE_IN_STATUS_FILTER.CONTACTED ||
       newStatus === TRADE_IN_STATUS_FILTER.COMPLETED ||
       newStatus === TRADE_IN_STATUS_FILTER.CANCELLED
@@ -319,7 +320,7 @@ const TradeInList = () => {
       </AnimatePresence>
 
       {pageCount > 1 && (
-        <div className="py-6">
+        <div className="pb-4">
           <Pagination
             key={`tradein-pagination-${activeFilters.status}-${activeFilters.location}-${activeFilters.sortBy}`}
             pageCount={pageCount}

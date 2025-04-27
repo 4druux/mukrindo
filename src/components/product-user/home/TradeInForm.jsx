@@ -93,7 +93,7 @@ const TradeInForm = ({
   };
 
   return (
-    <div className="bg-white lg:rounded-b-3xl lg:rounded-tr-3xl shadow-md p-4 md:p-6 w-full mx-auto">
+    <div className="bg-white rounded-b-2xl lg:rounded-tr-2xl shadow-md p-4 md:p-6 w-full mx-auto">
       <h1 className="text-md font-medium text-gray-700 mb-4">
         Informasi Mobil Kamu
       </h1>

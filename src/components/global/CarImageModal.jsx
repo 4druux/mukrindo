@@ -13,6 +13,7 @@ import { FreeMode, Thumbs, Navigation } from "swiper/modules";
 
 // Import Icon
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 
 const CarImageModal = ({
   show,
@@ -90,19 +91,19 @@ const CarImageModal = ({
         <div className="hidden lg:block">
           <button
             className="modal-swiper-button-prev absolute top-1/2 -mt-14 left-4 transform -translate-y-1/2 bg-black/30 
-          hover:bg-black/50 disabled:hidden rounded-full p-3 z-10 opacity-0 group-hover:opacity-100 
+          hover:bg-black/50 disabled:hidden rounded-full p-2 z-10 opacity-0 group-hover:opacity-100 
            transition-opacity duration-300 ease-in-out cursor-pointer"
             aria-label="Previous image"
           >
-            <ChevronLeft className="lg:w-10 lg:h-10 text-gray-300 group-hover:text-gray-100" />
+            <BsChevronLeft className="lg:w-6 lg:h-6 text-gray-300 group-hover:text-gray-100" />
           </button>
           <button
             className="modal-swiper-button-next absolute top-1/2 -mt-14 right-4 transform -translate-y-1/2 bg-black/30 
-          hover:bg-black/50 disabled:hidden rounded-full p-3 z-10 opacity-0 group-hover:opacity-100 
+          hover:bg-black/50 disabled:hidden rounded-full p-2 z-10 opacity-0 group-hover:opacity-100 
            transition-opacity duration-300 ease-in-out cursor-pointer"
             aria-label="Next image"
           >
-            <ChevronRight className="lg:w-10 lg:h-10 text-gray-300 group-hover:text-gray-100" />
+            <BsChevronRight className="lg:w-6 lg:h-6 text-gray-300 group-hover:text-gray-100" />
           </button>
         </div>
 

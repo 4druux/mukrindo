@@ -81,6 +81,7 @@ const BuySellList = () => {
 
   const handleStatusUpdateFilter = (updatedRequestId, newStatus) => {
     if (
+      newStatus === SELL_REQUEST_STATUS_FILTER.PENDING ||
       newStatus === SELL_REQUEST_STATUS_FILTER.CONTACTED ||
       newStatus === SELL_REQUEST_STATUS_FILTER.COMPLETED ||
       newStatus === SELL_REQUEST_STATUS_FILTER.CANCELLED
@@ -324,7 +325,7 @@ const BuySellList = () => {
       </AnimatePresence>
 
       {pageCount > 1 && (
-        <div className="py-6">
+        <div className="pb-4">
           <Pagination
             key={`sellreq-pagination-${activeFilters.status}-${activeFilters.location}-${activeFilters.sortBy}`}
             pageCount={pageCount}

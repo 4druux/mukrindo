@@ -1,4 +1,4 @@
-// layout/user/product/CarShop.jsx
+// layout/user/product/BuyCar.jsx
 "use client";
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -19,7 +19,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";
 const MAX_VIEWED_ITEMS = 10;
-const PRODUCTS_PER_PAGE = 12;
+const PRODUCTS_PER_PAGE = 5;
 
 const getRecentlyViewed = () => {
   if (typeof window === "undefined") return [];
@@ -42,7 +42,7 @@ const addRecentlyViewed = (product) => {
   localStorage.setItem(VIEWED_PRODUCTS_KEY, JSON.stringify(updatedViewed));
 };
 
-const CarShop = () => {
+const BuyCar = () => {
   const { products, allProducts, loading, error } = useProducts();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -62,7 +62,6 @@ const CarShop = () => {
       initialProducts:
         allProducts && allProducts.length > 0 ? allProducts : products || [],
       searchQuery: searchQuery,
-      initialFilter: SHORT_BY.RECOMMENDATION,
       options: {
         recentlyViewed: recentlyViewed,
         searchFields: [
@@ -78,6 +77,7 @@ const CarShop = () => {
           "type",
         ],
         suggestionTargets: ["brand", "model", "carName"],
+        defaultSort: SHORT_BY.RECOMMENDATION,
       },
       isLoading: loading,
     });
@@ -194,7 +194,7 @@ const CarShop = () => {
 
   useEffect(() => {
     setCurrentPage(0);
-  }, [activeFilter, searchParams]);
+  }, [searchParams]);
 
   const handleProductClick = (product) => {
     addRecentlyViewed(product);
@@ -280,6 +280,25 @@ const CarShop = () => {
     router.push(`/beli${queryString ? `?${queryString}` : ""}`);
   };
 
+  const handleSortChange = (newSortValue) => {
+    const currentParams = new URLSearchParams(searchParams.toString());
+    currentParams.set("sort", newSortValue);
+    // Hapus parameter filter harga spesifik jika memilih sort non-harga
+    if (
+      newSortValue !== SHORT_BY.PRICE_UNDER_150 &&
+      newSortValue !== SHORT_BY.PRICE_BETWEEN_150_300 &&
+      newSortValue !== SHORT_BY.PRICE_OVER_300
+    ) {
+      // Opsional: Anda bisa memilih untuk menghapus filter harga lain saat sort diubah
+      // currentParams.delete('priceMin');
+      // currentParams.delete('priceMax');
+    }
+    // Reset halaman ke 0 saat filter/sort berubah
+    // currentParams.delete('page'); // Jika Anda menggunakan param 'page'
+    setCurrentPage(0); // Reset state halaman internal
+    router.push(`/beli?${currentParams.toString()}`, { scroll: false }); // Gunakan scroll: false agar tidak loncat ke atas halaman
+  };
+
   useEffect(() => {
     document.body.style.overflow = isMobileSearchFiltersOpen
       ? "hidden"
@@ -308,7 +327,7 @@ const CarShop = () => {
   };
 
   return (
-    <div className="">
+    <div>
       <div className="flex flex-col lg:flex-row gap-6">
         {/* SearchFilters di sidebar */}
         <div className="hidden lg:block lg:w-1/4 lg:sticky lg:top-24 self-start">
@@ -317,12 +336,11 @@ const CarShop = () => {
 
         <div className="lg:w-3/4 w-full">
           <BreadcrumbNav items={breadcrumbItems} />
-          <h1 className="text-sm lg:text-lg font-medium text-gray-700 mb-4">
+          <h1 className="text-md lg:text-xl font-medium text-gray-700 mb-4">
             {searchQuery
               ? `Hasil pencarian untuk "${searchQuery}"`
               : "Menampilkan"}
-            {!loading &&
-              ` ${currentProducts.length} dari ${processedProducts.length} Mobil`}
+            {!loading && ` ${processedProducts.length} Mobil`}
           </h1>
 
           {/* Panggil ActiveSearchFilters  */}
@@ -357,7 +375,7 @@ const CarShop = () => {
           {/* ShortProduct (Filter Cepat) */}
           <ShortProduct
             activeFilter={activeFilter}
-            setActiveFilter={setActiveFilter}
+            onSortChange={handleSortChange}
           />
 
           <CarProductCard
@@ -366,7 +384,7 @@ const CarShop = () => {
             error={error}
             onProductClick={handleProductClick}
             emptyMessage={null}
-            isCarShopRoute={true}
+            BuyCarRoute={true}
             skeletonCount={PRODUCTS_PER_PAGE}
           />
 
@@ -461,4 +479,4 @@ const CarShop = () => {
   );
 };
 
-export default CarShop;
+export default BuyCar;

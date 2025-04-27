@@ -1,6 +1,6 @@
 // src/hooks/useFilterAndSuggest.js
 import { useState, useMemo, useEffect } from "react";
-import { useSearchParams } from "next/navigation"; // <--- Import useSearchParams
+import { useSearchParams } from "next/navigation";
 import levenshtein from "js-levenshtein";
 import { SHORT_BY } from "@/components/global/ShortProduct";
 
@@ -22,6 +22,7 @@ const defaultOptions = {
   ],
   suggestionTargets: ["brand", "model", "carName"],
   recentlyViewed: [],
+  defaultSort: SHORT_BY.RECOMMENDATION,
 };
 
 export const useFilterAndSuggest = ({
@@ -31,15 +32,36 @@ export const useFilterAndSuggest = ({
   options = {},
   isLoading = false,
 }) => {
-  const mergedOptions = { ...defaultOptions, ...options };
-  const { searchFields, suggestionTargets, recentlyViewed } = mergedOptions;
-  const [activeFilter, setActiveFilter] = useState(initialFilter);
-  const searchParams = useSearchParams(); // <--- Get search params
+  const mergedOptions = useMemo(
+    () => ({ ...defaultOptions, ...options }),
+    [options]
+  );
+  const { searchFields, suggestionTargets, recentlyViewed, defaultSort } =
+    mergedOptions;
+  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    // Reset activeFilter jika initialFilter berubah (misal: beda halaman)
-    setActiveFilter(initialFilter);
-  }, [initialFilter]);
+  const activeFilter = useMemo(() => {
+    const sortParam = searchParams.get("sort");
+    const sortMap = {
+      [SHORT_BY.LATEST]: SHORT_BY.LATEST,
+      [SHORT_BY.PRICE_ASC]: SHORT_BY.PRICE_ASC,
+      [SHORT_BY.YEAR_DESC]: SHORT_BY.YEAR_DESC,
+      [SHORT_BY.RECOMMENDATION]: SHORT_BY.RECOMMENDATION,
+      [SHORT_BY.PRICE_UNDER_150]: SHORT_BY.PRICE_UNDER_150,
+      [SHORT_BY.PRICE_BETWEEN_150_300]: SHORT_BY.PRICE_BETWEEN_150_300,
+      [SHORT_BY.PRICE_OVER_300]: SHORT_BY.PRICE_OVER_300,
+    };
+    return sortMap[sortParam] || defaultSort;
+  }, [searchParams, defaultSort]);
+
+  const setActiveFilter = (newFilterValue) => {
+    const currentParams = new URLSearchParams(searchParams.toString());
+    currentParams.set("sort", newFilterValue);
+
+    console.warn(
+      "setActiveFilter in useFilterAndSuggest should ideally trigger URL change from the component"
+    );
+  };
 
   const processedProducts = useMemo(() => {
     const productsToProcess = initialProducts || [];

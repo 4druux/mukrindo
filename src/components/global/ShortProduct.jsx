@@ -1,6 +1,7 @@
 // export in AllProuduct, CarShop, useFilterAndSuggest
 
 // components/global/ShortProduct.jsx
+import { useRef, useEffect } from "react";
 import ScrollHorizontal from "../common/ScrollHorizontal";
 
 export const SHORT_BY = {
@@ -25,10 +26,28 @@ const filterLabels = {
 
 const ShortProduct = ({
   activeFilter,
-  setActiveFilter,
+  onSortChange,
   excludeFilters = [],
   isAdminRoute = false,
 }) => {
+  const buttonRefs = useRef({}); 
+  const scrollContainerRef = useRef(null); 
+
+  useEffect(() => {
+    const scrollToActiveButton = () => {
+      if (activeFilter && buttonRefs.current[activeFilter]) {
+        const activeButton = buttonRefs.current[activeFilter];
+        activeButton.scrollIntoView({
+          behavior: "smooth", 
+          inline: "center", 
+          block: "nearest"
+        });
+      }
+    };
+
+    scrollToActiveButton();
+  }, [activeFilter]);
+
   const getButtonClass = (filterType) => {
     return `flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
       activeFilter === filterType
@@ -45,13 +64,15 @@ const ShortProduct = ({
     <>
       <div className="mb-4">
         <ScrollHorizontal
+          ref={scrollContainerRef}
           className={`space-x-2 ${isAdminRoute ? "" : "lg:px-2"}`}
           buttonVerticalAlign="top"
         >
           {filtersToShow.map(([key, filterType]) => (
             <button
+              ref={(el) => (buttonRefs.current[filterType] = el)}
               key={filterType}
-              onClick={() => setActiveFilter(filterType)}
+              onClick={() => onSortChange(filterType)}
               className={getButtonClass(filterType)}
             >
               {filterLabels[filterType]}

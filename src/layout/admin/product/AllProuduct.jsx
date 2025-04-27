@@ -27,7 +27,7 @@ const AllProducts = () => {
   const searchParams = useSearchParams();
   const { searchQuery, setSearchQuery } = useSidebar();
   const [currentPage, setCurrentPage] = useState(0);
-  const productsPerPage = 4;
+  const productsPerPage = 12;
 
   useEffect(() => {
     const urlSearchQuery = searchParams.get("search");
@@ -103,11 +103,10 @@ const AllProducts = () => {
     setIsDropdownOpen((prev) => ({ ...prev, [productId]: false }));
   };
 
-  const { processedProducts, suggestedQuery, activeFilter, setActiveFilter } =
+  const { processedProducts, suggestedQuery, activeFilter } =
     useFilterAndSuggest({
       initialProducts: products || [],
       searchQuery: searchQuery,
-      initialFilter: SHORT_BY.LATEST,
       options: {
         searchFields: [
           "carName",
@@ -118,6 +117,7 @@ const AllProducts = () => {
           "plateNumber",
         ],
         suggestionTargets: ["brand", "model", "carName", "plateNumber"],
+        defaultSort: SHORT_BY.LATEST,
       },
       isLoading: loading,
     });
@@ -204,9 +204,20 @@ const AllProducts = () => {
     );
   };
 
+  const handleAdminSortChange = (newSortValue) => {
+    const currentParams = new URLSearchParams(searchParams.toString());
+    currentParams.set("sort", newSortValue);
+    const currentPath = window.location.pathname; // Get current admin path
+    // Reset halaman ke 0 saat filter/sort berubah
+    setCurrentPage(0);
+    router.push(`${currentPath}?${currentParams.toString()}`, {
+      scroll: false,
+    }); // Navigate within admin path
+  };
+
   useEffect(() => {
     setCurrentPage(0);
-  }, [searchQuery, activeFilter]);
+  }, [searchQuery, searchParams]);
 
   const indexOfLastProduct = (currentPage + 1) * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -256,8 +267,7 @@ const AllProducts = () => {
           {searchQuery
             ? `Hasil pencarian untuk "${searchQuery}"`
             : "Menampilkan"}
-          {!loading &&
-            ` ${currentProducts.length} dari ${processedProducts.length} Produk Mobil`}
+          {!loading && ` ${processedProducts.length} Produk Mobil`}
         </h1>
 
         <div className="flex items-end justify-end">
@@ -303,7 +313,7 @@ const AllProducts = () => {
       <div className="mt-4">
         <ShortProduct
           activeFilter={activeFilter}
-          setActiveFilter={setActiveFilter}
+          onSortChange={handleAdminSortChange}
           excludeFilters={[SHORT_BY.RECOMMENDATION]}
           isAdminRoute={true}
         />
@@ -329,7 +339,7 @@ const AllProducts = () => {
         currentProducts.length > 0 &&
         processedProducts.length > productsPerPage && (
           <Pagination
-            key={`pagination-${activeFilter}-${searchQuery}`}
+            key={`pagination-${searchParams.toString()}`}
             pageCount={Math.ceil(processedProducts.length / productsPerPage)}
             forcePage={currentPage}
             onPageChange={handlePageChange}

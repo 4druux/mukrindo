@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
 import ScrollHorizontal from "@/components/common/ScrollHorizontal";
 
 export const SELL_REQUEST_STATUS_FILTER = {
@@ -114,6 +114,27 @@ const RequestFilter = ({
   visuallyActiveFilter,
   onFilterClick,
 }) => {
+  const buttonRefs = useRef({});
+  const scrollContainerRef = useRef(null);
+
+  useEffect(() => {
+    const scrollToActiveButton = () => {
+      if (visuallyActiveFilter?.type && visuallyActiveFilter?.value) {
+        const activeButtonKey = `${visuallyActiveFilter.type}-${visuallyActiveFilter.value}`;
+        if (buttonRefs.current[activeButtonKey]) {
+          const activeButton = buttonRefs.current[activeButtonKey];
+          activeButton.scrollIntoView({
+            behavior: "smooth",
+            inline: "center",
+            block: "nearest",
+          });
+        }
+      }
+    };
+
+    scrollToActiveButton();
+  }, [visuallyActiveFilter]);
+
   const filterOptions =
     requestType === "tradeIn"
       ? tradeInDisplayableOptions
@@ -132,20 +153,24 @@ const RequestFilter = ({
 
   return (
     <div className="mb-5">
-      <ScrollHorizontal buttonVerticalAlign="top">
-        {filterOptions.map((option) => (
-          <button
-            key={`${option.type}-${option.value}`}
-            onClick={() => onFilterClick(option.type, option.value)}
-            className={getButtonClass(option.type, option.value)}
-            aria-pressed={
-              visuallyActiveFilter.type === option.type &&
-              visuallyActiveFilter.value === option.value
-            }
-          >
-            {option.label}
-          </button>
-        ))}
+      <ScrollHorizontal buttonVerticalAlign="top" ref={scrollContainerRef}>
+        {filterOptions.map((option) => {
+          const buttonKey = `${option.type}-${option.value}`;
+          return (
+            <button
+              ref={(el) => (buttonRefs.current[buttonKey] = el)}
+              key={buttonKey}
+              onClick={() => onFilterClick(option.type, option.value)}
+              className={getButtonClass(option.type, option.value)}
+              aria-pressed={
+                visuallyActiveFilter?.type === option.type &&
+                visuallyActiveFilter?.value === option.value
+              }
+            >
+              {option.label}
+            </button>
+          );
+        })}
       </ScrollHorizontal>
     </div>
   );

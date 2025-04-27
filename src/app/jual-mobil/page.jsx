@@ -2,10 +2,10 @@
 
 import React from "react";
 import { useSearchParams } from "next/navigation";
-import BuySellCar from "@/layout/user/jual-mobil/BuySellCar";
+import SellCar from "@/layout/user/jual-mobil/SellCar";
 import CarouselGlobal from "@/components/product-user/CarouselGlobal";
-import BuySellBedge from "@/layout/user/jual-mobil/BuySellBedge";
-import BuySellAccordion from "@/layout/user/jual-mobil/BuySellAccordion";
+import SellBedge from "@/layout/user/jual-mobil/SellBedge";
+import SellAccordion from "@/layout/user/jual-mobil/SellAccordion";
 
 const SellCarPage = () => {
   const searchParams = useSearchParams();
@@ -23,15 +23,17 @@ const SellCarPage = () => {
         title="Jual Mobil Cepat Laku & Aman"
         subtitle="Bebas Drama & Tipu-Tipu"
       />
-      <BuySellCar
-        initialBrand={initialBrand}
-        initialModel={initialModel}
-        initialYear={initialYear}
-        initialPhoneNumber={initialPhoneNumberRaw}
-      />
 
-      <BuySellBedge />
-      <BuySellAccordion />
+      <div className="px-4 lg:px-0">
+        <SellCar
+          initialBrand={initialBrand}
+          initialModel={initialModel}
+          initialYear={initialYear}
+          initialPhoneNumber={initialPhoneNumberRaw}
+        />
+        <SellBedge />
+        <SellAccordion />
+      </div>
     </div>
   );
 };

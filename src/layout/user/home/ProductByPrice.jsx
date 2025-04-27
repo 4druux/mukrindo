@@ -95,9 +95,9 @@ const ProductByPrice = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-2 lg:mb-4 px-2">
+      <div className="flex justify-between items-center mb-2 lg:mb-4 px-4 lg:px-2">
         <h1 className="text-md lg:text-xl font-medium text-gray-700">
-          Mobil Pilihan Sesuai Budget
+          Mobil Sesuai Budget
         </h1>
         <div className="block lg:hidden">
           <Link href="/beli">
@@ -109,7 +109,7 @@ const ProductByPrice = () => {
       </div>
 
       <div
-        className="flex space-x-2 mb-4 overflow-x-auto lg:pb-2 px-2"
+        className="flex space-x-2 mb-4 overflow-x-auto lg:pb-2 px-4 lg:px-2"
         style={{ scrollbarWidth: "none" }}
       >
         <button

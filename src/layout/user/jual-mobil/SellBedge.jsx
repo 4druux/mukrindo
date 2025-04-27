@@ -1,4 +1,4 @@
-//layout/user/jual-mobil/BuySellBedge.jsx
+//layout/user/jual-mobil/SellBedge.jsx
 import FeatureCard from "@/components/common/FeatureCard";
 import React from "react";
 import { FaCalendarCheck, FaMoneyBillWave, FaShieldAlt } from "react-icons/fa";
@@ -27,9 +27,9 @@ const featuresData = [
   },
 ];
 
-const BuySellBedge = () => {
+const SellBedge = () => {
   return (
-    <div className="container mx-auto py-8 px-4 lg:px-0">
+    <div className="container mx-auto py-8">
       {/* Mobile View */}
       <div className="grid grid-cols-1 gap-4 lg:hidden">
         {featuresData.map((feature) => (
@@ -68,4 +68,4 @@ const BuySellBedge = () => {
   );
 };
 
-export default BuySellBedge;
+export default SellBedge;

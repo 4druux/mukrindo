@@ -15,20 +15,17 @@ const BuyForm = ({
   modelOptions,
   yearMinError,
   yearMaxError,
-  validateYears, // Pass validation function
-  INITIAL_PRICE_RANGE, // Pass initial range constant
+  validateYears, 
+  INITIAL_PRICE_RANGE,
 }) => {
   const router = useRouter();
 
   const handleSearchCar = () => {
-    // Perform validation inside this component
     const { yearMinError: minErr, yearMaxError: maxErr } = validateYears(
       productData.yearMin,
       productData.yearMax
     );
 
-    // Update errors locally or call a function passed from parent if needed
-    // For simplicity here, we'll just use the validation result directly
     if (minErr) {
       toast.error("Tahun Minimal Tidak Valid", { className: "custom-toast" });
       return;
@@ -61,7 +58,7 @@ const BuyForm = ({
   };
 
   return (
-    <div className="bg-white lg:rounded-b-3xl lg:rounded-tr-3xl shadow-md p-4 md:p-6 w-full mx-auto">
+    <div className="bg-white rounded-b-2xl lg:rounded-tr-2xl shadow-md p-4 md:p-6 w-full mx-auto">
       <h1 className="text-md font-medium text-gray-700 mb-4">
         Cari Mobil yang Anda Inginkan
       </h1>

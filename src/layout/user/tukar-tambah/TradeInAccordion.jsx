@@ -180,9 +180,9 @@ const TradeInAccordion = () => {
   ];
 
   return (
-    <div className="container mx-auto px-4 lg:px-0">
-      <h1 className="text-md lg:text-xl font-semibold mb-6 text-center text-gray-700">
-        FAQ Seputar Tukar Tambah Mobil
+    <div className="container mx-auto">
+      <h1 className="text-md lg:text-xl font-medium mb-4 text-center text-gray-700">
+      FAQ Seputar Tukar Tambah Mobil
       </h1>
 
       {accordionItems.map((item, index) => (

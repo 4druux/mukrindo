@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useSearchParams } from "next/navigation";
-import SellCar from "@/layout/user/jual-mobil/BuySellCar";
+import SellCar from "@/layout/user/jual-mobil/SellCar";
 import CarouselGlobal from "@/components/product-user/CarouselGlobal";
 
 const BudgetSimulationPage = () => {

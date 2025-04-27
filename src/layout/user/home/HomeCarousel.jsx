@@ -77,7 +77,7 @@ const HomeCarousel = ({
 
   return (
     <div
-      className="relative w-full max-h-[50vh] md:max-h-[60vh] overflow-hidden aspect-[16/9] rounded-none md:rounded-2xl cursor-pointer"
+      className="relative w-full overflow-hidden aspect-[2/1] lg:aspect-[3/1] rounded-none md:rounded-2xl cursor-pointer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -129,33 +129,29 @@ const HomeCarousel = ({
       </div>
 
       <div className="hidden lg:block">
-        <div
-          className={`absolute top-1/2 left-4 right-4 flex transform -translate-y-1/2 z-20 transition-opacity duration-300 ${
-            isHovered ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-        >
-          {!isFirstSlide && (
-            <button
-              onClick={handlePrevClick}
-              className="w-14 h-14 bg-black/30 shadow-lg rounded-full flex items-center justify-center hover:bg-black/50 transition cursor-pointer"
-            >
-              <BsChevronLeft className="w-6 h-6 text-white" />
-            </button>
-          )}
-          <div
-            className={`flex-grow ${isFirstSlide ? "" : ""} ${
-              isLastSlide ? "" : ""
+        {/* Tombol Kiri */}
+        {!isFirstSlide && (
+          <button
+            onClick={handlePrevClick}
+            className={`absolute top-1/2 left-4 transform -translate-y-1/2 z-20 w-11 h-11 bg-black/30 shadow-lg rounded-full flex items-center justify-center hover:bg-black/50 transition-opacity duration-300 cursor-pointer ${
+              isHovered ? "opacity-100" : "opacity-0 pointer-events-none"
             }`}
-          ></div>
-          {!isLastSlide && (
-            <button
-              onClick={handleNextClick}
-              className="w-14 h-14 bg-black/30 shadow-lg rounded-full flex items-center justify-center hover:bg-black/50 transition cursor-pointer"
-            >
-              <BsChevronRight className="w-6 h-6 text-white" />
-            </button>
-          )}
-        </div>
+          >
+            <BsChevronLeft className="w-6 h-6 text-white" />
+          </button>
+        )}
+
+        {/* Tombol Kanan */}
+        {!isLastSlide && (
+          <button
+            onClick={handleNextClick}
+            className={`absolute top-1/2 right-4 transform -translate-y-1/2 z-20 w-11 h-11 bg-black/30 shadow-lg rounded-full flex items-center justify-center hover:bg-black/50 transition-opacity duration-300 cursor-pointer ${
+              isHovered ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+          >
+            <BsChevronRight className="w-6 h-6 text-white" />
+          </button>
+        )}
       </div>
     </div>
   );

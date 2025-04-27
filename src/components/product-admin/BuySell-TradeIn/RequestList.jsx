@@ -46,7 +46,7 @@ const RequestList = ({
           return (
             <div
               key={request._id}
-              className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 cursor-pointer hover:bg-blue-50 transition-colors duration-150 ease-in-out"
+              className="bg-white border border-gray-200 rounded-2xl shadow-md p-4 cursor-pointer hover:bg-blue-50 transition-colors duration-150 ease-in-out"
               onClick={() => onRowClick(request._id)}
             >
               <div className="flex justify-between items-start mb-2">

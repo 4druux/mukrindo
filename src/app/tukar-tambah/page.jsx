@@ -22,15 +22,16 @@ const TradeInCarPage = () => {
         title="Tukar Tambah Mobil Lebih Untung"
         subtitle="Dapatkan Penawaran Terbaik untuk Mobil Lama Anda"
       />
-      <TradeInCar
-        initialBrand={initialBrand}
-        initialModel={initialModel}
-        initialYear={initialYear}
-        initialPhoneNumber={initialPhoneNumberRaw}
-      />
-
-      <TradeInBedge />
-      <TradeInAccordion />
+      <div className="px-4 lg:px-0">
+        <TradeInCar
+          initialBrand={initialBrand}
+          initialModel={initialModel}
+          initialYear={initialYear}
+          initialPhoneNumber={initialPhoneNumberRaw}
+        />
+        <TradeInBedge />
+        <TradeInAccordion />
+      </div>
     </div>
   );
 };

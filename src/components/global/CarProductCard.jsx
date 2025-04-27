@@ -27,7 +27,7 @@ const CarProductCard = ({
   loading,
   error,
   isAdminRoute = false,
-  isCarShopRoute = false,
+  BuyCarRoute = false,
   skeletonCount = isAdminRoute ? 8 : 6,
   emptyMessage = "Tidak ada produk mobil yang ditemukan.",
   handleStatusChange = () => {},
@@ -131,7 +131,7 @@ const CarProductCard = ({
 
                         <div
                           className={`${
-                            isAdminRoute || isCarShopRoute ? "hidden" : "flex"
+                            isAdminRoute || BuyCarRoute ? "hidden" : "flex"
                           }`}
                         >
                           <div className="flex flex-col items-center space-y-1 text-center">

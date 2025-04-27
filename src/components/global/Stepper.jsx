@@ -194,7 +194,7 @@ const Stepper = ({ currentStep, steps = [] }) => {
   return (
     <div
       ref={containerRef}
-      className="relative flex lg:flex-col justify-between h-full"
+      className="relative flex lg:flex-col justify-between h-full lg:h-4/5"
     >
       {steps.map((step, index) => (
         <StepItem

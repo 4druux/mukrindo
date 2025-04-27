@@ -53,7 +53,7 @@ const initialFormData = {
   inspectionTime: "",
 };
 
-const BuySellCar = ({
+const SellCar = ({
   initialBrand = "",
   initialModel = "",
   initialYear = "",
@@ -564,7 +564,7 @@ const BuySellCar = ({
   };
 
   return (
-    <div className="container mx-auto -mt-16 lg:-mt-32 relative z-20 px-4 lg:px-0">
+    <div className="container mx-auto -mt-16 lg:-mt-32 relative z-20">
       <div className="bg-white shadow-md p-4 md:p-8 rounded-2xl">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="w-full md:w-auto md:flex-shrink-0 md:pr-4">
@@ -640,4 +640,4 @@ const BuySellCar = ({
   );
 };
 
-export default BuySellCar;
+export default SellCar;
