@@ -142,7 +142,7 @@ const BuyAccordion = () => {
 
   return (
     <div>
-      <h1 className="text-md lg:text-xl font-medium mb-6 text-center text-gray-700">
+      <h1 className="text-md lg:text-xl font-medium mb-2 lg:mb-4 text-center text-gray-700">
         FAQ Seputar Pembelian Mobil
       </h1>
 

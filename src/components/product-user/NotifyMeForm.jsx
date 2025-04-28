@@ -226,7 +226,7 @@ const NotifyMeForm = ({ onSubmit }) => {
   const noModelsAvailable = formData.brand && modelOptions.length === 0;
 
   return (
-    <div className="bg-white px-6 pb-6 lg:py-2 rounded-2xl shadow-md flex flex-col-reverse lg:flex-row items-center justify-between ">
+    <div className="bg-white px-6 pb-6 lg:py-2 rounded-2xl shadow-md flex flex-col-reverse lg:flex-row items-center justify-between">
       <div className="w-full lg:w-3/4">
         <h2 className="text-md lg:text-xl font-medium text-gray-700 mb-1">
           Tidak Menemukan Mobil yang Dicari?

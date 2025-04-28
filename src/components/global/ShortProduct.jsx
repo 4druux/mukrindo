@@ -30,17 +30,17 @@ const ShortProduct = ({
   excludeFilters = [],
   isAdminRoute = false,
 }) => {
-  const buttonRefs = useRef({}); 
-  const scrollContainerRef = useRef(null); 
+  const buttonRefs = useRef({});
+  const scrollContainerRef = useRef(null);
 
   useEffect(() => {
     const scrollToActiveButton = () => {
       if (activeFilter && buttonRefs.current[activeFilter]) {
         const activeButton = buttonRefs.current[activeFilter];
         activeButton.scrollIntoView({
-          behavior: "smooth", 
-          inline: "center", 
-          block: "nearest"
+          behavior: "smooth",
+          inline: "center",
+          block: "nearest",
         });
       }
     };
@@ -49,7 +49,7 @@ const ShortProduct = ({
   }, [activeFilter]);
 
   const getButtonClass = (filterType) => {
-    return `flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
+    return `flex-shrink-0 px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full transition-colors cursor-pointer whitespace-nowrap ${
       activeFilter === filterType
         ? "bg-orange-100 text-orange-500 border border-orange-500"
         : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
@@ -65,7 +65,7 @@ const ShortProduct = ({
       <div className="mb-4">
         <ScrollHorizontal
           ref={scrollContainerRef}
-          className={`space-x-2 ${isAdminRoute ? "" : "lg:px-2"}`}
+          className={`space-x-2 ${isAdminRoute ? "" : "px-3 lg:px-2"}`}
           buttonVerticalAlign="top"
         >
           {filtersToShow.map(([key, filterType]) => (

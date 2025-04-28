@@ -164,7 +164,7 @@ const ProductByPrice = () => {
       />
 
       <p className="text-xs text-center text-gray-500 block lg:hidden">
-        Menampilkan {displayedProducts.slice(0, 9).length} dari{" "}
+        Hanya menampilkan {displayedProducts.slice(0, 9).length} dari{" "}
         {products.length} Mobil
       </p>
 

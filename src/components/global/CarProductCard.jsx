@@ -48,7 +48,7 @@ const CarProductCard = ({
 
   const gridClass = isAdminRoute
     ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4"
-    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4";
+    : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 px-3 lg:px-0";
 
   return (
     <div className={gridClass}>
@@ -131,7 +131,7 @@ const CarProductCard = ({
 
                         <div
                           className={`${
-                            isAdminRoute || BuyCarRoute ? "hidden" : "flex"
+                            isAdminRoute ? "block" : "block lg:hidden"
                           }`}
                         >
                           <div className="flex flex-col items-center space-y-1 text-center">

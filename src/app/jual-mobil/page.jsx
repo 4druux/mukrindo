@@ -24,7 +24,7 @@ const SellCarPage = () => {
         subtitle="Bebas Drama & Tipu-Tipu"
       />
 
-      <div className="px-4 lg:px-0">
+      <div className="px-4 lg:px-0 space-y-8 lg:space-y-16">
         <SellCar
           initialBrand={initialBrand}
           initialModel={initialModel}

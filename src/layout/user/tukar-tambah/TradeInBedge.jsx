@@ -30,7 +30,7 @@ const featuresData = [
 
 const TradeInBedge = () => {
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto">
       {/* Mobile View */}
       <div className="grid grid-cols-1 gap-4 lg:hidden">
         {featuresData.map((feature) => (

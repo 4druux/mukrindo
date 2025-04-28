@@ -103,7 +103,7 @@ const CarImageCard = ({ images, altText, status }) => {
                   status === "Terjual" ? "hidden" : ""
                 }`}
               >
-                <BsChevronLeft size={24} />
+                <BsChevronLeft className="w-4 h-4" />
               </button>
               <button
                 aria-label="Next Slide"
@@ -113,7 +113,7 @@ const CarImageCard = ({ images, altText, status }) => {
                   status === "Terjual" ? "hidden" : ""
                 }`}
               >
-                <BsChevronRight size={24} />
+                <BsChevronRight className="w-4 h-4" />
               </button>
             </div>
           </>

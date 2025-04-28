@@ -22,7 +22,7 @@ const TradeInCarPage = () => {
         title="Tukar Tambah Mobil Lebih Untung"
         subtitle="Dapatkan Penawaran Terbaik untuk Mobil Lama Anda"
       />
-      <div className="px-4 lg:px-0">
+      <div className="px-4 lg:px-0 space-y-8 lg:space-y-16">
         <TradeInCar
           initialBrand={initialBrand}
           initialModel={initialModel}

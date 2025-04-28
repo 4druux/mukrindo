@@ -336,7 +336,7 @@ const BuyCar = () => {
 
         <div className="lg:w-3/4 w-full">
           <BreadcrumbNav items={breadcrumbItems} />
-          <h1 className="text-md lg:text-xl font-medium text-gray-700 mb-4">
+          <h1 className="text-md lg:text-xl font-medium text-gray-700 mb-2 lg:mb-4 px-3 lg:px-0">
             {searchQuery
               ? `Hasil pencarian untuk "${searchQuery}"`
               : "Menampilkan"}
@@ -360,7 +360,7 @@ const BuyCar = () => {
             processedProducts.length === 0 &&
             suggestedQuery &&
             searchQuery && (
-              <p className="mt-1 mb-3 text-sm text-gray-600">
+              <p className="mt-1 mb-3 text-sm text-gray-600 px-3 lg:px-0">
                 Mungkin maksud Anda{" "}
                 <Link
                   href={`/beli?search=${encodeURIComponent(suggestedQuery)}`}
