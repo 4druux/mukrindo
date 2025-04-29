@@ -1,4 +1,4 @@
-// layout/user/product/CarDetails.jsx
+// layout/user/product/BuyCarDetails.jsx
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -14,7 +14,7 @@ import CarPricingInfo from "@/components/product-user/beli-mobil/CarPricingInfo"
 // Import Icon
 import { ArrowLeft } from "lucide-react";
 
-const CarDetails = ({ productId }) => {
+const BuyCarDetails = ({ productId }) => {
   const router = useRouter();
   const { fetchProductById, incrementProductView } = useProducts();
   const [product, setProduct] = useState(null);
@@ -44,7 +44,7 @@ const CarDetails = ({ productId }) => {
 
     const incrementView = () => {
       console.log(
-        `[EFFECT CarDetails] Incrementing view for product ID: ${productId}`
+        `[EFFECT BuyCarDetails] Incrementing view for product ID: ${productId}`
       );
       incrementProductView(productId).catch((err) => {
         console.warn("Gagal mencatat view:", err);
@@ -166,4 +166,4 @@ const CarDetails = ({ productId }) => {
   );
 };
 
-export default CarDetails;
+export default BuyCarDetails;

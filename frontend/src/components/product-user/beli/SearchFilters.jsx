@@ -241,6 +241,7 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
           options={brandOptionsForSelect}
           value={productData.brand}
           onChange={(value) => handleFilterChange("brand", value)}
+          searchOption={true}
           // options={[{ value: "", label: "Semua Merek" }, ...brandOptionsForSelect]}
         />
 
@@ -256,10 +257,8 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
           value={productData.model}
           onChange={(value) => handleFilterChange("model", value)}
           disabled={!productData.brand}
-          options={[
-            { value: "", label: "Semua Model" },
-            ...modelOptionsForSelect,
-          ]}
+          options={[...modelOptionsForSelect]}
+          searchOption={true}
         />
 
         {/* Tipe Mobil */}

@@ -58,7 +58,7 @@ const BuyForm = ({
   };
 
   return (
-    <div className="bg-white rounded-b-2xl lg:rounded-tr-2xl shadow-md p-4 md:p-6 w-full mx-auto">
+    <div className="bg-white border-b border-gray-200 lg:border-none lg:rounded-b-2xl lg:rounded-tr-2xl lg:shadow-md p-4 md:p-6 w-full mx-auto">
       <h1 className="text-md font-medium text-gray-700 mb-4">
         Cari Mobil yang Anda Inginkan
       </h1>

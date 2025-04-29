@@ -52,7 +52,7 @@ const CarImage = ({
   useEffect(() => {
     const handleScroll = () => {
       const shouldBeSticky =
-        window.scrollY > 100 && isStickyMobile && !isAdminRoute;
+        window.scrollY > 50 && isStickyMobile && !isAdminRoute;
       if (shouldBeSticky !== isSticky) {
         setIsSticky(shouldBeSticky);
       } else if ((!isStickyMobile || isAdminRoute) && isSticky) {
@@ -261,7 +261,7 @@ const CarImage = ({
                     aria-label="Buka Bookmark"
                   >
                     <Heart className="w-5 h-5 text-gray-700" />
-                    {bookmarkCount > 0 && (
+                    {bookmarkCount > -1 && (
                       <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full">
                         {bookmarkCount}
                       </span>

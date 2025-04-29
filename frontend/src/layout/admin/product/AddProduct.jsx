@@ -315,7 +315,7 @@ const AddProduct = () => {
       setErrors({});
       setSubmitError(null);
 
-      router.push("/admin");
+      router.push("/admin/products");
     } catch (error) {
       console.error("Error adding product:", error);
       const errorMessage =

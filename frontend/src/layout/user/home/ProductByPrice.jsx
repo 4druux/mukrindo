@@ -1,9 +1,8 @@
 // layout/user/product/ProductByPrice.jsx
 "use client";
 import Link from "next/link";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useProducts } from "@/context/ProductContext";
-import CarProductCard from "@/components/global/CarProductCard";
 import CarProductCardSwipe from "@/components/product-user/home/CarProductCardSwipe";
 
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";
@@ -42,10 +41,25 @@ const PRICE_UPPER_BOUND = 300000000;
 
 const ProductByPrice = () => {
   const { products, loading, error } = useProducts();
-  const [activePriceFilter, setActivePriceFilter] = useState(
-    PRICE_FILTER_TYPES.ALL
-  );
+  const [activeFilter, setActiveFilter] = useState(PRICE_FILTER_TYPES.ALL);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
+  const buttonRefs = useRef({});
+  const scrollContainerRef = useRef(null);
+
+  useEffect(() => {
+    const scrollToActiveButton = () => {
+      if (activeFilter && buttonRefs.current[activeFilter]) {
+        const activeButton = buttonRefs.current[activeFilter];
+        activeButton.scrollIntoView({
+          behavior: "smooth",
+          inline: "center",
+          block: "nearest",
+        });
+      }
+    };
+
+    scrollToActiveButton();
+  }, [activeFilter]);
 
   useEffect(() => {
     setRecentlyViewed(getRecentlyViewed());
@@ -58,7 +72,7 @@ const ProductByPrice = () => {
 
     let filteredProducts = products;
 
-    switch (activePriceFilter) {
+    switch (activeFilter) {
       case PRICE_FILTER_TYPES.UNDER_150:
         filteredProducts = products.filter((p) => p.price < PRICE_LOWER_BOUND);
         break;
@@ -77,7 +91,7 @@ const ProductByPrice = () => {
     }
 
     return filteredProducts;
-  }, [products, activePriceFilter, loading]);
+  }, [products, activeFilter, loading]);
 
   const handleProductClick = (product) => {
     addRecentlyViewed(product);
@@ -88,9 +102,7 @@ const ProductByPrice = () => {
   }
 
   const emptyMessage = `Tidak ada produk mobil yang ditemukan ${
-    activePriceFilter !== PRICE_FILTER_TYPES.ALL
-      ? `untuk rentang harga ini`
-      : ""
+    activeFilter !== PRICE_FILTER_TYPES.ALL ? `untuk rentang harga ini` : ""
   }.`;
 
   return (
@@ -111,11 +123,13 @@ const ProductByPrice = () => {
       <div
         className="flex space-x-2 mb-4 overflow-x-auto lg:pb-2 px-4 lg:px-2"
         style={{ scrollbarWidth: "none" }}
+        ref={scrollContainerRef}
       >
         <button
-          onClick={() => setActivePriceFilter(PRICE_FILTER_TYPES.ALL)}
+          onClick={() => setActiveFilter(PRICE_FILTER_TYPES.ALL)}
+          ref={(el) => (buttonRefs.current[PRICE_FILTER_TYPES.ALL] = el)}
           className={`px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full transition-colors cursor-pointer whitespace-nowrap ${
-            activePriceFilter === PRICE_FILTER_TYPES.ALL
+            activeFilter === PRICE_FILTER_TYPES.ALL
               ? "bg-orange-100 text-orange-500 border border-orange-500"
               : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
           }`}
@@ -123,9 +137,10 @@ const ProductByPrice = () => {
           Semua Harga
         </button>
         <button
-          onClick={() => setActivePriceFilter(PRICE_FILTER_TYPES.UNDER_150)}
+          onClick={() => setActiveFilter(PRICE_FILTER_TYPES.UNDER_150)}
+          ref={(el) => (buttonRefs.current[PRICE_FILTER_TYPES.UNDER_150] = el)}
           className={`px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full transition-colors cursor-pointer whitespace-nowrap ${
-            activePriceFilter === PRICE_FILTER_TYPES.UNDER_150
+            activeFilter === PRICE_FILTER_TYPES.UNDER_150
               ? "bg-orange-100 text-orange-500 border border-orange-500"
               : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
           }`}
@@ -133,11 +148,12 @@ const ProductByPrice = () => {
           Dibawah 150 Juta
         </button>
         <button
-          onClick={() =>
-            setActivePriceFilter(PRICE_FILTER_TYPES.BETWEEN_150_300)
+          onClick={() => setActiveFilter(PRICE_FILTER_TYPES.BETWEEN_150_300)}
+          ref={(el) =>
+            (buttonRefs.current[PRICE_FILTER_TYPES.BETWEEN_150_300] = el)
           }
           className={`px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full transition-colors cursor-pointer whitespace-nowrap ${
-            activePriceFilter === PRICE_FILTER_TYPES.BETWEEN_150_300
+            activeFilter === PRICE_FILTER_TYPES.BETWEEN_150_300
               ? "bg-orange-100 text-orange-500 border border-orange-500"
               : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
           }`}
@@ -145,9 +161,10 @@ const ProductByPrice = () => {
           150 - 300 Juta
         </button>
         <button
-          onClick={() => setActivePriceFilter(PRICE_FILTER_TYPES.OVER_300)}
+          onClick={() => setActiveFilter(PRICE_FILTER_TYPES.OVER_300)}
+          ref={(el) => (buttonRefs.current[PRICE_FILTER_TYPES.OVER_300] = el)}
           className={`px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full transition-colors cursor-pointer whitespace-nowrap ${
-            activePriceFilter === PRICE_FILTER_TYPES.OVER_300
+            activeFilter === PRICE_FILTER_TYPES.OVER_300
               ? "bg-orange-100 text-orange-500 border border-orange-500"
               : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
           }`}

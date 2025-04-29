@@ -20,7 +20,7 @@ import { AnimatePresence, motion } from "framer-motion";
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";
 const MAX_VIEWED_ITEMS = 10;
 const PRODUCTS_PER_PAGE = 5;
-
+ 
 const getRecentlyViewed = () => {
   if (typeof window === "undefined") return [];
   const items = localStorage.getItem(VIEWED_PRODUCTS_KEY);
@@ -43,7 +43,7 @@ const addRecentlyViewed = (product) => {
 };
 
 const BuyCar = () => {
-  const { products, allProducts, loading, error } = useProducts();
+  const { products, loading, error } = useProducts();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [recentlyViewed, setRecentlyViewed] = useState([]);
@@ -60,7 +60,7 @@ const BuyCar = () => {
   const { processedProducts, suggestedQuery, activeFilter, setActiveFilter } =
     useFilterAndSuggest({
       initialProducts:
-        allProducts && allProducts.length > 0 ? allProducts : products || [],
+        products && products.length > 0 ? products : products || [],
       searchQuery: searchQuery,
       options: {
         recentlyViewed: recentlyViewed,
@@ -91,7 +91,7 @@ const BuyCar = () => {
     if (!searchQuery) return result;
 
     const productsSource =
-      allProducts && allProducts.length > 0 ? allProducts : products || [];
+      products && products.length > 0 ? products : products || [];
     if (productsSource.length === 0) return result;
 
     const uniqueBrands = [
@@ -131,7 +131,7 @@ const BuyCar = () => {
     }
 
     return result;
-  }, [searchQuery, products, allProducts]);
+  }, [searchQuery, products]);
 
   const breadcrumbItems = useMemo(() => {
     const items = [

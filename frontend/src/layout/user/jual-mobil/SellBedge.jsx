@@ -1,4 +1,5 @@
 //layout/user/jual-mobil/SellBedge.jsx
+"use client";
 import FeatureCard from "@/components/common/FeatureCard";
 import React from "react";
 import { FaCalendarCheck, FaMoneyBillWave, FaShieldAlt } from "react-icons/fa";

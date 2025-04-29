@@ -1,9 +1,8 @@
 // layout/user/product/ProductByRecom.jsx
 "use client";
 import Link from "next/link";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useProducts } from "@/context/ProductContext";
-import CarProductCard from "@/components/global/CarProductCard";
 import CarProductCardSwipe from "@/components/product-user/home/CarProductCardSwipe";
 
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";
@@ -40,6 +39,23 @@ const ProductByRecom = () => {
   const { products, loading, error } = useProducts();
   const [activeFilter, setActiveFilter] = useState(FILTER_TYPES.RECOMMENDATION);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
+  const buttonRefs = useRef({});
+  const scrollContainerRef = useRef(null);
+
+  useEffect(() => {
+    const scrollToActiveButton = () => {
+      if (activeFilter && buttonRefs.current[activeFilter]) {
+        const activeButton = buttonRefs.current[activeFilter];
+        activeButton.scrollIntoView({
+          behavior: "smooth",
+          inline: "center",
+          block: "nearest",
+        });
+      }
+    };
+
+    scrollToActiveButton();
+  }, [activeFilter]);
 
   useEffect(() => {
     setRecentlyViewed(getRecentlyViewed());
@@ -135,6 +151,7 @@ const ProductByRecom = () => {
       >
         <button
           onClick={() => setActiveFilter(FILTER_TYPES.RECOMMENDATION)}
+          ref={(el) => (buttonRefs.current[FILTER_TYPES.RECOMMENDATION] = el)}
           className={`px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full transition-colors cursor-pointer whitespace-nowrap ${
             activeFilter === FILTER_TYPES.RECOMMENDATION
               ? "bg-orange-100 text-orange-500 border border-orange-500"
@@ -145,6 +162,7 @@ const ProductByRecom = () => {
         </button>
         <button
           onClick={() => setActiveFilter(FILTER_TYPES.LATEST)}
+          ref={(el) => (buttonRefs.current[FILTER_TYPES.LATEST] = el)}
           className={`px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full transition-colors cursor-pointer whitespace-nowrap ${
             activeFilter === FILTER_TYPES.LATEST
               ? "bg-orange-100 text-orange-500 border border-orange-500"
@@ -155,6 +173,7 @@ const ProductByRecom = () => {
         </button>
         <button
           onClick={() => setActiveFilter(FILTER_TYPES.PRICE_ASC)}
+          ref={(el) => (buttonRefs.current[FILTER_TYPES.PRICE_ASC] = el)}
           className={`px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full transition-colors cursor-pointer whitespace-nowrap ${
             activeFilter === FILTER_TYPES.PRICE_ASC
               ? "bg-orange-100 text-orange-500 border border-orange-500"
@@ -165,6 +184,7 @@ const ProductByRecom = () => {
         </button>
         <button
           onClick={() => setActiveFilter(FILTER_TYPES.YEAR_DESC)}
+          ref={(el) => (buttonRefs.current[FILTER_TYPES.YEAR_DESC] = el)}
           className={`px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full transition-colors cursor-pointer whitespace-nowrap ${
             activeFilter === FILTER_TYPES.YEAR_DESC
               ? "bg-orange-100 text-orange-500 border border-orange-500"

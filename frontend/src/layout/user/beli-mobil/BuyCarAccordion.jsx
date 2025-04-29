@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import Accordion from "@/components/common/Accordion";
 
-const BuyAccordion = () => {
+const BuyCarAccordion = () => {
   const [openIndex, setOpenIndex] = useState(0);
 
   const handleToggle = (index) => {
@@ -159,4 +159,4 @@ const BuyAccordion = () => {
   );
 };
 
-export default BuyAccordion;
+export default BuyCarAccordion;

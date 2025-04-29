@@ -71,6 +71,7 @@ const CarBrands = ({
         }
         onChange={(value) => onChange("model", value, variant, "")}
         options={modelOptions}
+        searchOption={true}
         disabled={!brand}
       />
       <Select

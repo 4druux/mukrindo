@@ -19,7 +19,7 @@ const FeatureCard = ({
     <a
       href={linkUrl}
       rel="noopener noreferrer"
-      className={`bg-white border border-gray-100 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 h-full flex overflow-hidden ${
+      className={`bg-white border-y border-gray-200 lg:rounded-2xl lg:shadow-md lg:hover:shadow-lg transition-shadow duration-200 h-full flex overflow-hidden ${
         hasImage
           ? "flex-col lg:flex-row lg:items-center lg:p-5"
           : "flex-row items-center p-5 gap-4"

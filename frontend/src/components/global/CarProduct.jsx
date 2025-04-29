@@ -18,7 +18,7 @@ const CarProduct = ({ product, isAdminRoute = false }) => {
       className={`p-4 lg:p-8 lg:rounded-3xl lg:border-none lg:shadow-md bg-white ${
         isAdminRoute
           ? "rounded-t-3xl border-t border-gray-300"
-          : "border-t border-b border-gray-200"
+          : "border-y border-gray-200"
       }
     `}
     >

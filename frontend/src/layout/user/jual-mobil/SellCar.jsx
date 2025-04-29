@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
+import { useSearchParams } from "next/navigation";
 
 // Import Components
 import Step1Form from "@/components/product-user/Step1Form";
@@ -53,12 +54,15 @@ const initialFormData = {
   inspectionTime: "",
 };
 
-const SellCar = ({
-  initialBrand = "",
-  initialModel = "",
-  initialYear = "",
-  initialPhoneNumber = "",
-}) => {
+const SellCar = () => {
+  const searchParams = useSearchParams();
+
+  // Data dari carform home
+  const initialBrand = searchParams.get("brand") || "";
+  const initialModel = searchParams.get("model") || "";
+  const initialYear = searchParams.get("year") || "";
+  const initialPhoneNumber = searchParams.get("phoneNumber") || "";
+
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState({});
   const [termsAccepted, setTermsAccepted] = useState(false);
