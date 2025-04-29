@@ -94,7 +94,7 @@ const SearchModal = () => {
 
   return (
     <motion.div
-      className="bg-white lg:rounded-2xl lg:shadow-lg p-4 lg:w-1/4 mx-auto"
+      className="bg-white lg:rounded-2xl lg:shadow-lg p-4 lg:w-1/2 mx-auto"
       variants={modalVariants}
       initial="hidden"
       animate="visible"
@@ -113,7 +113,7 @@ const SearchModal = () => {
               className={`text-xs rounded-full transition-colors cursor-pointer ${
                 isMobile
                   ? "py-1 px-2 bg-gray-100 text-gray-700"
-                  : "py-1 px-3 bg-gray-50 text-gray-700 border border-gray-300 hover:bg-orange-100 hover:text-orange-500  hover:border-orange-500"
+                  : "py-1 px-3 bg-gray-50 text-gray-700 border border-gray-100 hover:bg-orange-100 hover:text-orange-500  hover:border-orange-500"
               }`}
             >
               {searchTerm}
@@ -151,7 +151,7 @@ const SearchModal = () => {
                   className={`text-xs rounded-full transition-colors cursor-pointer group ${
                     isMobile
                       ? "py-1 px-2 bg-gray-100 text-gray-700"
-                      : "py-.5 px-2 bg-gray-50 text-gray-700 border border-gray-300 group-hover:bg-orange-100 group-hover:text-orange-500 group-hover:border-orange-500"
+                      : "py-.5 px-2 bg-gray-50 text-gray-700 border border-gray-100 group-hover:bg-orange-100 group-hover:text-orange-500 group-hover:border-orange-500"
                   }`}
                 >
                   {brand}
@@ -177,7 +177,7 @@ const SearchModal = () => {
               className={`text-xs rounded-full transition-colors cursor-pointer ${
                 isMobile
                   ? "py-1 px-2 bg-gray-100 text-gray-700"
-                  : "py-1 px-3 bg-gray-50 text-gray-700 border border-gray-300 hover:bg-orange-100 hover:text-orange-500 hover:border-orange-500"
+                  : "py-1 px-3 bg-gray-50 text-gray-700 border border-gray-100 hover:bg-orange-100 hover:text-orange-500 hover:border-orange-500"
               }`}
             >
               {choice.label}

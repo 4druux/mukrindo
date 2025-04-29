@@ -105,7 +105,7 @@ const ShareMobile = ({
       {/* Overlay */}
       <div
         onClick={handleClose}
-        className={`fixed inset-0 bg-black/50 z-40 backdrop-blur-xs transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ${
           isAnimatingIn ? "opacity-100" : "opacity-0"
         }`}
         aria-hidden="true"

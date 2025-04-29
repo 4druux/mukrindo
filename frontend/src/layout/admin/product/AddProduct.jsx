@@ -315,7 +315,7 @@ const AddProduct = () => {
       setErrors({});
       setSubmitError(null);
 
-      router.push("/admin/products");
+      router.push("/admin/produk");
     } catch (error) {
       console.error("Error adding product:", error);
       const errorMessage =
@@ -338,7 +338,7 @@ const AddProduct = () => {
 
   const breadcrumbItems = [
     { label: "Beranda", href: "/admin" },
-    { label: "Produk", href: "/admin/products" },
+    { label: "Produk", href: "/admin/produk" },
     { label: "Tambah Produk", href: "" },
   ];
 

@@ -144,8 +144,6 @@ const AppFooter = () => {
       <div className="container mx-auto px-4 lg:px-0">
         <p className="border-t border-gray-300" />
         <div className="py-5 text-sm text-gray-600 flex justify-center lg:justify-between lg:items-center">
-          <p> Copyright © 2025 Mukrindo Motor.</p>
-
           <div className="hidden lg:block">
             <div className="flex gap-3">
               <a
@@ -162,6 +160,7 @@ const AppFooter = () => {
               </a>
             </div>
           </div>
+          <p> Copyright © 2025 Mukrindo Motor.</p>
         </div>
       </div>
     </div>

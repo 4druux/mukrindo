@@ -58,13 +58,13 @@ const CarProductCard = ({
             .map((_, index) => <SkeletonComponent key={index} />)
         : products.map((product) => {
             const detailUrl = isAdminRoute
-              ? `/admin/products/car-details/${generateSlug(
+              ? `/admin/produk/detail-mobil/${generateSlug(
                   product.carName,
                   product._id
                 )}`
               : `/beli-mobil/${generateSlug(product.carName, product._id)}`;
 
-            const editUrl = `/admin/products/edit-product/${generateSlug(
+            const editUrl = `/admin/produk/edit-produk/${generateSlug(
               product.carName,
               product._id
             )}`;

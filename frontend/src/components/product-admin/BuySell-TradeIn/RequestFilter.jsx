@@ -13,6 +13,7 @@ export const SELL_REQUEST_LOCATION_FILTER = {
   SHOWROOM: "showroom",
   HOME: "home",
 };
+
 export const SELL_REQUEST_SORT_ORDER = {
   LATEST_CREATED: "latest_created",
   NEAREST_INSPECTION: "nearest_inspection",
@@ -33,6 +34,16 @@ export const TRADE_IN_LOCATION_FILTER = {
 export const TRADE_IN_SORT_ORDER = {
   LATEST_CREATED: "latest_created",
   NEAREST_INSPECTION: "nearest_inspection",
+};
+
+export const NOTIFY_STATUS_FILTER = {
+  ALL: "all_status",
+  PENDING: "Pending",
+  CONTACTED: "Dihubungi",
+};
+
+export const NOTIFY_SORT_ORDER = {
+  LATEST_CREATED: "latest_created",
 };
 
 const buySellDisplayableOptions = [
@@ -109,6 +120,16 @@ const tradeInDisplayableOptions = [
   },
 ];
 
+export const notifyMeDisplayableOptions = [
+  { type: "status", value: NOTIFY_STATUS_FILTER.ALL, label: "Semua Status" },
+  { type: "status", value: NOTIFY_STATUS_FILTER.PENDING, label: "Pending" },
+  {
+    type: "status",
+    value: NOTIFY_STATUS_FILTER.CONTACTED,
+    label: "Dihubungi",
+  },
+];
+
 const RequestFilter = ({
   requestType,
   visuallyActiveFilter,
@@ -138,7 +159,9 @@ const RequestFilter = ({
   const filterOptions =
     requestType === "tradeIn"
       ? tradeInDisplayableOptions
-      : buySellDisplayableOptions;
+      : requestType === "buySell"
+      ? buySellDisplayableOptions
+      : notifyMeDisplayableOptions;
 
   const getButtonClass = (buttonType, buttonValue) => {
     const isActive =

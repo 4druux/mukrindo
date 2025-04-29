@@ -42,7 +42,7 @@ const CarImageModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
@@ -71,7 +71,7 @@ const CarImageModal = ({
                 : null,
           }}
           modules={[FreeMode, Thumbs, Navigation]}
-          className="mySwiper2Modal rounded-none lg:rounded-4xl"
+          className="mySwiper2Modal rounded-none lg:rounded-2xl"
           onSlideChange={(swiper) => setModalActiveIndex(swiper.activeIndex)}
         >
           {images.map((image, index) => (

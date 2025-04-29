@@ -434,7 +434,7 @@ const EditProduct = ({ productId }) => {
       initialProductData.current = { ...productData };
       initialMediaFiles.current = [...mediaFiles.map((f) => ({ ...f }))];
 
-      router.push("/admin");
+      router.push("/admin/produk");
     } catch (error) {
       console.error("Error updating product:", error);
       const errorMessage =
@@ -471,7 +471,7 @@ const EditProduct = ({ productId }) => {
 
   const breadcrumbItems = [
     { label: "Beranda", href: "/admin" },
-    { label: "Produk", href: "/admin/products" },
+    { label: "Produk", href: "/admin/produk" },
     { label: "Edit Produk", href: "" },
   ];
 

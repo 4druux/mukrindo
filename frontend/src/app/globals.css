@@ -7,8 +7,8 @@
 
 @media (min-width: 768px) {
   .container {
-    padding-left: 9vw;
-    padding-right: 9vw;
+    padding-left: 3vw;
+    padding-right: 3vw;
   }
 }
 
@@ -16,6 +16,13 @@
   .container {
     padding-left: 10vw;
     padding-right: 10vw;
+  }
+}
+
+@media (min-width: 1920px) {
+  .container {
+    padding-left: 5vw;
+    padding-right: 5vw;
   }
 }
 

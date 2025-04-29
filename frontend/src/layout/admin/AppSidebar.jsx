@@ -26,9 +26,8 @@ const navItems = [
     name: "Produk",
     icon: <MdFormatListBulleted />,
     subItems: [
-      { name: "Semua Produk", path: "/admin/products" },
-      { name: "Jual Beli", path: "/admin/jual-beli" },
-      { name: "Tukar Tambah", path: "/admin/tukar-tambah" },
+      { name: "Katalog Produk", path: "/admin/produk" },
+      { name: "Layanan Produk", path: "/admin/layanan-produk" },
     ],
   },
   {

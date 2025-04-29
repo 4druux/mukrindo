@@ -2,6 +2,7 @@
 
 import React from "react";
 import BuyCarDetails from "@/layout/user/beli-mobil/BuyCarDetails";
+import Testimoni from "@/components/product-user/Testimoni";
 import NotifyMeForm from "@/components/product-user/NotifyMeForm";
 import BuyCarAccordion from "@/layout/user/beli-mobil/BuyCarAccordion";
 
@@ -18,6 +19,7 @@ export default function DetailCarPage({ params }) {
     <div className="container mx-auto">
       <div className=" lg:pt-10 border-t-2 border-gray-200 space-y-4 lg:space-y-16">
         <BuyCarDetails productId={productId} />
+        <Testimoni />
         <NotifyMeForm />
         <BuyCarAccordion />
       </div>

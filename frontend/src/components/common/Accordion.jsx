@@ -6,7 +6,9 @@ const Accordion = ({ title, description, isOpen, onToggle }) => {
   const renderDescription = () => {
     if (!Array.isArray(description)) {
       if (typeof description === "string") {
-        return <p className="text-gray-700 text-xs lg:text-sm">{description}</p>;
+        return (
+          <p className="text-gray-700 text-xs lg:text-sm">{description}</p>
+        );
       }
       return null;
     }
@@ -68,7 +70,7 @@ const Accordion = ({ title, description, isOpen, onToggle }) => {
 
   return (
     <div
-      className={`border border-gray-200 mb-3 overflow-hidden  transition-[border-radius] duration-1000 ease-in-out ${
+      className={`border border-gray-200 mb-3 overflow-hidden transition-[border-radius] duration-1000 ease-in-out ${
         isOpen ? "rounded-xl" : "rounded-4xl"
       }`}
     >
@@ -77,7 +79,9 @@ const Accordion = ({ title, description, isOpen, onToggle }) => {
         className="flex justify-between items-center gap-2 w-full p-4 text-left bg-white focus:outline-none cursor-pointer"
         aria-expanded={isOpen}
       >
-        <h3 className="text-sm lg:text-md font-semibold text-gray-600">{title}</h3>
+        <h3 className="text-sm lg:text-md font-semibold text-gray-600">
+          {title}
+        </h3>
         <motion.span
           className="text-gray-500"
           animate={{ rotate: isOpen ? 180 : 0 }}

@@ -196,7 +196,7 @@ const ModalRequestDetail = ({
   const title =
     requestType === "tradeIn"
       ? "Detail Permintaan Tukar Tambah"
-      : "Detail Permintaan Jual Mobil";
+      : "Detail Permintaan Jual Beli";
 
   //  Correct Anthropic Maps URL
   const getMapsUrl = (addressData) => {
@@ -609,7 +609,6 @@ const ModalRequestDetail = ({
             )}
 
             {/* Informasi Inspeksi */}
-
             <section
               className={`bg-gray-50 rounded-xl p-4 ${
                 requestType === "buySell" ? "lg:col-start-3 lg:col-span-2" : ""

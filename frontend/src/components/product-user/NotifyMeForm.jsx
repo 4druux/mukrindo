@@ -5,26 +5,32 @@ import Image from "next/image";
 import Select from "@/components/common/Select";
 import Input from "@/components/common/Input";
 import { IoMdNotifications } from "react-icons/io";
+import { FaChevronCircleDown } from "react-icons/fa";
 import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
 import carData from "@/utils/carData";
 import {
   formatNumberPhone,
   unformatNumberPhone,
 } from "@/utils/formatNumberPhone";
-// import toast from "react-hot-toast"; // Uncomment if using toast notifications
+import { useNotification } from "@/context/NotificationContext";
+import toast from "react-hot-toast";
+import { Loader2 } from "lucide-react";
 
 const PHONE_PREFIX = "+62 ";
 const QUICK_OPEN_DELAY = 50;
 
-const NotifyMeForm = ({ onSubmit }) => {
-  const [formData, setFormData] = useState({
-    brand: "",
-    model: "",
-    year: "",
-    phoneNumber: PHONE_PREFIX,
-  });
+const initialFormData = {
+  brand: "",
+  model: "",
+  year: "",
+  phoneNumber: PHONE_PREFIX,
+};
 
+const NotifyMeForm = () => {
+  const [formData, setFormData] = useState({ ...initialFormData });
   const [errors, setErrors] = useState({});
+  const { submitNotificationRequest, isSubmitting } = useNotification();
+  const [isFormExpanded, setIsFormExpanded] = useState(false);
 
   const brandSelectRef = useRef(null);
   const modelSelectRef = useRef(null);
@@ -97,17 +103,19 @@ const NotifyMeForm = ({ onSubmit }) => {
     const wasPreviouslyEmpty = !formData[name];
     setFormData((prev) => {
       const newData = { ...prev, [name]: value ?? "" };
-      if (name === "brand") newData.model = "";
+      if (name === "brand") {
+        newData.model = "";
+      }
       return newData;
     });
     clearErrorOnChange(name);
-    if (wasPreviouslyEmpty && value) handleAutoAdvance(name, value);
+    if (wasPreviouslyEmpty && value) {
+      handleAutoAdvance(name, value);
+    }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const wasPreviouslyEmpty =
-      !formData[name] || formData[name] === PHONE_PREFIX;
     let updatedValue = value;
 
     if (name === "phoneNumber") {
@@ -118,10 +126,6 @@ const NotifyMeForm = ({ onSubmit }) => {
 
     setFormData((prev) => ({ ...prev, [name]: updatedValue ?? "" }));
     clearErrorOnChange(name);
-
-    if (name !== "phoneNumber" && wasPreviouslyEmpty && updatedValue) {
-      // No auto-advance from phone number in this form
-    }
   };
 
   const validateForm = (returnErrors = false) => {
@@ -132,10 +136,9 @@ const NotifyMeForm = ({ onSubmit }) => {
     );
 
     if (!formData.brand) tempErrors.brand = "Merek wajib dipilih.";
-
     if (!formData.model) tempErrors.model = "Model wajib dipilih.";
-
     if (!formData.year) tempErrors.year = "Tahun wajib dipilih.";
+
     if (!rawPhoneNumber) {
       tempErrors.phoneNumber = "Nomor telepon wajib diisi.";
     } else if (!/^\d{9,13}$/.test(rawPhoneNumber)) {
@@ -147,18 +150,51 @@ const NotifyMeForm = ({ onSubmit }) => {
     if (returnErrors) {
       return tempErrors;
     }
-
-    return (
-      !tempErrors.brand &&
-      !tempErrors.year &&
-      !tempErrors.phoneNumber &&
-      !tempErrors.phoneFormat &&
-      !(formData.brand && currentModelOptions.length > 0 && !formData.model)
-    );
+    return Object.keys(tempErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const scrollToError = (currentErrors) => {
+    let firstErrorKey = null;
+    const errorPriority = [
+      "brand",
+      "model",
+      "year",
+      "phoneNumber",
+      "phoneFormat",
+    ];
+
+    for (const key of errorPriority) {
+      if (currentErrors[key]) {
+        firstErrorKey = key === "phoneFormat" ? "phoneNumber" : key;
+        break;
+      }
+    }
+
+    let elementId = null;
+    if (firstErrorKey === "brand") elementId = "notifyBrand";
+    else if (firstErrorKey === "model") elementId = "notifyModel";
+    else if (firstErrorKey === "year") elementId = "notifyYear";
+    else if (firstErrorKey === "phoneNumber") elementId = "notifyPhoneNumber";
+
+    if (elementId) {
+      const errorElement = document.getElementById(elementId);
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        const focusable = errorElement.querySelector("input, textarea, select");
+        if (focusable) {
+          focusable.focus({ preventScroll: true });
+        } else if (typeof errorElement.focus === "function") {
+          errorElement.focus({ preventScroll: true });
+        }
+      } else {
+        console.warn(`Element with id "${elementId}" not found for scrolling.`);
+      }
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (validateForm()) {
       const rawPhoneNumber = unformatNumberPhone(
         formData.phoneNumber,
@@ -170,55 +206,49 @@ const NotifyMeForm = ({ onSubmit }) => {
         year: formData.year,
         phoneNumber: rawPhoneNumber,
       };
-      if (onSubmit) {
-        onSubmit(submissionData);
-        // setFormData({ brand: "", model: "", year: "", phoneNumber: PHONE_PREFIX });
-        // setErrors({});
+
+      Object.keys(submissionData).forEach((key) => {
+        if (submissionData[key] === undefined || submissionData[key] === "") {
+          delete submissionData[key];
+        }
+      });
+
+      console.log("Mengirim Data Notifikasi:", submissionData);
+
+      try {
+        const result = await submitNotificationRequest(submissionData);
+        if (result.success) {
+          console.log("Pengiriman notifikasi berhasil:", result.data);
+          setFormData({ ...initialFormData });
+          setErrors({});
+        } else {
+          console.error("Pengiriman notifikasi gagal:", result.error);
+        }
+      } catch (error) {
+        console.error("Error saat memanggil submitNotificationRequest:", error);
+        toast.error("Gagal menghubungi server. Silakan coba lagi.", {
+          className: "custom-toast",
+        });
       }
     } else {
       const currentErrors = validateForm(true);
       console.log("Validation errors:", currentErrors);
+      toast.error("Harap lengkapi semua informasi yang diperlukan.", {
+        className: "custom-toast",
+      });
 
-      let firstErrorKey = null;
-      let elementId = null;
-
-      if (currentErrors.brand) {
-        firstErrorKey = "brand";
-        elementId = "notifyBrand";
-      } else if (currentErrors.model) {
-        firstErrorKey = "model";
-        elementId = "notifyModel";
-      } else if (currentErrors.year) {
-        firstErrorKey = "year";
-        elementId = "year";
-      } else if (currentErrors.phoneNumber || currentErrors.phoneFormat) {
-        firstErrorKey = "phoneNumber";
-        elementId = "phoneNumber"; // Ensure Input has id="phoneNumber"
-      }
-
-      if (elementId) {
-        const errorElement = document.getElementById(elementId);
-        if (errorElement) {
-          errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
-          // Optional: Show toast notification
-          // toast.error("Harap lengkapi semua informasi yang diperlukan.", {
-          //   className: "custom-toast",
-          // });
-        } else {
-          // Optional: Show toast notification even if element not found
-          // toast.error("Harap lengkapi semua informasi yang diperlukan.", {
-          //   className: "custom-toast",
-          // });
-          console.warn(
-            `Element with id "${elementId}" not found for scrolling.`
-          );
-        }
+      if (!isFormExpanded && window.innerWidth < 1024) {
+        setIsFormExpanded(true);
+        setTimeout(() => scrollToError(currentErrors), 100);
       } else {
-        // Optional: Fallback toast notification
-        // toast.error("Terjadi kesalahan validasi. Mohon periksa kembali isian Anda.", {
-        //   className: "custom-toast",
-        // });
+        scrollToError(currentErrors);
       }
+    }
+  };
+
+  const expandForm = () => {
+    if (!isFormExpanded) {
+      setIsFormExpanded(true);
     }
   };
 
@@ -228,16 +258,36 @@ const NotifyMeForm = ({ onSubmit }) => {
   return (
     <div className="bg-white px-6 pb-6 lg:py-2 border-y border-gray-200 lg:border-none lg:rounded-2xl lg:shadow-md flex flex-col-reverse lg:flex-row items-center justify-between">
       <div className="w-full lg:w-3/4">
-        <h2 className="text-md lg:text-xl font-medium text-gray-700 mb-1">
-          Tidak Menemukan Mobil yang Dicari?
-        </h2>
-        <p className="text-xs lg:text-sm text-gray-500 mb-6">
+        <div className="flex items-start gap-3">
+          <h2 className="text-md lg:text-xl font-medium text-gray-700 -mt-1">
+            Tidak Menemukan Mobil yang Dicari?
+          </h2>
+          {!isFormExpanded && (
+            <div className="lg:hidden text-center">
+              <button
+                type="button"
+                onClick={expandForm}
+                className="text-gray-500 hover:text-orange-600 focus:outline-none"
+                aria-expanded={isFormExpanded}
+                aria-controls="notify-me-collapsible-form"
+                aria-label="Tampilkan formulir"
+              >
+                <FaChevronCircleDown className="w-4 h-4 mx-auto animate-bounce" />
+              </button>
+            </div>
+          )}
+        </div>
+        <p className="text-xs lg:text-sm text-gray-500 mb-4">
           Beri tahu kami preferensi Anda. Kami akan menghubungi Anda jika mobil
           yang sesuai tersedia.
         </p>
-
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <form
+          id="notify-me-collapsible-form"
+          onSubmit={handleSubmit}
+          noValidate
+          className={`${isFormExpanded ? "block" : "hidden"} lg:block`}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
             <Select
               ref={brandSelectRef}
               label="Merek Mobil"
@@ -254,7 +304,7 @@ const NotifyMeForm = ({ onSubmit }) => {
               onChange={(value) => handleSelectChange("brand", value)}
               error={errors.brand}
               searchOption={true}
-              disabled={brandOptions.length === 0}
+              disabled={brandOptions.length === 0 || isSubmitting}
             />
             <Select
               ref={modelSelectRef}
@@ -272,14 +322,14 @@ const NotifyMeForm = ({ onSubmit }) => {
               options={modelOptions}
               value={formData.model}
               onChange={(value) => handleSelectChange("model", value)}
-              disabled={noBrandSelected || noModelsAvailable}
+              disabled={noBrandSelected || noModelsAvailable || isSubmitting}
               error={errors.model}
               searchOption={true}
             />
             <Select
               ref={yearSelectRef}
               label="Tahun"
-              id="year"
+              id="notifyYear"
               name="year"
               options={years}
               value={formData.year}
@@ -287,11 +337,12 @@ const NotifyMeForm = ({ onSubmit }) => {
               title="Pilih Tahun"
               description="Pilih Tahun Mobil"
               error={errors.year}
+              disabled={isSubmitting}
             />
             <Input
               ref={phoneNumberInputRef}
               label="No Handphone"
-              id="phoneNumber"
+              id="notifyPhoneNumber"
               name="phoneNumber"
               type="tel"
               value={formData.phoneNumber}
@@ -299,17 +350,24 @@ const NotifyMeForm = ({ onSubmit }) => {
               placeholder={PHONE_PREFIX}
               error={errors.phoneNumber || errors.phoneFormat}
               inputMode="numeric"
-              pattern="[0-9]*"
+              disabled={isSubmitting}
             />
           </div>
 
           <div>
             <button
               type="submit"
-              className={`cursor-pointer bg-orange-600 flex items-center justify-center w-full hover:bg-orange-500 text-white text-sm font-medium py-3 rounded-full focus:outline-none focus:shadow-outline group`}
+              disabled={isSubmitting}
+              className={`cursor-pointer bg-orange-600 flex items-center justify-center w-full hover:bg-orange-500 text-white text-sm font-medium py-3 rounded-full focus:outline-none focus:shadow-outline group ${
+                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
-              <IoMdNotifications className="mr-1 w-5 h-5 group-hover:animate-bounce" />
-              <span>Beritahu Saya</span>
+              {isSubmitting ? (
+                <Loader2 className="mr-1 w-5 h-5 animate-spin" />
+              ) : (
+                <IoMdNotifications className="mr-1 w-5 h-5 group-hover:animate-bounce" />
+              )}
+              <span>{isSubmitting ? "Mengirim..." : "Beritahu Saya"}</span>
             </button>
           </div>
         </form>
@@ -321,7 +379,7 @@ const NotifyMeForm = ({ onSubmit }) => {
           alt="Ilustrasi Kontak - Beritahu Saya"
           width={400}
           height={200}
-          className="rounded-lg object-cover"
+          className="rounded-lg object-cover max-w-[250px] lg:max-w-full"
           priority
         />
       </div>

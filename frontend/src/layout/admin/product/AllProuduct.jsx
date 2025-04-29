@@ -272,7 +272,7 @@ const AllProducts = () => {
 
         <div className="flex items-end justify-end">
           <button
-            onClick={() => router.push("/admin/products/add-product")}
+            onClick={() => router.push("/admin/produk/tambah-produk")}
             className="flex items-center space-x-1 px-3 py-1 lg:px-4 lg:py-2 rounded-full border border-orange-500 bg-orange-100 hover:bg-orange-500
           cursor-pointer transition-colors mb-4 lg:mb-0 group"
           >

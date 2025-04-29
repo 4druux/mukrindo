@@ -7,6 +7,7 @@ import { HeaderProvider } from "@/context/HeaderContext";
 import { ProductProvider } from "@/context/ProductContext";
 import { TradeInProvider } from "@/context/TradeInContext";
 import { BuySellProvider } from "@/context/BuySellContext";
+import { NotificationProvider } from "@/context/NotificationContext";
 import { Toaster } from "react-hot-toast";
 
 export default function RootLayoutClient({ children }) {
@@ -20,12 +21,18 @@ export default function RootLayoutClient({ children }) {
     <ProductProvider>
       <TradeInProvider>
         <BuySellProvider>
-          <SidebarProvider>
-            <HeaderProvider>
-              <Toaster position="top-right" reverseOrder={true} />
-              {isAdminPage ? children : <ClientLayout>{children}</ClientLayout>}
-            </HeaderProvider>
-          </SidebarProvider>
+          <NotificationProvider>
+            <SidebarProvider>
+              <HeaderProvider>
+                <Toaster position="top-right" reverseOrder={true} />
+                {isAdminPage ? (
+                  children
+                ) : (
+                  <ClientLayout>{children}</ClientLayout>
+                )}
+              </HeaderProvider>
+            </SidebarProvider>
+          </NotificationProvider>
         </BuySellProvider>
       </TradeInProvider>
     </ProductProvider>
