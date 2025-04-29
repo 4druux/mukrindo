@@ -94,7 +94,7 @@ const SearchModal = () => {
 
   return (
     <motion.div
-      className="bg-white lg:rounded-2xl lg:shadow-lg p-4 lg:w-1/4 mx-auto"
+      className="bg-white lg:rounded-2xl lg:shadow-lg p-4 lg:w-1/2 mx-auto"
       variants={modalVariants}
       initial="hidden"
       animate="visible"

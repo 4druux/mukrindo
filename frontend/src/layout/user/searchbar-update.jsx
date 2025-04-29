@@ -142,7 +142,7 @@ const SearchBar = () => {
             />
 
             <motion.div
-              className="fixed inset-x-0 top-20 z-[51]"
+              className="absolute right-20 top-20 z-[51]"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
@@ -151,7 +151,7 @@ const SearchBar = () => {
             >
               <div className="flex flex-col items-center justify-center">
                 <div
-                  className="border bg-white border-gray-400 px-5 py-2 my-2 rounded-full shadow-lg w-1/4 h-10 flex items-center"
+                  className="border bg-white border-gray-400 px-5 py-2 my-2 rounded-full w-1/2 shadow-lg h-10 flex items-center"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="relative flex-1 overflow-hidden">
