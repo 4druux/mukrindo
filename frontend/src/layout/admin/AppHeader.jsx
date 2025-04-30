@@ -39,7 +39,7 @@ const AppHeader = () => {
   const handleSearchSubmit = (event) => {
     event.preventDefault();
     setSearchQuery(inputValue);
-    router.push(`/admin/products?search=${inputValue}`, undefined, {
+    router.push(`/admin/produk?search=${inputValue}`, undefined, {
       shallow: true,
     });
   };
@@ -47,7 +47,7 @@ const AppHeader = () => {
   const handleResetSearch = () => {
     setInputValue("");
     setSearchQuery("");
-    router.push(`/admin/products`, undefined, {
+    router.push(`/admin/produk`, undefined, {
       shallow: true,
     });
     inputRef.current?.focus();

@@ -19,7 +19,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";
 const MAX_VIEWED_ITEMS = 10;
-const PRODUCTS_PER_PAGE = 5;
+const PRODUCTS_PER_PAGE = 12;
  
 const getRecentlyViewed = () => {
   if (typeof window === "undefined") return [];
