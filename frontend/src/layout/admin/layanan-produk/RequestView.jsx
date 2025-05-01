@@ -406,37 +406,34 @@ const RequestView = () => {
 
   return (
     <div>
-      <div className="mb-4">
-        <nav
-          className="flex space-x-6 border-b border-gray-200"
-          aria-label="Tabs"
-        >
+      <div className="mb-6">
+        <nav className="flex space-x-4" aria-label="Tabs">
           <button
             onClick={() => handleTabChange("tradeIn")}
-            className={`whitespace-nowrap pb-2 px-1 border-b-2 font-medium text-sm ${
+            className={`whitespace-nowrap px-3 py-1.5 border font-medium text-sm cursor-pointer rounded-full shadow-sm ${
               activeTab === "tradeIn"
-                ? "border-orange-500 text-orange-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                ? "text-orange-500 bg-orange-100 border-orange-500"
+                : "bg-white text-gray-500 hover:text-gray-700 border-gray-200"
             }`}
           >
             Tukar Tambah
           </button>
           <button
             onClick={() => handleTabChange("buySell")}
-            className={`whitespace-nowrap pb-2 px-1 border-b-2 font-medium text-sm ${
+            className={`whitespace-nowrap px-3 py-1.5 border font-medium text-sm cursor-pointer rounded-full shadow-sm ${
               activeTab === "buySell"
-                ? "border-orange-500 text-orange-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                ? "text-orange-500 bg-orange-100 border-orange-500"
+                : "bg-white text-gray-500 hover:text-gray-700 border-gray-200"
             }`}
           >
             Jual Mobil
           </button>
           <button
             onClick={() => handleTabChange("notifyMe")}
-            className={`whitespace-nowrap pb-2 px-1 border-b-2 font-medium text-sm ${
+            className={`whitespace-nowrap px-3 py-1.5 border font-medium text-sm cursor-pointer rounded-full shadow-sm ${
               activeTab === "notifyMe"
-                ? "border-orange-500 text-orange-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                ? "text-orange-500 bg-orange-100 border-orange-500"
+                : "bg-white text-gray-500 hover:text-gray-700 border-gray-200"
             }`}
           >
             Notifikasi Stok
