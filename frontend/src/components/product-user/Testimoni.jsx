@@ -20,7 +20,7 @@ function Testimoni() {
     {
       imgSrc: "/images/carousel/1.jpg",
       rating: 4.5,
-      title: "Andi Pratama",
+      title: "Andi Pratama Tesss",
       description:
         "Layanan yang sangat memuaskan! Timnya responsif dan hasilnya melebihi ekspektasi.",
     },
