@@ -138,19 +138,14 @@ const BuyCarDetails = ({ productId }) => {
             onImageClick={openModal}
             isAdminRoute={false}
           />
-
-          {/* Product Details*/}
-          <div className="space-y-4 mt-4 lg:mt-8">
-            <div className="block lg:hidden">
-              <CarPricingInfo product={product} />
-            </div>
-            <CarProduct product={product} isAdminRoute={false} />
-          </div>
         </div>
-
-        <div className="hidden lg:block lg:w-1/2 lg:sticky lg:top-24 self-start">
+        <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
           <CarPricingInfo product={product} />
         </div>
+      </div>
+
+      <div className="mt-4 lg:mt-8">
+        <CarProduct product={product} isAdminRoute={false} />
       </div>
 
       {/* Modal */}

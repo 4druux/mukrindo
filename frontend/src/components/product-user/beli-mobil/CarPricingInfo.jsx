@@ -48,54 +48,23 @@ const CarPricingInfo = ({ product }) => {
           Rp {product.price.toLocaleString("id-ID")}
         </p>
         <p className="text-xs text-gray-500 mt-1">
-          *Harga berlaku untuk tenor minimal 4 tahun TDP maksimal 20%
+          *Harga diatas merupakan harga cash untuk perhitungan kredit hubungi
+          kami
         </p>
       </div>
 
-      {/* Estimasi Pembiayaan */}
-      <div className="mt-4 p-4 bg-orange-50 rounded-xl">
-        <h2 className="text-md text-gray-700 mb-2">Estimasi Pembiayaan</h2>
-        <div className="flex flex-col lg:flex-row space-y-3 lg:space-y-0 justify-between text-sm mb-1 p-3 bg-white rounded-lg">
-          <div className="border-b border-gray-200 lg:border-none pb-2 lg:pb-0 flex justify-between lg:flex-col">
-            <p className="text-gray-500">Tenor</p>
-            <p className="font-medium text-gray-800">5 Tahun</p>
-          </div>
-          <div className="border-b border-gray-200 lg:border-none pb-2 lg:pb-0 flex justify-between lg:flex-col">
-            <p className="text-gray-500">TDP</p>
-            <p className="font-medium text-gray-800">Rp 24.529.025</p>
-          </div>
-          <div className="flex justify-between lg:flex-col">
-            <p className="text-gray-500">Cicilan per bulan</p>
-            <p className="font-medium text-gray-800">Rp 2.905.125</p>
-          </div>
-        </div>
-        <p className="text-xs text-gray-500 mb-6">
-          *Estimasi dapat berubah sewaktu-waktu
-        </p>
-        <button
-          className="flex items-center justify-center gap-2 py-3 bg-orange-600 text-white rounded-full
-         hover:bg-orange-500 transition duration-200 cursor-pointer w-3/5 mb-1 mx-auto"
-        >
-          <Calculator className="w-5 h-5" />
-          <span className="text-sm">Hitung Ulang</span>
-        </button>
-        <p className="text-xs text-center text-gray-500 mb-6">
-          *Hitung ulang sesuai dengan kemampuan anda
-        </p>
-      </div>
-
-      {/* Tombol Aksi */}
-      <div className="mt-4 flex flex-col lg:flex-row gap-3 w-full">
+    
+      <div className="mt-4 flex flex-col gap-3 w-full">
         <button
           className="flex items-center justify-center gap-2 py-3.5 border border-orange-600 text-orange-600 
-        rounded-full hover:bg-orange-50 transition duration-200 cursor-pointer lg:w-1/2"
+        rounded-full hover:bg-orange-50 transition duration-200 cursor-pointer"
         >
           <RefreshCw className="w-5 h-5" />
           <span className="text-sm">Tukar Tambah</span>
         </button>
         <button
           className="flex items-center justify-center gap-2 py-4 bg-orange-600 text-white rounded-full
-         hover:bg-orange-500 transition duration-200 cursor-pointer lg:w-1/2"
+         hover:bg-orange-500 transition duration-200 cursor-pointer"
         >
           <span className="text-sm">Cek Sekarang</span>
           <ArrowRight className="w-5 h-5" />
