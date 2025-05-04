@@ -78,6 +78,14 @@ function AppHeader() {
           <div className="flex items-center justify-end">
             <div className="hidden md:flex items-center space-x-6">
               <Link
+                href="/"
+                className={`text-sm font-medium hover:text-orange-500 ${
+                  pathname === "/" ? "text-orange-600" : "text-gray-700"
+                }`}
+              >
+                Beranda
+              </Link>
+              <Link
                 href="/beli"
                 className={`text-sm font-medium hover:text-orange-500 ${
                   pathname === "/beli" ? "text-orange-600" : "text-gray-700"
@@ -106,17 +114,6 @@ function AppHeader() {
                 }`}
               >
                 Tukar Tambah
-              </Link>
-
-              <Link
-                href="/simulasi-budget"
-                className={`text-sm font-medium hover:text-orange-500 ${
-                  pathname === "/simulasi-budget"
-                    ? "text-orange-600"
-                    : "text-gray-700"
-                }`}
-              >
-                Simulasi Budget
               </Link>
             </div>
 
@@ -232,7 +229,7 @@ function AppHeader() {
           </div>
 
           <Link
-            href="/simulasi-budget"
+            href="/"
             className="absolute left-1/2 transform -translate-x-1/2 -top-8 w-16 h-16 bg-orange-500 rounded-full z-20 flex items-center justify-center shadow-lg cursor-pointer"
           >
             <FaMoneyBillWaveAlt className="w-8 h-8 text-gray-100" />

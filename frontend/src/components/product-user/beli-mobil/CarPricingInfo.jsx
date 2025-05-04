@@ -13,7 +13,7 @@ const CarPricingInfo = ({ product }) => {
   const liked = isBookmarked(product._id);
 
   return (
-    <div className="p-4 lg:p-8 rounded-t-3xl lg:rounded-3xl border-t border-b border-gray-300 lg:border-none lg:shadow-md bg-white">
+    <div className="p-4 lg:p-8 rounded-t-3xl lg:rounded-3xl border-t-4 border-t-orange-500 border-b border-gray-300 lg:border-none lg:shadow-md bg-white">
       <div className="flex justify-between w-full gap-10 mb-4">
         <h1 className="text-lg font-semibold text-gray-700">
           {product.carName} {product.yearOfAssembly}

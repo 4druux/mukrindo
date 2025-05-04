@@ -129,7 +129,7 @@ const CarProductCard = ({
                           </span>
                         </div>
 
-                        <div
+                        {/* <div
                           className={`${
                             isAdminRoute ? "block" : "block lg:hidden"
                           }`}
@@ -140,7 +140,7 @@ const CarProductCard = ({
                               {product.carColor}
                             </span>
                           </div>
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   </div>

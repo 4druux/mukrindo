@@ -34,6 +34,7 @@ const EditProduct = ({ productId }) => {
     model: "",
     variant: "",
     type: "",
+    numberOfSeats: "",
     carColor: "",
     cc: "",
     travelDistance: "",
@@ -53,6 +54,7 @@ const EditProduct = ({ productId }) => {
   const modelSelectRef = useRef(null);
   const variantSelectRef = useRef(null);
   const typeSelectRef = useRef(null);
+  const numberOfSeatsSelectRef = useRef(null);
   const carColorSelectRef = useRef(null);
   const ccInputRef = useRef(null);
   const travelDistanceInputRef = useRef(null);
@@ -84,6 +86,7 @@ const EditProduct = ({ productId }) => {
       model: modelSelectRef,
       variant: variantSelectRef,
       type: typeSelectRef,
+      numberOfSeats: numberOfSeatsSelectRef,
       carColor: carColorSelectRef,
       cc: ccInputRef,
       travelDistance: travelDistanceInputRef,
@@ -122,6 +125,11 @@ const EditProduct = ({ productId }) => {
         delay: QUICK_OPEN_DELAY,
       },
       type: {
+        target: "numberOfSeats",
+        action: "openDropdown",
+        delay: QUICK_OPEN_DELAY,
+      },
+      numberOfSeats: {
         target: "carColor",
         action: "openDropdown",
         delay: QUICK_OPEN_DELAY,
@@ -266,6 +274,7 @@ const EditProduct = ({ productId }) => {
             model: data.model || "",
             variant: data.variant || "",
             type: data.type || "",
+            numberOfSeats: data.numberOfSeats || "",
             carColor: data.carColor || "",
             cc: data.cc || "",
             travelDistance: data.travelDistance || "",
@@ -553,6 +562,27 @@ const EditProduct = ({ productId }) => {
                 label: "Minibus",
                 ImgUrl: "/images/CarType/minibus.png",
               },
+            ]}
+          />
+
+          <Select
+            ref={numberOfSeatsSelectRef}
+            label="Kapasitas Tempat Duduk"
+            id="numberOfSeats"
+            name="numberOfSeats"
+            title="Kapasitas Tempat Duduk"
+            description="Kapasitas Tempat Duduk Mobil"
+            value={productData.numberOfSeats}
+            onChange={(value) =>
+              handleChange({ target: { name: "numberOfSeats", value } })
+            }
+            error={errors.numberOfSeats}
+            options={[
+              { value: "4", label: "4 Kursi" },
+              { value: "5", label: "5 Kursi" },
+              { value: "6", label: "6 Kursi" },
+              { value: "7", label: "7 Kursi" },
+              { value: "8", label: "8 Kursi" },
             ]}
           />
 

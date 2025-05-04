@@ -255,11 +255,11 @@ const CarForm = () => {
 
   return (
     <div>
-      <div className="flex w-full bg-gray-200 lg:w-fit rounded-t-2xl shadow-md">
+      <div className="flex w-full bg-gray-200 lg:w-fit rounded-t-3xl border-t-4 border-t-orange-500 lg:border-none shadow-md">
         {/* Tab Beli Mobil */}
         <button
           onClick={() => handleTabClick("beli")}
-          className={`relative w-full lg:w-fit rounded-tl-2xl rounded-br-2xl cursor-pointer ${
+          className={`relative w-full lg:w-fit rounded-tl-3xl lg:rounded-tl-2xl rounded-br-2xl cursor-pointer ${
             activeTab === "beli"
               ? "bg-white text-orange-500 before:absolute before:-right-5 before:top-0 before:h-6 before:w-10 before:bg-gray-200 before:content-[''] after:absolute after:top-0 after:right-0 after:h-6 after:w-5 after:rounded-tr-3xl after:bg-white after:content-['']"
               : activeTab === "jual"
@@ -301,7 +301,7 @@ const CarForm = () => {
         {/* Tab Tukar Tambah */}
         <button
           onClick={() => handleTabClick("tukar")}
-          className={`relative w-full lg:w-fit rounded-tr-2xl rounded-bl-2xl cursor-pointer ${
+          className={`relative w-full lg:w-fit rounded-tr-3xl lg:rounded-tr-2xl rounded-bl-2xl cursor-pointer ${
             activeTab === "tukar"
               ? "bg-white text-orange-500 before:absolute before:-left-5 before:top-0 before:h-6 before:w-10 before:bg-gray-200 before:content-[''] after:absolute after:left-0 after:top-0 after:h-6 after:w-5 after:rounded-tl-3xl after:bg-white after:content-['']"
               : activeTab === "jual"

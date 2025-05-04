@@ -119,7 +119,7 @@ const CarDetails = ({ productId }) => {
     <div className="">
       <BreadcrumbNav items={breadcrumbItems} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         <CarImage
           images={product.images}
           carName={product.carName}
@@ -127,6 +127,7 @@ const CarDetails = ({ productId }) => {
           onImageClick={openModal}
           isAdminRoute={true}
         />
+
         {/* Product Details*/}
         <CarProduct product={product} isAdminRoute={true} />
       </div>

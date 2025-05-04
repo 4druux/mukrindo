@@ -8,6 +8,10 @@ const productSchema = new mongoose.Schema(
     model: { type: String, required: [true, "Model mobil harus diisi"] },
     variant: { type: String, required: [true, "Varian mobil harus diisi"] },
     type: { type: String, required: [true, "Tipe mobil harus diisi"] },
+    numberOfSeats: {
+      type: Number,
+      required: [true, "Jumlah kursi harus diisi"],
+    },
     carColor: { type: String, required: [true, "Warna mobil harus diisi"] },
     cc: { type: Number, required: [true, "Kapasitas mesin (CC) harus diisi"] },
     travelDistance: {

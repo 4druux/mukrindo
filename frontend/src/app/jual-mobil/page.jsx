@@ -18,9 +18,8 @@ const SellCarPage = () => {
         title="Jual Mobil Cepat Laku & Aman"
         subtitle="Bebas Drama & Tipu-Tipu"
       />
-
+      <SellCar />
       <div className="px-4 lg:px-0 space-y-8 lg:space-y-16">
-        <SellCar />
         <SellBedge />
         <SellAccordion />
       </div>
