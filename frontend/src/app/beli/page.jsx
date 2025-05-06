@@ -12,11 +12,10 @@ export const metadata = {
 const CarShopPage = () => {
   return (
     <div className="container mx-auto">
-      <div className="lg:pt-10 border-t-2 border-gray-200">
-        <div className="space-y-4 lg:space-y-16 mt-4 lg:mt-0">
+      <div className="md:pt-5 lg:pt-10 border-t-2 border-gray-200">
+        <div className="space-y-4 md:space-y-16 mt-4 md:mt-0">
           <BuyCar />
           <Testimoni />
-
           <NotifyMeForm />
           <BuyAccordion />
         </div>

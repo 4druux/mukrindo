@@ -330,13 +330,13 @@ const BuyCar = () => {
     <div>
       <div className="flex flex-col lg:flex-row gap-6">
         {/* SearchFilters di sidebar */}
-        <div className="hidden lg:block lg:w-1/4 lg:sticky lg:top-24 self-start">
+        <div className="hidden xl:block xl:w-1/4 xl:sticky xl:top-24 self-start">
           <SearchFilters />
         </div>
 
-        <div className="lg:w-3/4 w-full">
+        <div className="xl:w-3/4 w-full">
           <BreadcrumbNav items={breadcrumbItems} />
-          <h1 className="text-md lg:text-xl font-medium text-gray-700 mb-2 lg:mb-4 px-3 lg:px-0">
+          <h1 className="text-md lg:text-xl font-medium text-gray-700 mb-2 lg:mb-4 px-3 md:px-0">
             {searchQuery
               ? `Hasil pencarian untuk "${searchQuery}"`
               : "Menampilkan"}
@@ -360,7 +360,7 @@ const BuyCar = () => {
             processedProducts.length === 0 &&
             suggestedQuery &&
             searchQuery && (
-              <p className="mt-1 mb-3 text-sm text-gray-600 px-3 lg:px-0">
+              <p className="mt-1 mb-3 text-sm text-gray-600 px-3 md:px-0">
                 Mungkin maksud Anda{" "}
                 <Link
                   href={`/beli?search=${encodeURIComponent(suggestedQuery)}`}
@@ -421,7 +421,7 @@ const BuyCar = () => {
       {!isMobileSearchFiltersOpen && (
         <button
           onClick={() => setIsMobileSearchFiltersOpen(true)}
-          className="lg:hidden fixed bottom-30 -left-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-r-full shadow-lg z-40 flex items-center gap-2 hover:from-orange-600 hover:to-orange-700 transition-all duration-300" // Sedikit penyesuaian style
+          className="xl:hidden fixed bottom-30 -left-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-r-full shadow-lg z-40 flex items-center gap-2 hover:from-orange-600 hover:to-orange-700 transition-all duration-300" // Sedikit penyesuaian style
           aria-label="Buka Filter"
         >
           <Filter className="w-4 h-4" />
@@ -439,7 +439,7 @@ const BuyCar = () => {
               animate="visible"
               exit="exit"
               onClick={() => setIsMobileSearchFiltersOpen(false)}
-              className="fixed inset-0 bg-black/60 z-50 lg:hidden"
+              className="fixed inset-0 bg-black/60 z-50 xl:hidden"
               aria-hidden="true"
             />
 
@@ -450,7 +450,7 @@ const BuyCar = () => {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="fixed bottom-0 right-0 w-2/3 h-screen bg-white rounded-l-2xl shadow-xl z-50 flex flex-col lg:hidden"
+              className="fixed bottom-0 right-0 w-2/3 h-screen bg-white rounded-l-2xl shadow-xl z-50 flex flex-col xl:hidden"
             >
               {/* Header Panel */}
               <div className="flex justify-between items-center p-4 border-b border-gray-200 flex-shrink-0">

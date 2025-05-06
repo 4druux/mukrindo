@@ -33,7 +33,7 @@ const CarImage = ({
   const { toggleBookmarkSidebar } = useHeader();
   const { bookmarkCount, toggleBookmark, isBookmarked } = useProducts();
   const [isSticky, setIsSticky] = useState(false);
-  const isStickyMobile = window.innerWidth <= 768;
+  const isStickyMobile = window.innerWidth <= 760;
   const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
   const [mainSwiper, setMainSwiper] = useState(null);
@@ -72,8 +72,8 @@ const CarImage = ({
   return (
     <div className="">
       {/* Main Image */}
-      <div className="lg:flex-1 relative lg:min-w-0">
-        <div className="relative aspect-[16/9] rounded-none lg:rounded-2xl transition-all duration-500 ease-in-out overflow-hidden">
+      <div className="md:flex-1 relative md:min-w-0">
+        <div className="relative aspect-[16/9] rounded-none md:rounded-2xl transition-all duration-500 ease-in-out overflow-hidden">
           <Swiper
             onSwiper={setMainSwiper}
             spaceBetween={0}
@@ -82,7 +82,7 @@ const CarImage = ({
                 thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null,
             }}
             modules={[FreeMode, Thumbs]}
-            className="mySwiper2 rounded-none lg:rounded-2xl h-full"
+            className="mySwiper2 rounded-none md:rounded-2xl h-full"
             onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
           >
             {images.map((image, index) => (
@@ -142,12 +142,12 @@ const CarImage = ({
                   transition-opacity duration-300
                 `}
               >
-                <div className="absolute top-2 lg:top-4 left-1 lg:left-2 z-10">
+                <div className="absolute top-2 md:top-4 left-1 md:left-2 z-10">
                   <div className="flex items-center gap-3">
                     <button onClick={() => router.back()} aria-label="Kembali">
                       <div className="relative group">
                         <div className="bg-white/80 hover:bg-white p-2 rounded-full shadow cursor-pointer ">
-                          <ArrowLeft className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700" />
+                          <ArrowLeft className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
                         </div>
                         <span
                           className="absolute left-1/2 ml-1 -translate-x-1/2 top-full mt-2
@@ -164,7 +164,7 @@ const CarImage = ({
                 </div>
 
                 {/* Kontrol Kanan (Share & Bookmark) */}
-                <div className="absolute top-2 lg:top-4 right-3 z-10 cursor-pointer transition">
+                <div className="absolute top-2 md:top-4 right-3 z-10 cursor-pointer transition">
                   <div className="flex items-center gap-3">
                     <ShareProduct
                       title={`Lihat mobil ini: ${carName}`}
@@ -177,12 +177,12 @@ const CarImage = ({
                         }
                         p-2 rounded-full shadow transition
                       `}
-                      iconClass="w-4 h-4 lg:w-5 lg:h-5 text-gray-700"
+                      iconClass="w-4 h-4 md:w-5 md:h-5 text-gray-700"
                     />
 
                     {/* Bookmark Desktop */}
                     <div
-                      className="relative group cursor-pointer hidden lg:block"
+                      className="relative group cursor-pointer hidden md:block"
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleBookmark(productId);
@@ -190,7 +190,7 @@ const CarImage = ({
                     >
                       <div className="bg-white/80 hover:bg-white p-2 rounded-full shadow transition">
                         <Heart
-                          className={`w-4 h-4 lg:w-5 lg:h-5 ${
+                          className={`w-4 h-4 md:w-5 md:h-5 ${
                             liked
                               ? "text-red-500 fill-red-500"
                               : "text-gray-700 fill-none"
@@ -199,7 +199,7 @@ const CarImage = ({
                       </div>
                       <span
                         className="absolute left-3 -translate-x-1/2 top-full mt-2
-                         whitespace-nowrap rounded-lg bg-black/50 px-2 py-1 text-xs text-white
+                         whitespace-nowrap rounded-md bg-black/50 px-2 py-1 text-xs text-white
                          opacity-0 group-hover:opacity-100 transition-opacity duration-300
                          invisible group-hover:visible
                          pointer-events-none z-20"
@@ -208,7 +208,7 @@ const CarImage = ({
                       </span>
                     </div>
 
-                    <div className="block lg:hidden">
+                    <div className="block md:hidden">
                       <button
                         onClick={toggleBookmarkSidebar}
                         className="relative bg-white/80 hover:bg-white p-2 rounded-full shadow"
@@ -230,7 +230,7 @@ const CarImage = ({
               <div
                 className={`
                   fixed top-0 left-0 right-0 z-20 bg-white shadow-md px-3 py-2
-                  flex items-center justify-between lg:hidden
+                  flex items-center justify-between md:hidden
                   transition-transform duration-300 ease-in-out
                   ${
                     isStickyMobile && isSticky
@@ -283,7 +283,7 @@ const CarImage = ({
       </div>
 
       {/* Thumbnail */}
-      <div className="mt-1 lg:mt-4 px-1 relative overflow-hidden horizontal-gradient-fade">
+      <div className="mt-1 md:mt-4 px-1 relative overflow-hidden horizontal-gradient-fade">
         <Swiper
           onSwiper={setThumbsSwiper}
           spaceBetween={4}
@@ -299,9 +299,9 @@ const CarImage = ({
                 type="button"
                 className={`relative block w-full h-[55px] cursor-pointer group rounded-md overflow-hidden ${
                   index === activeIndex
-                    ? "border-2 border-orange-400"
-                    : "border-2 border-transparent"
-                } ${isAdminRoute ? "lg:h-[72px]" : "lg:h-[85px]"}`}
+                    ? "border-b-3 md:border-b-4 border-orange-500"
+                    : "border border-white"
+                } ${isAdminRoute ? "lg:h-[72px]" : "md:h-[85px]"}`}
                 onClick={() => mainSwiper?.slideTo(index)}
                 aria-label={`Lihat gambar ${index + 1}`}
               >

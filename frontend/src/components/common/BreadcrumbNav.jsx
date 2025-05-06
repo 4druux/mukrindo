@@ -11,7 +11,7 @@ const BreadcrumbNav = ({ items }) => {
   return (
     <nav
       aria-label="Breadcrumb"
-      className="mb-6 text-sm text-gray-700 hidden lg:block"
+      className="mb-2 text-sm text-gray-700 hidden md:block"
     >
       <ol className="flex items-center space-x-1.5">
         {items.map((item, index) => (

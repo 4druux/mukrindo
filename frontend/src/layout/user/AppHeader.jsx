@@ -76,7 +76,7 @@ function AppHeader() {
           </Link>
 
           <div className="flex items-center justify-end">
-            <div className="hidden md:flex items-center space-x-6">
+            <div className="hidden md:flex items-center md:space-x-4 lg:space-x-6">
               <Link
                 href="/"
                 className={`text-sm font-medium hover:text-orange-500 ${
@@ -120,13 +120,13 @@ function AppHeader() {
             <div className="hidden md:block border-l border-gray-400 h-7 mx-4" />
 
             <FiSearch
-              className="w-5 h-5 text-gray-600 cursor-pointer mx-0 lg:mr-4"
+              className="w-5 h-5 text-gray-600 cursor-pointer mx-0 md:mr-4"
               onClick={toggleSearch}
             />
 
             <div className="block md:hidden border-l border-gray-400 h-7 mx-4" />
 
-            <div className="flex items-center space-x-3 lg:space-x-4 bg-gray-100 px-2 lg:px-4 rounded-full border border-gray-300">
+            <div className="flex items-center space-x-3 md:space-x-4 bg-gray-100 px-2 lg:px-4 rounded-full border border-gray-300">
               <button
                 onClick={toggleBookmarkSidebar}
                 className="relative group focus:outline-none"

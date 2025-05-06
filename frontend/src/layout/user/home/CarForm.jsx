@@ -255,7 +255,7 @@ const CarForm = () => {
 
   return (
     <div>
-      <div className="flex w-full bg-gray-200 lg:w-fit rounded-t-3xl border-t-4 border-t-orange-500 lg:border-none shadow-md">
+      <div className="flex w-full bg-gray-200 lg:w-fit rounded-t-3xl border-t-4 border-t-orange-500 md:border-none shadow-md">
         {/* Tab Beli Mobil */}
         <button
           onClick={() => handleTabClick("beli")}
@@ -270,7 +270,7 @@ const CarForm = () => {
           <div className="m-0 flex h-full w-full items-center justify-center px-4 text-center text-sm font-semibold lg:px-8">
             <div className="w-fit items-center justify-center lg:w-full">
               <div className="flex items-center justify-center gap-2 py-4">
-                <FaCar className="w-4 h-4 hidden lg:block" />
+                <FaCar className="w-4 h-4 hidden md:block" />
                 <h3 className="text-xs lg:text-sm font-medium">Beli Mobil</h3>
               </div>
             </div>
@@ -291,7 +291,7 @@ const CarForm = () => {
           <div className="m-0 flex h-full w-full items-center justify-center px-4 text-center text-sm font-semibold lg:px-8">
             <div className="w-fit items-center justify-center lg:w-full">
               <div className="flex items-center justify-center gap-2 py-4">
-                <FaMoneyBillWave className="w-4 h-4 hidden lg:block" />
+                <FaMoneyBillWave className="w-4 h-4 hidden md:block" />
                 <h3 className="text-xs lg:text-sm font-medium">Jual Mobil</h3>
               </div>
             </div>
@@ -312,7 +312,7 @@ const CarForm = () => {
           <div className="m-0 flex h-full w-full items-center justify-center px-4 text-center text-sm font-semibold lg:px-8">
             <div className="w-fit items-center justify-center lg:w-full">
               <div className="flex items-center justify-center gap-2 py-4">
-                <FaExchangeAlt className="w-4 h-4 hidden lg:block" />
+                <FaExchangeAlt className="w-4 h-4 hidden md:block" />
                 <h3 className="text-xs lg:text-sm font-medium">Tukar Mobil</h3>
               </div>
             </div>

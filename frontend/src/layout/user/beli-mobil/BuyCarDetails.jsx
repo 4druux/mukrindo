@@ -75,7 +75,7 @@ const BuyCarDetails = ({ productId }) => {
 
   useEffect(() => {
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      setIsMobile(window.innerWidth <= 760);
     };
     checkIsMobile();
     window.addEventListener("resize", checkIsMobile);
@@ -128,8 +128,8 @@ const BuyCarDetails = ({ productId }) => {
     <div>
       <BreadcrumbNav items={breadcrumbItems} />
 
-      <div className="flex flex-col lg:flex-row gap-4">
-        <div className="lg:w-3/5">
+      <div className="flex flex-col xl:flex-row gap-4">
+        <div className="xl:w-3/5">
           <CarImage
             productId={product._id}
             images={product.images}
@@ -139,12 +139,12 @@ const BuyCarDetails = ({ productId }) => {
             isAdminRoute={false}
           />
         </div>
-        <div className="lg:w-1/2 lg:sticky lg:top-24 self-start">
+        <div className="xl:w-1/2 xl:sticky xl:top-24 self-start w-full">
           <CarPricingInfo product={product} />
         </div>
       </div>
 
-      <div className="mt-4 lg:mt-8">
+      <div className="mt-4 xl:mt-8">
         <CarProduct product={product} isAdminRoute={false} />
       </div>
 

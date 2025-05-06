@@ -32,7 +32,7 @@ const TradeInBedge = () => {
   return (
     <div className="container mx-auto">
       {/* Mobile View */}
-      <div className="grid grid-cols-1 gap-4 lg:hidden">
+      <div className="grid grid-cols-1 gap-4 xl:hidden">
         {featuresData.map((feature) => (
           <div key={feature.id} className="w-full">
             <FeatureCard
@@ -46,13 +46,13 @@ const TradeInBedge = () => {
       </div>
 
       {/* Desktop View */}
-      <div className="hidden lg:block">
+      <div className="hidden xl:block">
         <div className="overflow-hidden relative w-full group whitespace-nowrap horizontal-gradient-fade">
           <div className="flex animate-marquee group-hover:[animation-play-state:paused] will-change-transform">
             {[...featuresData, ...featuresData].map((feature, index) => (
               <div
                 key={`${feature.id}-${index}`}
-                className="flex-shrink-0 w-full sm:w-1/2 md:w-1/3 lg:w-[32%] p-4  inline-block align-top"
+                className="flex-shrink-0 w-full sm:w-1/2 md:w-1/3 lg:w-[32%] p-4 inline-block align-top"
               >
                 <FeatureCard
                   icon={feature.icon}

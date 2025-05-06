@@ -14,7 +14,6 @@ import { BsFuelPumpFill } from "react-icons/bs";
 import { FaRegCalendarAlt, FaRoad } from "react-icons/fa";
 import { GiGearStickPattern } from "react-icons/gi";
 import { Heart } from "lucide-react";
-import { MdOutlineColorLens } from "react-icons/md";
 
 const CarProductCardSwipe = ({
   products,
@@ -32,7 +31,7 @@ const CarProductCardSwipe = ({
 
   return (
     <div
-      className="flex space-x-4 px-3 overflow-x-auto md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-3 mt-4 pb-4 md:pb-8"
+      className="flex space-x-4 px-3 md:px-1 overflow-x-auto md:space-x-0 md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4 mt-4 pb-4 md:pb-8"
       style={{ scrollbarWidth: "none" }}
     >
       {loading
@@ -151,15 +150,11 @@ const CarProductCardSwipe = ({
 
       {/* Empty Message */}
       {!loading && products.length === 0 && (
-        // Pastikan pesan ini ditampilkan dengan benar di layout flex/grid
         <div className="col-span-full text-center text-gray-500 mt-4 w-full">
-          {" "}
-          {/* Added w-full */}
           {emptyMessage}
         </div>
       )}
     </div>
-    // --- MODIFICATION END ---
   );
 };
 

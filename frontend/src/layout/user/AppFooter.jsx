@@ -13,10 +13,10 @@ const AppFooter = () => {
 
   return (
     <div
-      className="bg-white mt-14 lg:mt-20"
+      className="bg-white mt-14 xl:mt-20"
       style={{ boxShadow: "0px -5px 10px -5px rgba(0, 0, 0, 0.1)" }}
     >
-      <div className="container mx-auto flex flex-col lg:flex-row items-start justify-between px-4 lg:px-0 gap-4 lg:gap-10 py-10 text-sm">
+      <div className="container mx-auto flex flex-col xl:flex-row items-start justify-between px-4 xl:px-0 gap-4 xl:gap-10 py-10 text-sm">
         <div className="">
           {/* <img
             src={assets.forever_icon}
@@ -147,16 +147,16 @@ const AppFooter = () => {
           <div className="hidden lg:block">
             <div className="flex gap-3">
               <a
-                href="/kebijakan-privasi"
-                className="hover:text-orange-600 cursor-pointer underline"
-              >
-                Kebijakan Privasi
-              </a>
-              <a
                 href="/syarat-ketentuan"
                 className="hover:text-orange-600 cursor-pointer underline"
               >
                 Syarat & Ketentuan
+              </a>{" "}
+              <a
+                href="/kebijakan-privasi"
+                className="hover:text-orange-600 cursor-pointer underline"
+              >
+                Kebijakan Privasi
               </a>
             </div>
           </div>

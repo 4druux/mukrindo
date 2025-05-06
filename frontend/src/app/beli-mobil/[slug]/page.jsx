@@ -17,7 +17,7 @@ export default function DetailCarPage({ params }) {
 
   return (
     <div className="container mx-auto">
-      <div className=" lg:pt-10 border-t-2 border-gray-200 space-y-4 lg:space-y-16">
+      <div className="md:pt-5 lg:pt-10 md:border-t-2 md:border-gray-200 space-y-4 md:space-y-16">
         <BuyCarDetails productId={productId} />
         <Testimoni />
         <NotifyMeForm />

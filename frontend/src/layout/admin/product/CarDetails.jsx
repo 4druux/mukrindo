@@ -84,7 +84,7 @@ const CarDetails = ({ productId }) => {
           <p className="text-red-500 text-lg mb-4">{error}</p>
           <button
             onClick={() => router.back("/admin")}
-            className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded"
+            className="bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-white font-bold py-2 px-4 rounded"
           >
             Go Back
           </button>
@@ -100,7 +100,7 @@ const CarDetails = ({ productId }) => {
           <p className="text-gray-500 text-lg mb-4">Product not found.</p>
           <button
             onClick={() => router.back("/admin")}
-            className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded"
+            className="bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-white font-bold py-2 px-4 rounded"
           >
             Go Back
           </button>

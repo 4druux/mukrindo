@@ -42,14 +42,14 @@ const featuresData = [
 const HomeBedge = () => {
   return (
     <div>
-      <h1 className="text-md lg:text-xl font-medium text-gray-700 mt-6 mb-1 px-3 lg:px-0">
+      <h1 className="text-md lg:text-xl font-medium text-gray-700 mt-6 mb-1 px-3 md:px-0">
         Bosan dengan mobil yang lama?
       </h1>
-      <p className="text-xs lg:text-sm text-gray-500 mb-2 lg:mb-4 px-3 lg:px-0">
+      <p className="text-xs lg:text-sm text-gray-500 mb-2 lg:mb-4 px-3 md:px-0">
         Mau mobil bekas terbaru atau tukar tambah mobil lamamu bisa loh dengan
         pilihan yang beragam dari Mukrindo Motor
       </p>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {featuresData.map((feature) => (
           <div key={feature.id} className="w-full">
             <FeatureCard

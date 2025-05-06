@@ -217,7 +217,7 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
 
   return (
     <div
-      className="rounded-none md:rounded-3xl pb-4 md:pb-0 overflow-auto bg-white shadow-none md:shadow-md flex flex-col"
+      className="rounded-none 2xl:rounded-3xl pb-4 2xl:pb-0 overflow-auto bg-white shadow-none 2xl:shadow-md flex flex-col"
       style={{ scrollbarWidth: "none" }}
     >
       <div className="p-5 space-y-4">
@@ -368,8 +368,8 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
 
         <button
           onClick={handleApplyFilters}
-          className="flex items-center justify-center gap-2 py-2.5 bg-orange-600 text-white rounded-full
-          hover:bg-orange-500 transition duration-200 cursor-pointer w-full"
+          className="flex items-center justify-center gap-2 py-2.5 bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-white rounded-full
+          cursor-pointer w-full"
         >
           <span className="text-sm">Tampilkan Mobil</span>
           <ArrowRight className="w-5 h-5" />

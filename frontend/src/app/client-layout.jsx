@@ -17,7 +17,7 @@ export default function ClientLayout({ children }) {
 
   useEffect(() => {
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      setIsMobile(window.innerWidth <= 760);
     };
     checkIsMobile();
     window.addEventListener("resize", checkIsMobile);
@@ -39,7 +39,7 @@ export default function ClientLayout({ children }) {
   return (
     <>
       <HeaderProvider>
-        <div className="min-h-screen bg-gray-50 mb-25 lg:mb-0">
+        <div className="min-h-screen bg-gray-50 mb-25 md:mb-0">
           {showHeader && <AppHeader />}
           <BookmarkRightbar />
           <div className="">{children}</div>

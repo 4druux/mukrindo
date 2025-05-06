@@ -4,7 +4,7 @@ import React from "react";
 export default function GridShape() {
   return (
     <>
-      <div className="absolute bottom-10 right-0 -z-10 w-auto">
+      <div className="absolute bottom-8 right-0 -z-10 w-auto">
         <Image
           width={720}
           height={338}
@@ -13,7 +13,7 @@ export default function GridShape() {
           className="object-cover object-top-left"
         />
       </div>
-      <div className="absolute top-10 left-0 -z-10 w-auto rotate-180">
+      <div className="absolute top-8 left-0 -z-10 w-auto rotate-180">
         <Image
           width={720}
           height={338}

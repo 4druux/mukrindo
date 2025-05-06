@@ -28,10 +28,10 @@ const CarProductModernNoHelper = ({ product, isAdminRoute = false }) => {
 
   return (
     <div
-      className={`bg-white lg:rounded-3xl lg:shadow-md overflow-hidden ${
+      className={`bg-white md:rounded-3xl md:shadow-md overflow-hidden ${
         isAdminRoute
           ? "border-t-4 border-orange-500 lg:border-none rounded-t-3xl"
-          : "border border-gray-300 lg:border-none"
+          : "border-y border-gray-300 md:border-none"
       }`}
     >
       <div className="p-5 lg:p-8">

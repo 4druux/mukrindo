@@ -32,7 +32,7 @@ const SellBedge = () => {
   return (
     <div className="container mx-auto">
       {/* Mobile View */}
-      <div className="grid grid-cols-1 gap-4 lg:hidden">
+      <div className="grid grid-cols-1 gap-4 xl:hidden">
         {featuresData.map((feature) => (
           <div key={feature.id} className="w-full">
             <FeatureCard
@@ -46,7 +46,7 @@ const SellBedge = () => {
       </div>
 
       {/* Desktop View */}
-      <div className="hidden lg:block">
+      <div className="hidden xl:block">
         <div className="overflow-hidden relative w-full group whitespace-nowrap horizontal-gradient-fade">
           <div className="flex animate-marquee group-hover:[animation-play-state:paused] will-change-transform">
             {[...featuresData, ...featuresData].map((feature, index) => (

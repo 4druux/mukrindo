@@ -46,15 +46,15 @@ const CarImageModal = ({
       onClick={onClose}
     >
       <div
-        className="relative group rounded-none lg:rounded-4xl min-w-sm px-2 lg:max-w-4xl mx-auto"
+        className="relative group rounded-none md:rounded-4xl min-w-sm px-2 md:max-w-4xl mx-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          className="absolute right-3 top-1 lg:right-5 lg:top-4 bg-white/80 hover:bg-white rounded-full p-2 z-20 cursor-pointer group/close" // Beri nama group berbeda jika perlu
+          className="absolute right-3 top-1 md:right-5 md:top-4 bg-white/80 hover:bg-white rounded-full p-2 z-20 cursor-pointer group/close"
           onClick={onClose}
           aria-label="Close modal"
         >
-          <X className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700" />
+          <X className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
         </button>
 
         <Swiper
@@ -81,7 +81,7 @@ const CarImageModal = ({
                   src={image}
                   alt={`${carName} - ${index + 1}`}
                   layout="fill"
-                  className="object-cover lg:object-cover cursor-grab"
+                  className="object-cover md:object-cover cursor-grab"
                 />
               </div>
             </SwiperSlide>
@@ -129,8 +129,8 @@ const CarImageModal = ({
               <div
                 className={`relative w-full h-[50px] md:h-[90px] cursor-pointer ${
                   modalActiveIndex === index
-                    ? "border-2 border-orange-500 rounded-md"
-                    : ""
+                    ? "border-b-3 md:border-b-4 border-orange-500"
+                    : "border border-transparent"
                 }`}
               >
                 <Image

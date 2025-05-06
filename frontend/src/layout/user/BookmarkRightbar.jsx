@@ -205,7 +205,7 @@ const BookmarkRightbar = () => {
                             <Link
                               href={detailUrl}
                               onClick={toggleBookmarkSidebar}
-                              className="bg-orange-500 text-white text-center text-xs font-medium px-2 py-1 lg:px-3 lg:py-2 rounded-full hover:bg-orange-600 transition-colors flex-shrink-0" /* flex-shrink-0 */
+                              className="bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-white text-center text-xs font-medium px-2 py-1 lg:px-3 lg:py-2 rounded-full flex-shrink-0" /* flex-shrink-0 */
                             >
                               Cek Sekarang
                             </Link>

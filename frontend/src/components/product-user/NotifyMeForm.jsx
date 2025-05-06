@@ -256,7 +256,7 @@ const NotifyMeForm = () => {
   const noModelsAvailable = formData.brand && modelOptions.length === 0;
 
   return (
-    <div className="bg-white px-6 pb-6 lg:py-2 border-y border-gray-200 lg:border-none lg:rounded-2xl lg:shadow-md flex flex-col-reverse lg:flex-row items-center justify-between">
+    <div className="bg-white px-6 pb-6 lg:py-4 xl:py-0 border-y border-gray-200 md:border-none md:rounded-2xl md:shadow-md flex flex-col-reverse lg:flex-row items-center justify-between">
       <div className="w-full lg:w-3/4">
         <div className="flex items-start gap-3">
           <h2 className="text-md lg:text-xl font-medium text-gray-700 -mt-1">
@@ -358,7 +358,7 @@ const NotifyMeForm = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`cursor-pointer bg-orange-600 flex items-center justify-center w-full hover:bg-orange-500 text-white text-sm font-medium py-3 rounded-full focus:outline-none focus:shadow-outline group ${
+              className={`cursor-pointer bg-orange-500 flex items-center justify-center w-full hover:bg-orange-600 text-white text-sm font-medium py-3 rounded-full focus:outline-none transition duration-300 ease-in-out group ${
                 isSubmitting ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >

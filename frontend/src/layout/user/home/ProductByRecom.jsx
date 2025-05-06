@@ -132,11 +132,11 @@ const ProductByRecom = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-2 lg:mb-4 px-4 lg:px-2">
+      <div className="flex justify-between items-center mb-2 lg:mb-4 px-3 md:px-0">
         <h1 className="text-md lg:text-xl font-medium text-gray-700">
           Mobil Pilihan Terbaik
         </h1>
-        <div className="block lg:hidden">
+        <div className="block md:hidden">
           <Link href="/beli">
             <p className="text-xs text-orange-500 font-medium hover:text-orange-600 hover:text-underline hover:underline cursor-pointer">
               Tampilkan Semua
@@ -146,7 +146,7 @@ const ProductByRecom = () => {
       </div>
 
       <div
-        className="flex space-x-2 mb-4 overflow-x-auto lg:pb-2 px-4 lg:px-2"
+        className="flex space-x-2 mb-4 overflow-x-auto lg:pb-2 px-3 md:px-0"
         style={{ scrollbarWidth: "none" }}
       >
         <button
@@ -202,12 +202,12 @@ const ProductByRecom = () => {
         emptyMessage={emptyMessage}
       />
 
-      <p className="text-xs text-center text-gray-500 block lg:hidden">
+      <p className="text-xs text-center text-gray-500 block md:hidden">
         Hanya menampilkan {displayedProducts.slice(0, 9).length} dari{" "}
         {products.length} Mobil
       </p>
 
-      <div className="hidden lg:block">
+      <div className="hidden md:block">
         <div className="flex flex-col items-center">
           <p className="text-sm text-gray-500">
             Hanya menampilkan {displayedProducts.slice(0, 9).length} dari{" "}

@@ -73,7 +73,7 @@ const SearchBar = () => {
           {/* Mobile View */}
           <motion.div
             key="mobile-search"
-            className="fixed inset-0 bg-white z-[51] flex flex-col md:hidden"
+            className="fixed inset-0 bg-white z-[51] flex flex-col lg:hidden"
             variants={mobileContainerVariants}
             initial="hidden"
             animate="visible"

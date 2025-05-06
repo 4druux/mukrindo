@@ -241,7 +241,7 @@ const Step4Form = ({
             type="button"
             onClick={onSubmit}
             disabled={isLoading}
-            className={`cursor-pointer bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline ${
+            className={`cursor-pointer bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline ${
               isLoading ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >

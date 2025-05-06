@@ -20,6 +20,7 @@ exports.createProduct = async (req, res) => {
       model,
       variant,
       type,
+      numberOfSeats,
       carColor,
       cc,
       travelDistance,
@@ -31,7 +32,7 @@ exports.createProduct = async (req, res) => {
       yearOfAssembly,
       price,
       images,
-      status, // Ambil status dari request body
+      status,
     } = req.body;
 
     // Validasi data (termasuk status, jika tidak diberikan, default akan digunakan)
@@ -41,6 +42,7 @@ exports.createProduct = async (req, res) => {
       !model ||
       !variant ||
       !type ||
+      !numberOfSeats ||
       !carColor ||
       !cc ||
       !travelDistance ||
@@ -64,6 +66,7 @@ exports.createProduct = async (req, res) => {
       model,
       variant,
       type,
+      numberOfSeats,
       carColor,
       cc,
       travelDistance,

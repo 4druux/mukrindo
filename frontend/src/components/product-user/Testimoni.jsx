@@ -92,7 +92,7 @@ function Testimoni() {
 
   return (
     <div>
-      <div className="px-3 lg:px-0">
+      <div className="px-3 md:px-0">
         <h1 className="text-md lg:text-xl font-medium text-gray-700 mt-6 mb-1">
           Cerita Mereka Bersama Kami
         </h1>
@@ -108,7 +108,7 @@ function Testimoni() {
           modules={[Navigation, A11y]}
           spaceBetween={16}
           slidesPerView={"auto"}
-          className="!pb-2 lg:!pb-4 !px-3 lg:!px-0"
+          className="!pb-2 lg:!pb-4 !px-3 md:!px-0"
           navigation={{
             nextEl: "#testimonial-next",
             prevEl: "#testimonial-prev",

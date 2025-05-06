@@ -38,7 +38,7 @@ const StepItem = React.forwardRef(({ step, index, currentStep }, ref) => {
       key={step.id || index}
       className="relative z-10 flex flex-col items-center md:items-start mb-2 lg:mb-0"
     >
-      <div className="bg-white flex flex-col items-center text-center md:flex-row md:items-start md:text-left py-1 w-full">
+      <div className="bg-white flex flex-col items-center text-center lg:flex-row lg:items-start lg:text-left py-1 w-full">
         <div className="mb-1 md:mb-0 md:mr-3 flex-shrink-0">
           <StepperIcon
             isCompleted={isCompleted}

@@ -26,14 +26,13 @@ export default function Home() {
 
   return (
     <div className="container mx-auto">
-      <p className="lg:pt-10 border-t-2 border-gray-200"></p>
+      <p className="md:pt-5 lg:pt-10 border-t-2 border-gray-200"></p>
       <HomeCarousel images={bannerImages} />
-      <div className="space-y-4 lg:space-y-16 mt-4 lg:mt-10">
+      <div className="space-y-4 md:space-y-16 mt-4 md:mt-10">
         <CarForm />
         <ProductByRecom />
         <ProductByPrice />
         <Testimoni />
-
         <NotifyMeForm />
         <HomeBedge />
         <HomeAccordion />

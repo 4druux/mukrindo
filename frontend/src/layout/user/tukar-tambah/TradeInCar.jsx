@@ -61,12 +61,20 @@ const initialFormData = {
 
 const TradeInCar = () => {
   const searchParams = useSearchParams();
+  const [formData, setFormData] = useState({ ...initialFormData });
 
   // Data dari carform home
   const initialBrand = searchParams.get("brand") || "";
   const initialModel = searchParams.get("model") || "";
   const initialYear = searchParams.get("year") || "";
   const initialPhoneNumber = searchParams.get("phoneNumber") || "";
+
+  // Data dari CarPricingInfo pada BuyCarDetails
+  const initialNewBrand = searchParams.get("newBrand") || "";
+  const initialNewModel = searchParams.get("newModel") || "";
+  const initialNewVariant = searchParams.get("newVariant") || "";
+  const initialNewTransmission = searchParams.get("newTransmission") || "";
+  const initialNewCarColor = searchParams.get("newCarColor") || "";
 
   const { products, loading: productsLoading } = useProducts();
   const [currentStep, setCurrentStep] = useState(1);
@@ -81,16 +89,6 @@ const TradeInCar = () => {
     { id: 3, label: "Lokasi Inspeksi" },
     { id: 4, label: "Mobil Baru" },
   ];
-
-  const [formData, setFormData] = useState({
-    ...initialFormData,
-    brand: initialBrand || initialFormData.brand,
-    model: initialModel || initialFormData.model,
-    year: initialYear || initialFormData.year,
-    phoneNumber: initialPhoneNumber
-      ? formatNumberPhone(initialPhoneNumber, PHONE_PREFIX)
-      : initialFormData.phoneNumber,
-  });
 
   // Step 1 Refs
   const brandSelectRef = useRef(null);
@@ -261,6 +259,12 @@ const TradeInCar = () => {
         : prev.phoneNumber !== PHONE_PREFIX
         ? prev.phoneNumber
         : PHONE_PREFIX,
+
+      newCarBrand: initialNewBrand || prev.newCarBrand,
+      newCarModel: initialNewModel || prev.newCarModel,
+      newCarVariant: initialNewVariant || prev.newCarVariant,
+      newCarTransmission: initialNewTransmission || prev.newCarTransmission,
+      newCarColor: initialNewCarColor || prev.newCarColor,
     }));
 
     if (initialBrand && initialBrand !== formData.brand) {
@@ -283,6 +287,11 @@ const TradeInCar = () => {
     initialPhoneNumber,
     formData.brand,
     formData.model,
+    initialNewBrand,
+    initialNewModel,
+    initialNewVariant,
+    initialNewTransmission,
+    initialNewCarColor,
   ]);
 
   const brandOptions = useMemo(
@@ -828,9 +837,9 @@ const TradeInCar = () => {
 
   return (
     <div className="container mx-auto -mt-6 mb-6 lg:mb-8 lg:-mt-32 relative z-20">
-      <div className="bg-white p-4 md:p-8 rounded-t-3xl lg:rounded-2xl border-b border-gray-300 border-t-4 border-t-orange-500 lg:border-none lg:shadow-md ">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="w-full md:w-auto md:flex-shrink-0 md:pr-4">
+      <div className="bg-white p-4 md:p-8 rounded-t-3xl md:rounded-2xl border-b border-gray-300 border-t-4 border-t-orange-500 md:border-none md:shadow-md ">
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="w-full lg:w-auto lg:flex-shrink-0 lg:pr-4">
             <Stepper currentStep={currentStep} steps={TradeInCarSteps} />
           </div>
           <div className="flex-1 min-w-0">

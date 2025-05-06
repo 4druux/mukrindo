@@ -173,13 +173,12 @@ const TradeInForm = ({
       </div>
 
       <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-4">
-        <p className="text-xs lg:text-sm text-gray-500 flex-4">
+        <p className="text-xs lg:text-sm text-gray-500 md:flex-2 xl:flex-4">
           Dapatkan penawaran terbaik untuk tukar tambah mobil lama Anda dengan
           yang baru di Mukrindo.id
         </p>
         <button
-          className="w-full lg:flex-1 rounded-full py-3 text-sm text-white font-medium transition-colors duration-200
-          bg-orange-600 hover:bg-orange-500 cursor-pointer"
+          className="w-full md:flex-1 rounded-full py-3 text-sm text-white font-medium bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out cursor-pointer"
           type="button"
           onClick={handleSubmit}
         >

@@ -157,7 +157,7 @@ const ActiveSearchFilters = ({
   return (
     <div className="mb-2 lg:mb-4">
       <ScrollHorizontal
-        className={`gap-2 ${isAdminRoute ? "" : "px-3 lg:px-2"}`}
+        className={`gap-2 ${isAdminRoute ? "" : "px-3 md:px-2"}`}
         buttonVerticalAlign="top"
       >
         {/* Clear All Button */}

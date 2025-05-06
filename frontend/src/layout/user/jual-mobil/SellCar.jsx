@@ -569,9 +569,9 @@ const SellCar = () => {
 
   return (
     <div className="container mx-auto -mt-6 mb-6 lg:mb-8 lg:-mt-32 relative z-20">
-      <div className="bg-white p-4 md:p-8 rounded-t-3xl lg:rounded-2xl border-b border-gray-300 border-t-4 border-t-orange-500 lg:border-none lg:shadow-md ">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="w-full md:w-auto md:flex-shrink-0 md:pr-4">
+      <div className="bg-white p-4 md:p-8 rounded-t-3xl md:rounded-2xl border-b border-gray-300 border-t-4 border-t-orange-500 md:border-none md:shadow-md ">
+        <div className="flex flex-col lg:flex-row gap-4">
+          <div className="w-full lg:w-auto lg:flex-shrink-0 lg:pr-4">
             <Stepper currentStep={currentStep} steps={sellCarSteps} />
           </div>
           <div className="flex-1 min-w-0">

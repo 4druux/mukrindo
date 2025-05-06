@@ -693,10 +693,10 @@ const EditProduct = ({ productId }) => {
             </button>
             <button
               type="submit"
-              className={`text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline ${
+              className={`text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline transition duration-300 ease-in-out ${
                 loadingUpdate
                   ? "bg-orange-500 opacity-55 cursor-not-allowed"
-                  : "bg-orange-600 hover:bg-orange-500 cursor-pointer"
+                  : "bg-orange-500 hover:bg-orange-600  cursor-pointer"
               }`}
               disabled={loadingUpdate}
             >
