@@ -96,7 +96,6 @@ const SearchBar = () => {
                     className="relative z-10 w-full h-full outline-none bg-transparent text-sm"
                     type="text"
                     placeholder=""
-                    autoFocus
                   />
                 </div>
                 {searchQuery && (

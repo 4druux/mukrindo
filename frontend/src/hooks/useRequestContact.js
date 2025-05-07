@@ -90,7 +90,7 @@ export const useRequestContact = ({
 
       message += `${introMessage}\n\n`;
       message += `Kami ingin mengonfirmasi jadwal inspeksi mobil Bapak/Ibu yang telah dijadwalkan pada:\n`;
-      message += `    ��� Tanggal: ${inspectionDate}\n`;
+      message += `    • Tanggal: ${inspectionDate}\n`;
       message += `    • Waktu: ${inspectionTime}\n`;
       message += `    • Lokasi: ${inspectionLocationText} (${fullLocationDetail})\n\n`;
       message += `Mohon konfirmasi kesesuaian jadwal ini.\n\n`;

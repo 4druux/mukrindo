@@ -1,9 +1,15 @@
 // components/product-user/beli-mobil/CarPricingInfo.jsx
-import React, { useState } from "react";
-
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useProducts } from "@/context/ProductContext";
-import { RefreshCw, ArrowRight, Heart } from "lucide-react";
+import { RefreshCw, ArrowRight, Heart, Calculator } from "lucide-react";
+import {
+  FaMapMarkerAlt,
+  FaShoppingBag,
+  FaWhatsapp,
+  FaBell,
+} from "react-icons/fa";
+import toast from "react-hot-toast";
 
 const CarPricingInfo = ({ product }) => {
   if (!product) {
@@ -11,8 +17,36 @@ const CarPricingInfo = ({ product }) => {
   }
 
   const { isBookmarked, toggleBookmark } = useProducts();
+  const [selectedTenor, setSelectedTenor] = useState(null);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const WHATSAPP_NUMBER = "6282123736730";
+  const pricingInfoRef = useRef(null);
   const router = useRouter();
   const liked = isBookmarked(product._id);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const isCurrentlyMobile = window.innerWidth <= 760;
+
+      if (isCurrentlyMobile) {
+        const scrollThreshold = 800;
+        const shouldBeSticky = window.scrollY > scrollThreshold;
+
+        if (shouldBeSticky !== showStickyBar) {
+          setShowStickyBar(shouldBeSticky);
+        }
+      } else {
+        if (showStickyBar) {
+          setShowStickyBar(false);
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [showStickyBar]);
 
   const handleTradeInClick = () => {
     if (product) {
@@ -27,65 +61,332 @@ const CarPricingInfo = ({ product }) => {
     }
   };
 
+  const generateWhatsAppMessage = (includeTenor = false) => {
+    let message = `Halo Kak, Saya lihat mobil ini di website MukrindoMotor.id\n\n`;
+    message += `*${product.brand} ${product.model} ${product.variant} ${product.yearOfAssembly}*\n`;
+    message += `  • Warna: ${product.carColor}\n`;
+    message += `  • Transmisi: ${product.transmission}\n`;
+    message += `  • Jarak Tempuh: ${product.travelDistance.toLocaleString(
+      "id-ID"
+    )} KM\n\n`;
+    message += `Link Produk: ${window.location.href}\n\n`;
+    message += `Mau tanya dong, apakah unit ini masih ready?\n\n`;
+
+    if (includeTenor && selectedTenor) {
+      const tenorLabel = tenorOptions.find(
+        (opt) => opt.value === selectedTenor
+      )?.label;
+      message += `Untuk tenor ${tenorLabel}. Boleh minta tolong diinfokan perkiraan simulasinya?\n`;
+      message += ` 1. Perkiraan DP minimalnya berapa ya?\n`;
+      message += ` 2. Angsuran per bulannya kira-kira berapa?\n`;
+      message += ` 3. Syarat dokumennya apa aja yang perlu disiapkan?\n\n`;
+    }
+
+    message += `Ditunggu kabarnya ya. Terima kasih.`;
+    return encodeURIComponent(message);
+  };
+
+  const handleEstimasiPembiayaanClick = () => {
+    if (!selectedTenor && product.status !== "Terjual") {
+      toast.error("Silakan pilih tenor terlebih dahulu.", {
+        className: "custom-toast",
+      });
+
+      const tenorSection = document.getElementById(
+        "estimasi-pembiayaan-section"
+      );
+      if (tenorSection) {
+        tenorSection.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return;
+    }
+    const message = generateWhatsAppMessage(true);
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
+  };
+
+  const handleCekSekarangClick = () => {
+    const message = generateWhatsAppMessage(false);
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
+  };
+
+  const handleChatAdminForSoldUnit = () => {
+    let message = `Halo Kak, saya melihat unit *${product.carName}* di website MukrindoMotor.id sudah terjual.\n\n`;
+    message += `Apakah ada unit lain yang serupa atau rekomendasi lainnya yang tersedia?\n\n`;
+    message += `Link Produk yang terjual: ${window.location.href}\n\n`;
+    message += `Terima kasih.`;
+    const encodedMessage = encodeURIComponent(message);
+    window.open(
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`,
+      "_blank"
+    );
+  };
+
+  const handleNotifyMeClick = () => {
+    const notifyFormSection = document.getElementById("notify-me-form-section");
+    if (notifyFormSection) {
+      notifyFormSection.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
+  const tenorOptions = [
+    { id: "5y", label: "5 Tahun", value: 5 },
+    { id: "4y", label: "4 Tahun", value: 4 },
+    { id: "3y", label: "3 Tahun", value: 3 },
+  ];
+
   return (
-    <div className="p-4 md:p-8 rounded-t-3xl md:rounded-3xl border-t-4 border-t-orange-500 border-b border-gray-300 md:border-none md:shadow-md bg-white">
-      <div className="flex justify-between w-full gap-10 mb-4">
-        <h1 className="text-lg font-semibold text-gray-700">
-          {product.carName}
-        </h1>
-
-        <div
-          className="block md:hidden"
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleBookmark(product._id);
-          }}
-        >
-          <Heart
-            className={`w-6 h-6 mt-1 ${
-              liked ? "text-red-500 fill-red-500" : "text-gray-700 fill-none"
-            }`}
-          />
+    <>
+      <div
+        ref={pricingInfoRef}
+        className="p-4 md:p-8 rounded-t-3xl md:rounded-3xl border-t-4 border-t-orange-500 border-b border-gray-300 md:border-none md:shadow-md bg-white"
+      >
+        <div className="flex justify-between w-full gap-10 mb-4">
+          <h1 className="text-lg font-semibold text-gray-700">
+            {product.carName}
+          </h1>
+          <div
+            className="block md:hidden"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleBookmark(product._id);
+            }}
+          >
+            <Heart
+              className={`w-6 h-6 mt-1 ${
+                liked ? "text-red-500 fill-red-500" : "text-gray-700 fill-none"
+              } ${product.status === "Terjual" ? "hidden" : ""}`}
+            />
+          </div>
         </div>
+
+        <div className="flex items-center text-xs md:text-sm text-gray-600 space-x-2 border-b border-gray-300 pb-4">
+          <span> {product.travelDistance.toLocaleString("id-ID")} KM</span>
+          <span className="text-gray-300">|</span>
+          <span>{product.transmission}</span>
+          <span className="text-gray-300">|</span>
+          <span>{product.plateNumber}</span>{" "}
+          <span className="text-gray-300">|</span>
+          <div className="flex items-center col-span-2">
+            <FaMapMarkerAlt className="mr-1 md:mr-2 w-4 h-4 text-gray-500" />{" "}
+            Tangerang Selatan
+          </div>
+        </div>
+
+        <div className="mt-2">
+          <p className="text-xl font-semibold text-orange-600">
+            Rp {product.price.toLocaleString("id-ID")}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            *Harga diatas merupakan harga cash.
+            {product.status !== "Terjual" &&
+              " Untuk perhitungan kredit dapat menghubungi kami melalui estimasi pembiayaan."}
+          </p>
+        </div>
+
+        {product.status === "Terjual" ? (
+          <div>
+            <div className="mt-6 mb-2 flex flex-col items-center justify-center text-center p-8 bg-gray-100 rounded-xl">
+              <FaShoppingBag className="w-10 h-10 text-gray-500 mb-3" />
+              <p className="text-lg font-semibold text-gray-600">
+                Unit Telah Terjual
+              </p>
+              <p className="text-sm text-gray-500 mt-1 md:px-2 text-center">
+                Mohon maaf, unit ini sudah tidak tersedia. Anda dapat
+                menghubungi admin kami untuk menanyakan unit serupa atau mengisi
+                form notifikasi.
+              </p>
+            </div>
+            <div className="mt-6 flex flex-col md:flex-row gap-3 w-full mx-auto">
+              <button
+                onClick={handleChatAdminForSoldUnit}
+                className="flex items-center justify-center gap-2 py-3.5 border border-green-600 text-green-600 
+                rounded-full hover:bg-green-50 transition duration-200 cursor-pointer w-full text-sm"
+              >
+                <FaWhatsapp className="w-5 h-5" />
+                <span>Chat Admin</span>
+              </button>
+              <button
+                onClick={handleNotifyMeClick}
+                className="flex items-center justify-center gap-2 p py-4 text-white rounded-full
+                bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out cursor-pointer w-full text-sm"
+              >
+                <FaBell className="w-4 h-4" />
+                <span>Beritahu Saya</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div
+              id="estimasi-pembiayaan-section"
+              className="mt-4 p-4 bg-orange-50 rounded-xl"
+            >
+              <h2 className="text-md text-gray-700 mb-2">
+                Estimasi Pembiayaan
+              </h2>
+              <div className="flex flex-col space-y-0 justify-between text-sm mb-1 p-3 bg-white rounded-lg shadow-sm">
+                {tenorOptions.map((option, index) => (
+                  <div
+                    key={option.id}
+                    onClick={() => setSelectedTenor(option.value)}
+                    className={`flex items-center justify-between py-3 px-2 rounded-md cursor-pointer transition-colors group
+                        ${
+                          selectedTenor === option.value
+                            ? ""
+                            : "hover:bg-gray-50"
+                        } 
+                        ${
+                          index < tenorOptions.length - 1
+                            ? "border-b border-gray-200"
+                            : ""
+                        }`}
+                  >
+                    <div className="flex items-center">
+                      <div
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mr-3 transition-all
+                              ${
+                                selectedTenor === option.value
+                                  ? "border-orange-500 bg-orange-500"
+                                  : "border-gray-300 group-hover:border-gray-400"
+                              }`}
+                      >
+                        {selectedTenor === option.value && (
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        )}
+                      </div>
+                      <p
+                        className={`text-gray-500 ${
+                          selectedTenor === option.value
+                            ? "font-semibold text-orange-600"
+                            : "group-hover:text-gray-800 group-hover:font-medium"
+                        }`}
+                      >
+                        Tenor
+                      </p>
+                    </div>
+                    <p
+                      className={`text-gray-500 ${
+                        selectedTenor === option.value
+                          ? "text-orange-600 font-semibold"
+                          : "group-hover:text-gray-800 group-hover:font-medium"
+                      }`}
+                    >
+                      {option.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mb-4">
+                *Hitung estimasi pembiayaan dengan memilih tenor yang anda
+                inginkan lalu klik tombol dibawah ini untuk melakukan peritungan
+              </p>
+              <button
+                onClick={handleEstimasiPembiayaanClick}
+                className="flex items-center justify-center gap-2 py-3 text-white rounded-full
+               bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out cursor-pointer w-3/4 md:w-3/5 mb-1 mx-auto"
+              >
+                <Calculator className="w-5 h-5" />
+                <span className="text-sm">Estimasi Pembiayaan</span>
+              </button>
+            </div>
+            <div className="mt-4 flex flex-col lg:flex-row gap-3 w-full">
+              <button
+                onClick={handleTradeInClick}
+                className="flex items-center justify-center gap-2 py-3.5 border border-orange-600 text-orange-600 
+                rounded-full hover:bg-orange-50 transition duration-200 cursor-pointer w-full"
+              >
+                <RefreshCw className="w-5 h-5" />
+                <span className="text-sm">Tukar Tambah</span>
+              </button>
+              <button
+                onClick={handleCekSekarangClick}
+                className="flex items-center justify-center gap-2 py-4 text-white rounded-full
+               bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out cursor-pointer w-full"
+              >
+                <span className="text-sm">Cek Sekarang</span>
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
-      <div className="flex items-center text-sm text-gray-600 space-x-2 border-b border-gray-300 pb-4">
-        <span> {product.travelDistance.toLocaleString("id-ID")} KM</span>
-        <span className="text-gray-300">|</span>
-        <span>{product.transmission}</span>
-        <span className="text-gray-300">|</span>
-        <span>{product.plateNumber}</span>
-      </div>
+      {/* Sticky Bottom Bar for Mobile */}
+      <div
+        className={`
+          fixed bottom-0 left-0 right-0 z-30 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] px-4 py-3 rounded-t-3xl
+          flex items-center justify-between md:hidden
+          transition-transform duration-300 ease-in-out
+          ${showStickyBar ? "translate-y-0" : "translate-y-full"}
+        `}
+      >
+        {product.status === "Terjual" ? (
+          <div className="flex gap-3 w-full">
+            <button
+              onClick={handleChatAdminForSoldUnit}
+              className="flex-1 flex items-center justify-center gap-2 py-3 border border-green-600 text-green-600 
+              rounded-full hover:bg-green-50 transition duration-200 cursor-pointer text-sm"
+            >
+              <FaWhatsapp className="w-4 h-4" />
+              <span>Chat Admin</span>
+            </button>
+            <button
+              onClick={handleNotifyMeClick}
+              className="flex-1 flex items-center justify-center gap-2 py-3 text-white rounded-full
+              bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out cursor-pointer text-sm"
+            >
+              <FaBell className="w-3.5 h-3.5" />
+              <span>Beritahu Saya</span>
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 w-full">
+            <div className="flex-1">
+              <p className="text-md font-semibold text-orange-600 truncate">
+                Rp {product.price.toLocaleString("id-ID")}
+              </p>
+              {selectedTenor && (
+                <p className="text-xs text-gray-500">
+                  Tenor{" "}
+                  {
+                    tenorOptions.find((opt) => opt.value === selectedTenor)
+                      ?.label
+                  }
+                </p>
+              )}
+            </div>
 
-      {/* Harga */}
-      <div className="mt-2">
-        <p className="text-xl font-semibold text-orange-600">
-          Rp {product.price.toLocaleString("id-ID")}
-        </p>
-        <p className="text-xs text-gray-500 mt-1">
-          *Harga diatas merupakan harga cash untuk perhitungan kredit hubungi
-          kami
-        </p>
-      </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleTradeInClick}
+                className="p-3 border border-orange-600 text-orange-600 rounded-full hover:bg-orange-50 transition duration-200"
+                aria-label="Tukar Tambah"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
 
-      <div className="mt-4 flex flex-col lg:flex-row gap-3 w-full">
-        <button
-          onClick={handleTradeInClick}
-          className="flex items-center justify-center gap-2 py-3.5 border border-orange-600 text-orange-600 
-          rounded-full hover:bg-orange-50 transition duration-200 cursor-pointer w-full"
-        >
-          <RefreshCw className="w-5 h-5" />
-          <span className="text-sm">Tukar Tambah</span>
-        </button>
-        <button
-          className="flex items-center justify-center gap-2 py-4 text-white rounded-full
-         bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out cursor-pointer w-full"
-        >
-          <span className="text-sm">Cek Sekarang</span>
-          <ArrowRight className="w-5 h-5" />
-        </button>
+              {selectedTenor ? (
+                <button
+                  onClick={handleEstimasiPembiayaanClick}
+                  className="flex items-center justify-center gap-2 py-3 px-4 text-white rounded-full bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-sm"
+                >
+                  <Calculator className="w-4 h-4" />
+                  <span>Estimasi</span>
+                </button>
+              ) : (
+                <button
+                  onClick={handleCekSekarangClick}
+                  className="flex items-center justify-center gap-2 py-3 px-4 text-white rounded-full bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-sm"
+                >
+                  <span>Cek Sekarang</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 };
 

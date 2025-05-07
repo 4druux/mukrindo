@@ -388,7 +388,7 @@ const ModalRequestDetail = ({
                   <FaEnvelope className="text-gray-600 w-5 h-5 lg:w-6 lg:h-6 flex-shrink-0" />
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Email</p>
-                    <span className="text-gray-900 font-medium text-sm">
+                    <span className="text-gray-900 font-medium text-sm break-words">
                       {requestData.customerEmail}
                     </span>
                   </div>

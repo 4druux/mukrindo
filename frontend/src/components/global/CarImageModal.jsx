@@ -129,7 +129,7 @@ const CarImageModal = ({
               <div
                 className={`relative w-full h-[50px] md:h-[90px] cursor-pointer ${
                   modalActiveIndex === index
-                    ? "border-b-3 md:border-b-4 border-orange-500"
+                    ? "border-b-3 md:border-b-4 border-orange-500 rounded-lg"
                     : "border border-transparent"
                 }`}
               >

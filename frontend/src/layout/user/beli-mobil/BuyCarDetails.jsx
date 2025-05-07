@@ -139,7 +139,7 @@ const BuyCarDetails = ({ productId }) => {
             isAdminRoute={false}
           />
         </div>
-        <div className="xl:w-1/2 xl:sticky xl:top-24 self-start w-full">
+        <div className="w-full xl:w-1/2">
           <CarPricingInfo product={product} />
         </div>
       </div>
