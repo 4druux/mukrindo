@@ -368,7 +368,8 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
 
         <button
           onClick={handleApplyFilters}
-          className="flex items-center justify-center gap-2 py-2.5 bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-white rounded-full
+          className="flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-orange-400 to-orange-600 
+          hover:bg-orange-600 hover:from-transparent hover:to-transparent text-white rounded-full
           cursor-pointer w-full"
         >
           <span className="text-sm">Tampilkan Mobil</span>

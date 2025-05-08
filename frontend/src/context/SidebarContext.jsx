@@ -1,12 +1,6 @@
 // SidebarContext.js
 "use client";
-import  {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useMemo,
-} from "react";
+import { createContext, useContext, useState, useEffect, useMemo } from "react";
 
 const SidebarContext = createContext(undefined);
 
@@ -70,6 +64,7 @@ export const SidebarProvider = ({ children }) => {
       toggleSubmenu,
       searchQuery,
       setSearchQuery,
+      setIsMobileOpen,
     }),
     [
       isExpanded,
@@ -80,7 +75,7 @@ export const SidebarProvider = ({ children }) => {
       openSubmenu,
       searchQuery,
     ]
-  ); // searchQuery sebagai dependensi
+  );
 
   return (
     <SidebarContext.Provider value={contextValue}>

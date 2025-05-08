@@ -257,31 +257,28 @@ const AllProducts = () => {
   ];
 
   return (
-    <div className="">
+    <div className="my-6 md:my-0">
       <BreadcrumbNav items={breadcrumbItems} />
 
-      <h1 className="mb-4 text-xl font-medium">Produk Manajemen</h1>
-      <div className="mb-4 flex flex-col-reverse lg:flex-row lg:justify-between lg:items-end ">
-        <h1 className="text-sm lg:text-lg font-medium text-gray-700 ">
-          {" "}
+      <div className="flex items-end justify-end px-3 md:px-0">
+        <button
+          onClick={() => router.push("/admin/produk/tambah-produk")}
+          className="flex items-start space-x-1 px-3 py-1 lg:px-4 lg:py-2 rounded-full border border-orange-500 bg-orange-100
+             hover:bg-gradient-to-r from-orange-400 to-orange-600 hover:text-white text-orange-500 font-medium
+            cursor-pointer transition-colors mb-4 lg:mb-0"
+        >
+          <Plus className="w-4 md:w-5" />
+          <span className="text-xs md:text-sm mt-1">Tambah Produk</span>
+        </button>
+      </div>
+
+      <div className="mb-4">
+        <h1 className="text-md lg:text-lg font-medium text-gray-700 px-3 md:px-0">
           {searchQuery
             ? `Hasil pencarian untuk "${searchQuery}"`
             : "Menampilkan"}
           {!loading && ` ${processedProducts.length} Produk Mobil`}
         </h1>
-
-        <div className="flex items-end justify-end">
-          <button
-            onClick={() => router.push("/admin/produk/tambah-produk")}
-            className="flex items-center space-x-1 px-3 py-1 lg:px-4 lg:py-2 rounded-full border border-orange-500 bg-orange-100 hover:bg-orange-500
-          cursor-pointer transition-colors mb-4 lg:mb-0 group"
-          >
-            <Plus className="text-orange-500 group-hover:text-white w-4 md:w-5" />
-            <span className="text-xs md:text-sm mt-1 text-orange-500 group-hover:text-white">
-              Tambah Produk
-            </span>
-          </button>
-        </div>
       </div>
 
       {!loading && searchQuery && (
@@ -360,6 +357,7 @@ const AllProducts = () => {
           onSuggestionClick={() =>
             suggestedQuery && setSearchQuery(suggestedQuery)
           }
+          isAdminRoute={true}
         />
       )}
     </div>

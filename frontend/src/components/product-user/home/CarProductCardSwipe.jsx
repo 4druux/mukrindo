@@ -22,6 +22,7 @@ const CarProductCardSwipe = ({
   skeletonCount = 6,
   emptyMessage = "Tidak ada produk mobil yang ditemukan.",
   onProductClick = () => {},
+  isBuyCarRoute = false,
 }) => {
   if (error) {
     console.error("Error loading products:", error);
@@ -31,7 +32,11 @@ const CarProductCardSwipe = ({
 
   return (
     <div
-      className="flex space-x-4 px-3 md:px-1 overflow-x-auto md:space-x-0 md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-3 xl:grid-cols-4 mt-4 pb-4 md:pb-8"
+      className={`flex space-x-4 overflow-x-auto md:grid md:gap-4 md:space-x-0 mt-4 pb-4 md:pb-8 px-3 md:px-2 ${
+        isBuyCarRoute
+          ? "md:grid-cols-2 lg:grid-cols-3"
+          : "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      }`}
       style={{ scrollbarWidth: "none" }}
     >
       {loading

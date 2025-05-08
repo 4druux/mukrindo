@@ -388,6 +388,7 @@ const EditProduct = ({ productId }) => {
       toast.error("Tidak ada perubahan data untuk disimpan.", {
         className: "custom-toast",
       });
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
@@ -488,8 +489,11 @@ const EditProduct = ({ productId }) => {
     <div>
       <BreadcrumbNav items={breadcrumbItems} />
 
-      <div className="p-6 rounded-xl shadow-lg bg-white">
-        <h2 className="text-xl font-medium mb-4">Edit Produk Mobil</h2>
+      <div className="p-4 md:p-6 rounded-xl shadow-lg bg-white">
+        <h1 className="text-lg lg:text-xl font-medium text-gray-700 mb-2 md:mb-4">
+          Edit Produk Mobil
+        </h1>
+
         {submitError && <div className="text-red-500 mb-4">{submitError}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -686,17 +690,17 @@ const EditProduct = ({ productId }) => {
               type="button"
               onClick={() => router.back()}
               className="cursor-pointer border text-orange-600 border-orange-500 hover:bg-orange-100 hover:border-orange-500 
-              hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
+              hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full"
               disabled={loadingUpdate}
             >
               Kembali
             </button>
             <button
               type="submit"
-              className={`text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline transition duration-300 ease-in-out ${
+              className={`text-white text-sm font-medium py-2.5 px-6 rounded-full ${
                 loadingUpdate
                   ? "bg-orange-500 opacity-55 cursor-not-allowed"
-                  : "bg-orange-500 hover:bg-orange-600  cursor-pointer"
+                  : "bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 hover:from-transparent hover:to-transparent cursor-pointer"
               }`}
               disabled={loadingUpdate}
             >

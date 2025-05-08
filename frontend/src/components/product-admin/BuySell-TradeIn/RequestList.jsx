@@ -36,7 +36,7 @@ const RequestList = ({
   };
 
   return (
-    <div className="lg:p-6 rounded-xl lg:shadow-lg lg:bg-white px-2">
+    <div className="lg:p-6 rounded-xl lg:shadow-lg lg:bg-white">
       {/* Mobile View */}
       <div className="space-y-4 lg:space-y-0 lg:hidden">
         {requests.map((request) => {
@@ -46,7 +46,7 @@ const RequestList = ({
           return (
             <div
               key={request._id}
-              className="bg-white border border-gray-200 rounded-2xl shadow-md p-4 cursor-pointer hover:bg-blue-50 transition-colors duration-150 ease-in-out"
+              className="bg-white border border-gray-200 md:rounded-2xl md:shadow-md p-4 cursor-pointer hover:bg-blue-50 transition-colors duration-150 ease-in-out"
               onClick={() => onRowClick(request._id)}
             >
               <div className="flex justify-between items-start mb-2">

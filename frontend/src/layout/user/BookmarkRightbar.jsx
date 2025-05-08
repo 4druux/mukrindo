@@ -21,7 +21,7 @@ const BookmarkRightbar = () => {
 
   useEffect(() => {
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      setIsMobile(window.innerWidth <= 760);
     };
     checkIsMobile();
     window.addEventListener("resize", checkIsMobile);

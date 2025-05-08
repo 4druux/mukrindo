@@ -135,7 +135,8 @@ const BuyForm = ({
           Mukrindo.id
         </p>
         <button
-          className="w-full md:flex-1 rounded-full py-3 text-sm text-white font-medium bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out cursor-pointer"
+          className="w-full md:flex-1 rounded-full py-3 text-sm text-white font-medium bg-gradient-to-r from-orange-400 to-orange-600 
+            hover:bg-orange-600 hover:from-transparent hover:to-transparent cursor-pointer"
           type="button"
           onClick={handleSearchCar} // Use the local handler
         >

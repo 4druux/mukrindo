@@ -18,7 +18,7 @@ const AppHeader = () => {
   const router = useRouter();
 
   const handleMainToggle = () => {
-    if (window.innerWidth >= 991) {
+    if (window.innerWidth >= 1115) {
       toggleSidebar();
     } else {
       toggleMobileSidebar();

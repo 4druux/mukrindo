@@ -7,7 +7,7 @@ import { ChevronsLeft, ChevronsRight } from "lucide-react";
 
 const Pagination = ({ pageCount, currentPage, onPageChange }) => {
   return (
-    <div className="flex justify-center mt-8">
+    <div className="flex justify-center mt-4 md:mt-8">
       <ReactPaginate
         previousLabel={
           <div

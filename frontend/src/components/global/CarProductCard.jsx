@@ -27,7 +27,6 @@ const CarProductCard = ({
   loading,
   error,
   isAdminRoute = false,
-  BuyCarRoute = false,
   skeletonCount = isAdminRoute ? 8 : 6,
   emptyMessage = "Tidak ada produk mobil yang ditemukan.",
   handleStatusChange = () => {},
@@ -47,7 +46,7 @@ const CarProductCard = ({
     : SkeletonAllProductUser;
 
   const gridClass = isAdminRoute
-    ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4"
+    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4 px-3 md:px-0"
     : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 px-3 md:px-0";
 
   return (
@@ -167,10 +166,10 @@ const CarProductCard = ({
                         </div>
                         <span
                           className="absolute left-3 -translate-x-1/2 top-full mt-2
-                   whitespace-nowrap rounded-lg bg-black/50 px-2 py-1 text-xs text-white
-                   opacity-0 group-hover:opacity-100 transition-opacity duration-300
-                   invisible group-hover:visible
-                   pointer-events-none z-20"
+                          whitespace-nowrap rounded-lg bg-black/50 px-2 py-1 text-xs text-white
+                          opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                          invisible group-hover:visible
+                          pointer-events-none z-20"
                         >
                           Bookmark
                         </span>
@@ -182,7 +181,9 @@ const CarProductCard = ({
                 {isAdminRoute && (
                   <>
                     <div
-                      className="absolute top-2 right-2 z-10"
+                      className={`absolute top-2 right-2 z-10 ${
+                        product.status === "Terjual" ? "hidden" : ""
+                      }`}
                       ref={(el) => (dropdownRefs.current[product._id] = el)}
                     >
                       <button

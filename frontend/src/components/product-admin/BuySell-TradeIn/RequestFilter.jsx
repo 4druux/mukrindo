@@ -167,7 +167,7 @@ const RequestFilter = ({
     const isActive =
       visuallyActiveFilter.type === buttonType &&
       visuallyActiveFilter.value === buttonValue;
-    return `flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors cursor-pointer whitespace-nowrap ${
+    return `flex-shrink-0 px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full transition-colors cursor-pointer whitespace-nowrap ${
       isActive
         ? "bg-orange-100 text-orange-500 border border-orange-500"
         : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
@@ -175,8 +175,12 @@ const RequestFilter = ({
   };
 
   return (
-    <div className="mb-5">
-      <ScrollHorizontal buttonVerticalAlign="top" ref={scrollContainerRef}>
+    <div className="mb-4">
+      <ScrollHorizontal
+        buttonVerticalAlign="top"
+        ref={scrollContainerRef}
+        className="px-3 md:px-0"
+      >
         {filterOptions.map((option) => {
           const buttonKey = `${option.type}-${option.value}`;
           return (

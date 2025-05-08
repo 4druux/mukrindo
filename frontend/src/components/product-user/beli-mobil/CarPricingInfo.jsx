@@ -192,8 +192,8 @@ const CarPricingInfo = ({ product }) => {
               </p>
               <p className="text-sm text-gray-500 mt-1 md:px-2 text-center">
                 Mohon maaf, unit ini sudah tidak tersedia. Anda dapat
-                menghubungi admin kami untuk menanyakan unit serupa atau mengisi
-                form notifikasi.
+                menghubungi admin kami untuk unit serupa atau mengisi form
+                beritahu saya untuk informasi lebih lanjut.
               </p>
             </div>
             <div className="mt-6 flex flex-col md:flex-row gap-3 w-full mx-auto">
@@ -207,8 +207,9 @@ const CarPricingInfo = ({ product }) => {
               </button>
               <button
                 onClick={handleNotifyMeClick}
-                className="flex items-center justify-center gap-2 p py-4 text-white rounded-full
-                bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out cursor-pointer w-full text-sm"
+                className="flex items-center justify-center gap-2 py-4 text-white rounded-full
+                bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 hover:from-transparent 
+                hover:to-transparent cursor-pointer w-full text-sm"
               >
                 <FaBell className="w-4 h-4" />
                 <span>Beritahu Saya</span>
@@ -283,7 +284,8 @@ const CarPricingInfo = ({ product }) => {
               <button
                 onClick={handleEstimasiPembiayaanClick}
                 className="flex items-center justify-center gap-2 py-3 text-white rounded-full
-               bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out cursor-pointer w-3/4 md:w-3/5 mb-1 mx-auto"
+               bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 hover:from-transparent 
+               hover:to-transparent cursor-pointer w-3/4 md:w-3/5 mb-1 mx-auto"
               >
                 <Calculator className="w-5 h-5" />
                 <span className="text-sm">Estimasi Pembiayaan</span>
@@ -301,7 +303,8 @@ const CarPricingInfo = ({ product }) => {
               <button
                 onClick={handleCekSekarangClick}
                 className="flex items-center justify-center gap-2 py-4 text-white rounded-full
-               bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out cursor-pointer w-full"
+               bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 hover:from-transparent 
+                hover:to-transparent cursor-pointer w-full"
               >
                 <span className="text-sm">Cek Sekarang</span>
                 <ArrowRight className="w-5 h-5" />
@@ -333,7 +336,8 @@ const CarPricingInfo = ({ product }) => {
             <button
               onClick={handleNotifyMeClick}
               className="flex-1 flex items-center justify-center gap-2 py-3 text-white rounded-full
-              bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out cursor-pointer text-sm"
+              bg-gradient-to-r from-orange-400 to-orange-600 
+          hover:bg-orange-600 hover:from-transparent hover:to-transparent cursor-pointer text-sm"
             >
               <FaBell className="w-3.5 h-3.5" />
               <span>Beritahu Saya</span>
@@ -368,7 +372,8 @@ const CarPricingInfo = ({ product }) => {
               {selectedTenor ? (
                 <button
                   onClick={handleEstimasiPembiayaanClick}
-                  className="flex items-center justify-center gap-2 py-3 px-4 text-white rounded-full bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-sm"
+                  className="flex items-center justify-center gap-2 py-3 px-4 text-white rounded-full bg-gradient-to-r from-orange-400 to-orange-600 
+          hover:bg-orange-600 hover:from-transparent hover:to-transparent text-sm"
                 >
                   <Calculator className="w-4 h-4" />
                   <span>Estimasi</span>
@@ -376,7 +381,8 @@ const CarPricingInfo = ({ product }) => {
               ) : (
                 <button
                   onClick={handleCekSekarangClick}
-                  className="flex items-center justify-center gap-2 py-3 px-4 text-white rounded-full bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-sm"
+                  className="flex items-center justify-center gap-2 py-3 px-4 text-white rounded-full bg-gradient-to-r from-orange-400 to-orange-600 
+          hover:bg-orange-600 hover:from-transparent hover:to-transparent text-sm"
                 >
                   <span>Cek Sekarang</span>
                   <ArrowRight className="w-4 h-4" />

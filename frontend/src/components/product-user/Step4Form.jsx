@@ -207,7 +207,7 @@ const Step4Form = ({
                 href="/syarat-ketentuan"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-orange-600 hover:underline font-medium"
+                className="text-orange-500 hover:text-orange-600 hover:underline font-medium"
               >
                 Syarat dan Ketentuan
               </a>{" "}
@@ -216,7 +216,7 @@ const Step4Form = ({
                 href="/kebijakan-privasi"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-orange-600 hover:underline font-medium"
+                className="text-orange-500 hover:text-orange-600 hover:underline font-medium"
               >
                 Kebijakan Privasi
               </a>{" "}
@@ -241,9 +241,10 @@ const Step4Form = ({
             type="button"
             onClick={onSubmit}
             disabled={isLoading}
-            className={`cursor-pointer bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline ${
-              isLoading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`cursor-pointer bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 hover:from-transparent 
+              hover:to-transparent text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline ${
+                isLoading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
           >
             Tukar Sekarang
           </button>

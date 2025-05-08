@@ -20,7 +20,8 @@ import { AnimatePresence, motion } from "framer-motion";
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";
 const MAX_VIEWED_ITEMS = 10;
 const PRODUCTS_PER_PAGE = 12;
- 
+const MAX_FILTER_RECOMMENDATIONS = 9;
+
 const getRecentlyViewed = () => {
   if (typeof window === "undefined") return [];
   const items = localStorage.getItem(VIEWED_PRODUCTS_KEY);
@@ -50,12 +51,30 @@ const BuyCar = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isMobileSearchFiltersOpen, setIsMobileSearchFiltersOpen] =
     useState(false);
+  const [filterBasedRecommendations, setFilterBasedRecommendations] = useState(
+    []
+  );
 
   useEffect(() => {
     setRecentlyViewed(getRecentlyViewed());
   }, []);
 
-  const searchQuery = searchParams.get("search") || "";
+  const searchQuery = useMemo(
+    () => searchParams.get("search") || "",
+    [searchParams]
+  );
+  const sBrand = useMemo(() => searchParams.get("brand"), [searchParams]);
+  const sModel = useMemo(() => searchParams.get("model"), [searchParams]);
+  const sType = useMemo(() => searchParams.get("type"), [searchParams]);
+  const sTransmission = useMemo(
+    () => searchParams.get("transmission"),
+    [searchParams]
+  );
+  const sFuelType = useMemo(() => searchParams.get("fuelType"), [searchParams]);
+  const sYearMin = useMemo(() => searchParams.get("yearMin"), [searchParams]);
+  const sYearMax = useMemo(() => searchParams.get("yearMax"), [searchParams]);
+  const sPriceMin = useMemo(() => searchParams.get("priceMin"), [searchParams]);
+  const sPriceMax = useMemo(() => searchParams.get("priceMax"), [searchParams]);
 
   const { processedProducts, suggestedQuery, activeFilter, setActiveFilter } =
     useFilterAndSuggest({
@@ -209,24 +228,35 @@ const BuyCar = () => {
 
   // --- Pesan Jika Kosong ---
   const isAnyFilterActive = useMemo(() => {
-    const params = new URLSearchParams(searchParams);
     const hasUrlFilter = [
-      "brand",
-      "model",
-      "type",
-      "transmission",
-      "fuelType",
-      "yearMin",
-      "yearMax",
-      "priceMin",
-      "priceMax",
-    ].some((key) => params.has(key));
+      sBrand,
+      sModel,
+      sType,
+      sTransmission,
+      sFuelType,
+      sYearMin,
+      sYearMax,
+      sPriceMin,
+      sPriceMax,
+    ].some((val) => val !== null && val !== undefined && val !== "");
 
     const isShortProductFilterActive = activeFilter !== SHORT_BY.RECOMMENDATION;
     return hasUrlFilter || isShortProductFilterActive;
-  }, [searchParams, activeFilter]);
+  }, [
+    sBrand,
+    sModel,
+    sType,
+    sTransmission,
+    sFuelType,
+    sYearMin,
+    sYearMax,
+    sPriceMin,
+    sPriceMax,
+    activeFilter,
+  ]);
 
   let emptyMessage = "Belum ada produk mobil tersedia.";
+
   if (searchQuery) {
     emptyMessage = `Tidak ada produk mobil yang cocok dengan pencarian "${searchQuery}".`;
     if (isAnyFilterActive) {
@@ -235,6 +265,92 @@ const BuyCar = () => {
   } else if (isAnyFilterActive) {
     emptyMessage = `Tidak ada produk mobil yang cocok dengan filter yang dipilih.`;
   }
+
+  useEffect(() => {
+    let brandForRecommendation = null;
+    let modelForRecommendation = null;
+    let shouldAttemptRecommendation = false;
+
+    if (processedProducts.length === 0 && !loading) {
+      if (searchQuery && splitSearchFilter.brand) {
+        brandForRecommendation = splitSearchFilter.brand.toLowerCase();
+        modelForRecommendation = splitSearchFilter.modelQuery
+          ? splitSearchFilter.modelQuery.toLowerCase()
+          : null;
+        shouldAttemptRecommendation = true;
+      } else if (!searchQuery && isAnyFilterActive) {
+        if (sBrand) {
+          brandForRecommendation = sBrand.toLowerCase();
+          modelForRecommendation = sModel ? sModel.toLowerCase() : null;
+          shouldAttemptRecommendation = true;
+        }
+      }
+    }
+
+    if (shouldAttemptRecommendation && brandForRecommendation) {
+      const allAvailableProducts = products || [];
+      let potentialRecommendations = [];
+
+      const brandMatches = allAvailableProducts.filter(
+        (p) => p.brand && p.brand.toLowerCase() === brandForRecommendation
+      );
+
+      if (modelForRecommendation && brandMatches.length > 0) {
+        let modelMatches = brandMatches.filter(
+          (p) => p.model && p.model.toLowerCase() === modelForRecommendation
+        );
+
+        if (modelMatches.length > 0) {
+          potentialRecommendations = modelMatches;
+        } else {
+          modelMatches = brandMatches.filter(
+            (p) =>
+              p.model && p.model.toLowerCase().includes(modelForRecommendation)
+          );
+          if (modelMatches.length > 0) {
+            potentialRecommendations = modelMatches;
+          } else {
+            potentialRecommendations = brandMatches;
+          }
+        }
+      } else {
+        potentialRecommendations = brandMatches;
+      }
+
+      const newRecommendations = potentialRecommendations.slice(
+        0,
+        MAX_FILTER_RECOMMENDATIONS
+      );
+
+      if (
+        JSON.stringify(newRecommendations) !==
+        JSON.stringify(filterBasedRecommendations)
+      ) {
+        setFilterBasedRecommendations(newRecommendations);
+      }
+    } else {
+      if (filterBasedRecommendations.length > 0) {
+        setFilterBasedRecommendations([]);
+      }
+    }
+  }, [
+    processedProducts,
+    loading,
+    searchQuery,
+    splitSearchFilter,
+    isAnyFilterActive,
+    sBrand,
+    sModel,
+    products,
+    filterBasedRecommendations,
+  ]);
+
+  const shouldShowFilterRecsProp =
+    processedProducts.length === 0 &&
+    !loading &&
+    ((searchQuery && splitSearchFilter.brand) ||
+      (!searchQuery && isAnyFilterActive)) &&
+    filterBasedRecommendations.length > 0;
 
   const handleClearAllFilters = () => {
     router.push("/beli");
@@ -283,20 +399,13 @@ const BuyCar = () => {
   const handleSortChange = (newSortValue) => {
     const currentParams = new URLSearchParams(searchParams.toString());
     currentParams.set("sort", newSortValue);
-    // Hapus parameter filter harga spesifik jika memilih sort non-harga
     if (
       newSortValue !== SHORT_BY.PRICE_UNDER_150 &&
       newSortValue !== SHORT_BY.PRICE_BETWEEN_150_300 &&
       newSortValue !== SHORT_BY.PRICE_OVER_300
-    ) {
-      // Opsional: Anda bisa memilih untuk menghapus filter harga lain saat sort diubah
-      // currentParams.delete('priceMin');
-      // currentParams.delete('priceMax');
-    }
-    // Reset halaman ke 0 saat filter/sort berubah
-    // currentParams.delete('page'); // Jika Anda menggunakan param 'page'
-    setCurrentPage(0); // Reset state halaman internal
-    router.push(`/beli?${currentParams.toString()}`, { scroll: false }); // Gunakan scroll: false agar tidak loncat ke atas halaman
+    )
+      setCurrentPage(0);
+    router.push(`/beli?${currentParams.toString()}`, { scroll: false });
   };
 
   useEffect(() => {
@@ -336,7 +445,7 @@ const BuyCar = () => {
 
         <div className="xl:w-3/4 w-full">
           <BreadcrumbNav items={breadcrumbItems} />
-          <h1 className="text-md lg:text-xl font-medium text-gray-700 mb-2 lg:mb-4 px-3 md:px-0">
+          <h1 className="text-md lg:text-lg font-medium text-gray-700 mb-2 lg:mb-4 px-3 md:px-0">
             {searchQuery
               ? `Hasil pencarian untuk "${searchQuery}"`
               : "Menampilkan"}
@@ -372,11 +481,12 @@ const BuyCar = () => {
               </p>
             )}
 
-          {/* ShortProduct (Filter Cepat) */}
-          <ShortProduct
-            activeFilter={activeFilter}
-            onSortChange={handleSortChange}
-          />
+          {processedProducts.length > 0 && (
+            <ShortProduct
+              activeFilter={activeFilter}
+              onSortChange={handleSortChange}
+            />
+          )}
 
           <CarProductCard
             products={currentProducts}
@@ -406,13 +516,10 @@ const BuyCar = () => {
           {processedProducts.length === 0 && !loading && (
             <EmptyProductDisplay
               emptyMessage={emptyMessage}
-              suggestedQuery={suggestedQuery}
-              searchQuery={searchQuery}
-              suggestionLinkHref={
-                suggestedQuery
-                  ? `/beli?search=${encodeURIComponent(suggestedQuery)}`
-                  : null
-              }
+              showFilterRecommendations={shouldShowFilterRecsProp}
+              filterRecommendations={filterBasedRecommendations}
+              onProductClick={handleProductClick}
+              isAdminRoute={false}
             />
           )}
         </div>
@@ -421,7 +528,7 @@ const BuyCar = () => {
       {!isMobileSearchFiltersOpen && (
         <button
           onClick={() => setIsMobileSearchFiltersOpen(true)}
-          className="xl:hidden fixed bottom-30 -left-1 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-4 py-2 rounded-r-full shadow-lg z-40 flex items-center gap-2 hover:from-orange-600 hover:to-orange-700 transition-all duration-300" // Sedikit penyesuaian style
+          className="xl:hidden fixed bottom-30 -left-1 bg-gradient-to-r from-orange-300 to-orange-600 text-white px-4 py-2 rounded-r-full shadow-lg z-40 flex items-center gap-2 hover:from-orange-600 hover:to-orange-700 transition-all duration-300" // Sedikit penyesuaian style
           aria-label="Buka Filter"
         >
           <Filter className="w-4 h-4" />

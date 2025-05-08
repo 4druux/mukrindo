@@ -16,7 +16,12 @@ const CarShopPage = () => {
         <div className="space-y-4 md:space-y-16 mt-4 md:mt-0">
           <BuyCar />
           <Testimoni />
-          <NotifyMeForm />
+          <div
+            id="notify-me-form-section"
+            className="scroll-mt-20 md:scroll-mt-24"
+          >
+            <NotifyMeForm />
+          </div>
           <BuyAccordion />
         </div>
       </div>

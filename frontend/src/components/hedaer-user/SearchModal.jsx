@@ -46,7 +46,7 @@ const SearchModal = () => {
     );
 
     const topBrandNamesLower = sortedBrandsByViews
-      .slice(0, 5)
+      .slice(0, 10)
       .map(([brandLower]) => brandLower);
 
     const topBrandsOriginalCase = topBrandNamesLower.map((brandLower) => {
@@ -74,7 +74,7 @@ const SearchModal = () => {
       ([, viewsA], [, viewsB]) => viewsB - viewsA
     );
 
-    return sortedCombinations.slice(0, 5).map(([combination]) => combination);
+    return sortedCombinations.slice(0, 10).map(([combination]) => combination);
   }, [products]);
 
   const quickChoices = [

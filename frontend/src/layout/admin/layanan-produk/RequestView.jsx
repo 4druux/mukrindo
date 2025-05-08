@@ -71,11 +71,11 @@ const requestConfigs = {
   notifyMe: {
     apiEndpoint: "http://localhost:5000/api/notifications",
     statusConstants: NOTIFY_STATUS_FILTER,
-    locationConstants: {}, // No location filter for notifyMe
+    locationConstants: {},
     sortConstants: NOTIFY_SORT_ORDER,
     defaultFilters: {
       status: NOTIFY_STATUS_FILTER.ALL,
-      location: null, // No location filter for notifyMe
+      location: null,
       sortBy: NOTIFY_SORT_ORDER.LATEST_CREATED,
     },
     pageTitle: "Permintaan Notifikasi Stok",
@@ -106,11 +106,6 @@ const modalVariants = {
   },
 };
 
-// --- Component Definition ---
-/**
- * Renders a view for managing different types of requests (Trade-In, Buy/Sell, Notify Me)
- * with tabs, filtering, sorting, pagination, and modal details.
- */
 const RequestView = () => {
   const [activeTab, setActiveTab] = useState("tradeIn");
   const [currentPage, setCurrentPage] = useState(0);
@@ -316,7 +311,6 @@ const RequestView = () => {
     }
 
     if (isLoading && currentRequestsData.length > 0) {
-      // Show skeleton even if there's stale data while loading new filter results
       return <SkeletonRequest requestType={config.requestType} />;
     }
 
@@ -405,12 +399,15 @@ const RequestView = () => {
   };
 
   return (
-    <div>
+    <div className="mt-6 md:mt-0">
+      <h1 className="text-lg lg:text-xl font-medium text-gray-700 mb-2 md:mb-4 px-3 md:px-0">
+        Layanan Produk
+      </h1>
       <div className="mb-6">
-        <nav className="flex space-x-4" aria-label="Tabs">
+        <nav className="flex space-x-3 px-3 md:px-0" aria-label="Tabs">
           <button
             onClick={() => handleTabChange("tradeIn")}
-            className={`whitespace-nowrap px-3 py-1.5 border font-medium text-sm cursor-pointer rounded-full shadow-sm ${
+            className={`whitespace-nowrap border px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full shadow-sm cursor-pointer ${
               activeTab === "tradeIn"
                 ? "text-orange-500 bg-orange-100 border-orange-500"
                 : "bg-white text-gray-500 hover:text-gray-700 border-gray-200"
@@ -420,7 +417,7 @@ const RequestView = () => {
           </button>
           <button
             onClick={() => handleTabChange("buySell")}
-            className={`whitespace-nowrap px-3 py-1.5 border font-medium text-sm cursor-pointer rounded-full shadow-sm ${
+            className={`whitespace-nowrap border px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full shadow-sm cursor-pointer ${
               activeTab === "buySell"
                 ? "text-orange-500 bg-orange-100 border-orange-500"
                 : "bg-white text-gray-500 hover:text-gray-700 border-gray-200"
@@ -430,7 +427,7 @@ const RequestView = () => {
           </button>
           <button
             onClick={() => handleTabChange("notifyMe")}
-            className={`whitespace-nowrap px-3 py-1.5 border font-medium text-sm cursor-pointer rounded-full shadow-sm ${
+            className={`whitespace-nowrap border px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full shadow-sm cursor-pointer ${
               activeTab === "notifyMe"
                 ? "text-orange-500 bg-orange-100 border-orange-500"
                 : "bg-white text-gray-500 hover:text-gray-700 border-gray-200"
@@ -441,9 +438,9 @@ const RequestView = () => {
         </nav>
       </div>
 
-      <h2 className="text-sm lg:text-lg leading-6 font-semibold text-gray-700 mb-4">
+      <h1 className="text-md lg:text-lg font-medium text-gray-700 mb-2 md:mb-4 px-3 md:px-0">
         {config.pageTitle}
-      </h2>
+      </h1>
 
       <RequestFilter
         key={activeTab}

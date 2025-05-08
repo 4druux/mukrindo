@@ -7,9 +7,10 @@ export const metadata = {
   description: "Rincian produk mobil.",
 };
 
-export default function CarDetailspage({ params }) {
-  const { slug } = params;
-  const productId = slug.substring(slug.lastIndexOf("-") + 1);
+export default async function CarDetailspage({ params }) {
+  const resolvedParams = await params;
+  const { slug } = resolvedParams;
+    const productId = slug.substring(slug.lastIndexOf("-") + 1);
 
   return (
     <div className="grid grid-cols-1 gap-4 md:gap-6">

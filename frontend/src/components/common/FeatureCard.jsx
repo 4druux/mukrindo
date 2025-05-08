@@ -19,7 +19,7 @@ const FeatureCard = ({
     <a
       href={linkUrl}
       rel="noopener noreferrer"
-      className={`bg-white border-y border-gray-200 md:rounded-2xl md:shadow-md lg:hover:shadow-lg transition-shadow duration-200 h-full flex overflow-hidden ${
+      className={`bg-white border-y border-gray-200 md:rounded-2xl md:shadow-md lg:hover:shadow-lg transition-shadow duration-200 h-full flex overflow-hidden group ${
         hasImage
           ? "flex-col lg:flex-row lg:items-center lg:p-5"
           : "flex-row items-center p-5 gap-4"
@@ -57,7 +57,7 @@ const FeatureCard = ({
 
         <div className="py-4 text-right">
           <span
-            className="text-xs font-semibold text-orange-600 hover:text-orange-500 inline-flex items-center gap-1"
+            className="text-xs font-semibold text-orange-500 group-hover:text-orange-600 group-hover:underline inline-flex items-center gap-1"
             aria-hidden="true"
           >
             Selengkapnya

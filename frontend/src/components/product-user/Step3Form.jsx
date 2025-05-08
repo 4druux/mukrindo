@@ -312,7 +312,8 @@ const Step3Form = ({
           <button
             type="button"
             onClick={isSellRoute ? onSubmit : onNext}
-            className="cursor-pointer bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
+            className="cursor-pointer bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 hover:from-transparent 
+            hover:to-transparent text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
           >
             {isSellRoute ? "Jual Sekarang" : "Selanjutnya"}
           </button>

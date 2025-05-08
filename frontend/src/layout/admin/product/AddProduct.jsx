@@ -355,8 +355,10 @@ const AddProduct = () => {
     <div>
       <BreadcrumbNav items={breadcrumbItems} />
 
-      <div className="p-6 rounded-xl shadow-lg bg-white">
-        <h2 className="text-xl font-medium mb-4">Tambah Produk Mobil</h2>
+      <div className="p-4 md:p-6 rounded-xl shadow-lg bg-white">
+        <h1 className="text-lg lg:text-xl font-medium text-gray-700 mb-2 md:mb-4">
+          Tambah Produk Mobil
+        </h1>
         {submitError && <div className="text-red-500 mb-4">{submitError}</div>}
         {loading && <div className="text-orange-500 mb-4">Menambahkan...</div>}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -567,13 +569,14 @@ const AddProduct = () => {
               type="button"
               onClick={() => router.back("/admin")}
               className="cursor-pointer border text-orange-600 border-orange-500 hover:bg-orange-100 hover:border-orange-500 
-            hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
+            hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full"
             >
               Kembali
             </button>
             <button
               type="submit"
-              className="cursor-pointer bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
+              className="cursor-pointer bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 
+              hover:from-transparent hover:to-transparent text-white text-sm font-medium py-2.5 px-6 rounded-full"
               disabled={loading}
             >
               Tambah Produk

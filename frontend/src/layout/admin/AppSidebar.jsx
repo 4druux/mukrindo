@@ -30,43 +30,25 @@ const navItems = [
       { name: "Layanan Produk", path: "/admin/layanan-produk" },
     ],
   },
-  {
-    name: "Tables",
-    icon: <MdTableChart />,
-    subItems: [{ name: "Basic Tables", path: "/basic-tables" }],
-  },
-  {
-    name: "Pages",
-    icon: <MdDescription />,
-    subItems: [
-      { name: "Blank Page", path: "/blank" },
-      { name: "404 Error", path: "/error-404" },
-    ],
-  },
-];
-
-const othersItems = [
-  {
-    icon: <MdPieChart />,
-    name: "Charts",
-    subItems: [
-      { name: "Line Chart", path: "/line-chart" },
-      { name: "Bar Chart", path: "/bar-chart" },
-    ],
-  },
-  {
-    icon: <MdExtension />,
-    name: "Authentication",
-    subItems: [
-      { name: "Sign In", path: "/sign-in" },
-      { name: "Sign Up", path: "/sign-up" },
-    ],
-  },
 ];
 
 const AppSidebar = () => {
-  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const {
+    isExpanded,
+    isMobileOpen,
+    isHovered,
+    setIsHovered,
+    setIsMobileOpen,
+    isMobile,
+  } = useSidebar();
   const pathname = usePathname();
+
+  useEffect(() => {
+    document.body.style.overflow = isMobileOpen ? "hidden" : "auto";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isMobileOpen]);
 
   const renderMenuItems = (navItems, menuType) => (
     <ul className="flex flex-col gap-4">
@@ -75,14 +57,14 @@ const AppSidebar = () => {
           {nav.subItems ? (
             <button
               onClick={() => handleSubmenuToggle(index, menuType)}
-              className={`relative flex items-center w-full gap-3 px-3 py-2 font-medium text-sm rounded-lg cursor-pointer group ${
+              className={`relative flex items-center w-full gap-3 px-3 py-2 font-medium text-sm rounded-xl cursor-pointer group ${
                 openSubmenu?.type === menuType && openSubmenu?.index === index
                   ? "bg-orange-50 text-orange-500"
                   : "text-neutral-700 hover:bg-neutral-100"
               } ${
                 !isExpanded && !isHovered
-                  ? "lg:justify-center"
-                  : "lg:justify-start"
+                  ? "xl:justify-center"
+                  : "xl:justify-start"
               }`}
             >
               <span
@@ -112,7 +94,7 @@ const AppSidebar = () => {
             nav.path && (
               <Link
                 href={nav.path}
-                className={`relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm ${
+                className={`relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-xl text-theme-sm ${
                   isActive(nav.path)
                     ? "bg-orange-50 text-brand-500"
                     : "text-gray-700 hover:bg-gray-100 group-hover:text-gray-700"
@@ -151,7 +133,7 @@ const AppSidebar = () => {
                   <li key={subItem.name}>
                     <Link
                       href={subItem.path}
-                      className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-normal ${
+                      className={`relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-normal ${
                         isActive(subItem.path)
                           ? "bg-orange-50 text-orange-500"
                           : "text-neutral-700 hover:bg-neutral-100"
@@ -175,23 +157,28 @@ const AppSidebar = () => {
   const isActive = useCallback((path) => path === pathname, [pathname]);
 
   useEffect(() => {
+    if (isMobile && isMobileOpen) {
+      setIsMobileOpen(false);
+    }
+  }, [pathname, isMobile]);
+
+  useEffect(() => {
     let submenuMatched = false;
-    ["main", "others"].forEach((menuType) => {
-      const items = menuType === "main" ? navItems : othersItems;
-      items.forEach((nav, index) => {
-        if (nav.subItems) {
-          nav.subItems.forEach((subItem) => {
-            if (isActive(subItem.path)) {
-              setOpenSubmenu({
-                type: menuType,
-                index,
-              });
-              submenuMatched = true;
-            }
-          });
-        }
-      });
+    const menuType = "main";
+    navItems.forEach((nav, index) => {
+      if (nav.subItems) {
+        nav.subItems.forEach((subItem) => {
+          if (isActive(subItem.path)) {
+            setOpenSubmenu({
+              type: menuType,
+              index,
+            });
+            submenuMatched = true;
+          }
+        });
+      }
     });
+
     if (!submenuMatched) {
       setOpenSubmenu(null);
     }
@@ -224,8 +211,8 @@ const AppSidebar = () => {
 
   return (
     <aside
-      className={`fixed mt-14 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white text-gray-900
-         h-screen transition-all duration-300 ease-in-out z-50 lg:border-r border-gray-200 
+      className={`fixed mt-15 lg:mt-19 flex flex-col xl:mt-0 top-0 px-5 left-0 bg-white text-gray-900
+         h-screen transition-all duration-300 ease-in-out z-50 xl:border-r border-gray-200 
         ${
           isExpanded || isMobileOpen
             ? "w-[290px]"
@@ -234,13 +221,13 @@ const AppSidebar = () => {
             : "w-[90px]"
         }
         ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
-        lg:translate-x-0`}
+        xl:translate-x-0`}
       onMouseEnter={() => !isExpanded && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
         className={`py-8 flex  ${
-          !isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+          !isExpanded && !isHovered ? "xl:justify-center" : "justify-start"
         }`}
       >
         <Link href="/">
@@ -274,7 +261,7 @@ const AppSidebar = () => {
               <h2
                 className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
                   !isExpanded && !isHovered
-                    ? "lg:justify-center"
+                    ? "xl:justify-center"
                     : "justify-start"
                 }`}
               >
@@ -285,22 +272,6 @@ const AppSidebar = () => {
                 )}
               </h2>
               {renderMenuItems(navItems, "main")}
-            </div>
-            <div className="">
-              <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${
-                  !isExpanded && !isHovered
-                    ? "lg:justify-center"
-                    : "justify-start"
-                }`}
-              >
-                {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
-                ) : (
-                  <MdMoreHoriz className="text-2xl" />
-                )}
-              </h2>
-              {renderMenuItems(othersItems, "others")}
             </div>
           </div>
         </nav>
