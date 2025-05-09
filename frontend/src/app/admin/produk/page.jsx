@@ -6,7 +6,7 @@ export const metadata = {
   description: "This is Next.js Home for TailAdmin Dashboard Template",
 };
 
-export default function Ecommerce() {
+export default function AllProductsPage() {
   return (
     <div>
       <AllProducts />

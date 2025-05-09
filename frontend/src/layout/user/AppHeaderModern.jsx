@@ -180,85 +180,106 @@ function AppHeader() {
       <SearchBar />
 
       <div
-        className="fixed bottom-0 left-0 right-0 z-30 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] px-4 py-3 rounded-t-3xl
-          flex items-center justify-between md:hidden "
+        className="fixed -bottom-0.5 left-0 right-0 w-full z-40 md:hidden h-[70px] bg-transparent"
+        style={{
+          backgroundImage: `url("${notchedBackgroundSvg}")`,
+          backgroundSize: "cover",
+          // backgroundPosition: "center bottom",
+          backgroundRepeat: "no-repeat",
+          filter: "drop-shadow(0 -2px 5px rgba(0,0,0,0.1))",
+        }}
       >
-        <div className="relative flex items-center gap-3 justify-between text-[10px] w-full">
+        <div className="relative flex items-center justify-between w-full h-full px-4">
           {/* Left Icons */}
+          <div className="flex items-center gap-6 text-[10px] z-10">
+            <Link
+              href="/"
+              className="flex flex-col items-center gap-1 cursor-pointer"
+            >
+              <FaHome
+                className={`w-5 h-5 ${
+                  pathname === "/" ? "text-orange-600" : "text-gray-700"
+                }`}
+              />
+              <p
+                className={`${
+                  pathname === "/" ? "text-orange-600" : "text-gray-700"
+                } font-medium`}
+              >
+                Beranda
+              </p>
+            </Link>
+            <Link
+              href="/beli"
+              className="flex flex-col items-center gap-1 cursor-pointer"
+            >
+              <FaShoppingBag
+                className={`w-5 h-5 ${
+                  pathname === "/beli" ? "text-orange-600" : "text-gray-700"
+                }`}
+              />
+              <p
+                className={`${
+                  pathname === "/beli" ? "text-orange-600" : "text-gray-700"
+                } font-medium`}
+              >
+                Beli Mobil
+              </p>
+            </Link>
+          </div>
+
           <Link
             href="/"
-            className="flex flex-col items-center gap-1 cursor-pointer"
+            className="absolute left-1/2 transform -translate-x-1/2 -top-8 w-16 h-16 bg-orange-500 rounded-full z-20 flex items-center justify-center shadow-lg cursor-pointer"
           >
-            <FaHome
-              className={`w-5 h-5 ${
-                pathname === "/" ? "text-orange-600" : "text-gray-700"
-              }`}
-            />
-            <p
-              className={`${
-                pathname === "/" ? "text-orange-600" : "text-gray-700"
-              } font-medium`}
-            >
-              Beranda
-            </p>
-          </Link>
-          <Link
-            href="/beli"
-            className="flex flex-col items-center gap-1 cursor-pointer"
-          >
-            <FaShoppingBag
-              className={`w-5 h-5 ${
-                pathname === "/beli" ? "text-orange-600" : "text-gray-700"
-              }`}
-            />
-            <p
-              className={`${
-                pathname === "/beli" ? "text-orange-600" : "text-gray-700"
-              } font-medium`}
-            >
-              Beli Mobil
-            </p>
+            <FaMoneyBillWaveAlt className="w-8 h-8 text-gray-100" />
           </Link>
 
           {/* Right Icons */}
-          <Link
-            href="/jual-mobil"
-            className="flex flex-col items-center gap-1 cursor-pointer"
-          >
-            <FaKey
-              className={`w-5 h-5 ${
-                pathname === "/jual-mobil" ? "text-orange-600" : "text-gray-700"
-              }`}
-            />
-            <p
-              className={`${
-                pathname === "/jual-mobil" ? "text-orange-600" : "text-gray-700"
-              } font-medium`}
+          <div className="flex items-center gap-4 text-[10px] z-10">
+            <Link
+              href="/jual-mobil"
+              className="flex flex-col items-center gap-1 cursor-pointer"
             >
-              Jual Mobil
-            </p>
-          </Link>
-          <Link
-            href="/tukar-tambah"
-            className="flex flex-col items-center gap-1 cursor-pointer"
-          >
-            <FaArrowsRotate
-              className={`w-5 h-5 ${
-                pathname === "/tukar-tambah"
-                  ? "text-orange-600"
-                  : "text-gray-700"
-              }`}
-            />
-            <p
-              className={`${
-                pathname === "/tukar-tambah"
-                  ? "text-orange-600"
-                  : "text-gray-700"
-              } font-medium`}
+              <FaKey
+                className={`w-5 h-5 ${
+                  pathname === "/jual-mobil"
+                    ? "text-orange-600"
+                    : "text-gray-700"
+                }`}
+              />
+              <p
+                className={`${
+                  pathname === "/jual-mobil"
+                    ? "text-orange-600"
+                    : "text-gray-700"
+                } font-medium`}
+              >
+                Jual Mobil
+              </p>
+            </Link>
+            <Link
+              href="/tukar-tambah"
+              className="flex flex-col items-center gap-1 cursor-pointer"
             >
-              Tukar Tambah
-            </p>
-          </Link>
+              <FaArrowsRotate
+                className={`w-5 h-5 ${
+                  pathname === "/tukar-tambah"
+                    ? "text-orange-600"
+                    : "text-gray-700"
+                }`}
+              />
+              <p
+                className={`${
+                  pathname === "/tukar-tambah"
+                    ? "text-orange-600"
+                    : "text-gray-700"
+                } font-medium`}
+              >
+                Tukar Tambah
+              </p>
+            </Link>
+          </div>
         </div>
       </div>
 
