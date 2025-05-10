@@ -8,9 +8,9 @@ import {
 } from "react";
 import axios from "axios";
 import useSWR from "swr";
+import isEqual from "lodash/isEqual";
 
 const ProductContext = createContext();
-
 export const useProducts = () => useContext(ProductContext);
 
 const fetcher = (url) => axios.get(url).then((res) => res.data);
@@ -24,7 +24,15 @@ export const ProductProvider = ({ children }) => {
     mutate,
   } = useSWR(API_ENDPOINT, fetcher, {
     revalidateOnFocus: true,
-    // refreshInterval: 30000,
+    // refreshInterval: 30000, // Jika Anda menggunakan ini, pertimbangkan dampaknya
+
+    compare: (a, b) => {
+      if (a === b) return true;
+
+      if (a === undefined || b === undefined) return false;
+
+      return isEqual(a, b);
+    },
   });
 
   const products = data || [];
@@ -112,7 +120,6 @@ export const ProductProvider = ({ children }) => {
     localStorage.setItem("bookmarks", JSON.stringify(Array.from(bookmarks)));
   }, [bookmarks]);
 
-  // Fungsi untuk menambah/menghapus bookmark
   const toggleBookmark = (productId) => {
     setBookmarks((prevBookmarks) => {
       const newBookmarks = new Set(prevBookmarks);

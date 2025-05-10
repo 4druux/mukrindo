@@ -121,7 +121,11 @@ const CarProductCardSwipe = ({
                 </Link>
 
                 {/* Bookmark Button */}
-                <div className="absolute top-2 right-2 z-10">
+                <div
+                  className={`absolute top-2 right-2 z-10 ${
+                    product.status === "Terjual" ? "hidden" : ""
+                  }`}
+                >
                   <div
                     className="relative group cursor-pointer"
                     onClick={(e) => {

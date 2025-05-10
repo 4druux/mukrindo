@@ -442,7 +442,7 @@ export default function StatisticsChart() {
               "Statistik Penjualan Tahunan (5 Tahun Terakhir)"}
           </h3>
         </div>
-        <div className="flex items-center flex-wrap gap-2 sm:w-auto sm:justify-end">
+        <div className="flex items-start w-full gap-3 sm:w-auto sm:justify-end">
           {selectedTab === "Bulanan" && (
             <select
               value={currentYear}

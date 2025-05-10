@@ -135,7 +135,7 @@ const RecentCarProductsTable = () => {
                   product.carName || `${product.brand} ${product.model}`,
                   product._id
                 )}`}
-                className="flex sm:grid sm:grid-cols-12 sm:gap-x-4 items-start sm:items-center py-4 px-2 border-b border-gray-200 hover:bg-orange-50/50 transition-colors duration-150 group"
+                className="flex sm:grid sm:grid-cols-12 sm:gap-x-4 items-start sm:items-center py-4 px-2 border-b border-gray-200 hover:bg-gray-50 transition-colors duration-150 group"
               >
                 <div className="flex flex-1 items-start sm:col-span-6 sm:flex sm:items-center sm:gap-x-3">
                   <div className="flex-shrink-0">

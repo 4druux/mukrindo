@@ -1,12 +1,10 @@
-// src/components/admin/dashboard/MonthlyTarget.jsx
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
+import { RiArrowUpDownFill } from "react-icons/ri";
 import { useProducts } from "@/context/ProductContext";
 import {
   startOfMonth,
-  endOfMonth,
   subMonths,
   getYear,
   getMonth,
@@ -42,34 +40,40 @@ const formatCurrency = (value, currency = "IDR") => {
   }).format(value || 0);
 };
 
-const STATIC_MONTHLY_TARGET = 5000000000; // Target Statis Rp 500 Juta
+const STATIC_MONTHLY_TARGET = 1000000000;
 
 export default function MonthlyTarget() {
   const { products, loading, error } = useProducts();
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [displayCurrentDate, setDisplayCurrentDate] = useState(new Date());
 
   useEffect(() => {
     const interval = setInterval(() => {
       const now = new Date();
-      if (
-        now.getMonth() !== currentDate.getMonth() ||
-        now.getFullYear() !== currentDate.getFullYear()
-      ) {
-        setCurrentDate(now);
-      }
-    }, 3600000); // Cek setiap jam untuk perubahan bulan
+      setDisplayCurrentDate((prevDisplayDate) => {
+        if (
+          now.getMonth() !== prevDisplayDate.getMonth() ||
+          now.getFullYear() !== prevDisplayDate.getFullYear()
+        ) {
+          return now;
+        }
+        return prevDisplayDate;
+      });
+    }, 3600000);
     return () => clearInterval(interval);
-  }, [currentDate]);
-
-  const startOfCurrentMonth = startOfMonth(currentDate);
-  const startOfLastMonth = startOfMonth(subMonths(currentDate, 1));
+  }, []);
 
   const { currentMonthRevenue, lastMonthRevenue } = useMemo(() => {
     if (loading || error || !products) {
       return { currentMonthRevenue: 0, lastMonthRevenue: 0 };
     }
+
+    const calculationTime = new Date();
+    const actualStartOfCurrentMonth = startOfMonth(calculationTime);
+    const actualStartOfLastMonth = startOfMonth(subMonths(calculationTime, 1));
+
     let currentMonthSum = 0;
     let lastMonthSum = 0;
+
     products.forEach((product) => {
       if (
         product.status?.toLowerCase() === "terjual" &&
@@ -78,14 +82,14 @@ export default function MonthlyTarget() {
         const saleDate = getValidSaleDate(product);
         if (saleDate) {
           if (
-            getMonth(saleDate) === getMonth(startOfCurrentMonth) &&
-            getYear(saleDate) === getYear(startOfCurrentMonth)
+            getMonth(saleDate) === getMonth(actualStartOfCurrentMonth) &&
+            getYear(saleDate) === getYear(actualStartOfCurrentMonth)
           ) {
             currentMonthSum += product.price;
           }
           if (
-            getMonth(saleDate) === getMonth(startOfLastMonth) &&
-            getYear(saleDate) === getYear(startOfLastMonth)
+            getMonth(saleDate) === getMonth(actualStartOfLastMonth) &&
+            getYear(saleDate) === getYear(actualStartOfLastMonth)
           ) {
             lastMonthSum += product.price;
           }
@@ -96,14 +100,7 @@ export default function MonthlyTarget() {
       currentMonthRevenue: currentMonthSum,
       lastMonthRevenue: lastMonthSum,
     };
-  }, [
-    products,
-    loading,
-    error,
-    currentDate,
-    startOfCurrentMonth,
-    startOfLastMonth,
-  ]);
+  }, [products, loading, error]);
 
   const achievementPercentage = useMemo(() => {
     if (STATIC_MONTHLY_TARGET === 0) return currentMonthRevenue > 0 ? 100 : 0;
@@ -122,37 +119,42 @@ export default function MonthlyTarget() {
     return currentMonthRevenue - STATIC_MONTHLY_TARGET;
   }, [currentMonthRevenue]);
 
-  const series = [parseFloat(achievementPercentage.toFixed(2))];
-  const options = {
-    colors: ["#f97316"],
-    chart: {
-      fontFamily: "Outfit, sans-serif",
-      type: "radialBar",
-      height: 330,
-      sparkline: { enabled: true },
-    },
-    plotOptions: {
-      radialBar: {
-        startAngle: -90,
-        endAngle: 90,
-        hollow: { size: "75%" },
-        track: { background: "#E4E7EC", strokeWidth: "100%", margin: 5 },
-        dataLabels: {
-          name: { show: false },
-          value: {
-            fontSize: "32px",
-            fontWeight: "600",
-            offsetY: 8,
-            color: "#1D2939",
-            formatter: (val) => `${val.toFixed(0)}%`,
+  const series = useMemo(() => {
+    return [parseFloat(achievementPercentage.toFixed(2))];
+  }, [achievementPercentage]);
+
+  const options = useMemo(
+    () => ({
+      colors: ["#f97316"],
+      chart: {
+        fontFamily: "Outfit, sans-serif",
+        type: "radialBar",
+        sparkline: { enabled: true },
+      },
+      plotOptions: {
+        radialBar: {
+          startAngle: -90,
+          endAngle: 90,
+          hollow: { size: "75%" },
+          track: { background: "#E4E7EC", strokeWidth: "100%", margin: 5 },
+          dataLabels: {
+            name: { show: false },
+            value: {
+              fontSize: "32px",
+              fontWeight: "500",
+              offsetY: -30,
+              color: "#374151",
+              formatter: (val) => `${val.toFixed(0)}%`,
+            },
           },
         },
       },
-    },
-    fill: { type: "solid", colors: ["#f97316"] },
-    stroke: { lineCap: "round" },
-    labels: ["Pencapaian"],
-  };
+      fill: { type: "solid", colors: ["#f97316"] },
+      stroke: { lineCap: "round" },
+      labels: ["Pencapaian"],
+    }),
+    []
+  );
 
   const progressMessage = useMemo(() => {
     if (loading) return "Memuat data...";
@@ -185,24 +187,30 @@ export default function MonthlyTarget() {
 
   return (
     <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-gray-50">
-      <div className="px-5 pt-5 bg-white rounded-t-2xl md:border-b md:border-gray-200 pb-11 sm:px-6 sm:pt-6">
+      <div className="px-5 pt-5 bg-white rounded-t-2xl md:border-b md:border-gray-200 pb-5 md:px-6 md:pt-6">
         <div className="flex justify-between items-center">
           <div>
             <h3 className="text-md lg:text-lg font-medium text-gray-700">
               Target Bulan Ini (
-              {formatDate(currentDate, "MMMM yyyy", { locale: localeID })})
+              {formatDate(displayCurrentDate, "MMMM yyyy", {
+                locale: localeID,
+              })}
+              )
             </h3>
           </div>
         </div>
         <div className="relative mt-4">
           <div className="max-h-[280px] flex justify-center items-center">
-            <ReactApexChart
-              options={options}
-              series={series}
-              type="radialBar"
-              height={280}
-              width={280}
-            />
+            {typeof window !== "undefined" && (
+              <ReactApexChart
+                key={series[0]}
+                options={options}
+                series={series}
+                type="radialBar"
+                height={280}
+                width={280}
+              />
+            )}
           </div>
           {currentMonthRevenue > 0 && lastMonthRevenue > 0 && (
             <span
@@ -213,66 +221,63 @@ export default function MonthlyTarget() {
               }`}
             >
               {revenueChangeVsLastMonth >= 0 ? (
-                <MdKeyboardArrowUp className="inline mr-0.5" />
+                <RiArrowUpDownFill className="inline mr-0.5" />
               ) : (
-                <MdKeyboardArrowDown className="inline mr-0.5" />
+                <RiArrowUpDownFill className="inline mr-0.5" />
               )}
               {Math.abs(revenueChangeVsLastMonth).toFixed(0)}% vs Bulan Lalu
             </span>
           )}
         </div>
-        <p className="mx-auto mt-8 w-full max-w-[420px] text-center text-sm text-gray-600 sm:text-base">
+        <p className="mx-auto mt-3 w-full max-w-[420px] text-center text-xs md:text-sm text-gray-600">
           {progressMessage}
         </p>
       </div>
-      <div className="flex items-center justify-around gap-3 px-4 py-4 sm:gap-5 bg-white rounded-b-2xl">
-        <div>
-          <p className="mb-1 text-center text-gray-500 text-xs sm:text-sm">
-            Target
-          </p>
-          <p className="flex items-center justify-center gap-1 text-sm font-semibold text-gray-800 sm:text-base">
+
+      <div className="flex flex-col items-center justify-around gap-3 px-4 py-4 bg-white rounded-b-2xl">
+        <div className="flex items-start justify-between w-full border-b md:border-none border-gray-200 pb-3 md:pb-0">
+          <p className="mb-1 text-center text-gray-500 text-sm">Target</p>
+          <p className="flex items-center justify-center gap-1 text-sm font-semibold text-gray-700">
             {formatCurrency(STATIC_MONTHLY_TARGET)}
           </p>
         </div>
-        <div className="w-px bg-gray-300 h-7 self-center"></div>
-        <div>
-          <p className="mb-1 text-center text-gray-500 text-xs sm:text-sm">
-            Pendapatan
-          </p>
+
+        <div className="flex items-start justify-between w-full border-b md:border-none border-gray-200 pb-3 md:pb-0">
+          <p className="mb-1 text-center text-gray-500 text-sm">Pendapatan</p>
           <p
-            className={`flex items-center justify-center gap-1 text-sm font-semibold sm:text-base ${
+            className={`flex items-center justify-center gap-1 text-sm font-semibold ${
               currentMonthRevenue >= STATIC_MONTHLY_TARGET
                 ? "text-green-600"
                 : "text-orange-600"
             }`}
           >
-            {formatCurrency(currentMonthRevenue)}
             {currentMonthRevenue !== 0 &&
               lastMonthRevenue !== 0 &&
               (currentMonthRevenue >= lastMonthRevenue ? (
-                <MdKeyboardArrowUp className="text-green-500" />
+                <RiArrowUpDownFill className="w-4 h-4 text-green-600" />
               ) : (
-                <MdKeyboardArrowDown className="text-red-500" />
+                <RiArrowUpDownFill className="w-4 h-4 text-red-500" />
               ))}
+            {formatCurrency(currentMonthRevenue)}
           </p>
         </div>
-        <div className="w-px bg-gray-300 h-7 self-center"></div>
-        <div>
-          <p className="mb-1 text-center text-gray-500 text-xs sm:text-sm">
+
+        <div className="flex items-start justify-between w-full">
+          <p className="mb-1 text-center text-gray-500 text-sm">
             {targetDifference >= 0 ? "Surplus" : "Sisa Target"}
           </p>
           <p
-            className={`flex items-center justify-center gap-1 text-sm font-semibold sm:text-base ${
+            className={`flex items-center justify-center gap-1 text-sm font-semibold ${
               targetDifference >= 0 ? "text-green-600" : "text-red-600"
             }`}
           >
-            {formatCurrency(Math.abs(targetDifference))}
             {targetDifference > 0 && (
-              <MdKeyboardArrowUp className="text-green-500" />
+              <RiArrowUpDownFill className="w-4 h-4 text-green-600" />
             )}
             {targetDifference < 0 && (
-              <MdKeyboardArrowDown className="text-red-500" />
+              <RiArrowUpDownFill className="w-4 h-4 text-red-500" />
             )}
+            {formatCurrency(Math.abs(targetDifference))}
           </p>
         </div>
       </div>

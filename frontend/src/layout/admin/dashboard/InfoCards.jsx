@@ -1,6 +1,5 @@
-// src/components/InfoCards.jsx
 "use client";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import {
   MdKeyboardArrowDown,
   MdKeyboardArrowUp,
@@ -8,26 +7,67 @@ import {
 } from "react-icons/md";
 import { FaBoxOpen, FaCar } from "react-icons/fa";
 import { useProducts } from "@/context/ProductContext";
+import {
+  startOfMonth,
+  endOfMonth,
+  subMonths,
+  isWithinInterval,
+  parseISO,
+  isValid,
+} from "date-fns";
+
+const PREV_MONTH_ADDED_COUNT_KEY = "infoCardsPrevMonthAdded";
+const PREV_MONTH_SOLD_COUNT_KEY = "infoCardsPrevMonthSold";
+const LAST_TREND_CALC_MONTH_YEAR_KEY = "infoCardsLastTrendCalcMonthYear";
+
+const calculateTrendInternal = (current, previous) => {
+  if (previous === null || isNaN(previous) || typeof previous === "undefined")
+    return current > 0 ? 100 : 0;
+  if (previous === 0) return current > 0 ? 100 : 0;
+  if (current === previous) return 0;
+  return ((current - previous) / previous) * 100;
+};
+
+const getValidDate = (dateString) => {
+  if (!dateString) return null;
+  try {
+    const date = parseISO(dateString);
+    if (isValid(date)) return date;
+    const fallbackDate = new Date(dateString);
+    return isValid(fallbackDate) ? fallbackDate : null;
+  } catch (e) {
+    return null;
+  }
+};
 
 export const InfoCards = () => {
-  const { products, loading, error } = useProducts();
+  const {
+    products,
+    loading: productsLoading,
+    error: productsError,
+  } = useProducts();
+  const isInitialMountRef = useRef(true);
 
-  // previousCounts sekarang akan menyimpan nilai saat data pertama kali valid
-  const [previousCounts, setPreviousCounts] = useState({
-    available: null,
-    sold: null,
+  const [displayStats, setDisplayStats] = useState({
+    totalAvailable: 0,
+    addedThisMonth: 0,
+    addedTrend: { value: 0, direction: "neutral", show: false },
+    totalSold: 0,
+    soldThisMonth: 0,
+    soldTrend: { value: 0, direction: "neutral", show: false },
   });
 
-  const [currentStats, setCurrentStats] = useState({
-    available: { count: 0, trend: 0, direction: "neutral" },
-    sold: { count: 0, trend: 0, direction: "neutral" },
+  const [websiteVisits, setWebsiteVisits] = useState({
+    totalOverall: 0,
+    thisMonth: 0,
+    trend: { value: 0, direction: "neutral", show: false },
+    loading: true,
+    error: null,
   });
 
-  // Hitung jumlah saat ini, tetap sama
-  const { availableCount, soldCount } = useMemo(() => {
-    if (loading || !products || products.length === 0) {
-      // Ditambahkan !loading untuk memastikan products sudah ada
-      return { availableCount: 0, soldCount: 0 };
+  const { overallTotalAvailable, overallTotalSold } = useMemo(() => {
+    if (!products || products.length === 0) {
+      return { overallTotalAvailable: 0, overallTotalSold: 0 };
     }
     const available = products.filter(
       (p) => p.status?.toLowerCase() === "tersedia"
@@ -35,218 +75,367 @@ export const InfoCards = () => {
     const sold = products.filter(
       (p) => p.status?.toLowerCase() === "terjual"
     ).length;
-    return { availableCount: available, soldCount: sold };
-  }, [products, loading]); // Tambahkan loading sebagai dependensi
+    return { overallTotalAvailable: available, overallTotalSold: sold };
+  }, [products]);
 
   useEffect(() => {
-    // Hanya proses jika tidak loading dan ada produk
-    if (!loading && products && products.length > 0) {
-      // 1. Set previousCounts jika belum di-set (data pertama kali valid)
-      if (previousCounts.available === null && previousCounts.sold === null) {
-        setPreviousCounts({
-          available: availableCount,
-          sold: soldCount,
+    if (productsLoading || productsError || !products) {
+      if (productsError) {
+        setDisplayStats({
+          totalAvailable: 0,
+          addedThisMonth: 0,
+          addedTrend: { value: 0, direction: "neutral", show: false },
+          totalSold: 0,
+          soldThisMonth: 0,
+          soldTrend: { value: 0, direction: "neutral", show: false },
         });
-        // Setelah previousCounts di-set, kita tidak perlu langsung menghitung tren di render ini,
-        // biarkan render berikutnya dengan previousCounts yang sudah valid menghitungnya.
-        // Atau, kita bisa langsung hitung tren dengan asumsi perubahan dari 0 jika ini adalah data pertama.
-        // Untuk konsistensi, kita akan biarkan useEffect berikutnya yang menangani tren.
       }
-
-      // 2. Hitung tren jika previousCounts sudah valid
-      // Pastikan previousCounts sudah di-set dari blok if di atas pada render sebelumnya atau saat ini
-      const prevAvailable =
-        previousCounts.available !== null ? previousCounts.available : 0; // Default ke 0 jika masih null
-      const prevSold = previousCounts.sold !== null ? previousCounts.sold : 0; // Default ke 0 jika masih null
-
-      const calculateTrend = (current, previous) => {
-        if (previous === 0) {
-          // Jika nilai sebelumnya adalah 0
-          return current > 0 ? 100 : 0; // Jika saat ini > 0, anggap naik 100%, jika tidak, 0%
-        }
-        if (current === previous) return 0;
-        return ((current - previous) / previous) * 100;
-      };
-
-      // Hanya hitung tren jika previousCounts sudah diinisialisasi (bukan null lagi)
-      // Ini mencegah tren dihitung dengan previousCounts yang masih null dari state awal.
-      let newAvailableTrend = 0;
-      let newSoldTrend = 0;
-
-      if (previousCounts.available !== null) {
-        // Pastikan previousCounts sudah di-set
-        newAvailableTrend = calculateTrend(availableCount, prevAvailable);
-      }
-      if (previousCounts.sold !== null) {
-        // Pastikan previousCounts sudah di-set
-        newSoldTrend = calculateTrend(soldCount, prevSold);
-      }
-
-      setCurrentStats({
-        available: {
-          count: availableCount,
-          trend: Math.abs(newAvailableTrend),
-          direction:
-            newAvailableTrend > 0
-              ? "up"
-              : newAvailableTrend < 0
-              ? "down"
-              : "neutral",
-        },
-        sold: {
-          count: soldCount,
-          trend: Math.abs(newSoldTrend),
-          direction:
-            newSoldTrend > 0 ? "up" : newSoldTrend < 0 ? "down" : "neutral",
-        },
-      });
-    } else if (!loading && (!products || products.length === 0)) {
-      // Jika tidak loading tapi tidak ada produk, reset stats
-      setCurrentStats({
-        available: { count: 0, trend: 0, direction: "neutral" },
-        sold: { count: 0, trend: 0, direction: "neutral" },
-      });
-      // Reset previousCounts juga jika tidak ada data, agar saat data muncul lagi, dihitung ulang
-      setPreviousCounts({ available: null, sold: null });
+      return;
     }
-  }, [products, loading, availableCount, soldCount, previousCounts]); // previousCounts menjadi dependensi
 
-  // ... (kode loading, error, renderTrend, dan JSX lainnya tetap sama) ...
+    const now = new Date();
+    const currentMonthStart = startOfMonth(now);
+    const currentMonthEnd = endOfMonth(now);
+    const currentMonthYearStr = `${now.getFullYear()}-${String(
+      now.getMonth() + 1
+    ).padStart(2, "0")}`;
 
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
-        {Array(3)
-          .fill(0)
-          .map((_, index) => (
-            <div
-              key={index}
-              className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6 animate-pulse"
-            >
-              <div className="w-12 h-12 bg-gray-200 rounded-xl"></div>
-              <div className="mt-5">
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-              </div>
-            </div>
-          ))}
-      </div>
+    const prevMonthDate = subMonths(now, 1);
+    const prevMonthStart = startOfMonth(prevMonthDate);
+    const prevMonthEnd = endOfMonth(prevMonthDate);
+
+    let actualAddedThisMonth = 0;
+    let actualSoldThisMonth = 0;
+
+    products.forEach((p) => {
+      if (p.status?.toLowerCase() === "tersedia") {
+        const availableDate = getValidDate(p.createdAt);
+        if (
+          availableDate &&
+          isWithinInterval(availableDate, {
+            start: currentMonthStart,
+            end: currentMonthEnd,
+          })
+        ) {
+          actualAddedThisMonth++;
+        }
+      }
+      if (p.status?.toLowerCase() === "terjual") {
+        const saleDate = getValidDate(p.soldDate || p.updatedAt);
+        if (
+          saleDate &&
+          isWithinInterval(saleDate, {
+            start: currentMonthStart,
+            end: currentMonthEnd,
+          })
+        ) {
+          actualSoldThisMonth++;
+        }
+      }
+    });
+
+    const storedLastCalcMonthYear = localStorage.getItem(
+      LAST_TREND_CALC_MONTH_YEAR_KEY
     );
-  }
-
-  if (error) {
-    return (
-      <div className="text-red-500 p-4">
-        Gagal memuat data statistik produk.
-      </div>
+    let prevMonthAddedCount = parseInt(
+      localStorage.getItem(PREV_MONTH_ADDED_COUNT_KEY) || "0",
+      10
     );
-  }
+    let prevMonthSoldCount = parseInt(
+      localStorage.getItem(PREV_MONTH_SOLD_COUNT_KEY) || "0",
+      10
+    );
+    let showTrends = false;
+
+    if (storedLastCalcMonthYear !== currentMonthYearStr) {
+      let actualAddedLastMonth = 0;
+      let actualSoldLastMonth = 0;
+      products.forEach((p) => {
+        if (p.status?.toLowerCase() === "tersedia") {
+          const availableDate = getValidDate(p.createdAt);
+          if (
+            availableDate &&
+            isWithinInterval(availableDate, {
+              start: prevMonthStart,
+              end: prevMonthEnd,
+            })
+          ) {
+            actualAddedLastMonth++;
+          }
+        }
+        if (p.status?.toLowerCase() === "terjual") {
+          const saleDate = getValidDate(p.soldDate || p.updatedAt);
+          if (
+            saleDate &&
+            isWithinInterval(saleDate, {
+              start: prevMonthStart,
+              end: prevMonthEnd,
+            })
+          ) {
+            actualSoldLastMonth++;
+          }
+        }
+      });
+      localStorage.setItem(
+        PREV_MONTH_ADDED_COUNT_KEY,
+        actualAddedLastMonth.toString()
+      );
+      localStorage.setItem(
+        PREV_MONTH_SOLD_COUNT_KEY,
+        actualSoldLastMonth.toString()
+      );
+      localStorage.setItem(LAST_TREND_CALC_MONTH_YEAR_KEY, currentMonthYearStr);
+      prevMonthAddedCount = actualAddedLastMonth;
+      prevMonthSoldCount = actualSoldLastMonth;
+      showTrends = true;
+    } else if (storedLastCalcMonthYear) {
+      showTrends = true;
+    }
+
+    const addedTrendVal = calculateTrendInternal(
+      actualAddedThisMonth,
+      prevMonthAddedCount
+    );
+    const soldTrendVal = calculateTrendInternal(
+      actualSoldThisMonth,
+      prevMonthSoldCount
+    );
+
+    setDisplayStats({
+      totalAvailable: overallTotalAvailable,
+      addedThisMonth: actualAddedThisMonth,
+      addedTrend: {
+        value: Math.abs(addedTrendVal),
+        direction:
+          addedTrendVal > 0 ? "up" : addedTrendVal < 0 ? "down" : "neutral",
+        show: showTrends,
+      },
+      totalSold: overallTotalSold,
+      soldThisMonth: actualSoldThisMonth,
+      soldTrend: {
+        value: Math.abs(soldTrendVal),
+        direction:
+          soldTrendVal > 0 ? "up" : soldTrendVal < 0 ? "down" : "neutral",
+        show: showTrends,
+      },
+    });
+
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false;
+    }
+  }, [
+    products,
+    productsLoading,
+    productsError,
+    overallTotalAvailable,
+    overallTotalSold,
+  ]);
+
+  useEffect(() => {
+    const fetchWebsiteVisitStats = async () => {
+      setWebsiteVisits((prev) => ({ ...prev, loading: true, error: null }));
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/visits/homepage/stats",
+          {
+            credentials: "include",
+          }
+        );
+        if (!response.ok) {
+          throw new Error(
+            `Gagal mengambil data statistik kunjungan: ${response.statusText}`
+          );
+        }
+        const data = await response.json();
+
+        const trendVal = calculateTrendInternal(
+          data.uniqueVisitorsThisMonth,
+          data.uniqueVisitorsLastMonth
+        );
+
+        setWebsiteVisits({
+          totalOverall: data.totalUniqueVisitorsOverall,
+          thisMonth: data.uniqueVisitorsThisMonth,
+          trend: {
+            value: Math.abs(trendVal),
+            direction: trendVal > 0 ? "up" : trendVal < 0 ? "down" : "neutral",
+            show: true,
+          },
+          loading: false,
+          error: null,
+        });
+      } catch (err) {
+        console.error("Error fetching website visit stats:", err);
+        setWebsiteVisits((prev) => ({
+          ...prev,
+          loading: false,
+          error: err.message || "Gagal memuat data kunjungan.",
+        }));
+      }
+    };
+
+    fetchWebsiteVisitStats();
+    const intervalId = setInterval(fetchWebsiteVisitStats, 30000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, []);
 
   const renderTrend = (trendValue, direction) => {
-    // Jika previousCounts belum di-set, mungkin lebih baik tidak menampilkan tren sama sekali
-    // atau menampilkan "N/A"
-    if (
-      previousCounts.available === null &&
-      previousCounts.sold === null &&
-      direction === "neutral" &&
-      trendValue === 0
-    ) {
-      // Ini kondisi awal sebelum previousCounts di-set, atau jika memang tidak ada perubahan dari 0
-      // Anda bisa memilih untuk tidak menampilkan badge tren sama sekali di sini
-      // return null;
-      // Atau tampilkan sebagai 0% netral
-    }
-
     if (direction === "neutral" && trendValue === 0) {
-      // Hanya tampilkan 0% jika memang netral dan 0
-      return (
-        <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">
-          {/* Bisa tambahkan ikon netral jika mau, atau biarkan kosong */}
-          0.00%
-        </span>
-      );
+      return <span className="text-xs font-medium text-gray-500">(0.00%)</span>;
     }
-    if (
-      direction === "neutral" &&
-      trendValue === 100 &&
-      (currentStats.available.count > 0 || currentStats.sold.count > 0)
-    ) {
-      // Ini kasus khusus dimana previous adalah 0 dan current > 0
-      // Kita bisa anggap ini sebagai "Baru" atau tetap 100% naik
-    }
-
     const isUp = direction === "up";
     return (
       <span
-        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-          isUp ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
+        className={`text-xs font-medium ${
+          isUp ? "text-green-600" : "text-red-600"
         }`}
       >
         {isUp ? (
-          <MdKeyboardArrowUp className="w-4 h-4" />
+          <MdKeyboardArrowUp className="inline w-4 h-4" />
         ) : (
-          <MdKeyboardArrowDown className="w-4 h-4" />
+          <MdKeyboardArrowDown className="inline w-4 h-4" />
         )}
         {trendValue.toFixed(2)}%
       </span>
     );
   };
 
+  if (productsLoading && isInitialMountRef.current) {
+    return (
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 md:gap-6">
+        {[...Array(4)].map((_, i) => (
+          <div
+            key={i}
+            className="bg-white border md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6 animate-pulse"
+          >
+            <div className="w-10 h-10 bg-gray-200 rounded-lg mb-3"></div>
+            <div className="h-5 bg-gray-200 rounded w-3/4 mb-1"></div>
+            <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
+            <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (productsError)
+    return (
+      <div className="text-red-500 p-4">
+        Gagal memuat data statistik produk.
+      </div>
+    );
+
+  const WebsiteVisitCardSkeleton = () => (
+    <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6 animate-pulse">
+      <div className="w-10 h-10 bg-gray-200 rounded-lg mb-3"></div>
+      <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+      <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
+      <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+    </div>
+  );
+
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6">
-      {/* Pendaftar Akun (Statis) */}
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 md:gap-6">
       <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6">
-        <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl">
-          <MdGroup className="text-gray-600 w-8 h-8" />
+        <div className="flex items-center justify-center w-10 h-10 bg-orange-100 text-orange-600 rounded-lg mb-3">
+          <FaCar className="w-5 h-5" />
         </div>
-        <div className="flex items-end justify-between mt-5">
-          <div>
-            <span className="text-sm text-gray-500">Pendaftar Akun</span>
-            <h4 className="text-lg font-semibold text-gray-700">3,782</h4>
-          </div>
-          <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-600">
-            <MdKeyboardArrowUp className="w-4 h-4" />
-            11.01%
+        <h2 className="text-sm text-gray-500">Total Mobil Tersedia</h2>
+        <p className="text-2xl font-semibold text-gray-800 mt-1">
+          {displayStats.totalAvailable.toLocaleString("id-ID")}
+        </p>
+        <div className="mt-2 text-xs text-gray-600">
+          Penambahan Bulan Ini:{" "}
+          <span className="font-semibold">
+            {displayStats.addedThisMonth.toLocaleString("id-ID")}
           </span>
+          {displayStats.addedTrend.show && (
+            <span className="ml-1">
+              {renderTrend(
+                displayStats.addedTrend.value,
+                displayStats.addedTrend.direction
+              )}
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Mobil Tersedia (Dinamis) */}
       <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6">
-        <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl">
-          <FaCar className="text-gray-600 w-8 h-8" />
+        <div className="flex items-center justify-center w-10 h-10 bg-green-100 text-green-600 rounded-lg mb-3">
+          <FaBoxOpen className="w-5 h-5" />
         </div>
-        <div className="flex items-end justify-between mt-5">
-          <div>
-            <span className="text-sm text-gray-500">Mobil Tersedia</span>
-            <h4 className="text-lg font-semibold text-gray-700">
-              {currentStats.available.count.toLocaleString("id-ID")}
-            </h4>
+        <h2 className="text-sm text-gray-500">Total Mobil Terjual</h2>
+        <p className="text-2xl font-semibold text-gray-800 mt-1">
+          {displayStats.totalSold.toLocaleString("id-ID")}
+        </p>
+        <div className="mt-2 text-xs text-gray-600">
+          Terjual Bulan Ini:{" "}
+          <span className="font-semibold">
+            {displayStats.soldThisMonth.toLocaleString("id-ID")}
+          </span>
+          {displayStats.soldTrend.show && (
+            <span className="ml-1">
+              {renderTrend(
+                displayStats.soldTrend.value,
+                displayStats.soldTrend.direction
+              )}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {websiteVisits.loading ? (
+        <WebsiteVisitCardSkeleton />
+      ) : websiteVisits.error ? (
+        <div className="bg-white border border-red-300 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6 text-red-600">
+          <div className="flex items-center justify-center w-10 h-10 bg-red-100 rounded-lg mb-3">
+            <MdGroup className="w-5 h-5" />
           </div>
-          {/* Hanya tampilkan tren jika previousCounts sudah diinisialisasi */}
-          {previousCounts.available !== null &&
-            renderTrend(
-              currentStats.available.trend,
-              currentStats.available.direction
+          <h2 className="text-sm text-gray-500">Total Kunjungan Website</h2>
+          <p className="text-sm font-semibold mt-1">Error:</p>
+          <p className="text-xs mt-1">{websiteVisits.error}</p>
+        </div>
+      ) : (
+        <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6">
+          <div className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-lg mb-3">
+            <MdGroup className="w-5 h-5" />
+          </div>
+          <h2 className="text-sm text-gray-500">Total Kunjungan Website</h2>
+          <p className="text-2xl font-semibold text-gray-800 mt-1">
+            {websiteVisits.totalOverall.toLocaleString("id-ID")}
+          </p>
+          <div className="mt-2 text-xs text-gray-600">
+            Bulan Ini:{" "}
+            <span className="font-semibold">
+              {websiteVisits.thisMonth.toLocaleString("id-ID")}
+            </span>
+            {websiteVisits.trend.show && (
+              <span className="ml-1">
+                {renderTrend(
+                  websiteVisits.trend.value,
+                  websiteVisits.trend.direction
+                )}
+              </span>
             )}
-        </div>
-      </div>
-
-      {/* Produk Terjual (Dinamis) */}
-      <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6">
-        <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl">
-          <FaBoxOpen className="text-gray-600 w-8 h-8" />
-        </div>
-        <div className="flex items-end justify-between mt-5">
-          <div>
-            <span className="text-sm text-gray-500">Produk Terjual</span>
-            <h4 className="text-lg font-semibold text-gray-700">
-              {currentStats.sold.count.toLocaleString("id-ID")}
-            </h4>
           </div>
-          {/* Hanya tampilkan tren jika previousCounts sudah diinisialisasi */}
-          {previousCounts.sold !== null &&
-            renderTrend(currentStats.sold.trend, currentStats.sold.direction)}
+        </div>
+      )}
+
+      <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6">
+        <div className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-lg mb-3">
+          <MdGroup className="w-5 h-5" />
+        </div>
+        <h2 className="text-sm text-gray-500">Pendaftar Akun</h2>
+        <p className="text-2xl font-semibold text-gray-800 mt-1">3,782</p>
+        <div className="mt-2 text-xs text-gray-600">
+          Bulan Ini: <span className="font-semibold">150</span>
+          <span className="ml-1 text-green-600">
+            <MdKeyboardArrowUp className="inline w-4 h-4" />
+            10.5%
+          </span>
         </div>
       </div>
     </div>

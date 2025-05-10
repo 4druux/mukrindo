@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 const connectDB = require("./config/db");
 const { createServer } = require("http");
+const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = process.env.PORT || 5000;
 const path = require("path");
@@ -10,6 +11,7 @@ const productRoutes = require("./routes/productRoutes");
 const tradeInRoutes = require("./routes/tradeInRoutes");
 const sellRoutes = require("./routes/sellRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const visitRoutes = require("./routes/visitRoutes");
 
 // Middleware
 app.use(
@@ -20,6 +22,7 @@ app.use(
 );
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
+app.use(cookieParser());
 
 // MongoDB Connection
 console.log("Attempting MongoDB connection...");
@@ -41,6 +44,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/trade-in", tradeInRoutes);
 app.use("/api/sell-requests", sellRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/visits", visitRoutes);
 
 // 404 Route
 app.use((req, res, next) => {
