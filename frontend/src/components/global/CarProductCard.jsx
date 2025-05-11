@@ -246,7 +246,7 @@ const CarProductCard = ({
                       <div className="flex justify-between items-center border-t border-gray-200">
                         <div className="flex items-center space-x-1 mt-2 text-xs text-gray-500">
                           <FaEye />
-                          <span>Dilihat {product.viewCount || 0} kali</span>
+                          <span> {product.viewCount || 0} Dilihat</span>
                         </div>
                         <div className="flex items-center md:space-x-1 mt-2">
                           <Link

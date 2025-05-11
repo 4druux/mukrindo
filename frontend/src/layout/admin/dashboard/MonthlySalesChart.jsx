@@ -67,6 +67,13 @@ export default function MonthlySalesChart() {
       offsetY: -20,
       style: { fontSize: "10px", colors: ["#304758"] },
     },
+    states: {
+      active: {
+        filter: {
+          type: "none",
+        },
+      },
+    },
     stroke: {
       show: true,
       width: 4,

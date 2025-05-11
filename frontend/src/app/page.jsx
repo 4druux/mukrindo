@@ -1,4 +1,4 @@
-// Home.js
+// Home.js (misalnya frontend/src/app/page.js)
 "use client";
 import React, { useEffect } from "react";
 import CarForm from "@/layout/user/home/CarForm";
@@ -9,6 +9,7 @@ import HomeCarousel from "@/layout/user/home/HomeCarousel";
 import ProductByPrice from "@/layout/user/home/ProductByPrice";
 import ProductByRecom from "@/layout/user/home/ProductByRecom";
 import Testimoni from "@/components/product-user/Testimoni";
+import { useTraffic } from "@/context/TrafficContext";
 
 export default function Home() {
   const bannerImages = [
@@ -21,28 +22,16 @@ export default function Home() {
     "/images/carousel/7.jpg",
   ];
 
+  const { trackHomepageVisit } = useTraffic();
   useEffect(() => {
-    const trackVisit = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/api/visits/homepage/track",
-          {
-            method: "POST",
-            credentials: "include",
-          }
-        );
-        if (response.ok) {
-          console.log("Homepage visit tracked by backend.");
-        } else {
-          console.error("Failed to track homepage visit.");
-        }
-      } catch (error) {
-        console.error("Error calling tracking API:", error);
+    trackHomepageVisit().then((result) => {
+      if (result.success) {
+        // console.log("Homepage visit tracked from Home page.");
+      } else {
+        // console.error("Failed to track homepage visit from Home page:", result.error);
       }
-    };
-
-    trackVisit();
-  }, []);
+    });
+  }, [trackHomepageVisit]);
 
   return (
     <div className="container mx-auto">

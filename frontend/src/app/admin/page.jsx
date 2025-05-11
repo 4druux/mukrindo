@@ -3,7 +3,8 @@ import MonthlySalesChart from "@/layout/admin/dashboard/MonthlySalesChart";
 import MonthlyTarget from "@/layout/admin/dashboard/MonthlyTarget";
 import LastUpdatedInfo from "@/layout/admin/dashboard/LastUpdateInfo";
 import StatisticsChart from "@/layout/admin/dashboard/StatisticsChart";
-import RecentCarProductsTable from "@/layout/admin/dashboard/RecentCarProductsTable";
+import CarProductsTable from "@/layout/admin/dashboard/CarProductsTable";
+import TopViewedCarsChart from "@/layout/admin/dashboard/TopViewedCarsChart";
 
 import React from "react";
 
@@ -35,8 +36,12 @@ export default function DashboardPage() {
         <StatisticsChart />
       </div>
 
+      <div className="col-span-12 xl:col-span-4">
+        <TopViewedCarsChart />
+      </div>
+
       <div className="col-span-12">
-        <RecentCarProductsTable />
+        <CarProductsTable />
       </div>
     </div>
   );

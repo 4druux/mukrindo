@@ -8,6 +8,7 @@ import { ProductProvider } from "@/context/ProductContext";
 import { TradeInProvider } from "@/context/TradeInContext";
 import { BuySellProvider } from "@/context/BuySellContext";
 import { NotificationProvider } from "@/context/NotificationContext";
+import { TrafficProvider } from "@/context/TrafficContext";
 import { Toaster } from "react-hot-toast";
 
 export default function RootLayoutClient({ children }) {
@@ -18,23 +19,25 @@ export default function RootLayoutClient({ children }) {
     pathname.startsWith("/sign-up");
 
   return (
-    <ProductProvider>
-      <TradeInProvider>
-        <BuySellProvider>
-          <NotificationProvider>
-            <SidebarProvider>
-              <HeaderProvider>
-                <Toaster position="top-right" reverseOrder={true} />
-                {isAdminPage ? (
-                  children
-                ) : (
-                  <ClientLayout>{children}</ClientLayout>
-                )}
-              </HeaderProvider>
-            </SidebarProvider>
-          </NotificationProvider>
-        </BuySellProvider>
-      </TradeInProvider>
-    </ProductProvider>
+    <TrafficProvider>
+      <ProductProvider>
+        <TradeInProvider>
+          <BuySellProvider>
+            <NotificationProvider>
+              <SidebarProvider>
+                <HeaderProvider>
+                  <Toaster position="top-right" reverseOrder={true} />
+                  {isAdminPage ? (
+                    children
+                  ) : (
+                    <ClientLayout>{children}</ClientLayout>
+                  )}
+                </HeaderProvider>
+              </SidebarProvider>
+            </NotificationProvider>
+          </BuySellProvider>
+        </TradeInProvider>
+      </ProductProvider>
+    </TrafficProvider>
   );
 }

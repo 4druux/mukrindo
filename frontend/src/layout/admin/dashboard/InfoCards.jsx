@@ -1,11 +1,12 @@
+// InfoCards.jsx
 "use client";
 import React, { useEffect, useState, useMemo, useRef } from "react";
+// ... import lainnya tetap sama
 import {
   MdKeyboardArrowDown,
   MdKeyboardArrowUp,
   MdGroup,
 } from "react-icons/md";
-import { FaBoxOpen, FaCar } from "react-icons/fa";
 import { useProducts } from "@/context/ProductContext";
 import {
   startOfMonth,
@@ -15,9 +16,11 @@ import {
   parseISO,
   isValid,
 } from "date-fns";
+import { CarInfoAvailable } from "@/components/product-admin/Dashboard/CarInfoAvailable";
+import { CarInfoSold } from "@/components/product-admin/Dashboard/CarInfoSold";
+import { WebsiteTraffic } from "@/components/product-admin/Dashboard/WebsiteTraffic";
+import SkeletonInfoCard from "@/components/skeleton/skeleton-admin/SkeletonInfoCard";
 
-const PREV_MONTH_ADDED_COUNT_KEY = "infoCardsPrevMonthAdded";
-const PREV_MONTH_SOLD_COUNT_KEY = "infoCardsPrevMonthSold";
 const LAST_TREND_CALC_MONTH_YEAR_KEY = "infoCardsLastTrendCalcMonthYear";
 
 const calculateTrendInternal = (current, previous) => {
@@ -51,18 +54,12 @@ export const InfoCards = () => {
   const [displayStats, setDisplayStats] = useState({
     totalAvailable: 0,
     addedThisMonth: 0,
+    addedLastMonth: 0,
     addedTrend: { value: 0, direction: "neutral", show: false },
     totalSold: 0,
     soldThisMonth: 0,
+    soldLastMonth: 0,
     soldTrend: { value: 0, direction: "neutral", show: false },
-  });
-
-  const [websiteVisits, setWebsiteVisits] = useState({
-    totalOverall: 0,
-    thisMonth: 0,
-    trend: { value: 0, direction: "neutral", show: false },
-    loading: true,
-    error: null,
   });
 
   const { overallTotalAvailable, overallTotalSold } = useMemo(() => {
@@ -79,16 +76,30 @@ export const InfoCards = () => {
   }, [products]);
 
   useEffect(() => {
-    if (productsLoading || productsError || !products) {
+    if (
+      productsLoading ||
+      productsError ||
+      !products ||
+      products.length === 0
+    ) {
+      const defaultStats = {
+        totalAvailable: overallTotalAvailable,
+        totalSold: overallTotalSold,
+        addedThisMonth: 0,
+        addedLastMonth: 0,
+        addedTrend: { value: 0, direction: "neutral", show: false },
+        soldThisMonth: 0,
+        soldLastMonth: 0,
+        soldTrend: { value: 0, direction: "neutral", show: false },
+      };
       if (productsError) {
-        setDisplayStats({
-          totalAvailable: 0,
-          addedThisMonth: 0,
-          addedTrend: { value: 0, direction: "neutral", show: false },
-          totalSold: 0,
-          soldThisMonth: 0,
-          soldTrend: { value: 0, direction: "neutral", show: false },
-        });
+        setDisplayStats(defaultStats);
+      } else if (
+        productsLoading ||
+        (!products && !productsError) ||
+        (products && products.length === 0 && !productsError)
+      ) {
+        setDisplayStats(defaultStats);
       }
       return;
     }
@@ -106,19 +117,28 @@ export const InfoCards = () => {
 
     let actualAddedThisMonth = 0;
     let actualSoldThisMonth = 0;
+    let actualAddedLastMonth = 0;
+    let actualSoldLastMonth = 0;
 
     products.forEach((p) => {
-      if (p.status?.toLowerCase() === "tersedia") {
-        const availableDate = getValidDate(p.createdAt);
-        if (
-          availableDate &&
-          isWithinInterval(availableDate, {
-            start: currentMonthStart,
-            end: currentMonthEnd,
-          })
-        ) {
-          actualAddedThisMonth++;
-        }
+      const creationDate = getValidDate(p.createdAt);
+      if (
+        creationDate &&
+        isWithinInterval(creationDate, {
+          start: currentMonthStart,
+          end: currentMonthEnd,
+        })
+      ) {
+        actualAddedThisMonth++;
+      }
+      if (
+        creationDate &&
+        isWithinInterval(creationDate, {
+          start: prevMonthStart,
+          end: prevMonthEnd,
+        })
+      ) {
+        actualAddedLastMonth++;
       }
       if (p.status?.toLowerCase() === "terjual") {
         const saleDate = getValidDate(p.soldDate || p.updatedAt);
@@ -131,62 +151,24 @@ export const InfoCards = () => {
         ) {
           actualSoldThisMonth++;
         }
+        if (
+          saleDate &&
+          isWithinInterval(saleDate, {
+            start: prevMonthStart,
+            end: prevMonthEnd,
+          })
+        ) {
+          actualSoldLastMonth++;
+        }
       }
     });
 
     const storedLastCalcMonthYear = localStorage.getItem(
       LAST_TREND_CALC_MONTH_YEAR_KEY
     );
-    let prevMonthAddedCount = parseInt(
-      localStorage.getItem(PREV_MONTH_ADDED_COUNT_KEY) || "0",
-      10
-    );
-    let prevMonthSoldCount = parseInt(
-      localStorage.getItem(PREV_MONTH_SOLD_COUNT_KEY) || "0",
-      10
-    );
     let showTrends = false;
-
     if (storedLastCalcMonthYear !== currentMonthYearStr) {
-      let actualAddedLastMonth = 0;
-      let actualSoldLastMonth = 0;
-      products.forEach((p) => {
-        if (p.status?.toLowerCase() === "tersedia") {
-          const availableDate = getValidDate(p.createdAt);
-          if (
-            availableDate &&
-            isWithinInterval(availableDate, {
-              start: prevMonthStart,
-              end: prevMonthEnd,
-            })
-          ) {
-            actualAddedLastMonth++;
-          }
-        }
-        if (p.status?.toLowerCase() === "terjual") {
-          const saleDate = getValidDate(p.soldDate || p.updatedAt);
-          if (
-            saleDate &&
-            isWithinInterval(saleDate, {
-              start: prevMonthStart,
-              end: prevMonthEnd,
-            })
-          ) {
-            actualSoldLastMonth++;
-          }
-        }
-      });
-      localStorage.setItem(
-        PREV_MONTH_ADDED_COUNT_KEY,
-        actualAddedLastMonth.toString()
-      );
-      localStorage.setItem(
-        PREV_MONTH_SOLD_COUNT_KEY,
-        actualSoldLastMonth.toString()
-      );
       localStorage.setItem(LAST_TREND_CALC_MONTH_YEAR_KEY, currentMonthYearStr);
-      prevMonthAddedCount = actualAddedLastMonth;
-      prevMonthSoldCount = actualSoldLastMonth;
       showTrends = true;
     } else if (storedLastCalcMonthYear) {
       showTrends = true;
@@ -194,16 +176,17 @@ export const InfoCards = () => {
 
     const addedTrendVal = calculateTrendInternal(
       actualAddedThisMonth,
-      prevMonthAddedCount
+      actualAddedLastMonth
     );
     const soldTrendVal = calculateTrendInternal(
       actualSoldThisMonth,
-      prevMonthSoldCount
+      actualSoldLastMonth
     );
 
     setDisplayStats({
       totalAvailable: overallTotalAvailable,
       addedThisMonth: actualAddedThisMonth,
+      addedLastMonth: actualAddedLastMonth,
       addedTrend: {
         value: Math.abs(addedTrendVal),
         direction:
@@ -212,6 +195,7 @@ export const InfoCards = () => {
       },
       totalSold: overallTotalSold,
       soldThisMonth: actualSoldThisMonth,
+      soldLastMonth: actualSoldLastMonth,
       soldTrend: {
         value: Math.abs(soldTrendVal),
         direction:
@@ -230,57 +214,6 @@ export const InfoCards = () => {
     overallTotalAvailable,
     overallTotalSold,
   ]);
-
-  useEffect(() => {
-    const fetchWebsiteVisitStats = async () => {
-      setWebsiteVisits((prev) => ({ ...prev, loading: true, error: null }));
-      try {
-        const response = await fetch(
-          "http://localhost:5000/api/visits/homepage/stats",
-          {
-            credentials: "include",
-          }
-        );
-        if (!response.ok) {
-          throw new Error(
-            `Gagal mengambil data statistik kunjungan: ${response.statusText}`
-          );
-        }
-        const data = await response.json();
-
-        const trendVal = calculateTrendInternal(
-          data.uniqueVisitorsThisMonth,
-          data.uniqueVisitorsLastMonth
-        );
-
-        setWebsiteVisits({
-          totalOverall: data.totalUniqueVisitorsOverall,
-          thisMonth: data.uniqueVisitorsThisMonth,
-          trend: {
-            value: Math.abs(trendVal),
-            direction: trendVal > 0 ? "up" : trendVal < 0 ? "down" : "neutral",
-            show: true,
-          },
-          loading: false,
-          error: null,
-        });
-      } catch (err) {
-        console.error("Error fetching website visit stats:", err);
-        setWebsiteVisits((prev) => ({
-          ...prev,
-          loading: false,
-          error: err.message || "Gagal memuat data kunjungan.",
-        }));
-      }
-    };
-
-    fetchWebsiteVisitStats();
-    const intervalId = setInterval(fetchWebsiteVisitStats, 30000);
-
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, []);
 
   const renderTrend = (trendValue, direction) => {
     if (direction === "neutral" && trendValue === 0) {
@@ -305,17 +238,9 @@ export const InfoCards = () => {
 
   if (productsLoading && isInitialMountRef.current) {
     return (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 md:gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 md:gap-6">
         {[...Array(4)].map((_, i) => (
-          <div
-            key={i}
-            className="bg-white border md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6 animate-pulse"
-          >
-            <div className="w-10 h-10 bg-gray-200 rounded-lg mb-3"></div>
-            <div className="h-5 bg-gray-200 rounded w-3/4 mb-1"></div>
-            <div className="h-3 bg-gray-200 rounded w-1/2 mb-2"></div>
-            <div className="h-3 bg-gray-200 rounded w-1/3"></div>
-          </div>
+          <SkeletonInfoCard key={i} />
         ))}
       </div>
     );
@@ -328,109 +253,37 @@ export const InfoCards = () => {
       </div>
     );
 
-  const WebsiteVisitCardSkeleton = () => (
-    <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6 animate-pulse">
-      <div className="w-10 h-10 bg-gray-200 rounded-lg mb-3"></div>
-      <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-      <div className="h-6 bg-gray-200 rounded w-1/3 mb-3"></div>
-      <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-    </div>
-  );
-
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-4 md:gap-6">
-      <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6">
-        <div className="flex items-center justify-center w-10 h-10 bg-orange-100 text-orange-600 rounded-lg mb-3">
-          <FaCar className="w-5 h-5" />
-        </div>
-        <h2 className="text-sm text-gray-500">Total Mobil Tersedia</h2>
-        <p className="text-2xl font-semibold text-gray-800 mt-1">
-          {displayStats.totalAvailable.toLocaleString("id-ID")}
-        </p>
-        <div className="mt-2 text-xs text-gray-600">
-          Penambahan Bulan Ini:{" "}
-          <span className="font-semibold">
-            {displayStats.addedThisMonth.toLocaleString("id-ID")}
-          </span>
-          {displayStats.addedTrend.show && (
-            <span className="ml-1">
-              {renderTrend(
-                displayStats.addedTrend.value,
-                displayStats.addedTrend.direction
-              )}
-            </span>
-          )}
-        </div>
-      </div>
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+      <CarInfoAvailable
+        totalAvailable={displayStats.totalAvailable}
+        addedThisMonth={displayStats.addedThisMonth}
+        addedLastMonth={displayStats.addedLastMonth}
+        addedTrend={displayStats.addedTrend}
+        renderTrend={renderTrend}
+      />
+
+      <CarInfoSold
+        totalSold={displayStats.totalSold}
+        soldThisMonth={displayStats.soldThisMonth}
+        soldLastMonth={displayStats.soldLastMonth}
+        soldTrend={displayStats.soldTrend}
+        renderTrend={renderTrend}
+      />
+
+      <WebsiteTraffic />
 
       <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6">
-        <div className="flex items-center justify-center w-10 h-10 bg-green-100 text-green-600 rounded-lg mb-3">
-          <FaBoxOpen className="w-5 h-5" />
-        </div>
-        <h2 className="text-sm text-gray-500">Total Mobil Terjual</h2>
-        <p className="text-2xl font-semibold text-gray-800 mt-1">
-          {displayStats.totalSold.toLocaleString("id-ID")}
-        </p>
-        <div className="mt-2 text-xs text-gray-600">
-          Terjual Bulan Ini:{" "}
-          <span className="font-semibold">
-            {displayStats.soldThisMonth.toLocaleString("id-ID")}
-          </span>
-          {displayStats.soldTrend.show && (
-            <span className="ml-1">
-              {renderTrend(
-                displayStats.soldTrend.value,
-                displayStats.soldTrend.direction
-              )}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {websiteVisits.loading ? (
-        <WebsiteVisitCardSkeleton />
-      ) : websiteVisits.error ? (
-        <div className="bg-white border border-red-300 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6 text-red-600">
-          <div className="flex items-center justify-center w-10 h-10 bg-red-100 rounded-lg mb-3">
+        <h2 className="text-md text-gray-700 font-medium">Pendaftar Akun</h2>
+        <div className="flex items-start justify-start gap-2 mt-2">
+          <div className="flex items-center justify-center w-14 h-10 bg-blue-100 text-blue-600 rounded-lg mb-3">
             <MdGroup className="w-5 h-5" />
           </div>
-          <h2 className="text-sm text-gray-500">Total Kunjungan Website</h2>
-          <p className="text-sm font-semibold mt-1">Error:</p>
-          <p className="text-xs mt-1">{websiteVisits.error}</p>
-        </div>
-      ) : (
-        <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6">
-          <div className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-lg mb-3">
-            <MdGroup className="w-5 h-5" />
-          </div>
-          <h2 className="text-sm text-gray-500">Total Kunjungan Website</h2>
-          <p className="text-2xl font-semibold text-gray-800 mt-1">
-            {websiteVisits.totalOverall.toLocaleString("id-ID")}
+          <p className="text-xl font-medium text-gray-700 mt-2 text-center">
+            3,782
           </p>
-          <div className="mt-2 text-xs text-gray-600">
-            Bulan Ini:{" "}
-            <span className="font-semibold">
-              {websiteVisits.thisMonth.toLocaleString("id-ID")}
-            </span>
-            {websiteVisits.trend.show && (
-              <span className="ml-1">
-                {renderTrend(
-                  websiteVisits.trend.value,
-                  websiteVisits.trend.direction
-                )}
-              </span>
-            )}
-          </div>
         </div>
-      )}
-
-      <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6">
-        <div className="flex items-center justify-center w-10 h-10 bg-blue-100 text-blue-600 rounded-lg mb-3">
-          <MdGroup className="w-5 h-5" />
-        </div>
-        <h2 className="text-sm text-gray-500">Pendaftar Akun</h2>
-        <p className="text-2xl font-semibold text-gray-800 mt-1">3,782</p>
-        <div className="mt-2 text-xs text-gray-600">
+        <div className="text-xs text-gray-600">
           Bulan Ini: <span className="font-semibold">150</span>
           <span className="ml-1 text-green-600">
             <MdKeyboardArrowUp className="inline w-4 h-4" />

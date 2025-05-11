@@ -149,6 +149,13 @@ export default function MonthlyTarget() {
           },
         },
       },
+      states: {
+        active: {
+          filter: {
+            type: "none",
+          },
+        },
+      },
       fill: { type: "solid", colors: ["#f97316"] },
       stroke: { lineCap: "round" },
       labels: ["Pencapaian"],

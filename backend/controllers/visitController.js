@@ -1,12 +1,11 @@
 // controllers/visitController.js
 const trackingVisit = require("../models/trackingVisit");
-const { v4: uuidv4 } = require("uuid"); // Untuk generate ID unik
-const { startOfMonth, endOfMonth, subMonths } = require("date-fns"); // Untuk kalkulasi tanggal
+const { v4: uuidv4 } = require("uuid");
+const { startOfMonth, endOfMonth, subMonths } = require("date-fns");
 
 const VISITOR_COOKIE_NAME =
-  process.env.VISITOR_COOKIE_NAME || "mukrindo_visitor_id"; // Nama cookie
+  process.env.VISITOR_COOKIE_NAME || "mukrindo_visitor_id";
 
-// Fungsi untuk melacak kunjungan ke beranda
 exports.trackHomepageVisit = async (req, res) => {
   try {
     let visitorId = req.cookies[VISITOR_COOKIE_NAME];
@@ -26,33 +25,25 @@ exports.trackHomepageVisit = async (req, res) => {
       req.headers["x-forwarded-for"] || req.socket.remoteAddress;
     const userAgent = req.headers["user-agent"];
 
-    // Menggunakan findOneAndUpdate untuk membuat atau memperbarui entri
     const updatedVisitEntry = await trackingVisit.findOneAndUpdate(
-      { visitorCookieId: visitorId }, // Kriteria pencarian: cari berdasarkan visitorCookieId
+      { visitorCookieId: visitorId },
       {
-        // Data yang akan diatur atau diperbarui
         $set: {
           ipAddress: ipAddress,
           userAgent: userAgent,
-          visitTimestamp: new Date(), // Selalu perbarui timestamp ke waktu kunjungan terakhir
+          visitTimestamp: new Date(),
         },
-        // $setOnInsert akan mengatur field ini hanya jika dokumen baru dibuat (operasi insert)
-        // Ini berguna jika Anda ingin menyimpan timestamp kunjungan pertama secara terpisah
-        // $setOnInsert: {
-        //   firstVisitTimestamp: new Date()
-        // }
       },
       {
-        upsert: true, // Jika tidak ada dokumen yang cocok, buat dokumen baru
-        new: true, // Kembalikan dokumen yang sudah diperbarui (atau yang baru dibuat)
-        setDefaultsOnInsert: true, // Terapkan default schema jika dokumen baru dibuat
+        upsert: true,
+        new: true,
+        setDefaultsOnInsert: true,
       }
     );
 
     res.status(200).json({
       message: "Homepage visit tracked/updated successfully",
-      visitorId: updatedVisitEntry.visitorCookieId, // atau visitorId
-      // entry: updatedVisitEntry // Anda bisa mengirim kembali entri yang di-upsert jika perlu
+      visitorId: updatedVisitEntry.visitorCookieId,
     });
   } catch (error) {
     console.error("Error tracking/updating homepage visit:", error);
@@ -62,36 +53,32 @@ exports.trackHomepageVisit = async (req, res) => {
   }
 };
 
-// Fungsi untuk mendapatkan statistik kunjungan (untuk dashboard admin)
+// Fungsi untuk mendapatkan statistik kunjungan  dashboard admin
 exports.getHomepageVisitStats = async (req, res) => {
   try {
     const now = new Date();
     const currentMonthStart = startOfMonth(now);
     const currentMonthEnd = endOfMonth(now);
 
-    const prevMonthDate = subMonths(now, 1); // Tanggal di bulan sebelumnya
+    const prevMonthDate = subMonths(now, 1);
     const prevMonthStart = startOfMonth(prevMonthDate);
     const prevMonthEnd = endOfMonth(prevMonthDate);
 
-    // Helper function untuk menghitung pengunjung unik dengan MongoDB Aggregation Pipeline
     const countUniqueVisitors = async (matchQuery = {}) => {
       const result = await trackingVisit.aggregate([
-        { $match: matchQuery }, // Filter berdasarkan kriteria (misalnya rentang tanggal)
-        { $group: { _id: "$visitorCookieId" } }, // Kelompokkan berdasarkan visitorCookieId untuk mendapatkan unik
-        { $count: "uniqueCount" }, // Hitung jumlah grup unik
+        { $match: matchQuery },
+        { $group: { _id: "$visitorCookieId" } },
+        { $count: "uniqueCount" },
       ]);
       return result.length > 0 ? result[0].uniqueCount : 0;
     };
 
-    // Hitung total pengunjung unik sepanjang waktu
     const totalUniqueVisitorsOverall = await countUniqueVisitors({});
 
-    // Hitung pengunjung unik bulan ini
     const uniqueVisitorsThisMonth = await countUniqueVisitors({
       visitTimestamp: { $gte: currentMonthStart, $lte: currentMonthEnd },
     });
 
-    // Hitung pengunjung unik bulan lalu
     const uniqueVisitorsLastMonth = await countUniqueVisitors({
       visitTimestamp: { $gte: prevMonthStart, $lte: prevMonthEnd },
     });
