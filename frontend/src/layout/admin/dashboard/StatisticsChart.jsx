@@ -240,7 +240,7 @@ export default function StatisticsChart() {
       },
       stroke: {
         curve: "smooth",
-        width: [2.5, 2.5], // Ketebalan garis
+        width: [2.5, 2.5],
       },
       fill: {
         type: "gradient",
@@ -248,9 +248,9 @@ export default function StatisticsChart() {
           shade: "light",
           type: "vertical",
           shadeIntensity: 0.3,
-          opacityFrom: 0.7, // Opacity awal gradien (lebih solid di atas)
-          opacityTo: 0.1, // Opacity akhir gradien (lebih transparan di bawah)
-          stops: [0, 95, 100], // Gradien lebih solid hingga 95% lalu fade out
+          opacityFrom: 0.7,
+          opacityTo: 0.1,
+          stops: [0, 95, 100],
         },
       },
       markers: {
@@ -435,11 +435,11 @@ export default function StatisticsChart() {
         <div className="w-full">
           <h3 className="text-md lg:text-lg font-medium text-gray-700">
             {selectedTab === "Mingguan" &&
-              "Statistik Penjualan Mingguan (12 Minggu Terakhir)"}
+              "Statistik Penjualan Mingguan 12 Minggu Terakhir"}
             {selectedTab === "Bulanan" &&
               `Statistik Penjualan Bulanan (${currentYear})`}
             {selectedTab === "Tahunan" &&
-              "Statistik Penjualan Tahunan (5 Tahun Terakhir)"}
+              "Statistik Penjualan Tahunan 5 Tahun Terakhir"}
           </h3>
         </div>
         <div className="flex items-start w-full gap-3 sm:w-auto sm:justify-end">
@@ -491,17 +491,19 @@ export default function StatisticsChart() {
           </div>
         </div>
       ) : (
-        <div
-          className="text-center text-gray-500"
-          style={{
-            height: `${chartHeight}px`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "0.875rem",
-          }}
-        >
-          Tidak ada data penjualan untuk periode ini.
+        <div className="py-2">
+          <div
+            className="text-center text-gray-500"
+            style={{
+              height: `${chartHeight}px`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "0.875rem",
+            }}
+          >
+            Tidak ada data penjualan untuk periode ini.
+          </div>
         </div>
       )}
     </div>

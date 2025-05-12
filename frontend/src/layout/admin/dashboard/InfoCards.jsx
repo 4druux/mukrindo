@@ -7,6 +7,8 @@ import {
   MdKeyboardArrowUp,
   MdGroup,
 } from "react-icons/md";
+import { IoIosTrendingUp, IoIosTrendingDown } from "react-icons/io";
+
 import { useProducts } from "@/context/ProductContext";
 import {
   startOfMonth,
@@ -217,21 +219,25 @@ export const InfoCards = () => {
 
   const renderTrend = (trendValue, direction) => {
     if (direction === "neutral" && trendValue === 0) {
-      return <span className="text-xs font-medium text-gray-500">(0.00%)</span>;
+      return (
+        <span className="text-[11px] font-medium text-white bg-gray-500 px-1 rounded-full">
+          0.00%
+        </span>
+      );
     }
     const isUp = direction === "up";
     return (
       <span
-        className={`text-xs font-medium ${
-          isUp ? "text-green-600" : "text-red-600"
+        className={`text-[11px] font-medium px-1 rounded-full ${
+          isUp ? "text-green-600 bg-green-100" : "text-red-600 bg-red-100"
         }`}
       >
-        {isUp ? (
-          <MdKeyboardArrowUp className="inline w-4 h-4" />
-        ) : (
-          <MdKeyboardArrowDown className="inline w-4 h-4" />
-        )}
         {trendValue.toFixed(2)}%
+        {isUp ? (
+          <IoIosTrendingUp className="inline ml-1 w-4 h-4 -rotate-12" />
+        ) : (
+          <IoIosTrendingDown className="inline ml-1 w-4 h-4 rotate-12" />
+        )}
       </span>
     );
   };
@@ -271,22 +277,22 @@ export const InfoCards = () => {
         renderTrend={renderTrend}
       />
 
-      <WebsiteTraffic />
+      <WebsiteTraffic renderTrend={renderTrend} />
 
-      <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5 md:p-6">
+      <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5">
         <h2 className="text-md text-gray-700 font-medium">Pendaftar Akun</h2>
         <div className="flex items-start justify-start gap-2 mt-2">
           <div className="flex items-center justify-center w-14 h-10 bg-blue-100 text-blue-600 rounded-lg mb-3">
             <MdGroup className="w-5 h-5" />
           </div>
-          <p className="text-xl font-medium text-gray-700 mt-2 text-center">
+          <p className="text-xl font-semibold text-blue-600 mt-2 text-center">
             3,782
           </p>
         </div>
         <div className="text-xs text-gray-600">
           Bulan Ini: <span className="font-semibold">150</span>
           <span className="ml-1 text-green-600">
-            <MdKeyboardArrowUp className="inline w-4 h-4" />
+            <IoIosTrendingUp className="inline w-4 h-4" />
             10.5%
           </span>
         </div>

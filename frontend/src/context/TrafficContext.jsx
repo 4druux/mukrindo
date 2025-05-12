@@ -42,7 +42,7 @@ export const TrafficProvider = ({ children }) => {
         TRACK_API_ENDPOINT,
         {},
         {
-          credentials: "include",
+          withCredentials: true,
         }
       );
       if (response.status === 200 || response.status === 201) {

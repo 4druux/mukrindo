@@ -8,21 +8,56 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-const CHART_COLORS = ["#4D96FF", "#6BCB77", "#FFD93D", "#FF6B6B", "#845EC2"];
+const CHART_COLORS = ["#F89B78", "#B6A6E9", "#AFDC8F", "#9AD8D8", "#92C5F9"];
 
 const TopViewedCarsChart = () => {
   const { products, loading, error } = useProducts();
   const [showExportMenu, setShowExportMenu] = useState(false);
   const chartRef = useRef(null);
+  const [allStats, setAllStats] = useState({
+    totalAllViews: 0,
+    averageAllViews: 0,
+    allProductsWithViews: [],
+  });
 
+  // Calculate statistics for all products
+  const calculateAllProductsStats = () => {
+    if (!products || products.length === 0) {
+      return {
+        totalAllViews: 0,
+        averageAllViews: 0,
+        allProductsWithViews: [],
+      };
+    }
+
+    const allProductsWithViews = products.filter(
+      (p) => typeof p.viewCount === "number"
+    );
+    const totalAllViews = allProductsWithViews.reduce(
+      (sum, p) => sum + (p.viewCount || 0),
+      0
+    );
+    const averageAllViews =
+      allProductsWithViews.length > 0
+        ? totalAllViews / allProductsWithViews.length
+        : 0;
+
+    return {
+      totalAllViews,
+      averageAllViews,
+      allProductsWithViews: allProductsWithViews.sort(
+        (a, b) => b.viewCount - a.viewCount
+      ),
+    };
+  };
+
+  // Calculate chart data for top 5 products
   const chartData = useMemo(() => {
     if (!products || products.length === 0) {
       return {
         series: [],
         labels: [],
         topProducts: [],
-        totalViewsTopProducts: 0,
-        averageViews: 0,
         hasData: false,
       };
     }
@@ -38,8 +73,6 @@ const TopViewedCarsChart = () => {
         series: [],
         labels: [],
         topProducts: [],
-        totalViewsTopProducts: 0,
-        averageViews: 0,
         hasData: false,
       };
     }
@@ -52,30 +85,15 @@ const TopViewedCarsChart = () => {
         `Produk ID: ${p._id}`
     );
 
-    const totalViewsTopProducts = series.reduce((sum, count) => sum + count, 0);
-
-    const allProductsWithViewCountField = products.filter(
-      (p) => typeof p.viewCount === "number"
-    );
-    const totalViewsAllProducts = allProductsWithViewCountField.reduce(
-      (sum, p) => sum + (p.viewCount || 0),
-      0
-    );
-    const averageViews =
-      allProductsWithViewCountField.length > 0
-        ? totalViewsAllProducts / allProductsWithViewCountField.length
-        : 0;
-
     return {
       series,
       labels,
       topProducts,
-      totalViewsTopProducts,
-      averageViews,
       hasData: true,
     };
   }, [products]);
 
+  // Chart options
   const chartOptions = useMemo(
     () => ({
       chart: {
@@ -197,29 +215,91 @@ const TopViewedCarsChart = () => {
     [chartData.labels, chartData.topProducts.length]
   );
 
+  // Handle export functionality
   const handleExport = (type) => {
-    if (chartRef.current) {
-      switch (type) {
-        case "SVG":
-          chartRef.current.exportToSVG();
-          break;
-        case "PNG":
-          chartRef.current.exportToPNG();
-          break;
-        case "CSV":
-          chartRef.current.exportToCSV({
-            columnDelimiter: ",",
-            headerCategory: "Produk",
-            headerValue: "Jumlah Dilihat",
+    if (type === "CSV") {
+      const headers = [
+        "No",
+        "Nama Mobil",
+        "Merk",
+        "Model",
+        "Varian",
+        "Jumlah Dilihat",
+      ];
+      const csvContent = [
+        headers.join(","),
+        ...allStats.allProductsWithViews.map((product, index) =>
+          [
+            index + 1,
+            `"${product.carName || "-"}"`,
+            `"${product.brand || "-"}"`,
+            `"${product.model || "-"}"`,
+            `"${product.variant || "-"}"`,
+            product.viewCount,
+          ].join(",")
+        ),
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "data_mobil_dilihat.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else if (type === "PDF") {
+      import("jspdf").then((jsPDF) => {
+        import("jspdf-autotable").then((autoTable) => {
+          const doc = new jsPDF.default();
+
+          // Title
+          doc.setFontSize(16);
+          doc.text("Laporan Data Mobil Dilihat", 14, 20);
+
+          // Subtitle
+          doc.setFontSize(10);
+          doc.text(
+            `Total Data: ${allStats.allProductsWithViews.length} mobil`,
+            14,
+            30
+          );
+          doc.text(
+            `Total Views: ${allStats.totalAllViews.toLocaleString("id-ID")}`,
+            14,
+            36
+          );
+          doc.text(
+            `Rata-rata: ${allStats.averageAllViews.toFixed(2)} views/mobil`,
+            14,
+            42
+          );
+
+          // Table data
+          autoTable.default(doc, {
+            startY: 50,
+            head: [["No", "Nama Mobil", "Merk", "Model", "Varian", "Views"]],
+            body: allStats.allProductsWithViews.map((product, index) => [
+              index + 1,
+              product.carName || "-",
+              product.brand || "-",
+              product.model || "-",
+              product.variant || "-",
+              product.viewCount.toLocaleString("id-ID"),
+            ]),
+            styles: { fontSize: 8 },
+            headStyles: { fillColor: [79, 70, 229] },
           });
-          break;
-        default:
-          break;
-      }
+
+          doc.save("data_mobil_dilihat.pdf");
+        });
+      });
     }
+
     setShowExportMenu(false);
   };
 
+  // Close export menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showExportMenu && !event.target.closest(".export-menu-container")) {
@@ -231,6 +311,13 @@ const TopViewedCarsChart = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showExportMenu]);
+
+  // Update all products stats when products change
+  useEffect(() => {
+    if (products) {
+      setAllStats(calculateAllProductsStats());
+    }
+  }, [products]);
 
   if (loading) {
     return (
@@ -274,9 +361,11 @@ const TopViewedCarsChart = () => {
           </h3>
         </div>
         <p className="text-gray-500">Belum ada data produk yang dilihat.</p>
-        <p className="text-sm text-gray-500 mt-4">Total dilihat (Top 5): 0</p>
+        <p className="text-sm text-gray-500 mt-4">
+          Total melihat semua mobil: 0
+        </p>
         <p className="text-sm text-gray-500 mt-1">
-          Rata-rata dilihat per produk: 0
+          Rata-rata melihat semua mobil: 0
         </p>
       </div>
     );
@@ -301,18 +390,10 @@ const TopViewedCarsChart = () => {
               <ul className="text-xs font-medium text-gray-700">
                 <li>
                   <button
-                    onClick={() => handleExport("PNG")}
+                    onClick={() => handleExport("PDF")}
                     className="block w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   >
-                    Download PNG
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => handleExport("SVG")}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    Download SVG
+                    Download PDF
                   </button>
                 </li>
                 <li>
@@ -341,7 +422,7 @@ const TopViewedCarsChart = () => {
         )}
       </div>
 
-      {/* Legenda Kustom */}
+      {/* Custom Legend */}
       <div className="mt-6 space-y-2">
         <h4 className="text-sm font-semibold text-gray-600 mb-2">
           Top 5 Mobil Paling Diminati
@@ -367,18 +448,18 @@ const TopViewedCarsChart = () => {
         ))}
       </div>
 
-      {/* Total dan Rata-rata View Count */}
+      {/* All Products Stats */}
       <div className="mt-6 pt-4 border-t border-gray-200">
         <p className="text-xs text-gray-600">
-          Total melihat semua mobil:{" "}
+          Total melihat semua data mobil:{" "}
           <span className="font-semibold text-gray-800">
-            {chartData.totalViewsTopProducts.toLocaleString("id-ID")}
+            {allStats.totalAllViews.toLocaleString("id-ID")}
           </span>
         </p>
         <p className="text-xs text-gray-600 mt-1">
-          Rata-rata dilihat semua produk:{" "}
+          Rata-rata melihat semua data mobil:{" "}
           <span className="font-semibold text-gray-800">
-            {chartData.averageViews.toFixed(2).replace(".", ",")}%
+            {allStats.averageAllViews.toFixed(2).replace(".", ",")}
           </span>
         </p>
       </div>

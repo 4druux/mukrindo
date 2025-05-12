@@ -1,26 +1,31 @@
-// models/homepageVisitModel.js
+// models/TrackingVisit.js
 const mongoose = require("mongoose");
 
-const trackingVisit = new mongoose.Schema({
-  visitorCookieId: {
-    type: String,
-    required: true,
-    index: true,
+const trackingVisitSchema = new mongoose.Schema(
+  {
+    visitorCookieId: {
+      type: String,
+      required: true,
+      index: true,
+    },
+    visitTimestamp: {
+      type: Date,
+      default: Date.now,
+      required: true,
+      index: true,
+    },
+    ipAddress: {
+      type: String,
+    },
+    userAgent: {
+      type: String,
+    },
   },
-  visitTimestamp: {
-    type: Date,
-    default: Date.now,
-    required: true,
-    index: true,
-  },
-  ipAddress: {
-    type: String,
-  },
-  userAgent: {
-    type: String,
-  },
-});
+  {
+    timestamps: false,
+    versionKey: false,
+  }
+);
 
-const HomepageVisit = mongoose.model("HomepageVisit", trackingVisit);
-
-module.exports = HomepageVisit;
+const TrackingVisit = mongoose.model("TrackingVisit", trackingVisitSchema);
+module.exports = TrackingVisit;
