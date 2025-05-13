@@ -73,10 +73,10 @@ export const WebsiteTraffic = ({ renderTrend }) => {
     <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5">
       <h2 className="text-md text-gray-700 font-medium">Trafik Website</h2>
       <div className="flex items-start justify-start gap-2 mt-2">
-        <div className="flex items-center justify-center w-14 h-10 bg-cyan-100 text-cyan-600 rounded-lg mb-3">
+        <div className="flex items-center justify-center w-14 h-10 bg-teal-100 text-teal-600 rounded-lg mb-3">
           <FaChartBar className="w-5 h-5" />
         </div>
-        <p className="text-xl font-semibold text-cyan-600 mt-2 text-center">
+        <p className="text-xl font-semibold text-teal-600 mt-2 text-center">
           {trafficStats.totalUniqueVisitorsOverall?.toLocaleString("id-ID") ||
             0}
         </p>

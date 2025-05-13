@@ -63,15 +63,15 @@ function AppHeader() {
         <div className="container mx-auto flex items-center justify-between px-3 py-3 lg:py-5">
           {/* Logo */}
           <Link href="/">
-            <div className="flex items-center">
-              {/* <Image
-                src="/images/logo/logo.svg"
+            <div className="">
+              <Image
+                src="/images/logo/mm-logo-header.png"
                 alt="MukrindoLogo"
-                width={130}
-                height={35}
-                className="cursor-pointer lg:w-[150px] lg:h-[40px]"
-              /> */}
-              Mukrindo Motor LOGO
+                width={180}
+                height={20}
+                priority={true}
+                className="cursor-pointer w-[150px] md:w-[200px]"
+              />
             </div>
           </Link>
 

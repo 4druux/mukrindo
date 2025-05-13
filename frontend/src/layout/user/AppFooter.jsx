@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { FaInstagram, FaWhatsapp, FaFacebook } from "react-icons/fa";
 import { AiFillTikTok } from "react-icons/ai";
 
@@ -18,12 +19,14 @@ const AppFooter = () => {
     >
       <div className="container mx-auto flex flex-col xl:flex-row items-start justify-between px-4 xl:px-0 gap-4 xl:gap-10 py-10 text-sm">
         <div className="">
-          {/* <img
-            src={assets.forever_icon}
-            className="w-40 h-12"
-            alt="Atlas Icon"
-          /> */}
-          Mukrindo Motor LOGO
+          <Image
+            src="/images/logo/mm-logo.png"
+            alt="MukrindoLogo"
+            width={180}
+            height={20}
+            priority={true}
+            className="cursor-pointer w-[180px] md:w-[200px]"
+          />
           <div className="flex items-center space-x-3 my-3">
             <a
               href="https://api.whatsapp.com/send/?phone=%2B6285774723529&text&type=phone_number&app_absent=0"

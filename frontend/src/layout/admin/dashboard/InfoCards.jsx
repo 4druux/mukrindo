@@ -1,12 +1,7 @@
 // InfoCards.jsx
 "use client";
 import React, { useEffect, useState, useMemo, useRef } from "react";
-// ... import lainnya tetap sama
-import {
-  MdKeyboardArrowDown,
-  MdKeyboardArrowUp,
-  MdGroup,
-} from "react-icons/md";
+import { MdGroup } from "react-icons/md";
 import { IoIosTrendingUp, IoIosTrendingDown } from "react-icons/io";
 
 import { useProducts } from "@/context/ProductContext";

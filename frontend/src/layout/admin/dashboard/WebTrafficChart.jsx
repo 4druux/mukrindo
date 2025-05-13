@@ -26,6 +26,7 @@ import {
 } from "date-fns";
 import { id } from "date-fns/locale";
 import { FaChevronDown } from "react-icons/fa";
+import { useYearDropdown } from "@/hooks/useYearDropdown";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -39,9 +40,13 @@ const fetcher = (url) =>
 
 export default function WebTrafficChart() {
   const [selectedPeriod, setSelectedPeriod] = useState("Hari");
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-  const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false); // State for dropdown visibility
-  const yearDropdownRef = useRef(null); // Ref for click outside detection
+  const {
+    currentYear,
+    setCurrentYear,
+    isYearDropdownOpen,
+    setIsYearDropdownOpen,
+    yearDropdownRef,
+  } = useYearDropdown();
 
   const apiQueryPeriodMap = {
     Hari: "daily",
@@ -68,24 +73,6 @@ export default function WebTrafficChart() {
     fetcher,
     { revalidateOnFocus: true }
   );
-
-  // Click outside handler for year dropdown
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (
-        yearDropdownRef.current &&
-        !yearDropdownRef.current.contains(event.target)
-      ) {
-        setIsYearDropdownOpen(false);
-      }
-    }
-    // Bind the event listener
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      // Unbind the event listener on clean up
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [yearDropdownRef]);
 
   const processedChartData = useMemo(() => {
     if (historyLoading || historyError || !trafficHistoryData?.data) {
@@ -380,7 +367,7 @@ export default function WebTrafficChart() {
           </h3>
         </div>
         <div className="flex items-start w-full gap-3 sm:w-auto sm:justify-end">
-          <div className="flex items-center gap-0.5 rounded-lg bg-gray-100 p-1 w-full sm:w-auto">
+          <div className="flex items-center gap-0.5 rounded-full bg-gray-100 p-1 w-full sm:w-auto">
             {["Hari", "Minggu", "Bulan", "Tahun"].map((period) => {
               if (period === "Bulan") {
                 return (
@@ -391,7 +378,7 @@ export default function WebTrafficChart() {
                         setSelectedPeriod("Bulan");
                         setIsYearDropdownOpen(isOpening);
                       }}
-                      className={`px-3 py-1.5 font-semibold w-full rounded-md text-xs cursor-pointer  transition-colors duration-150 flex items-center justify-center gap-1 whitespace-nowrap ${
+                      className={`px-3 py-1.5 font-semibold w-full rounded-full text-xs cursor-pointer  transition-colors duration-150 flex items-center justify-center gap-1 whitespace-nowrap ${
                         selectedPeriod === period
                           ? "text-emerald-600 bg-white shadow-sm"
                           : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
@@ -405,7 +392,7 @@ export default function WebTrafficChart() {
                       />
                     </button>
                     {isYearDropdownOpen && selectedPeriod === "Bulan" && (
-                      <div className="absolute z-20 mt-1 right-0 w-full min-w-[80px] rounded-md bg-white shadow-lg border border-gray-200 max-h-48 overflow-y-auto">
+                      <div className="absolute z-20 mt-1 right-0 w-full min-w-[80px] rounded-xl bg-white shadow-lg border border-gray-200 max-h-48 overflow-y-auto">
                         <ul className="py-1">
                           {availableYears.map((year) => (
                             <li
@@ -436,7 +423,7 @@ export default function WebTrafficChart() {
                       setSelectedPeriod(period);
                       setIsYearDropdownOpen(false);
                     }}
-                    className={`px-3 py-1.5 font-semibold w-full rounded-md text-xs cursor-pointer transition-colors duration-150 ${
+                    className={`px-3 py-1.5 font-semibold w-full rounded-full text-xs cursor-pointer transition-colors duration-150 ${
                       selectedPeriod === period
                         ? "text-emerald-600 bg-white shadow-sm"
                         : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"

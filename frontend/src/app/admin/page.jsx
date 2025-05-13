@@ -1,8 +1,8 @@
 import { InfoCards } from "@/layout/admin/dashboard/InfoCards";
-import MonthlySalesChart from "@/layout/admin/dashboard/MonthlySalesChart";
+import ProductReportChart from "@/layout/admin/dashboard/ProductReportChart";
 import MonthlyTarget from "@/layout/admin/dashboard/MonthlyTarget";
 import LastUpdatedInfo from "@/layout/admin/dashboard/LastUpdateInfo";
-import StatisticsChart from "@/layout/admin/dashboard/StatisticsChart";
+import SalesStatsChart from "@/layout/admin/dashboard/SalesStatsChart";
 import CarProductsTable from "@/layout/admin/dashboard/CarProductsTable";
 import TopViewedCarsChart from "@/layout/admin/dashboard/TopViewedCarsChart";
 import WebTrafficChart from "@/layout/admin/dashboard/WebTrafficChart";
@@ -26,7 +26,7 @@ export default function DashboardPage() {
       <div className="col-span-12 xl:space-y-6 xl:col-span-8">
         <InfoCards />
         <div className="hidden xl:block space-y-6">
-          <MonthlySalesChart />
+          <ProductReportChart />
           <WebTrafficChart />
         </div>
       </div>
@@ -40,12 +40,12 @@ export default function DashboardPage() {
       </div>
 
       <div className="col-span-12 space-y-6 block xl:hidden">
-        <MonthlySalesChart />
+        <ProductReportChart />
         <WebTrafficChart />
       </div>
 
       <div className="col-span-12">
-        <StatisticsChart />
+        <SalesStatsChart />
       </div>
 
       <div className="col-span-12">

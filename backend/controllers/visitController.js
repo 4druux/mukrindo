@@ -20,7 +20,6 @@ const {
 const VISITOR_COOKIE_NAME =
   process.env.VISITOR_COOKIE_NAME || "mukrindo_visitor_id";
 
-// Fungsi untuk tracking visit (tidak berubah)
 exports.trackHomepageVisit = async (req, res) => {
   try {
     let visitorId = req.cookies[VISITOR_COOKIE_NAME];
@@ -73,7 +72,6 @@ exports.trackHomepageVisit = async (req, res) => {
   }
 };
 
-// Fungsi untuk get stats (tidak berubah)
 exports.getHomepageVisitStats = async (req, res) => {
   try {
     const now = new Date();

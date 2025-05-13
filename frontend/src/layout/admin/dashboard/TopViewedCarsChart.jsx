@@ -3,6 +3,10 @@ import React, { useMemo, useState, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useProducts } from "@/context/ProductContext";
 import { FaEllipsis } from "react-icons/fa6";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+import { useExportData } from "@/hooks/useExportData";
+import ExportDropdown from "@/components/product-admin/Dashboard/ExportDropdown";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -12,15 +16,87 @@ const CHART_COLORS = ["#F89B78", "#B6A6E9", "#AFDC8F", "#9AD8D8", "#92C5F9"];
 
 const TopViewedCarsChart = () => {
   const { products, loading, error } = useProducts();
-  const [showExportMenu, setShowExportMenu] = useState(false);
-  const chartRef = useRef(null);
   const [allStats, setAllStats] = useState({
     totalAllViews: 0,
     averageAllViews: 0,
     allProductsWithViews: [],
   });
 
-  // Calculate statistics for all products
+  const prepareExportData = () => {
+    if (
+      !allStats.allProductsWithViews ||
+      allStats.allProductsWithViews.length === 0
+    ) {
+      return null;
+    }
+
+    const exportDate = format(new Date(), "dd MMM yyyy", { locale: id });
+    const periodeText = `Data per: ${exportDate}`;
+
+    const pdfData = allStats.allProductsWithViews.map((product, index) => [
+      index + 1,
+      product.carName || "-",
+      product.brand || "-",
+      product.model || "-",
+      product.variant || "-",
+      product.viewCount.toLocaleString("id-ID"),
+    ]);
+
+    const csvData = allStats.allProductsWithViews.map((product, index) => [
+      index + 1,
+      `"${product.carName || "-"}"`,
+      `"${product.brand || "-"}"`,
+      `"${product.model || "-"}"`,
+      `"${product.variant || "-"}"`,
+      product.viewCount,
+    ]);
+
+    return {
+      pdf: {
+        title: "Laporan Mobil Paling Dilihat",
+        data: pdfData,
+        columns: [
+          "No",
+          "Nama Mobil",
+          "Merk",
+          "Model",
+          "Varian",
+          "Jumlah Dilihat",
+        ],
+        summaryData: [
+          [
+            "Total Data Mobil Dilihat:",
+            allStats.allProductsWithViews.length.toLocaleString("id-ID"),
+          ],
+          [
+            "Total Views Keseluruhan:",
+            allStats.totalAllViews.toLocaleString("id-ID"),
+          ],
+          [
+            "Rata-rata Views per Mobil:",
+            allStats.averageAllViews.toFixed(2).replace(".", ","),
+          ],
+        ],
+        fileName: "Laporan_Mobil_Paling_Dilihat_Mukrindo.pdf",
+        periodeText,
+      },
+      csv: {
+        headers: [
+          "No",
+          "Nama Mobil",
+          "Merk",
+          "Model",
+          "Varian",
+          "Jumlah Dilihat",
+        ],
+        data: csvData,
+        fileName: "Laporan_Mobil_Paling_Dilihat_Mukrindo.csv",
+      },
+    };
+  };
+
+  const { handleExport } = useExportData(prepareExportData);
+
   const calculateAllProductsStats = () => {
     if (!products || products.length === 0) {
       return {
@@ -51,15 +127,9 @@ const TopViewedCarsChart = () => {
     };
   };
 
-  // Calculate chart data for top 5 products
   const chartData = useMemo(() => {
     if (!products || products.length === 0) {
-      return {
-        series: [],
-        labels: [],
-        topProducts: [],
-        hasData: false,
-      };
+      return { series: [], labels: [], topProducts: [], hasData: false };
     }
 
     const productsWithViews = products
@@ -69,63 +139,36 @@ const TopViewedCarsChart = () => {
     const topProducts = productsWithViews.slice(0, 5);
 
     if (topProducts.length === 0) {
-      return {
-        series: [],
-        labels: [],
-        topProducts: [],
-        hasData: false,
-      };
+      return { series: [], labels: [], topProducts: [], hasData: false };
     }
 
-    const series = topProducts.map((p) => p.viewCount);
-    const labels = topProducts.map(
-      (p) =>
-        p.carName ||
-        `${p.brand || ""} ${p.model || ""} ${p.variant || ""}`.trim() ||
-        `Produk ID: ${p._id}`
-    );
-
     return {
-      series,
-      labels,
+      series: topProducts.map((p) => p.viewCount),
+      labels: topProducts.map(
+        (p) =>
+          p.carName ||
+          `${p.brand || ""} ${p.model || ""} ${p.variant || ""}`.trim() ||
+          `Produk ID: ${p._id}`
+      ),
       topProducts,
       hasData: true,
     };
   }, [products]);
 
-  // Chart options
   const chartOptions = useMemo(
     () => ({
       chart: {
         type: "pie",
-        animations: {
-          enabled: true,
-          easing: "easeinout",
-          speed: 800,
-        },
-        toolbar: {
-          show: false,
-        },
-        events: {
-          mounted: (chart) => {
-            chartRef.current = chart;
-          },
-          updated: (chart) => {
-            chartRef.current = chart;
-          },
-        },
+        animations: { enabled: true, easing: "easeinout", speed: 800 },
+        toolbar: { show: false },
       },
       labels: chartData.labels,
       colors: CHART_COLORS.slice(0, chartData.topProducts.length),
-      legend: {
-        show: false,
-      },
+      legend: { show: false },
       tooltip: {
         enabled: true,
-        y: {
-          formatter: (val) => `${val.toLocaleString("id-ID")} dilihat`,
-        },
-        custom: function ({ series, seriesIndex, dataPointIndex, w }) {
+        y: { formatter: (val) => `${val.toLocaleString("id-ID")} dilihat` },
+        custom: ({ series, seriesIndex, w }) => {
           const label = w.globals.labels[seriesIndex];
           const value = series[seriesIndex];
           const percentage = (
@@ -135,23 +178,21 @@ const TopViewedCarsChart = () => {
           const color = w.globals.colors[seriesIndex];
 
           return `
-            <div class="apexcharts-tooltip-custom" style="padding: 8px 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <div style="display: flex; align-items: center; margin-bottom: 4px;">
-                    <span style="width: 12px; height: 12px; border-radius: 50%; background-color: ${color}; margin-right: 8px;"></span>
-                    <strong style="font-size: 13px; color: #333;">${label}</strong>
-                </div>
-                <div style="font-size: 12px; color: #555;">
-                    Dilihat: ${value.toLocaleString("id-ID")} (${percentage}%)
-                </div>
-            </div>
-          `;
+          <div class="apexcharts-tooltip-custom" style="padding: 8px 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <div style="display: flex; align-items: center; margin-bottom: 4px;">
+                  <span style="width: 12px; height: 12px; border-radius: 50%; background-color: ${color}; margin-right: 8px;"></span>
+                  <strong style="font-size: 13px; color: #333;">${label}</strong>
+              </div>
+              <div style="font-size: 12px; color: #555;">
+                  Dilihat: ${value.toLocaleString("id-ID")} (${percentage}%)
+              </div>
+          </div>
+        `;
         },
       },
       dataLabels: {
         enabled: true,
-        formatter: function (val) {
-          return `${val.toFixed(1)}%`;
-        },
+        formatter: (val) => `${val.toFixed(1)}%`,
         style: {
           fontSize: "12px",
           fontFamily: "Outfit, sans-serif",
@@ -170,43 +211,22 @@ const TopViewedCarsChart = () => {
       plotOptions: {
         pie: {
           expandOnClick: false,
-          dataLabels: {
-            offset: -15,
-            minAngleToShowLabel: 10,
-          },
+          dataLabels: { offset: -15, minAngleToShowLabel: 10 },
         },
       },
       states: {
-        hover: {
-          filter: {
-            type: "none",
-          },
-        },
-        active: {
-          filter: {
-            type: "none",
-          },
-        },
+        hover: { filter: { type: "none" } },
+        active: { filter: { type: "none" } },
       },
-      stroke: {
-        show: true,
-        width: 1.5,
-        colors: ["#fff"],
-      },
+      stroke: { show: true, width: 1.5, colors: ["#fff"] },
       responsive: [
         {
           breakpoint: 768,
           options: {
-            chart: {
-              width: "100%",
-            },
+            chart: { width: "100%" },
             dataLabels: {
-              style: {
-                fontSize: "10px",
-              },
-              formatter: function (val) {
-                return `${val.toFixed(1)}%`;
-              },
+              style: { fontSize: "10px" },
+              formatter: (val) => `${val.toFixed(1)}%`,
             },
           },
         },
@@ -215,104 +235,6 @@ const TopViewedCarsChart = () => {
     [chartData.labels, chartData.topProducts.length]
   );
 
-  // Handle export functionality
-  const handleExport = (type) => {
-    if (type === "CSV") {
-      const headers = [
-        "No",
-        "Nama Mobil",
-        "Merk",
-        "Model",
-        "Varian",
-        "Jumlah Dilihat",
-      ];
-      const csvContent = [
-        headers.join(","),
-        ...allStats.allProductsWithViews.map((product, index) =>
-          [
-            index + 1,
-            `"${product.carName || "-"}"`,
-            `"${product.brand || "-"}"`,
-            `"${product.model || "-"}"`,
-            `"${product.variant || "-"}"`,
-            product.viewCount,
-          ].join(",")
-        ),
-      ].join("\n");
-
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", "data_mobil_dilihat.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else if (type === "PDF") {
-      import("jspdf").then((jsPDF) => {
-        import("jspdf-autotable").then((autoTable) => {
-          const doc = new jsPDF.default();
-
-          // Title
-          doc.setFontSize(16);
-          doc.text("Laporan Data Mobil Dilihat", 14, 20);
-
-          // Subtitle
-          doc.setFontSize(10);
-          doc.text(
-            `Total Data: ${allStats.allProductsWithViews.length} mobil`,
-            14,
-            30
-          );
-          doc.text(
-            `Total Views: ${allStats.totalAllViews.toLocaleString("id-ID")}`,
-            14,
-            36
-          );
-          doc.text(
-            `Rata-rata: ${allStats.averageAllViews.toFixed(2)} views/mobil`,
-            14,
-            42
-          );
-
-          // Table data
-          autoTable.default(doc, {
-            startY: 50,
-            head: [["No", "Nama Mobil", "Merk", "Model", "Varian", "Views"]],
-            body: allStats.allProductsWithViews.map((product, index) => [
-              index + 1,
-              product.carName || "-",
-              product.brand || "-",
-              product.model || "-",
-              product.variant || "-",
-              product.viewCount.toLocaleString("id-ID"),
-            ]),
-            styles: { fontSize: 8 },
-            headStyles: { fillColor: [79, 70, 229] },
-          });
-
-          doc.save("data_mobil_dilihat.pdf");
-        });
-      });
-    }
-
-    setShowExportMenu(false);
-  };
-
-  // Close export menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showExportMenu && !event.target.closest(".export-menu-container")) {
-        setShowExportMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showExportMenu]);
-
-  // Update all products stats when products change
   useEffect(() => {
     if (products) {
       setAllStats(calculateAllProductsStats());
@@ -377,37 +299,7 @@ const TopViewedCarsChart = () => {
         <h3 className="text-md lg:text-lg font-medium text-gray-700">
           Mobil Paling Diminati
         </h3>
-        <div className="relative export-menu-container">
-          <button
-            onClick={() => setShowExportMenu(!showExportMenu)}
-            className="text-gray-500 hover:text-gray-700 p-2 cursor-pointer hover:bg-gray-100 rounded-full focus:outline-none"
-            aria-label="Opsi Ekspor"
-          >
-            <FaEllipsis className="w-5 h-5" />
-          </button>
-          {showExportMenu && (
-            <div className="absolute right-0 mt-2 w-max bg-white border border-gray-200 rounded-md shadow-lg z-10">
-              <ul className="text-xs font-medium text-gray-700">
-                <li>
-                  <button
-                    onClick={() => handleExport("PDF")}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    Download PDF
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onClick={() => handleExport("CSV")}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  >
-                    Download CSV
-                  </button>
-                </li>
-              </ul>
-            </div>
-          )}
-        </div>
+        <ExportDropdown onExport={handleExport} className="relative" />
       </div>
 
       <div className="flex flex-col items-center">
@@ -422,7 +314,6 @@ const TopViewedCarsChart = () => {
         )}
       </div>
 
-      {/* Custom Legend */}
       <div className="mt-6 space-y-2">
         <h4 className="text-sm font-semibold text-gray-600 mb-2">
           Top 5 Mobil Paling Diminati
@@ -448,7 +339,6 @@ const TopViewedCarsChart = () => {
         ))}
       </div>
 
-      {/* All Products Stats */}
       <div className="mt-6 pt-4 border-t border-gray-200">
         <p className="text-xs text-gray-600">
           Total melihat semua data mobil:{" "}
