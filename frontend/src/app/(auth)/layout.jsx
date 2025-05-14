@@ -13,13 +13,13 @@ export default function AuthLayout({ children }) {
             <div className="absolute w-full h-full top-0 left-0 pointer-events-none">
               <GridShape />
             </div>
-            <div className="flex items-center justify-between max-w-2xl mx-auto">
+            <div className="flex items-end justify-between max-w-2xl mx-auto">
               <Image
                 width={400}
                 height={200}
                 src="/images/Badge/car-3-removebg.png"
                 alt="grid"
-                className="object-contain"
+                className="object-contain lg:w-[300px] lg:h-[200px]"
               />
 
               <div className="flex flex-col items-center text-center">
@@ -27,14 +27,15 @@ export default function AuthLayout({ children }) {
                   <Image
                     width={231}
                     height={48}
-                    src="./images/logo/auth-logo.svg"
+                    src="/images/logo/mm-logo-white.png"
                     alt="Logo"
+                    className="cursor-pointer lg:w-[400px] lg:h-[65px]"
                   />
                 </Link>
-                <h1 className="mb-4 text-3xl font-bold text-white">
-                  Mukrindo Motor
-                </h1>
-                <p className="text-neutral-300">Showroom mobil bekas terbaik dan terpercaya</p>
+
+                <p className="text-neutral-200">
+                  Showroom mobil bekas terbaik dan terpercaya
+                </p>
               </div>
             </div>
           </div>

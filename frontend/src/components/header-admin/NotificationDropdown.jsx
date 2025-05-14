@@ -1,125 +1,230 @@
 "use client";
-
-import Link from "next/link";
-import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-
-// Import Icons
-import { Bell, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Bell, X, Check, Trash2, MailCheck } from "lucide-react";
+import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { formatDistanceToNow } from "date-fns";
+import { id as localeID } from "date-fns/locale";
 
 export default function NotificationDropdown() {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [notifying, setNotifying] = useState(true);
+  const [notifications, setNotifications] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const router = useRouter();
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/notifications");
+      setNotifications(res.data);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const deleteAllNotifications = async () => {
+    try {
+      await axios.delete("http://localhost:5000/api/notifications");
+      setNotifications([]);
+    } catch (error) {
+      console.error("Error deleting all notifications:", error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const unreadNotifications = notifications.filter((n) => !n.isRead);
+      await Promise.all(
+        unreadNotifications.map((n) =>
+          axios.patch(`http://localhost:5000/api/notifications/${n._id}/read`)
+        )
+      );
+
+      setNotifications(
+        notifications.map((n) => ({
+          ...n,
+          isRead: true,
+        }))
+      );
+    } catch (error) {
+      console.error("Error marking all as read:", error);
+    }
+  };
+
+  const handleNotificationClick = async (notification) => {
+    if (!notification.isRead) {
+      await markAsRead(notification._id);
+    }
+
+    const routes = {
+      tradeIn: `/admin/layanan-produk?tab=tradeIn&id=${notification.requestId}&fromNotification=true`,
+      buySell: `/admin/layanan-produk?tab=buySell&id=${notification.requestId}&fromNotification=true`,
+      notifStock: `/admin/layanan-produk?tab=notifyMe&id=${notification.requestId}&fromNotification=true`,
+    };
+
+    router.push(routes[notification.type]);
+    setIsOpen(false);
+  };
+
+  const markAsRead = async (id, e) => {
+    if (e && typeof e.stopPropagation === "function") {
+      e.stopPropagation();
+    }
+
+    try {
+      await axios.patch(`http://localhost:5000/api/notifications/${id}/read`);
+      setNotifications(
+        notifications.map((n) => (n._id === id ? { ...n, isRead: true } : n))
+      );
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsDropdownOpen(false);
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [dropdownRef]);
-
-  useEffect(() => {
-    if (isDropdownOpen) {
-      setNotifying(false);
-    }
-  }, [isDropdownOpen]);
-
-  const dropDownVariant = {
-    open: { opacity: 1, y: 0, transition: { duration: 0.2 } },
-    closed: { opacity: 0, y: -10, transition: { duration: 0.2 } },
-  };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button
-        className="relative dropdown-toggle flex items-center justify-center text-gray-500 transition-colors bg-white border
-         border-gray-200 rounded-full hover:text-gray-700 w-8 h-8 lg:w-11 lg:h-11 hover:bg-gray-100 cursor-pointer"
-        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+        onClick={() => setIsOpen(!isOpen)}
+        className="relative p-2 rounded-full hover:bg-gray-100 border border-gray-200 cursor-pointer transition-colors duration-200"
       >
-        <span
-          className={`absolute right-0 top-0.5 z-10 h-2 w-2 rounded-full bg-orange-300 ${
-            !notifying ? "hidden" : ""
-          }`}
-        >
-          <span className="absolute -right-0.5 -top-0.5 z-10 h-3 w-3 bg-orange-500 rounded-full opacity-75 animate-ping"></span>
-        </span>
-        <Bell className="w-4 lg:w-5" />
+        <Bell className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
+        {notifications.some((n) => !n.isRead) && (
+          <span className="absolute right-0 top-0 z-10 h-2 w-2 bg-orange-500 rounded-full">
+            <span className="absolute -right-0.5 -top-0.5 z-10 h-3 w-3 bg-orange-500 rounded-full opacity-75 animate-ping"></span>
+          </span>
+        )}
       </button>
 
-      {/* Inlined Dropdown */}
       <AnimatePresence>
-        {isDropdownOpen && (
+        {isOpen && (
           <motion.div
-            initial="closed"
-            animate="open"
-            exit="closed"
-            variants={dropDownVariant}
-            className="absolute right-[-80px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-2xl border border-gray-200 
-          bg-white p-3 shadow-lg sm:w-[361px]"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+            className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden"
           >
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100">
-              <h5 className="text-lg font-semibold text-gray-800">
-                Notification
-              </h5>
+            <div className="p-3 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-md  font-medium text-gray-700">Notifikasi</h3>
               <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="transition dropdown-toggle"
+                onClick={() => setIsOpen(false)}
+                className="p-1 rounded-full hover:bg-gray-100 transition-colors"
               >
-                <X className="w-5 h-5 text-gray-500 hover:text-gray-700 cursor-pointer" />
+                <X className="w-4 h-4 text-gray-600 cursor-pointer" />
               </button>
             </div>
-            <ul className="flex flex-col h-auto overflow-y-auto custom-scrollbar">
-              <li>
+
+            <div className="max-h-96 overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="p-6 flex flex-col items-center justify-center text-center">
+                  <MailCheck className="w-8 h-8 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500">Tidak ada notifikasi</p>
+                </div>
+              ) : (
+                <ul>
+                  {notifications.map((notification) => {
+                    // Tambahkan fallback untuk data yang tidak lengkap
+                    const preview = notification.preview || {};
+                    const model = preview.model || "Tidak ada info mobil";
+                    const customer = preview.customer || "";
+
+                    return (
+                      <li
+                        key={notification._id}
+                        onClick={() => handleNotificationClick(notification)}
+                        className={`p-4 cursor-pointer border-b border-gray-200 last:border-b-0 transition-colors ${
+                          notification.isRead
+                            ? "bg-gray-50 hover:bg-blue-50"
+                            : "bg-white hover:bg-gray-50"
+                        }`}
+                      >
+                        <div className="flex gap-3">
+                          <div
+                            className={`flex-shrink-0 w-2 rounded-full ${
+                              notification.isRead
+                                ? "bg-gray-300"
+                                : "bg-orange-500"
+                            }`}
+                          ></div>
+
+                          <div className="flex-1">
+                            <div className="flex justify-between">
+                              <span className="text-xs font-semibold text-gray-800">
+                                {notification.type === "tradeIn"
+                                  ? "🔄 Permintaan Tukar Tambah"
+                                  : notification.type === "buySell"
+                                  ? "💰 Permintaan Jual Mobil"
+                                  : "🔔 Permintaan Stok"}
+                              </span>
+                              {!notification.isRead && (
+                                <span className="inline-block w-2 h-2 bg-orange-500 animate-pulse rounded-full"></span>
+                              )}
+                            </div>
+
+                            <p className="text-xs mt-1 text-gray-600">
+                              {model}
+                            </p>
+
+                            {customer && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                👤 {customer}
+                              </p>
+                            )}
+
+                            <p className="text-xs text-gray-400 mt-2">
+                              {formatDistanceToNow(
+                                new Date(notification.createdAt),
+                                {
+                                  addSuffix: true,
+                                  locale: localeID,
+                                }
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+
+            {notifications.length > 0 && (
+              <div className="p-3 border-t border-gray-200 flex justify-between gap-2">
                 <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 w-full text-left"
+                  onClick={markAllAsRead}
+                  disabled={notifications.every((n) => n.isRead)}
+                  className={`flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                    notifications.every((n) => n.isRead)
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-gray-700 hover:text-blue-600 hover:bg-gray-100"
+                  }`}
                 >
-                  <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
-                    <Image
-                      width={40}
-                      height={40}
-                      src="/images/user/user-02.jpg"
-                      alt="User"
-                      className="w-full overflow-hidden rounded-full"
-                    />
-                    <span
-                      className="absolute bottom-0 right-0 z-10 h-2.5 w-full max-w-2.5 rounded-full border-[1.5px] 
-                  border-white bg-success-500"
-                    ></span>
-                  </span>
-                  <span className="block">
-                    <span className="mb-1.5 space-x-1 block text-theme-sm text-gray-500">
-                      <span className="font-medium text-gray-800">
-                        Terry Franci
-                      </span>
-                      <span>requests permission to change</span>
-                      <span className="font-medium text-gray-800">
-                        Project - Nganter App
-                      </span>
-                    </span>
-                    <span className="flex items-center gap-2 text-gray-500 text-theme-xs">
-                      <span>Project</span>
-                      <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                      <span>5 min ago</span>
-                    </span>
-                  </span>
+                  Tandai Semua Dibaca
                 </button>
-              </li>
-            </ul>
-            <Link
-              href="/"
-              className="block px-4 py-2 mt-3 text-sm font-medium text-center text-gray-700 
-            bg-white border border-gray-300 rounded-lg hover:bg-gray-100"
-            >
-              View All Notifications
-            </Link>
+                <button
+                  onClick={deleteAllNotifications}
+                  className="flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  Hapus Semua
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

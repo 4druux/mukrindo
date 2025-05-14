@@ -130,8 +130,8 @@ const BookmarkRightbar = () => {
                   Memuat...
                 </div>
               ) : bookmarkedProducts.length === 0 ? (
-                <div className="flex items-center gap-4 justify-center h-[80vh] text-gray-600 px-10">
-                  <FaBoxOpen className="w-24 h-24 sm:w-36 sm:h-36 text-gray-500" />
+                <div className="flex items-center gap-4 justify-center h-[80vh] text-gray-600 px-10.5">
+                  <FaBoxOpen className="w-24 h-24 sm:w-26 sm:h-26 text-gray-500" />
                   <div className="flex flex-col text-gray-600 mt-4 sm:mt-0">
                     <p className="text-2xl font-semibold">Oops!</p>
                     Belum ada mobil yang disimpan.

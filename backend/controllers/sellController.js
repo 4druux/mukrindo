@@ -1,4 +1,5 @@
 const SellRequest = require("../models/sellRequest");
+const Notification = require("../models/notification");
 
 // @desc    Create a new sell request
 // @route   POST /api/sell-requests
@@ -66,6 +67,15 @@ exports.createSellRequest = async (req, res) => {
 
     // Simpan ke database
     const savedRequest = await newRequest.save();
+
+    await Notification.create({
+      type: "buySell",
+      requestId: savedRequest._id,
+      preview: {
+        model: `${brand} ${model} ${year}`,
+        customer: `${name} - ${phoneNumber}`,
+      },
+    });
 
     // Kirim response sukses
     res.status(201).json({

@@ -13,6 +13,7 @@ import {
   format as formatDate,
 } from "date-fns";
 import { id as localeID } from "date-fns/locale";
+import { Loader2 } from "lucide-react";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -179,8 +180,19 @@ export default function MonthlyTarget() {
 
   if (loading) {
     return (
-      <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-gray-50 p-6 text-center">
-        Memuat target bulanan...
+      <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white">
+        <div className="px-5 pt-5 md:border-b md:border-gray-200 pb-5 md:px-6 md:pt-6">
+          <h3 className="text-md lg:text-lg font-medium text-gray-700 animate-pulse">
+            Memuat target bulanan...
+          </h3>
+          <div
+            className="flex flex-col gap-3 justify-center items-center w-full h-full text-gray-500"
+            style={{ height: "350px" }}
+          >
+            <Loader2 className="animate-spin mr-2" />
+            <span className="animate-pulse">Sedang memuat data...</span>
+          </div>
+        </div>
       </div>
     );
   }

@@ -14,11 +14,13 @@ export const useTraffic = () => {
   return context;
 };
 
-const STATS_API_ENDPOINT = "http://localhost:5000/api/visits/homepage/stats";
-const TRACK_API_ENDPOINT = "http://localhost:5000/api/visits/homepage/track";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const STATS_API_ENDPOINT = `${API_BASE_URL}/api/visits/homepage/stats`;
+const TRACK_API_ENDPOINT = `${API_BASE_URL}/api/visits/homepage/track`;
+const HISTORY_API_ENDPOINT = `${API_BASE_URL}/api/visits/homepage/history`;
 
 const fetcher = (url) =>
-  axios.get(url, { credentials: "include" }).then((res) => res.data);
+  axios.get(url, { withCredentials: true }).then((res) => res.data);
 
 export const TrafficProvider = ({ children }) => {
   const {
@@ -28,7 +30,6 @@ export const TrafficProvider = ({ children }) => {
     mutate: mutateTrafficStats,
   } = useSWR(STATS_API_ENDPOINT, fetcher, {
     revalidateOnFocus: true,
-    // refreshInterval: 60000, // Opsional: refresh setiap 1 menit
     compare: (a, b) => {
       if (a === b) return true;
       if (a === undefined || b === undefined) return false;
@@ -36,35 +37,31 @@ export const TrafficProvider = ({ children }) => {
     },
   });
 
+  const getTrafficHistory = useCallback((period, year) => {
+    return fetcher(`${HISTORY_API_ENDPOINT}?period=${period}&year=${year}`);
+  }, []);
+
+ 
+
   const trackHomepageVisit = useCallback(async () => {
     try {
       const response = await axios.post(
         TRACK_API_ENDPOINT,
         {},
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
-      if (response.status === 200 || response.status === 201) {
-        console.log("Homepage visit tracked successfully by context.");
-
-        return { success: true, data: response.data };
-      } else {
-        console.error(
-          "Failed to track homepage visit via context:",
-          response.statusText
-        );
-        return { success: false, error: response.statusText };
-      }
+      return {
+        success: response.status === 200 || response.status === 201,
+        data: response.data,
+        error: response.statusText,
+      };
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Error tracking homepage visit via context";
-      console.error("Track Homepage Visit Error (Context):", errorMessage);
-      return { success: false, error: errorMessage };
+      return {
+        success: false,
+        error: error.response?.data?.message || error.message,
+      };
     }
-  });
+  }, []);
 
   const contextValue = {
     trafficStats,
@@ -72,6 +69,7 @@ export const TrafficProvider = ({ children }) => {
     statsError,
     mutateTrafficStats,
     trackHomepageVisit,
+    getTrafficHistory,
   };
 
   return (

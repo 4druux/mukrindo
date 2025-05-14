@@ -1,4 +1,5 @@
 const TradeInRequest = require("../models/tradeInRequest");
+const Notification = require("../models/notification");
 
 // @desc    Create a new trade-in request
 // @route   POST /api/trade-in
@@ -13,6 +14,15 @@ exports.createTradeInRequest = async (req, res) => {
 
     // Simpan ke database
     const savedRequest = await newRequest.save();
+
+    await Notification.create({
+      type: "tradeIn",
+      requestId: savedRequest._id,
+      preview: {
+        model: `${req.body.tradeInBrand} ${req.body.tradeInModel} ${req.body.tradeInYear}`,
+        customer: `${req.body.customerName} - ${req.body.customerPhoneNumber}`,
+      },
+    });
 
     // Kirim response sukses
     res.status(201).json({

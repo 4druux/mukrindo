@@ -5,23 +5,21 @@ import { useTraffic } from "@/context/TrafficContext";
 import { formatDistanceToNow } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 import { FiRefreshCw } from "react-icons/fi";
+import { Loader2 } from "lucide-react";
 
 const LAST_UPDATE_TIME_KEY = "lastUpdateTime";
 const PREVIOUS_DATA_KEY = "previousData";
 const MAX_STORAGE_SIZE = 4 * 1024 * 1024; // 4MB
 
-// Optimized hash generator
 const generateDataHash = (data) => {
   if (!data) return null;
 
-  // Compact representation for traffic stats
   if (data.totalVisits !== undefined) {
-    return `${data.totalVisits}|${data.uniqueVisitors || 0}|${
-      data.lastUpdated ? new Date(data.lastUpdated).getTime() : 0
-    }`;
+    return `${data.totalVisits}|${data.uniqueVisitors}|${data.todayVisits}|${
+      data.currentMonthVisits
+    }|${data.lastUpdated ? new Date(data.lastUpdated).getTime() : 0}`;
   }
 
-  // Lightweight hash for products
   if (Array.isArray(data)) {
     return `${data.length}|${data.reduce((acc, p) => acc ^ p.id, 0)}`;
   }
@@ -41,8 +39,8 @@ const safeLocalStorageSet = (key, value) => {
   } catch (e) {
     if (e.name === "QuotaExceededError") {
       console.warn("Storage quota exceeded, clearing some space");
-      localStorage.removeItem(key); // Remove the problematic key first
-      localStorage.removeItem(PREVIOUS_DATA_KEY); // Then clear previous data
+      localStorage.removeItem(key);
+      localStorage.removeItem(PREVIOUS_DATA_KEY);
       try {
         localStorage.setItem(key, value);
         return true;
@@ -153,13 +151,23 @@ export default function LastUpdatedInfo() {
 
   const renderTimestamp = () => {
     if (productsLoading || statsLoading) {
-      return <span className="italic">Memuat data...</span>;
+      return (
+        <span className="flex items-center">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Memuat data...
+        </span>
+      );
     }
     if (productsError || statsError) {
       return <span className="text-red-500 italic">Gagal memuat data.</span>;
     }
     if (!lastUpdateTime) {
-      return <span className="italic">Menunggu data...</span>;
+      return (
+        <span className="flex items-center">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Memuat data...
+        </span>
+      );
     }
 
     if (hasRealChange) {
@@ -177,8 +185,10 @@ export default function LastUpdatedInfo() {
   };
 
   return (
-    <div className="p-4 border border-gray-200 md:border-none md:rounded-2xl md:shadow-sm text-sm text-gray-600 bg-white flex items-center justify-between">
-      <div>Terakhir data diperbarui: {renderTimestamp()}</div>
+    <div className="p-4 border border-gray-200 md:border-none md:rounded-2xl md:shadow-sm text-sm text-gray-600 bg-white flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2">
+        Terakhir data diperbarui: {renderTimestamp()}
+      </div>
       <button
         onClick={handleManualRefresh}
         disabled={isUpdating || productsLoading || statsLoading}

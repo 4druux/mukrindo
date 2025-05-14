@@ -7,7 +7,7 @@ import { HeaderProvider } from "@/context/HeaderContext";
 import { ProductProvider } from "@/context/ProductContext";
 import { TradeInProvider } from "@/context/TradeInContext";
 import { BuySellProvider } from "@/context/BuySellContext";
-import { NotificationProvider } from "@/context/NotificationContext";
+import { NotificationProvider } from "@/context/NotifStockContext";
 import { TrafficProvider } from "@/context/TrafficContext";
 import { Toaster } from "react-hot-toast";
 
@@ -15,8 +15,8 @@ export default function RootLayoutClient({ children }) {
   const pathname = usePathname();
   const isAdminPage =
     pathname.startsWith("/admin") ||
-    pathname.startsWith("/sign-in") ||
-    pathname.startsWith("/sign-up");
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register");
 
   return (
     <TrafficProvider>

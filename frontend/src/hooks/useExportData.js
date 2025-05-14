@@ -32,6 +32,7 @@ export const useExportData = (exportDataFn) => {
       ) {
         toast.error("Tidak ada data untuk periode yang dipilih.", {
           className: "custom-toast",
+          duration: 5000,
         });
         return false;
       }
@@ -44,12 +45,14 @@ export const useExportData = (exportDataFn) => {
 
       toast.success("Data berhasil diunduh!", {
         className: "custom-toast",
+        duration: 5000,
       });
       return true;
     } catch (error) {
       console.error("Export error:", error);
       toast.error("Gagal mengekspor data. Silakan coba lagi.", {
         className: "custom-toast",
+        duration: 5000,
       });
       return false;
     }

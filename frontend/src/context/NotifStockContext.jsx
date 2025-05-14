@@ -8,7 +8,7 @@ const NotificationContext = createContext();
 
 export const useNotification = () => useContext(NotificationContext);
 
-const API_ENDPOINT = "http://localhost:5000/api/notifications";
+const API_ENDPOINT = "http://localhost:5000/api/notif-stock";
 
 export const NotificationProvider = ({ children }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);

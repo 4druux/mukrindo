@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import useSWR from "swr";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSearchParams } from "next/navigation";
 
 // Global Components
 import Pagination from "@/components/global/Pagination";
@@ -69,7 +70,7 @@ const requestConfigs = {
     errorTitle: "Permintaan Jual Beli",
   },
   notifyMe: {
-    apiEndpoint: "http://localhost:5000/api/notifications",
+    apiEndpoint: "http://localhost:5000/api/notif-stock",
     statusConstants: NOTIFY_STATUS_FILTER,
     locationConstants: {},
     sortConstants: NOTIFY_SORT_ORDER,
@@ -111,6 +112,21 @@ const RequestView = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const fromNotification = searchParams.get("fromNotification");
+    const id = searchParams.get("id");
+
+    if (fromNotification === "true" && id) {
+      const element = document.getElementById(`request-${id}`);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 500);
+      }
+    }
+  }, [searchParams]);
 
   const config = requestConfigs[activeTab];
 

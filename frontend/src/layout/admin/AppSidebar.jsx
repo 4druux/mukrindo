@@ -8,10 +8,6 @@ import { useSidebar } from "@/context/SidebarContext";
 import {
   MdDashboard,
   MdFormatListBulleted,
-  MdTableChart,
-  MdDescription,
-  MdPieChart,
-  MdExtension,
   MdKeyboardArrowDown,
   MdMoreHoriz,
 } from "react-icons/md";
@@ -227,7 +223,7 @@ const AppSidebar = () => {
     >
       <div
         className={`py-8 flex  ${
-          !isExpanded && !isHovered ? "xl:justify-center" : "justify-start"
+          !isExpanded && !isHovered ? "xl:justify-center" : "justify-center"
         }`}
       >
         <Link href="/">
@@ -235,7 +231,7 @@ const AppSidebar = () => {
             <>
               <Image
                 className=""
-                src="/images/carousel/7.jpg"
+                src="/images/logo/mm-logo.png"
                 alt="Logo"
                 width={150}
                 height={40}
@@ -243,7 +239,7 @@ const AppSidebar = () => {
             </>
           ) : (
             <Image
-              src="/images/carousel/7.jpg"
+              src="/images/logo/mm-logo.png"
               alt="Logo"
               width={32}
               height={32}

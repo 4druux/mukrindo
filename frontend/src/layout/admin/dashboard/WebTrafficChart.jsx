@@ -1,9 +1,7 @@
 "use client";
-
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
-import useSWR from "swr";
-import axios from "axios";
+import { useTraffic } from "@/context/TrafficContext";
 import {
   format,
   parseISO,
@@ -25,28 +23,18 @@ import {
   subYears,
 } from "date-fns";
 import { id } from "date-fns/locale";
-import { FaChevronDown } from "react-icons/fa";
-import { useYearDropdown } from "@/hooks/useYearDropdown";
+import useSWR from "swr";
+import PeriodFilter from "@/components/product-admin/Dashboard/PeriodFilter";
+import { Loader2 } from "lucide-react";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-const HISTORY_API_ENDPOINT = `${API_BASE_URL}/api/visits/homepage/history`;
-
-const fetcher = (url) =>
-  axios.get(url, { withCredentials: true }).then((res) => res.data);
-
 export default function WebTrafficChart() {
-  const [selectedPeriod, setSelectedPeriod] = useState("Hari");
-  const {
-    currentYear,
-    setCurrentYear,
-    isYearDropdownOpen,
-    setIsYearDropdownOpen,
-    yearDropdownRef,
-  } = useYearDropdown();
+  const { getTrafficHistory } = useTraffic();
+  const [selectedTab, setSelectedTab] = useState("Hari");
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
   const apiQueryPeriodMap = {
     Hari: "daily",
@@ -55,22 +43,13 @@ export default function WebTrafficChart() {
     Tahun: "yearly",
   };
 
-  // Generate available years (e.g., last 5 years + current year)
-  const availableYears = useMemo(() => {
-    const current = new Date().getFullYear();
-    return Array.from({ length: 6 }, (_, i) => current - 5 + i + 1).sort(
-      (a, b) => b - a
-    );
-  }, []);
-
   const {
     data: trafficHistoryData,
     error: historyError,
     isLoading: historyLoading,
   } = useSWR(
-    // Always pass currentYear, backend might ignore if period is not monthly
-    `${HISTORY_API_ENDPOINT}?period=${apiQueryPeriodMap[selectedPeriod]}&year=${currentYear}`,
-    fetcher,
+    [apiQueryPeriodMap[selectedTab], currentYear],
+    ([period, year]) => getTrafficHistory(period, year),
     { revalidateOnFocus: true }
   );
 
@@ -88,7 +67,7 @@ export default function WebTrafficChart() {
     let categories = [];
     let visitsData = [];
 
-    if (selectedPeriod === "Hari") {
+    if (selectedTab === "Hari") {
       const last7Days = Array.from({ length: 7 }, (_, i) =>
         subDays(startOfDay(now), 6 - i)
       );
@@ -103,30 +82,29 @@ export default function WebTrafficChart() {
         categories.push(format(day, "dd MMM yy", { locale: id }));
         visitsData.push(matchingData?.visits || 0);
       });
-    } else if (selectedPeriod === "Minggu") {
+    } else if (selectedTab === "Minggu") {
       const endDate = endOfWeek(now, { weekStartsOn: 1 });
-      const startDate = subWeeks(startOfWeek(endDate, { weekStartsOn: 1 }), 3); // Ensure start of the week
+      const startDate = subWeeks(startOfWeek(endDate, { weekStartsOn: 1 }), 3);
       const weeks = eachWeekOfInterval(
         { start: startDate, end: endDate },
         { weekStartsOn: 1 }
       );
       weeks.forEach((weekStart) => {
         const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-        let weeklyVisits = 0;
-        dataPoints.forEach((point) => {
+        let weeklyVisits = dataPoints.reduce((sum, point) => {
           const pointDate = parseISO(point.date);
-          if (
-            isValid(pointDate) &&
+          return (
+            sum +
+            (isValid(pointDate) &&
             isWithinInterval(pointDate, { start: weekStart, end: weekEnd })
-          ) {
-            weeklyVisits += point.visits || 0;
-          }
-        });
+              ? point.visits
+              : 0)
+          );
+        }, 0);
         categories.push(format(weekStart, "dd MMM yy", { locale: id }));
         visitsData.push(weeklyVisits);
       });
-    } else if (selectedPeriod === "Bulan") {
-      // Use currentYear state for monthly view
+    } else if (selectedTab === "Bulan") {
       const yearDate = new Date(currentYear, 0, 1);
       const months = eachMonthOfInterval({
         start: startOfYear(yearDate),
@@ -134,42 +112,36 @@ export default function WebTrafficChart() {
       });
       months.forEach((monthStart) => {
         const monthEnd = endOfMonth(monthStart);
-        let monthlyVisits = 0;
-        // Filter data points relevant to the selected year first for efficiency
-        const yearDataPoints = dataPoints.filter((point) => {
+        let monthlyVisits = dataPoints.reduce((sum, point) => {
           const pointDate = parseISO(point.date);
-          return isValid(pointDate) && pointDate.getFullYear() === currentYear;
-        });
-        yearDataPoints.forEach((point) => {
-          const pointDate = parseISO(point.date);
-          // Double check interval, though filtering helps
-          if (
-            isValid(pointDate) &&
+          return (
+            sum +
+            (isValid(pointDate) &&
             isWithinInterval(pointDate, { start: monthStart, end: monthEnd })
-          ) {
-            monthlyVisits += point.visits || 0;
-          }
-        });
+              ? point.visits
+              : 0)
+          );
+        }, 0);
         categories.push(format(monthStart, "MMM yyyy", { locale: id }));
         visitsData.push(monthlyVisits);
       });
-    } else if (selectedPeriod === "Tahun") {
+    } else if (selectedTab === "Tahun") {
       const years = eachYearOfInterval({
         start: subYears(startOfYear(now), 4),
-        end: endOfYear(now), // Ensure we include the current year fully
+        end: endOfYear(now),
       });
       years.forEach((yearStart) => {
         const yearEnd = endOfYear(yearStart);
-        let yearlyVisits = 0;
-        dataPoints.forEach((point) => {
+        let yearlyVisits = dataPoints.reduce((sum, point) => {
           const pointDate = parseISO(point.date);
-          if (
-            isValid(pointDate) &&
+          return (
+            sum +
+            (isValid(pointDate) &&
             isWithinInterval(pointDate, { start: yearStart, end: yearEnd })
-          ) {
-            yearlyVisits += point.visits || 0;
-          }
-        });
+              ? point.visits
+              : 0)
+          );
+        }, 0);
         categories.push(format(yearStart, "yyyy"));
         visitsData.push(yearlyVisits);
       });
@@ -180,7 +152,7 @@ export default function WebTrafficChart() {
     trafficHistoryData,
     historyLoading,
     historyError,
-    selectedPeriod,
+    selectedTab,
     currentYear,
   ]);
 
@@ -232,15 +204,7 @@ export default function WebTrafficChart() {
         enabled: true,
         theme: "light",
         style: { fontSize: "12px", fontFamily: "Outfit, sans-serif" },
-        x: {
-          show: true,
-          // Format tooltip x-axis based on period
-          formatter: function (val, { dataPointIndex, w }) {
-            const category = w.globals.labels[dataPointIndex] || val;
-            // Re-parse based on expected format if needed, or just display category
-            return category;
-          },
-        },
+        x: { show: true },
         y: {
           formatter: (val) =>
             `${val ? val.toLocaleString("id-ID") : 0} kunjungan`,
@@ -260,19 +224,12 @@ export default function WebTrafficChart() {
             fontSize: "11px",
             fontFamily: "Outfit, sans-serif",
           },
-          formatter: function (val) {
-            // Shorten labels for daily/weekly if too long
-            if (
-              typeof val === "string" &&
-              val.length > 7 &&
-              (selectedPeriod === "Hari" || selectedPeriod === "Minggu")
-            ) {
-              return val.substring(0, 6) + "."; // e.g., "15 Jul."
-            }
-            // For monthly, it shows "MMM yyyy" which is fine
-            // For yearly, it shows "yyyy" which is fine
-            return val;
-          },
+          formatter: (val) =>
+            typeof val === "string" &&
+            val.length > 7 &&
+            (selectedTab === "Hari" || selectedTab === "Minggu")
+              ? val.substring(0, 6) + "."
+              : val,
         },
       },
       yaxis: {
@@ -297,34 +254,46 @@ export default function WebTrafficChart() {
         tickAmount: 5,
       },
     }),
-    [processedChartData, selectedPeriod] // Dependency on selectedPeriod for label formatting
+    [processedChartData, selectedTab]
   );
 
   const chartSeries = useMemo(
     () => [{ name: "Kunjungan", data: processedChartData.visits }],
     [processedChartData]
   );
+  const chartHeight = 280;
 
-  const chartHeight = chartOptions.chart.height;
-
-  // Update title map
   const periodTitleMap = {
     Hari: "7 Hari Terakhir",
     Minggu: "4 Minggu Terakhir",
-    Bulan: `Bulan ${currentYear}`, // Dynamic title for monthly
+    Bulan: `Bulan ${currentYear}`,
     Tahun: "5 Tahun Terakhir",
   };
 
   if (historyLoading) {
     return (
       <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white px-4 pb-5 pt-5 sm:px-6 sm:pt-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-md lg:text-lg font-medium text-gray-700">
-            Memuat Statistik Trafik...
-          </h3>
+        <div className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="w-full">
+          <h3 className="text-md lg:text-lg font-medium text-gray-700 animate-pulse">
+              Memuat Statistik Trafik...
+            </h3>
+          </div>
+
+          <div className="flex items-start w-full gap-3 bg-gray-200 p-1 animate-pulse rounded-full sm:w-auto sm:justify-end">
+            <div className="w-1/4 md:w-20 h-5 bg-white animate-pulse rounded-full" />
+            <div className="w-1/4 md:w-20 h-5 bg-white animate-pulse rounded-full" />
+            <div className="w-1/4 md:w-20 h-5 bg-white animate-pulse rounded-full" />
+            <div className="w-1/4 md:w-20 h-5 bg-white animate-pulse rounded-full" />
+          </div>
         </div>
-        <div className="animate-pulse" style={{ height: `${chartHeight}px` }}>
-          <div className="h-full bg-gray-200 rounded-md"></div>
+
+        <div
+          className="flex flex-col gap-3 justify-center items-center w-full h-full text-gray-500"
+          style={{ height: `${chartHeight}px` }}
+        >
+          <Loader2 className="animate-spin mr-2" />
+          <span className="animate-pulse">Sedang memuat data...</span>
         </div>
       </div>
     );
@@ -347,8 +316,7 @@ export default function WebTrafficChart() {
             justifyContent: "center",
           }}
         >
-          Gagal memuat data trafik. Silakan coba lagi nanti. Error:{" "}
-          {historyError.message}
+          Gagal memuat data trafik. Silakan coba lagi nanti.
         </div>
       </div>
     );
@@ -363,88 +331,26 @@ export default function WebTrafficChart() {
       <div className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="w-full">
           <h3 className="text-md lg:text-lg font-medium text-gray-700">
-            Statistik Trafik Pengunjung {periodTitleMap[selectedPeriod]}
+            Statistik Trafik Pengunjung {periodTitleMap[selectedTab]}
           </h3>
         </div>
         <div className="flex items-start w-full gap-3 sm:w-auto sm:justify-end">
-          <div className="flex items-center gap-0.5 rounded-full bg-gray-100 p-1 w-full sm:w-auto">
-            {["Hari", "Minggu", "Bulan", "Tahun"].map((period) => {
-              if (period === "Bulan") {
-                return (
-                  <div key={period} className="relative" ref={yearDropdownRef}>
-                    <button
-                      onClick={() => {
-                        const isOpening = !isYearDropdownOpen;
-                        setSelectedPeriod("Bulan");
-                        setIsYearDropdownOpen(isOpening);
-                      }}
-                      className={`px-3 py-1.5 font-semibold w-full rounded-full text-xs cursor-pointer  transition-colors duration-150 flex items-center justify-center gap-1 whitespace-nowrap ${
-                        selectedPeriod === period
-                          ? "text-emerald-600 bg-white shadow-sm"
-                          : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                      }`}
-                    >
-                      {period} {currentYear}
-                      <FaChevronDown
-                        className={`h-3 w-3 transition-transform ${
-                          isYearDropdownOpen ? "rotate-180" : ""
-                        }`}
-                      />
-                    </button>
-                    {isYearDropdownOpen && selectedPeriod === "Bulan" && (
-                      <div className="absolute z-20 mt-1 right-0 w-full min-w-[80px] rounded-xl bg-white shadow-lg border border-gray-200 max-h-48 overflow-y-auto">
-                        <ul className="py-1">
-                          {availableYears.map((year) => (
-                            <li
-                              key={year}
-                              onClick={() => {
-                                setCurrentYear(year);
-                                setIsYearDropdownOpen(false);
-                              }}
-                              className={`px-3 py-1.5 text-xs text-center cursor-pointer ${
-                                year === currentYear
-                                  ? "font-semibold text-emerald-600 bg-emerald-50"
-                                  : "text-gray-700 hover:bg-gray-100"
-                              }`}
-                            >
-                              {year}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                );
-              } else {
-                return (
-                  <button
-                    key={period}
-                    onClick={() => {
-                      setSelectedPeriod(period);
-                      setIsYearDropdownOpen(false);
-                    }}
-                    className={`px-3 py-1.5 font-semibold w-full rounded-full text-xs cursor-pointer transition-colors duration-150 ${
-                      selectedPeriod === period
-                        ? "text-emerald-600 bg-white shadow-sm"
-                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    {period}
-                  </button>
-                );
-              }
-            })}
-          </div>
+          <PeriodFilter
+            currentYear={currentYear}
+            setCurrentYear={setCurrentYear}
+            selectedTab={selectedTab}
+            setSelectedTab={setSelectedTab}
+            webTrafficChart={true}
+          />
         </div>
       </div>
 
-      {/* Chart Area */}
       {hasActualData ? (
         <div className="max-w-full overflow-x-auto custom-scrollbar">
           <div className="min-w-[600px] xl:min-w-full">
             <ReactApexChart
-              key={`${selectedPeriod}-${
-                selectedPeriod === "Bulan" ? currentYear : ""
+              key={`${selectedTab}-${
+                selectedTab === "Bulan" ? currentYear : ""
               }`}
               options={chartOptions}
               series={chartSeries}

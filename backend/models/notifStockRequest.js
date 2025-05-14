@@ -1,7 +1,7 @@
 // models/notificationRequest.js
 const mongoose = require("mongoose");
 
-const NotificationRequestSchema = new mongoose.Schema(
+const NotifStockRequestSchema = new mongoose.Schema(
   {
     brand: {
       type: String,
@@ -36,6 +36,6 @@ const NotificationRequestSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model(
-  "NotificationRequest", // Nama model singular
-  NotificationRequestSchema
+  "NotifStockRequest", // Nama model singular
+  NotifStockRequestSchema
 );

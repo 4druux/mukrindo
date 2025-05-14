@@ -2,11 +2,11 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useProducts } from "@/context/ProductContext";
-import { FaEllipsis } from "react-icons/fa6";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { useExportData } from "@/hooks/useExportData";
 import ExportDropdown from "@/components/product-admin/Dashboard/ExportDropdown";
+import { Loader2 } from "lucide-react";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -243,20 +243,19 @@ const TopViewedCarsChart = () => {
 
   if (loading) {
     return (
-      <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-6 animate-pulse">
-        <div className="h-6 bg-gray-300 rounded w-3/4 mb-4"></div>
+      <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-md lg:text-lg font-medium text-gray-700 animate-pulse">
+            Memuat Mobil Paling Diminati...
+          </h3>
+        </div>
         <div
-          className="flex justify-center items-center"
-          style={{ minHeight: "300px" }}
+          className="flex flex-col gap-3 justify-center items-center w-full h-full text-gray-500"
+          style={{ height: 435 }}
         >
-          <div className="w-48 h-48 bg-gray-300 rounded-full"></div>
+          <Loader2 className="animate-spin mr-2" />
+          <span className="animate-pulse">Sedang memuat data...</span>
         </div>
-        <div className="mt-4 space-y-2">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-4 bg-gray-300 rounded w-1/2"></div>
-          ))}
-        </div>
-        <div className="mt-4 h-4 bg-gray-300 rounded w-1/3"></div>
       </div>
     );
   }

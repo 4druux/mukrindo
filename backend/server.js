@@ -10,6 +10,7 @@ const path = require("path");
 const productRoutes = require("./routes/productRoutes");
 const tradeInRoutes = require("./routes/tradeInRoutes");
 const sellRoutes = require("./routes/sellRoutes");
+const notifStockRoutes = require("./routes/notifStockRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const visitRoutes = require("./routes/visitRoutes");
 
@@ -43,6 +44,7 @@ app.get("/", (req, res) => {
 app.use("/api/products", productRoutes);
 app.use("/api/trade-in", tradeInRoutes);
 app.use("/api/sell-requests", sellRoutes);
+app.use("/api/notif-stock", notifStockRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/visits", visitRoutes);
 

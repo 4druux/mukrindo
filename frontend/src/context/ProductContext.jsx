@@ -14,6 +14,15 @@ const ProductContext = createContext();
 export const useProducts = () => useContext(ProductContext);
 
 const fetcher = (url) => axios.get(url).then((res) => res.data);
+
+// const fetcher = async (url) => {
+//   // Delay 2 menit (120000 ms)
+//   await new Promise((resolve) => setTimeout(resolve, 120000));
+
+//   const res = await axios.get(url);
+//   return res.data;
+// };
+
 const API_ENDPOINT = "http://localhost:5000/api/products";
 
 export const ProductProvider = ({ children }) => {

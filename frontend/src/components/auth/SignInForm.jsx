@@ -13,27 +13,28 @@ export default function SignInForm() {
   const [isChecked, setIsChecked] = useState(false);
 
   return (
-    <div className="flex flex-col flex-1 lg:w-1/2 w-full">
-      <div className="w-full max-w-md sm:pt-10 mx-auto mb-5">
+    <div className="flex flex-col flex-1 lg:w-1/2 w-full py-4">
+      <div className="w-full max-w-md pt-5 md:pt-10 mx-auto mb-5">
         <Link href="/">
-          <div className="flex items-center">
-            {/* <Image
-                        src="/images/logo/logo.svg"
-                        alt="MukrindoLogo"
-                        width={130}
-                        height={35}
-                        className="cursor-pointer lg:w-[150px] lg:h-[40px]"
-                      /> */}
-            Mukrindo Motor LOGO
+          <div className="flex items-center justify-center">
+            <Image
+              src="/images/logo/mm-logo.png"
+              alt="MukrindoLogo"
+              width={130}
+              height={35}
+              className="cursor-pointer w-[200px] h-[60px]"
+            />
           </div>
         </Link>
       </div>
 
-      <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
+      <div className="flex flex-col justify-center pt-5 w-full max-w-md mx-auto">
         <div>
-          <div className="mb-5 sm:mb-8 text-center lg:text-left">
+          <div className="mb-5 text-left">
             <div className="inline-flex items-center gap-2 mb-1">
-              <p className="prata-regular text-3xl">Masuk Sekarang</p>
+              <p className="prata-regular text-xl md:text-2xl">
+                Masuk Sekarang
+              </p>
               <hr className="border-none h-[1.5px] w-8 bg-gray-800" />
             </div>
           </div>
@@ -140,7 +141,8 @@ export default function SignInForm() {
                 <div>
                   <button
                     type="submit"
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white transition rounded-full bg-orange-500 hover:bg-orange-600 cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white transition cursor-pointer bg-gradient-to-r from-orange-400 to-orange-600 
+                    hover:bg-orange-600 hover:from-transparent hover:to-transparent  rounded-full"
                   >
                     Masuk <ArrowRight className="w-5 h-5" />
                   </button>
@@ -153,7 +155,7 @@ export default function SignInForm() {
               <p className="text-sm font-normal text-center text-gray-700 sm:text-start">
                 Tidak punya akun?
                 <Link
-                  href="/sign-up"
+                  href="/register"
                   className="text-orange-600 ml-1 hover:underline"
                 >
                   Daftar Sekarang

@@ -152,22 +152,24 @@ function AppHeader() {
                       animate="open"
                       exit="closed"
                       variants={dropDownVariant}
-                      className={`absolute -right-2 lg:-left-10 mt-2 w-28 rounded-lg shadow-lg z-20 ${
+                      className={`absolute -right-2 md:-right-3 mt-2 min-w-[120px] rounded-xl border border-gray-200 shadow-lg z-20 ${
                         isTop ? "bg-gray-50" : "bg-white"
                       }`}
                     >
-                      <Link
-                        href="/sign-in"
-                        className="block w-full text-left text-xs font-medium px-4 py-2 text-gray-700 hover:text-gray-700 hover:bg-orange-100 rounded-t-lg cursor-pointer"
-                      >
-                        Sign In
-                      </Link>
-                      <Link
-                        href="/sign-up"
-                        className="block w-full text-left text-xs font-medium px-4 py-2 text-gray-700 hover:text-gray-700 hover:bg-orange-100 rounded-t-lg cursor-pointer"
-                      >
-                        Sign Up
-                      </Link>
+                      <div className="py-1">
+                        <Link
+                          href="/login"
+                          className="block w-full text-left text-xs font-medium px-4 py-2 text-gray-600 hover:text-gray-700 hover:bg-gray-100 cursor-pointer"
+                        >
+                          Masuk
+                        </Link>
+                        <Link
+                          href="/register"
+                          className="block w-full text-left text-xs font-medium px-4 py-2 text-gray-600 hover:text-gray-700 hover:bg-gray-100 cursor-pointer"
+                        >
+                          Daftar
+                        </Link>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>

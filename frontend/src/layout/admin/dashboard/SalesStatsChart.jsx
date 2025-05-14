@@ -2,12 +2,12 @@
 import React, { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { useProducts } from "@/context/ProductContext";
-import { FaEllipsis, FaChevronDown } from "react-icons/fa6";
 import {
   format,
   startOfWeek,
   endOfWeek,
   startOfMonth,
+  endOfMonth,
   startOfYear,
   endOfYear,
   eachWeekOfInterval,
@@ -19,8 +19,9 @@ import {
 } from "date-fns";
 import { id } from "date-fns/locale";
 import { useExportData } from "@/hooks/useExportData";
-import { useYearDropdown } from "@/hooks/useYearDropdown";
 import ExportDropdown from "@/components/product-admin/Dashboard/ExportDropdown";
+import PeriodFilter from "@/components/product-admin/Dashboard/PeriodFilter";
+import { Loader2 } from "lucide-react";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -32,7 +33,12 @@ const getValidSaleDate = (product) => {
 
   try {
     const dateObj = parseISO(dateStr);
-    return isValid(dateObj) ? dateObj : new Date(dateStr);
+    const fallbackDate = new Date(dateStr);
+    return isValid(dateObj)
+      ? dateObj
+      : isValid(fallbackDate)
+      ? fallbackDate
+      : null;
   } catch {
     return null;
   }
@@ -40,25 +46,29 @@ const getValidSaleDate = (product) => {
 
 const SalesStatsChart = () => {
   const { products, loading, error } = useProducts();
-  const [selectedTab, setSelectedTab] = useState("Mingguan");
-  const {
-    currentYear,
-    setCurrentYear,
-    isYearDropdownOpen,
-    setIsYearDropdownOpen,
-    yearDropdownRef,
-  } = useYearDropdown();
+  const [selectedTab, setSelectedTab] = useState("Minggu");
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
   const prepareExportData = () => {
-    const soldProducts = products.filter((p) => {
+    let soldProducts = products.filter((p) => {
       const saleDate = getValidSaleDate(p);
       return (
         p.status?.toLowerCase() === "terjual" &&
         typeof p.price === "number" &&
         p.price > 0 &&
-        saleDate
+        saleDate &&
+        isValid(saleDate)
       );
     });
+
+    if (soldProducts.length > 0) {
+      soldProducts.sort((a, b) => {
+        const dateA = getValidSaleDate(a);
+        const dateB = getValidSaleDate(b);
+
+        return dateB.getTime() - dateA.getTime();
+      });
+    }
 
     const hasDataForPeriod =
       processedChartData.sales.some((v) => v > 0) ||
@@ -68,24 +78,56 @@ const SalesStatsChart = () => {
       return null;
     }
 
-    const exportDate = format(new Date(), "dd MMM yyyy", { locale: id });
-    const periodeText = `Data per: ${exportDate}`;
+    let periodeText = "";
+    const today = new Date();
+    if (selectedTab === "Minggu") {
+      const endDatePeriod = endOfWeek(today, { weekStartsOn: 1 });
+      const startDatePeriod = startOfWeek(
+        new Date(
+          endDatePeriod.getFullYear(),
+          endDatePeriod.getMonth(),
+          endDatePeriod.getDate() - (12 - 1) * 7
+        ),
+        { weekStartsOn: 1 }
+      );
+      periodeText = `Periode: ${format(startDatePeriod, "dd MMM yyyy", {
+        locale: id,
+      })} - ${format(endDatePeriod, "dd MMM yyyy", { locale: id })}`;
+    } else if (selectedTab === "Bulan") {
+      const startDatePeriod = startOfMonth(new Date(currentYear, 0));
+      const endDatePeriod = endOfMonth(new Date(currentYear, 11));
+      periodeText = `Periode: ${format(startDatePeriod, "dd MMM yyyy", {
+        locale: id,
+      })} - ${format(endDatePeriod, "dd MMM yyyy", { locale: id })}`;
+    } else if (selectedTab === "Tahun") {
+      const currentActualYear = getYear(today);
+      const endYearDate = endOfYear(new Date(currentActualYear, 11, 31));
+      const startYearForPeriod = currentActualYear - 4;
+      const startDatePeriod = startOfYear(new Date(startYearForPeriod, 0, 1));
+      periodeText = `Periode: ${format(startDatePeriod, "dd MMM yyyy", {
+        locale: id,
+      })} - ${format(endYearDate, "dd MMM yyyy", { locale: id })}`;
+    }
 
-    const pdfData = soldProducts.map((product, index) => [
-      index + 1,
-      product.carName || `${product.brand} ${product.model}`.trim(),
-      product.soldDate
-        ? format(getValidSaleDate(product), "dd MMM yyyy", { locale: id })
-        : "-",
-      `Rp ${product.price.toLocaleString("id-ID")}`,
-    ]);
+    const pdfData = soldProducts.map((product, index) => {
+      const actualSaleDate = getValidSaleDate(product);
+      return [
+        index + 1,
+        product.carName || `${product.brand} ${product.model}`.trim(),
+        format(actualSaleDate, "dd MMM yyyy", { locale: id }),
+        `Rp ${product.price.toLocaleString("id-ID")}`,
+      ];
+    });
 
-    const csvData = soldProducts.map((product, index) => [
-      index + 1,
-      `"${product.carName || `${product.brand} ${product.model}`.trim()}"`,
-      product.soldDate ? format(getValidSaleDate(product), "yyyy-MM-dd") : "-",
-      product.price,
-    ]);
+    const csvData = soldProducts.map((product, index) => {
+      const actualSaleDate = getValidSaleDate(product);
+      return [
+        index + 1,
+        `"${product.carName || `${product.brand} ${product.model}`.trim()}"`,
+        format(actualSaleDate, "yyyy-MM-dd"),
+        product.price,
+      ];
+    });
 
     const totalRevenue = soldProducts.reduce((sum, p) => sum + p.price, 0);
 
@@ -114,7 +156,7 @@ const SalesStatsChart = () => {
   const processedChartData = useMemo(() => {
     const createDefaultData = () => {
       let defaultCategories = [];
-      if (selectedTab === "Mingguan") {
+      if (selectedTab === "Minggu") {
         const lastWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
         defaultCategories = Array.from({ length: 12 }, (_, i) =>
           format(
@@ -130,13 +172,13 @@ const SalesStatsChart = () => {
             { locale: id }
           )
         );
-      } else if (selectedTab === "Bulanan") {
+      } else if (selectedTab === "Bulan") {
         defaultCategories = Array.from({ length: 12 }, (_, i) =>
           format(startOfMonth(new Date(currentYear, i)), "MMM yyyy", {
             locale: id,
           })
         );
-      } else if (selectedTab === "Tahunan") {
+      } else if (selectedTab === "Tahun") {
         defaultCategories = Array.from({ length: 5 }, (_, i) =>
           (new Date().getFullYear() - 4 + i).toString()
         );
@@ -170,7 +212,7 @@ const SalesStatsChart = () => {
     let salesData = [];
     let revenueData = [];
 
-    if (selectedTab === "Mingguan") {
+    if (selectedTab === "Minggu") {
       const endDate = endOfWeek(new Date(), { weekStartsOn: 1 });
       const startDate = startOfWeek(
         new Date(
@@ -207,7 +249,7 @@ const SalesStatsChart = () => {
           }
         }
       });
-    } else if (selectedTab === "Bulanan") {
+    } else if (selectedTab === "Bulan") {
       const months = Array.from({ length: 12 }, (_, i) =>
         startOfMonth(new Date(currentYear, i))
       );
@@ -225,7 +267,7 @@ const SalesStatsChart = () => {
           revenueData[monthIndex] += p.price;
         }
       });
-    } else if (selectedTab === "Tahunan") {
+    } else if (selectedTab === "Tahun") {
       const endYear = getYear(new Date());
       const startYear = endYear - 4;
       const years = Array.from({ length: 5 }, (_, i) =>
@@ -341,7 +383,7 @@ const SalesStatsChart = () => {
             if (
               typeof val === "string" &&
               val.length > 7 &&
-              selectedTab === "Mingguan"
+              selectedTab === "Minggu"
             ) {
               return val.substring(0, 6) + ".";
             }
@@ -420,13 +462,29 @@ const SalesStatsChart = () => {
   if (loading) {
     return (
       <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white px-4 pb-5 pt-5 sm:px-6 sm:pt-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-md lg:text-lg font-medium text-gray-700">
-            Memuat Statistik...
-          </h3>
+        <div className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="w-full">
+          <h3 className="text-md lg:text-lg font-medium text-gray-700 animate-pulse">
+              Memuat Statistik Penjualan...
+            </h3>
+          </div>
+
+          <div className="flex gap-4 items-center">
+            <div className="flex items-start w-full gap-3 bg-gray-200 p-1 animate-pulse rounded-full sm:w-auto sm:justify-end">
+              <div className="w-1/3 md:w-20 h-5 bg-white animate-pulse rounded-full" />
+              <div className="w-1/3 md:w-20 h-5 bg-white animate-pulse rounded-full" />
+              <div className="w-1/3 md:w-20 h-5 bg-white animate-pulse rounded-full" />
+            </div>
+            <div className="w-9 h-6 bg-gray-200 rounded-full animate-pulse" />
+          </div>
         </div>
-        <div className="animate-pulse" style={{ height: 310 }}>
-          <div className="h-full bg-gray-200 rounded-md"></div>
+
+        <div
+          className="flex flex-col gap-3 justify-center items-center w-full h-full text-gray-500"
+          style={{ height: 310 }}
+        >
+          <Loader2 className="animate-spin mr-2" />
+          <span className="animate-pulse">Sedang memuat data...</span>
         </div>
       </div>
     );
@@ -460,83 +518,21 @@ const SalesStatsChart = () => {
       <div className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="w-full">
           <h3 className="text-md lg:text-lg font-medium text-gray-700">
-            {selectedTab === "Mingguan" &&
-              "Statistik Penjualan Mingguan 12 Minggu Terakhir"}
-            {selectedTab === "Bulanan" &&
-              `Statistik Penjualan Bulanan (${currentYear})`}
-            {selectedTab === "Tahunan" &&
-              "Statistik Penjualan Tahunan 5 Tahun Terakhir"}
+            {selectedTab === "Minggu" &&
+              "Statistik Penjualan Minggu 12 Minggu Terakhir"}
+            {selectedTab === "Bulan" &&
+              `Statistik Penjualan Bulan (${currentYear})`}
+            {selectedTab === "Tahun" &&
+              "Statistik Penjualan Tahun 5 Tahun Terakhir"}
           </h3>
         </div>
         <div className="flex items-start w-full gap-3 sm:w-auto sm:justify-end">
-          <div className="flex items-center gap-0.5 rounded-full bg-gray-100 p-1 w-full sm:w-auto">
-            {["Mingguan", "Bulanan", "Tahunan"].map((tab) =>
-              tab === "Bulanan" ? (
-                <div key={tab} className="relative" ref={yearDropdownRef}>
-                  <button
-                    onClick={() => {
-                      setSelectedTab("Bulanan");
-                      setIsYearDropdownOpen(!isYearDropdownOpen);
-                    }}
-                    className={`px-3 py-1.5 font-semibold w-full rounded-full text-xs cursor-pointer transition-colors duration-150 flex items-center justify-center gap-1 whitespace-nowrap ${
-                      selectedTab === tab
-                        ? "text-orange-600 bg-white shadow-sm"
-                        : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    {tab} {currentYear}
-                    <FaChevronDown
-                      className={`h-3 w-3 transition-transform ${
-                        isYearDropdownOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {isYearDropdownOpen && selectedTab === "Bulanan" && (
-                    <div className="absolute z-20 mt-1 right-0 w-full min-w-[80px] rounded-xl bg-white shadow-lg border border-gray-200 max-h-48 overflow-y-auto">
-                      <ul className="py-1">
-                        {Array.from(
-                          { length: 6 },
-                          (_, i) => new Date().getFullYear() - 5 + i + 1
-                        )
-                          .sort((a, b) => b - a)
-                          .map((year) => (
-                            <li
-                              key={year}
-                              onClick={() => {
-                                setCurrentYear(year);
-                                setIsYearDropdownOpen(false);
-                              }}
-                              className={`px-3 py-1.5 text-xs text-center cursor-pointer ${
-                                year === currentYear
-                                  ? "font-semibold text-orange-600 bg-orange-50"
-                                  : "text-gray-700 hover:bg-gray-100"
-                              }`}
-                            >
-                              {year}
-                            </li>
-                          ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <button
-                  key={tab}
-                  onClick={() => {
-                    setSelectedTab(tab);
-                    setIsYearDropdownOpen(false);
-                  }}
-                  className={`px-3 py-1.5 font-semibold w-full rounded-full text-xs cursor-pointer transition-colors duration-150 ${
-                    selectedTab === tab
-                      ? "text-orange-600 bg-white shadow-sm"
-                      : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {tab}
-                </button>
-              )
-            )}
-          </div>
+          <PeriodFilter
+            currentYear={currentYear}
+            setCurrentYear={setCurrentYear}
+            selectedTab={selectedTab}
+            setSelectedTab={setSelectedTab}
+          />
           <ExportDropdown onExport={handleExport} className="relative" />
         </div>
       </div>
@@ -552,7 +548,7 @@ const SalesStatsChart = () => {
                 height={310}
                 width="100%"
                 key={`${selectedTab}-${
-                  selectedTab === "Bulanan" ? currentYear : ""
+                  selectedTab === "Bulan" ? currentYear : ""
                 }`}
               />
             )}

@@ -11,6 +11,7 @@ import { FaLocationDot } from "react-icons/fa6";
 import { Loader2 } from "lucide-react";
 import { formatNumberPhone } from "@/utils/formatNumberPhone";
 import { formatNumber } from "@/utils/formatNumber";
+import { useSearchParams } from "next/navigation";
 
 const RequestList = ({
   requests,
@@ -20,6 +21,10 @@ const RequestList = ({
   updatingStatusRequestId,
   getInspectionLocationText,
 }) => {
+  const searchParams = useSearchParams();
+  const fromNotification = searchParams.get("fromNotification");
+  const idParam = searchParams.get("id");
+
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case "Pending":
@@ -45,8 +50,13 @@ const RequestList = ({
 
           return (
             <div
-              key={request._id}
-              className="bg-white border border-gray-200 md:rounded-2xl md:shadow-md p-4 cursor-pointer hover:bg-blue-50 transition-colors duration-150 ease-in-out"
+              key={`mobile-${request._id}`}
+              id={`request-${request._id}`}
+              className={`bg-white border border-gray-200 md:rounded-2xl md:shadow-md p-4 cursor-pointer hover:bg-blue-50 transition-colors duration-150 ease-in-out ${
+                fromNotification === "true" && idParam === request._id
+                  ? "ring-2 ring-orange-500 !bg-orange-50"
+                  : ""
+              }`}
               onClick={() => onRowClick(request._id)}
             >
               <div className="flex justify-between items-start mb-2">
@@ -254,11 +264,15 @@ const RequestList = ({
 
               return (
                 <tr
-                  key={request._id}
-                  onClick={() => onRowClick(request._id)}
+                  key={`desktop-${request._id}`}
+                  id={`request-${request._id}`}
                   className={`${
                     index % 2 === 1 ? "bg-gray-50" : "bg-white"
-                  } hover:bg-blue-50 cursor-pointer transition-colors duration-150 ease-in-out`}
+                  } hover:bg-blue-50 cursor-pointer transition-colors duration-150 ease-in-out ${
+                    fromNotification === "true" && idParam === request._id
+                      ? "!bg-orange-50 !border-l-3 border-b-0 !border-orange-500"
+                      : ""
+                  }`}
                 >
                   <td className="px-3 py-4 text-xs font-medium text-gray-900 whitespace-normal break-words">
                     {request.customerName || "-"}

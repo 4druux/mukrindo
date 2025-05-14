@@ -28,8 +28,8 @@ export default function ClientLayout({ children }) {
 
   const isNotHeader =
     pathname.startsWith("/admin") ||
-    pathname.startsWith("/sign-in") ||
-    pathname.startsWith("/sign-up");
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register");
 
   const hideHeaderOnBeliMobilMobile =
     isMobile && pathname.startsWith("/beli-mobil");
