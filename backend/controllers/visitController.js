@@ -1,5 +1,5 @@
 // controllers/visitController.js
-const TrackingVisit = require("../models/TrackingVisit");
+const TrackingVisit = require("../models/trackingVisit");
 const { v4: uuidv4 } = require("uuid");
 const {
   startOfDay,
