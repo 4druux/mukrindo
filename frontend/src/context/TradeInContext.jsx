@@ -9,7 +9,7 @@ const TradeInContext = createContext();
 export const useTradeIn = () => useContext(TradeInContext);
 
 // Sesuaikan dengan endpoint backend Anda nanti
-const API_ENDPOINT = "http://localhost:5000/api/trade-in"; // Endpoint baru
+const API_ENDPOINT = "https://mukrindo-backend.vercel.app/api/trade-in"; // Endpoint baru
 
 export const TradeInProvider = ({ children }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -23,7 +23,7 @@ const fetcher = (url) => axios.get(url).then((res) => res.data);
 //   return res.data;
 // };
 
-const API_ENDPOINT = "http://localhost:5000/api/products";
+const API_ENDPOINT = "https://mukrindo-backend.vercel.app/api/products";
 
 export const ProductProvider = ({ children }) => {
   const {

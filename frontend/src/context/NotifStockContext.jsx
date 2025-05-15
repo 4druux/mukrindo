@@ -8,7 +8,7 @@ const NotifStockContext = createContext();
 
 export const useNotification = () => useContext(NotifStockContext);
 
-const API_ENDPOINT = "http://localhost:5000/api/notif-stock";
+const API_ENDPOINT = "https://mukrindo-backend.vercel.app/api/notif-stock";
 
 export const NotifStockProvider = ({ children }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);

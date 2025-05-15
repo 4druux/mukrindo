@@ -44,8 +44,8 @@ const ModalRequestDetail = ({
 }) => {
   const API_BASE_URL =
     requestType === "tradeIn"
-      ? "http://localhost:5000/api/trade-in"
-      : "http://localhost:5000/api/sell-requests";
+      ? "https://mukrindo-backend.vercel.app/api/trade-in"
+      : "https://mukrindo-backend.vercel.app/api/sell-requests";
 
   const statusConstants =
     requestType === "tradeIn"

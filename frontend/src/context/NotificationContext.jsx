@@ -9,7 +9,7 @@ export const useNotifications = () => useContext(NotificationContext);
 
 const fetcher = (url) => axios.get(url).then((res) => res.data);
 
-const API_ENDPOINT = "http://localhost:5000/api/notifications";
+const API_ENDPOINT = "https://mukrindo-backend.vercel.app/api/notifications";
 
 export const NotificationProvider = ({ children }) => {
   const {

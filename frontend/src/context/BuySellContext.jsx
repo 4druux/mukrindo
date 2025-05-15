@@ -9,7 +9,7 @@ const BuySellContext = createContext();
 export const useBuySell = () => useContext(BuySellContext);
 
 // Sesuaikan dengan endpoint backend Anda untuk jual mobil
-const API_ENDPOINT = "http://localhost:5000/api/sell-requests"; // Endpoint baru untuk jual mobil
+const API_ENDPOINT = "https://mukrindo-backend.vercel.app/api/sell-requests"; // Endpoint baru untuk jual mobil
 
 export const BuySellProvider = ({ children }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);

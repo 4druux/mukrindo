@@ -77,7 +77,7 @@ const EditProduct = ({ productId }) => {
   const initialProductData = useRef(null);
   const initialMediaFiles = useRef(null);
 
-  const API_ENDPOINT = "http://localhost:5000/api/products";
+  const API_ENDPOINT = "https://mukrindo-backend.vercel.app/api/products";
 
   const allRefs = useMemo(
     () => ({

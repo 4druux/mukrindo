@@ -72,7 +72,7 @@ const AddProduct = () => {
   const [errors, setErrors] = useState({});
   const router = useRouter();
   const { mutateProducts } = useProducts();
-  const API_ENDPOINT = "http://localhost:5000/api/products";
+  const API_ENDPOINT = "https://mukrindo-backend.vercel.app/api/products";
 
   const allRefs = useMemo(
     () => ({

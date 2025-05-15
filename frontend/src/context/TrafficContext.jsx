@@ -14,7 +14,7 @@ export const useTraffic = () => {
   return context;
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://mukrindo-backend.vercel.app";
 const STATS_API_ENDPOINT = `${API_BASE_URL}/api/visits/homepage/stats`;
 const TRACK_API_ENDPOINT = `${API_BASE_URL}/api/visits/homepage/track`;
 const HISTORY_API_ENDPOINT = `${API_BASE_URL}/api/visits/homepage/history`;
