@@ -1,5 +1,6 @@
 const SellRequest = require("../models/sellRequest");
 const Notification = require("../models/notification");
+const { sendNotificationEmail } = require("../services/emailService");
 
 // @desc    Create a new sell request
 // @route   POST /api/sell-requests
@@ -75,6 +76,11 @@ exports.createSellRequest = async (req, res) => {
         model: `${brand} ${model} ${year}`,
         customer: `${name} - ${phoneNumber}`,
       },
+    });
+
+    await sendNotificationEmail("buySell", {
+      model: `${brand} ${model} ${year}`,
+      customer: `${name} - ${phoneNumber}`,
     });
 
     // Kirim response sukses

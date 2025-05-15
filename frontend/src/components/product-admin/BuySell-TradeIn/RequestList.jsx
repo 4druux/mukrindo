@@ -273,6 +273,7 @@ const RequestList = ({
                       ? "!bg-orange-50 !border-l-3 border-b-0 !border-orange-500"
                       : ""
                   }`}
+                  onClick={() => onRowClick(request._id)}
                 >
                   <td className="px-3 py-4 text-xs font-medium text-gray-900 whitespace-normal break-words">
                     {request.customerName || "-"}

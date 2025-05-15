@@ -128,6 +128,13 @@ const RequestView = () => {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && ["tradeIn", "buySell", "notifyMe"].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
+
   const config = requestConfigs[activeTab];
 
   const [activeFilters, setActiveFilters] = useState(config.defaultFilters);

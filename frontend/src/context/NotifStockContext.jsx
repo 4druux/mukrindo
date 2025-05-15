@@ -4,13 +4,13 @@ import React, { createContext, useState, useContext } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const NotificationContext = createContext();
+const NotifStockContext = createContext();
 
-export const useNotification = () => useContext(NotificationContext);
+export const useNotification = () => useContext(NotifStockContext);
 
 const API_ENDPOINT = "http://localhost:5000/api/notif-stock";
 
-export const NotificationProvider = ({ children }) => {
+export const NotifStockProvider = ({ children }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -70,8 +70,8 @@ export const NotificationProvider = ({ children }) => {
   };
 
   return (
-    <NotificationContext.Provider value={contextValue}>
+    <NotifStockContext.Provider value={contextValue}>
       {children}
-    </NotificationContext.Provider>
+    </NotifStockContext.Provider>
   );
 };

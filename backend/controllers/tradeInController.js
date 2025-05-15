@@ -1,5 +1,6 @@
 const TradeInRequest = require("../models/tradeInRequest");
 const Notification = require("../models/notification");
+const { sendNotificationEmail } = require("../services/emailService");
 
 // @desc    Create a new trade-in request
 // @route   POST /api/trade-in
@@ -22,6 +23,11 @@ exports.createTradeInRequest = async (req, res) => {
         model: `${req.body.tradeInBrand} ${req.body.tradeInModel} ${req.body.tradeInYear}`,
         customer: `${req.body.customerName} - ${req.body.customerPhoneNumber}`,
       },
+    });
+
+    await sendNotificationEmail("tradeIn", {
+      model: `${req.body.tradeInBrand} ${req.body.tradeInModel} ${req.body.tradeInYear}`,
+      customer: `${req.body.customerName} - ${req.body.customerPhoneNumber}`,
     });
 
     // Kirim response sukses

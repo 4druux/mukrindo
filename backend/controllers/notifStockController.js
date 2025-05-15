@@ -1,6 +1,7 @@
 // controllers/notificationController.js
 const NotifStockRequest = require("../models/notifStockRequest");
 const Notification = require("../models/notification");
+const { sendNotificationEmail } = require("../services/emailService");
 
 // @desc    Create a new notification request
 // @route   POST /api/notifications
@@ -48,6 +49,11 @@ exports.createNotifStockRequest = async (req, res) => {
         model: `${brand} ${model} ${year}`,
         customer: phoneNumber,
       },
+    });
+
+    await sendNotificationEmail("notifStock", {
+      model: `${brand} ${model} ${year}`,
+      customer: phoneNumber,
     });
 
     // Kirim response sukses

@@ -3,6 +3,7 @@ import React from "react";
 import { FaPhone, FaWhatsapp, FaCar, FaCalendarAlt } from "react-icons/fa";
 import { Loader2 } from "lucide-react";
 import { formatNumberPhone } from "@/utils/formatNumberPhone";
+import { useSearchParams } from "next/navigation";
 
 const RequestNotifyList = ({
   requests,
@@ -10,6 +11,10 @@ const RequestNotifyList = ({
   onContactClick,
   updatingStatusRequestId,
 }) => {
+  const searchParams = useSearchParams();
+  const fromNotification = searchParams.get("fromNotification");
+  const idParam = searchParams.get("id");
+
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case "Pending":
@@ -31,8 +36,13 @@ const RequestNotifyList = ({
 
           return (
             <div
-              key={request._id}
-              className="bg-white border border-gray-200 rounded-2xl shadow-md p-4 cursor-pointer hover:bg-blue-50 transition-colors duration-150 ease-in-out"
+              key={`mobile-${request._id}`}
+              id={`request-${request._id}`}
+              className={`bg-white border border-gray-200 md:rounded-2xl md:shadow-md p-4 cursor-pointer hover:bg-blue-50 transition-colors duration-150 ease-in-out ${
+                fromNotification === "true" && idParam === request._id
+                  ? "ring-2 ring-orange-500 !bg-orange-50"
+                  : ""
+              }`}
               onClick={() => onRowClick(request._id)}
             >
               <div className="flex justify-between items-start mb-2">
@@ -169,11 +179,16 @@ const RequestNotifyList = ({
 
               return (
                 <tr
-                  key={request._id}
-                  onClick={() => onRowClick(request._id)}
+                  key={`desktop-${request._id}`}
+                  id={`request-${request._id}`}
                   className={`${
                     index % 2 === 1 ? "bg-gray-50" : "bg-white"
-                  } hover:bg-blue-50 cursor-pointer transition-colors duration-150 ease-in-out`}
+                  } hover:bg-blue-50 cursor-pointer transition-colors duration-150 ease-in-out ${
+                    fromNotification === "true" && idParam === request._id
+                      ? "!bg-orange-50 !border-l-3 border-b-0 !border-orange-500"
+                      : ""
+                  }`}
+                  onClick={() => onRowClick(request._id)}
                 >
                   <td className="px-3 py-4 text-xs text-gray-600 whitespace-normal break-words">
                     {`${request.brand || ""} ${request.model || ""} (${

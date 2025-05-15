@@ -7,7 +7,8 @@ import { HeaderProvider } from "@/context/HeaderContext";
 import { ProductProvider } from "@/context/ProductContext";
 import { TradeInProvider } from "@/context/TradeInContext";
 import { BuySellProvider } from "@/context/BuySellContext";
-import { NotificationProvider } from "@/context/NotifStockContext";
+import { NotifStockProvider } from "@/context/NotifStockContext";
+import { NotificationProvider } from "@/context/NotificationContext";
 import { TrafficProvider } from "@/context/TrafficContext";
 import { Toaster } from "react-hot-toast";
 
@@ -21,22 +22,24 @@ export default function RootLayoutClient({ children }) {
   return (
     <TrafficProvider>
       <ProductProvider>
-        <TradeInProvider>
-          <BuySellProvider>
-            <NotificationProvider>
-              <SidebarProvider>
-                <HeaderProvider>
-                  <Toaster position="top-right" reverseOrder={true} />
-                  {isAdminPage ? (
-                    children
-                  ) : (
-                    <ClientLayout>{children}</ClientLayout>
-                  )}
-                </HeaderProvider>
-              </SidebarProvider>
-            </NotificationProvider>
-          </BuySellProvider>
-        </TradeInProvider>
+        <NotificationProvider>
+          <TradeInProvider>
+            <BuySellProvider>
+              <NotifStockProvider>
+                <SidebarProvider>
+                  <HeaderProvider>
+                    <Toaster position="top-right" reverseOrder={true} />
+                    {isAdminPage ? (
+                      children
+                    ) : (
+                      <ClientLayout>{children}</ClientLayout>
+                    )}
+                  </HeaderProvider>
+                </SidebarProvider>
+              </NotifStockProvider>
+            </BuySellProvider>
+          </TradeInProvider>
+        </NotificationProvider>
       </ProductProvider>
     </TrafficProvider>
   );

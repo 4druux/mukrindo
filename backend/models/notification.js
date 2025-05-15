@@ -36,7 +36,6 @@ const notificationSchema = new mongoose.Schema(
   }
 );
 
-// Virtual untuk dynamic population
 notificationSchema.virtual("requestData", {
   ref: function (doc) {
     return {

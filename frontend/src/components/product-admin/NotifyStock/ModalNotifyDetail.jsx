@@ -19,7 +19,7 @@ const ModalNotifyDetail = ({
   currentRequests,
   onStatusUpdated,
 }) => {
-  const API_BASE_URL = "http://localhost:5000/api/notifications";
+  const API_BASE_URL = "http://localhost:5000/api/notif-stock";
   const requestType = "notifyMe";
   const statusConstants = NOTIFY_STATUS_FILTER;
 
