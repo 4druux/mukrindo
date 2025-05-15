@@ -1,6 +1,6 @@
 // Home.js (misalnya frontend/src/app/page.js)
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import CarForm from "@/layout/user/home/CarForm";
 import HomeAccordion from "@/layout/user/home/HomeAccordion";
 import HomeBedge from "@/layout/user/home/HomeBedge";
@@ -38,7 +38,9 @@ export default function Home() {
       <p className="md:pt-5 lg:pt-10 border-t-2 border-gray-200"></p>
       <HomeCarousel images={bannerImages} />
       <div className="space-y-4 md:space-y-16 mt-4 md:mt-10">
-        <CarForm />
+        <Suspense fallback={<div>Loading...</div>}>
+          <CarForm />
+        </Suspense>
         <ProductByRecom />
         <ProductByPrice />
         <Testimoni />

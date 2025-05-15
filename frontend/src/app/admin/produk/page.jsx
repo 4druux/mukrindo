@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import AllProducts from "@/layout/admin/product/AllProuduct";
 
 export const metadata = {
@@ -9,7 +9,9 @@ export const metadata = {
 export default function AllProductsPage() {
   return (
     <div>
-      <AllProducts />
+      <Suspense fallback={<div>Loading...</div>}>
+        <AllProducts />
+      </Suspense>
     </div>
   );
 }

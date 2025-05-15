@@ -6,12 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { MdPersonOutline } from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
-import {
-  FaHome,
-  FaShoppingBag,
-  FaKey,
-  FaMoneyBillWaveAlt,
-} from "react-icons/fa";
+import { FaHome, FaShoppingBag, FaKey } from "react-icons/fa";
 import { usePathname } from "next/navigation";
 import { FaArrowsRotate } from "react-icons/fa6";
 import { motion, AnimatePresence } from "framer-motion";

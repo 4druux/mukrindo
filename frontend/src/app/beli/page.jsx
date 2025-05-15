@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import BuyCar from "@/layout/user/beli/BuyCar";
 import Testimoni from "@/components/product-user/Testimoni";
 import BuyAccordion from "@/layout/user/beli/BuyAccordion";
@@ -14,7 +14,9 @@ const CarShopPage = () => {
     <div className="container mx-auto">
       <div className="md:pt-5 lg:pt-10 border-t-2 border-gray-200">
         <div className="space-y-4 md:space-y-16 mt-4 md:mt-0">
-          <BuyCar />
+          <Suspense fallback={<div>Loading...</div>}>
+            <BuyCar />
+          </Suspense>
           <Testimoni />
           <div
             id="notify-me-form-section"

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import SellCar from "@/layout/user/jual-mobil/SellCar";
 import CarouselGlobal from "@/components/product-user/CarouselGlobal";
 import SellBedge from "@/layout/user/jual-mobil/SellBedge";
@@ -18,7 +18,9 @@ const SellCarPage = () => {
         title="Jual Mobil Cepat Laku & Aman"
         subtitle="Bebas Drama & Tipu-Tipu"
       />
-      <SellCar />
+      <Suspense fallback={<div>Loading...</div>}>
+        <SellCar />
+      </Suspense>
       <div className="px-4 lg:px-0 space-y-8 lg:space-y-16">
         <SellBedge />
         <SellAccordion />
