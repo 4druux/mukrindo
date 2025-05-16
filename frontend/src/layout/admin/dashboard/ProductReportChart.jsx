@@ -22,6 +22,7 @@ import { useExportData } from "@/hooks/useExportData";
 import ExportDropdown from "@/components/product-admin/Dashboard/ExportDropdown";
 import PeriodFilter from "@/components/product-admin/Dashboard/PeriodFilter";
 import { Loader2 } from "lucide-react";
+import { useAutoScrollToChart } from "@/hooks/useAutoScrollToChart";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -417,12 +418,18 @@ const ProductReportChart = () => {
   const totalMasuk = processedData.masuk.reduce((a, b) => a + b, 0);
   const totalTerjual = processedData.terjual.reduce((a, b) => a + b, 0);
 
+  const chartContainerRef = useAutoScrollToChart(
+    { masuk: processedData.masuk, terjual: processedData.terjual },
+    selectedTab,
+    currentYear
+  );
+
   if (loading) {
     return (
       <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-4 sm:p-6">
         <div className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="w-full">
-          <h3 className="text-md lg:text-lg font-medium text-gray-700 animate-pulse">
+            <h3 className="text-md lg:text-lg font-medium text-gray-700 animate-pulse">
               Memuat Laporan Produk...
             </h3>
           </div>
@@ -497,7 +504,10 @@ const ProductReportChart = () => {
       </div>
 
       {hasActualData ? (
-        <div className="max-w-full overflow-x-auto custom-scrollbar">
+        <div
+          className="max-w-full overflow-x-auto custom-scrollbar"
+          ref={chartContainerRef}
+        >
           <div className="min-w-[600px] xl:min-w-full">
             {typeof window !== "undefined" && (
               <ReactApexChart

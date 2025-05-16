@@ -26,6 +26,7 @@ import { id } from "date-fns/locale";
 import useSWR from "swr";
 import PeriodFilter from "@/components/product-admin/Dashboard/PeriodFilter";
 import { Loader2 } from "lucide-react";
+import { useAutoScrollToChart } from "@/hooks/useAutoScrollToChart";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -270,12 +271,18 @@ export default function WebTrafficChart() {
     Tahun: "5 Tahun Terakhir",
   };
 
+  const chartContainerRef = useAutoScrollToChart(
+    { visits: processedChartData.visits },
+    selectedTab,
+    currentYear
+  );
+
   if (historyLoading) {
     return (
       <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white px-4 pb-5 pt-5 sm:px-6 sm:pt-6">
         <div className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="w-full">
-          <h3 className="text-md lg:text-lg font-medium text-gray-700 animate-pulse">
+            <h3 className="text-md lg:text-lg font-medium text-gray-700 animate-pulse">
               Memuat Statistik Trafik...
             </h3>
           </div>
@@ -346,7 +353,10 @@ export default function WebTrafficChart() {
       </div>
 
       {hasActualData ? (
-        <div className="max-w-full overflow-x-auto custom-scrollbar">
+        <div
+          className="max-w-full overflow-x-auto custom-scrollbar"
+          ref={chartContainerRef}
+        >
           <div className="min-w-[600px] xl:min-w-full">
             <ReactApexChart
               key={`${selectedTab}-${

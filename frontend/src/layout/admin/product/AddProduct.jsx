@@ -132,7 +132,7 @@ const AddProduct = () => {
       carColor: {
         target: "cc",
         action: "focus",
-        delay: INACTIVITY_DELAY,
+        delay: QUICK_OPEN_DELAY,
         type: "inactivity",
       },
       cc: {

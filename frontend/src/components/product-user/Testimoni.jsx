@@ -96,14 +96,37 @@ function Testimoni() {
         <h1 className="text-md lg:text-xl font-medium text-gray-700 mt-6 mb-1">
           Cerita Mereka Bersama Kami
         </h1>
-        <p className="text-xs lg:text-sm text-gray-500 mb-2 lg:mb-4 ">
+        <p className="text-xs lg:text-sm text-gray-500 mb-2 lg:mb-4">
           Lihat pengalaman pelanggan yang puas dengan layanan dan kualitas mobil
-          dari Mukrindo Motor. Kami selalu berkomitmen memberikan yang terbaik
-          untuk Anda.
+          dari Mukrindo Motor.
         </p>
       </div>
 
-      <div className="w-full relative group horizontal-gradient-fade">
+      {/* Versi Mobile - Scroll Horizontal */}
+      <div className="lg:hidden horizontal-gradient-fade">
+        <div
+          className="flex overflow-x-auto gap-4 pl-3 pb-4"
+          style={{ scrollbarWidth: "none" }}
+        >
+          {testimonials.map((testimonial, index) => (
+            <div
+              key={index}
+              className="flex-shrink-0"
+              style={{ width: "300px" }}
+            >
+              <TestimonialCard
+                imgSrc={testimonial.imgSrc}
+                rating={testimonial.rating}
+                title={testimonial.title}
+                description={testimonial.description}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Versi Desktop - Swiper */}
+      <div className="hidden lg:block w-full relative group horizontal-gradient-fade">
         <Swiper
           modules={[Navigation, A11y]}
           spaceBetween={16}
@@ -120,7 +143,7 @@ function Testimoni() {
               className="!h-auto"
               style={{ width: "auto" }}
             >
-              <div className="h-full  cursor-grab">
+              <div className="h-full cursor-grab">
                 <TestimonialCard
                   imgSrc={testimonial.imgSrc}
                   rating={testimonial.rating}
@@ -135,16 +158,14 @@ function Testimoni() {
         <div className="hidden lg:block">
           <button
             id="testimonial-prev"
-            className="absolute top-1/2 -left-5 transform -translate-y-1/2 z-10 w-10 h-10 bg-white/50 shadow-md rounded-full flex items-center justify-center hover:bg-white transition-opacity duration-300 cursor-pointer
-          opacity-0 group-hover:opacity-100 disabled:opacity-0 disabled:cursor-not-allowed"
+            className="absolute top-1/2 -left-5 transform -translate-y-1/2 z-10 w-10 h-10 bg-white/50 shadow-md rounded-full flex items-center justify-center hover:bg-white transition-opacity duration-300 cursor-pointer opacity-0 group-hover:opacity-100 disabled:opacity-0 disabled:cursor-not-allowed"
           >
             <BsChevronLeft className="w-5 h-5 text-gray-700" />
           </button>
 
           <button
             id="testimonial-next"
-            className="absolute top-1/2 -right-5 transform -translate-y-1/2 z-10 w-10 h-10 bg-white/50 shadow-md rounded-full flex items-center justify-center hover:bg-white transition-opacity duration-300 cursor-pointer
-          opacity-0 group-hover:opacity-100 disabled:opacity-0 disabled:cursor-not-allowed"
+            className="absolute top-1/2 -right-5 transform -translate-y-1/2 z-10 w-10 h-10 bg-white/50 shadow-md rounded-full flex items-center justify-center hover:bg-white transition-opacity duration-300 cursor-pointer opacity-0 group-hover:opacity-100 disabled:opacity-0 disabled:cursor-not-allowed"
           >
             <BsChevronRight className="w-5 h-5 text-gray-700" />
           </button>
