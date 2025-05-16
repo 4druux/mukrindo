@@ -317,7 +317,7 @@ const CarPricingInfo = ({ product }) => {
       {/* Sticky Bottom Bar for Mobile */}
       <div
         className={`
-          fixed bottom-0 left-0 right-0 z-30 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] px-4 py-3 rounded-t-3xl
+          fixed bottom-0 left-0 right-0 z-30 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] px-4 py-5 rounded-t-3xl
           flex items-center justify-between md:hidden
           transition-transform duration-300 ease-in-out
           ${showStickyBar ? "translate-y-0" : "translate-y-full"}

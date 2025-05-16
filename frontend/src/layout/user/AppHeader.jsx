@@ -177,10 +177,10 @@ function AppHeader() {
       <SearchBar />
 
       <div
-        className="fixed bottom-0 left-0 right-0 z-30 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] px-4 py-3 rounded-t-3xl
+        className="fixed bottom-0 left-0 right-0 z-30 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] px-4 py-5 rounded-t-3xl
           flex items-center justify-between md:hidden "
       >
-        <div className="relative flex items-center gap-3 justify-between text-[10px] w-full">
+        <div className="relative flex items-center gap-3 justify-between text-xs w-full">
           {/* Left Icons */}
           <Link
             href="/"

@@ -528,7 +528,7 @@ const BuyCar = () => {
       {!isMobileSearchFiltersOpen && (
         <button
           onClick={() => setIsMobileSearchFiltersOpen(true)}
-          className="xl:hidden fixed bottom-30 -left-1 bg-gradient-to-r from-orange-300 to-orange-600 text-white px-4 py-2 rounded-r-full shadow-lg z-40 flex items-center gap-2 hover:from-orange-600 hover:to-orange-700 transition-all duration-300" // Sedikit penyesuaian style
+          className="xl:hidden fixed bottom-50 -left-1 bg-gradient-to-r from-orange-300 to-orange-600 text-white px-3 py-2 rounded-r-full shadow-lg z-40 flex items-center gap-2 hover:from-orange-600 hover:to-orange-700 transition-all duration-300" // Sedikit penyesuaian style
           aria-label="Buka Filter"
         >
           <Filter className="w-4 h-4" />
@@ -557,7 +557,7 @@ const BuyCar = () => {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="fixed bottom-0 right-0 w-2/3 h-screen bg-white rounded-l-2xl shadow-xl z-50 flex flex-col xl:hidden"
+              className="fixed bottom-0 right-0 w-2/3 h-[100dvh] bg-white rounded-l-2xl shadow-xl z-50 flex flex-col xl:hidden"
             >
               {/* Header Panel */}
               <div className="flex justify-between items-center p-4 border-b border-gray-200 flex-shrink-0">
