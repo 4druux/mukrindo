@@ -62,7 +62,7 @@ export default function UserDropdown() {
             animate="open"
             exit="closed"
             variants={dropDownVariant}
-            className="absolute z-40 right-0 mt-4 rounded-2xl border border-gray-200 bg-white shadow-lg p-4"
+            className="absolute z-40 right-0 mt-2 rounded-2xl border border-gray-200 bg-white shadow-lg p-4"
           >
             <div>
               <span className="block font-medium text-gray-700 text-sm">

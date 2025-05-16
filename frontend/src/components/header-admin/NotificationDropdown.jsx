@@ -78,7 +78,7 @@ export default function NotificationDropdown() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ type: "spring", damping: 20, stiffness: 300 }}
-            className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden"
+            className="absolute -right-10 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden"
             role="menu"
           >
             <div className="p-3 border-b border-gray-200 flex justify-between items-center">

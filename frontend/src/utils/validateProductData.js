@@ -9,6 +9,7 @@ export const validateProductData = (productData, mediaFiles) => {
     model,
     variant,
     type,
+    numberOfSeats,
     carColor,
     cc,
     travelDistance,
@@ -26,6 +27,7 @@ export const validateProductData = (productData, mediaFiles) => {
   if (!model) errors.model = requiredMessage;
   if (!variant) errors.variant = requiredMessage;
   if (!type) errors.type = requiredMessage;
+  if (!numberOfSeats) errors.numberOfSeats = requiredMessage;
   if (!carColor) errors.carColor = requiredMessage;
   if (!cc) errors.cc = requiredMessage;
   if (!travelDistance) errors.travelDistance = requiredMessage;

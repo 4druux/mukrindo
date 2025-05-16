@@ -11,7 +11,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 
 // Import Icon
-import { Trash2, UploadCloud, Plus, Pencil } from "lucide-react";
+import { Trash2, UploadCloud, Plus, Pencil, X } from "lucide-react";
 
 export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
   const [internalMediaFiles, setInternalMediaFiles] = useState(
@@ -20,6 +20,7 @@ export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
   const [previewURLs, setPreviewURLs] = useState([]);
   const [croppingIndex, setCroppingIndex] = useState(null);
   const [cropSource, setCropSource] = useState(null);
+  const [showUploadPlaceholder, setShowUploadPlaceholder] = useState(false);
   const [activeOverlayIndex, setActiveOverlayIndex] = useState(null);
 
   useEffect(() => {
@@ -61,18 +62,19 @@ export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
   }, [internalMediaFiles]);
 
   const handleAddImage = () => {
-    if (internalMediaFiles.length < 10) {
-      setInternalMediaFiles([
-        ...internalMediaFiles,
-        { original: null, cropped: null },
-      ]);
+    if (internalMediaFiles.length < 10 && !showUploadPlaceholder) {
+      setShowUploadPlaceholder(true);
     }
+  };
+
+  const handleCancelUpload = () => {
+    setShowUploadPlaceholder(false);
   };
 
   const handleRemoveImage = (index) => {
     const updatedFiles = internalMediaFiles.filter((_, i) => i !== index);
     setInternalMediaFiles(updatedFiles);
-    setMediaFiles(updatedFiles); // <-- TAMBAHKAN BARIS INI
+    setMediaFiles(updatedFiles);
 
     if (activeOverlayIndex === index) {
       setActiveOverlayIndex(null);
@@ -85,7 +87,10 @@ export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
     const file = event.target.files[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      alert("Only image files are allowed.");
+      setShowUploadPlaceholder(false);
+      toast.error("Hanya file gambar atau GIF yang diperbolehkan.", {
+        className: "custom-toast",
+      });
       event.target.value = null;
       return;
     }
@@ -114,6 +119,7 @@ export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
     };
     reader.readAsDataURL(file);
     event.target.value = null;
+    setShowUploadPlaceholder(false);
   };
 
   const handleCropComplete = (croppedFile) => {
@@ -259,9 +265,34 @@ export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
           {internalMediaFiles.length < 10 && (
             <SwiperSlide>
               <div className="w-auto h-[200px] rounded-lg border-2 border-dashed border-gray-400 flex justify-center items-center">
-                <button type="button" onClick={handleAddImage}>
-                  <Plus className="w-10 h-10 text-gray-400  cursor-pointer" />
-                </button>
+                {showUploadPlaceholder ? (
+                  <div className="relative w-full h-full">
+                    <label className="absolute inset-0 flex flex-col justify-center items-center gap-2 cursor-pointer">
+                      <UploadCloud className="w-10 h-10 text-gray-400" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const newIndex = internalMediaFiles.length;
+                          handleImageChange(newIndex, e);
+                        }}
+                      />
+                      <span className="text-xs text-gray-400">Upload</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleCancelUpload}
+                      className="absolute top-2 right-2 p-1 rounded-full bg-white/80"
+                    >
+                      <X className="w-5 h-5 text-gray-600" />
+                    </button>
+                  </div>
+                ) : (
+                  <button type="button" onClick={handleAddImage}>
+                    <Plus className="w-10 h-10 text-gray-400 cursor-pointer" />
+                  </button>
+                )}
               </div>
             </SwiperSlide>
           )}
@@ -326,28 +357,55 @@ export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
                 : "border-2 border-dashed border-gray-400 hover:border-gray-700"
             }`}
           >
-            <button
-              type="button"
-              onClick={handleAddImage}
-              className="flex flex-col items-center gap-1"
-            >
-              <Plus
-                className={`w-6 h-6 cursor-pointer ${
-                  error && internalMediaFiles.length === 0
-                    ? "text-red-500"
-                    : "text-gray-400 group-hover:text-gray-700"
-                }`}
-              />
-              <span
-                className={`text-xs ${
-                  error && internalMediaFiles.length === 0
-                    ? "text-red-500"
-                    : "text-gray-400 group-hover:text-gray-700"
-                }`}
+            {showUploadPlaceholder ? (
+              <div className="relative w-full h-full">
+                <label className="absolute inset-0 flex flex-col justify-center items-center gap-2 cursor-pointer">
+                  <UploadCloud className="w-6 h-6 text-gray-400 group-hover:text-gray-700" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const newIndex = internalMediaFiles.length;
+                      handleImageChange(newIndex, e);
+                    }}
+                  />
+                  <span className="text-xs text-gray-400 group-hover:text-gray-700">
+                    Upload
+                  </span>
+                </label>
+                <button
+                  type="button"
+                  onClick={handleCancelUpload}
+                  className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-gray-200 cursor-pointer"
+                >
+                  <X className="w-4 h-4 text-gray-600" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleAddImage}
+                className="flex flex-col items-center gap-1"
               >
-                Tambah
-              </span>
-            </button>
+                <Plus
+                  className={`w-6 h-6 cursor-pointer ${
+                    error && internalMediaFiles.length === 0
+                      ? "text-red-500"
+                      : "text-gray-400 group-hover:text-gray-700"
+                  }`}
+                />
+                <span
+                  className={`text-xs ${
+                    error && internalMediaFiles.length === 0
+                      ? "text-red-500"
+                      : "text-gray-400 group-hover:text-gray-700"
+                  }`}
+                >
+                  Tambah
+                </span>
+              </button>
+            )}
           </div>
         )}
 
