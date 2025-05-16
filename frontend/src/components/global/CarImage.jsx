@@ -229,7 +229,7 @@ const CarImage = ({
               {/* Mobile & Sticky */}
               <div
                 className={`
-                  fixed top-0 left-0 right-0 z-20 bg-white shadow-md px-3 py-2
+                  fixed top-0 left-0 right-0 z-20 bg-white shadow-md p-3
                   flex items-center justify-between md:hidden
                   transition-transform duration-300 ease-in-out
                   ${
