@@ -206,7 +206,7 @@ export default function LastUpdatedInfo() {
         onClick={handleManualRefresh}
         disabled={isUpdating || productsLoading || statsLoading}
         className="p-2 text-orange-600 bg-orange-100 rounded-md hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-        aria-label={isUpdating ? "Menyegarkan data..." : "Segarkan data"}
+        aria-label={isUpdating ? "memperbarui data..." : "perbarui data"}
       >
         <FiRefreshCw size={16} className={isUpdating ? "animate-spin" : ""} />
       </button>
