@@ -33,24 +33,21 @@ const generateDataHash = (data) => {
 
 const safeSetToLocalStorage = (key, value) => {
   try {
-    if (typeof value !== "string") {
-      value = JSON.stringify(value);
-    }
+    const strValue = typeof value !== "string" ? JSON.stringify(value) : value;
 
-    if (value.length > MAX_STORAGE_SIZE) {
+    if (strValue.length > MAX_STORAGE_SIZE) {
       console.warn(`Data too large for localStorage (${key})`);
       return false;
     }
 
-    localStorage.setItem(key, value);
+    localStorage.setItem(key, strValue);
     return true;
   } catch (e) {
     if (e.name === "QuotaExceededError") {
-      console.warn("LocalStorage quota exceeded, clearing old data");
       localStorage.removeItem(key);
       localStorage.removeItem(PREVIOUS_DATA_KEY);
       try {
-        localStorage.setItem(key, value);
+        localStorage.setItem(key, JSON.stringify(value));
         return true;
       } catch (err) {
         console.error("Failed to save to localStorage:", err);
@@ -72,7 +69,7 @@ export default function LastUpdatedInfo() {
   const { trafficStats, statsLoading, statsError, mutateTrafficStats } =
     useTraffic();
 
-  const [lastUpdateTime, setLastUpdateTime] = (useState < Date) | (null > null);
+  const [lastUpdateTime, setLastUpdateTime] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [hasRealChange, setHasRealChange] = useState(false);
   const [prevHash, setPrevHash] = useState({
@@ -84,26 +81,22 @@ export default function LastUpdatedInfo() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Initialize or recover lastUpdateTime
     const storedTime = localStorage.getItem(LAST_UPDATE_TIME_KEY);
     if (storedTime) {
       const parsed = new Date(storedTime);
       if (!isNaN(parsed.getTime())) {
         setLastUpdateTime(parsed);
       } else {
-        // Handle invalid date
         const now = new Date();
         setLastUpdateTime(now);
         safeSetToLocalStorage(LAST_UPDATE_TIME_KEY, now.toISOString());
       }
     } else {
-      // First time load - set initial time
       const now = new Date();
       setLastUpdateTime(now);
       safeSetToLocalStorage(LAST_UPDATE_TIME_KEY, now.toISOString());
     }
 
-    // Initialize previous data hash
     const storedData = localStorage.getItem(PREVIOUS_DATA_KEY);
     if (storedData) {
       try {
@@ -123,7 +116,9 @@ export default function LastUpdatedInfo() {
     if (productsLoading || statsLoading) return;
 
     const currentProductsHash = generateDataHash(products);
-    const currentTrafficHash = generateDataHash(trafficStats);
+    const currentTrafficHash = trafficStats
+      ? generateDataHash(trafficStats)
+      : "no_data";
 
     const hasProductChange = prevHash.products !== currentProductsHash;
     const hasTrafficChange = prevHash.traffic !== currentTrafficHash;
@@ -138,13 +133,17 @@ export default function LastUpdatedInfo() {
       setHasRealChange(false);
     }
 
-    const newHash = {
+    setPrevHash({
       products: currentProductsHash,
       traffic: currentTrafficHash,
-    };
-
-    setPrevHash(newHash);
-    safeSetToLocalStorage(PREVIOUS_DATA_KEY, JSON.stringify(newHash));
+    });
+    safeSetToLocalStorage(
+      PREVIOUS_DATA_KEY,
+      JSON.stringify({
+        products: currentProductsHash,
+        traffic: currentTrafficHash,
+      })
+    );
   }, [products, trafficStats, productsLoading, statsLoading]);
 
   const handleManualRefresh = async () => {
