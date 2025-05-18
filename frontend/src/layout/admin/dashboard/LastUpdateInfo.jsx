@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useProducts } from "@/context/ProductContext";
 import { useTraffic } from "@/context/TrafficContext";
 import { formatDistanceToNow } from "date-fns";
@@ -11,13 +11,18 @@ const LAST_UPDATE_TIME_KEY = "lastUpdateTime";
 const PREVIOUS_DATA_KEY = "previousData";
 const MAX_STORAGE_SIZE = 4 * 1024 * 1024; // 4MB
 
+// Utility: hash data produk dan traffic
 const generateDataHash = (data) => {
   if (!data) return null;
 
   if (data.totalVisits !== undefined) {
-    return `${data.totalVisits}|${data.uniqueVisitors}|${data.todayVisits}|${
-      data.currentMonthVisits
-    }|${data.lastUpdated ? new Date(data.lastUpdated).getTime() : 0}`;
+    return [
+      data.totalVisits,
+      data.uniqueVisitors,
+      data.todayVisits,
+      data.currentMonthVisits,
+      data.lastUpdated ? new Date(data.lastUpdated).getTime() : 0,
+    ].join("|");
   }
 
   if (Array.isArray(data)) {
@@ -27,25 +32,21 @@ const generateDataHash = (data) => {
   return null;
 };
 
-// Safe storage handler
-const safeLocalStorageSet = (key, value) => {
+// Utility: simpan ke localStorage secara aman
+const safeSetToLocalStorage = (key, value) => {
   try {
-    if (value.length > MAX_STORAGE_SIZE) {
-      console.warn(`Data too large for ${key}, truncating`);
-      return false;
-    }
+    if (value.length > MAX_STORAGE_SIZE) return false;
     localStorage.setItem(key, value);
     return true;
   } catch (e) {
     if (e.name === "QuotaExceededError") {
-      console.warn("Storage quota exceeded, clearing some space");
       localStorage.removeItem(key);
       localStorage.removeItem(PREVIOUS_DATA_KEY);
       try {
         localStorage.setItem(key, value);
         return true;
-      } catch (e) {
-        console.error("Failed to store after cleanup", e);
+      } catch (err) {
+        console.error("Gagal menyimpan ulang ke localStorage", err);
         return false;
       }
     }
@@ -62,88 +63,76 @@ export default function LastUpdatedInfo() {
   } = useProducts();
   const { trafficStats, statsLoading, statsError, mutateTrafficStats } =
     useTraffic();
+
   const [lastUpdateTime, setLastUpdateTime] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [hasRealChange, setHasRealChange] = useState(false);
+  const [prevHash, setPrevHash] = useState({
+    products: null,
+    traffic: null,
+  });
 
-  const prevDataRef = useRef({ products: null, traffic: null });
-  const isInitialLoadRef = useRef(true);
-
-  // Load initial data from localStorage
+  // Load dari localStorage saat pertama kali render
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const storedTime = localStorage.getItem(LAST_UPDATE_TIME_KEY);
     const storedData = localStorage.getItem(PREVIOUS_DATA_KEY);
 
     if (storedTime) {
-      const date = new Date(storedTime);
-      if (!isNaN(date.getTime())) {
-        setLastUpdateTime(date);
-      } else {
-        localStorage.removeItem(LAST_UPDATE_TIME_KEY);
+      const parsed = new Date(storedTime);
+      if (!isNaN(parsed.getTime())) {
+        setLastUpdateTime(parsed);
       }
     }
 
     if (storedData) {
       try {
-        prevDataRef.current = JSON.parse(storedData);
+        const parsed = JSON.parse(storedData);
+        setPrevHash(parsed);
       } catch {
         localStorage.removeItem(PREVIOUS_DATA_KEY);
       }
     }
-
-    isInitialLoadRef.current = true;
   }, []);
 
-  // Check for data changes with optimized comparison
+  // Deteksi perubahan data
   useEffect(() => {
     if (productsLoading || statsLoading) return;
 
     const currentProductsHash = generateDataHash(products);
     const currentTrafficHash = generateDataHash(trafficStats);
 
-    if (isInitialLoadRef.current) {
-      isInitialLoadRef.current = false;
-      prevDataRef.current = {
-        products: currentProductsHash,
-        traffic: currentTrafficHash,
-      };
-      safeLocalStorageSet(
-        PREVIOUS_DATA_KEY,
-        JSON.stringify(prevDataRef.current)
-      );
-      return;
-    }
+    const isFirstLoad = prevHash.products === null && prevHash.traffic === null;
 
-    const hasProductChange =
-      prevDataRef.current.products !== currentProductsHash;
-    const hasTrafficChange = prevDataRef.current.traffic !== currentTrafficHash;
+    const hasProductChange = prevHash.products !== currentProductsHash;
+    const hasTrafficChange = prevHash.traffic !== currentTrafficHash;
     const hasChange = hasProductChange || hasTrafficChange;
 
-    if (hasChange) {
-      const newTime = new Date();
-      setLastUpdateTime(newTime);
+    if (!isFirstLoad && hasChange) {
+      const now = new Date();
+      setLastUpdateTime(now);
       setHasRealChange(true);
-
-      safeLocalStorageSet(LAST_UPDATE_TIME_KEY, newTime.toISOString());
-      prevDataRef.current = {
-        products: currentProductsHash,
-        traffic: currentTrafficHash,
-      };
-      safeLocalStorageSet(
-        PREVIOUS_DATA_KEY,
-        JSON.stringify(prevDataRef.current)
-      );
+      safeSetToLocalStorage(LAST_UPDATE_TIME_KEY, now.toISOString());
     } else {
       setHasRealChange(false);
     }
+
+    const newHash = {
+      products: currentProductsHash,
+      traffic: currentTrafficHash,
+    };
+
+    setPrevHash(newHash);
+    safeSetToLocalStorage(PREVIOUS_DATA_KEY, JSON.stringify(newHash));
   }, [products, trafficStats, productsLoading, statsLoading]);
 
   const handleManualRefresh = async () => {
     setIsUpdating(true);
     try {
       await Promise.all([mutateProducts(), mutateTrafficStats()]);
-    } catch (e) {
-      console.error("Refresh failed:", e);
+    } catch (err) {
+      console.error("Gagal refresh data:", err);
     } finally {
       setIsUpdating(false);
     }
@@ -158,9 +147,11 @@ export default function LastUpdatedInfo() {
         </span>
       );
     }
+
     if (productsError || statsError) {
       return <span className="text-red-500 italic">Gagal memuat data.</span>;
     }
+
     if (!lastUpdateTime) {
       return (
         <span className="flex items-center">
