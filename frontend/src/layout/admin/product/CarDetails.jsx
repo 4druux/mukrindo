@@ -121,8 +121,7 @@ const CarDetails = ({ productId }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         <CarImage
-          images={product.images}
-          carName={product.carName}
+          product={product}
           isMobile={isMobile}
           onImageClick={openModal}
           isAdminRoute={true}

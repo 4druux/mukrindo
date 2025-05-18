@@ -24,8 +24,7 @@ import { ArrowLeft, Heart } from "lucide-react";
 
 const CarImage = ({
   productId,
-  images,
-  carName,
+  product,
   onImageClick,
   isMobile,
   isAdminRoute = false,
@@ -41,7 +40,7 @@ const CarImage = ({
 
   const liked = isBookmarked(productId);
 
-  if (!images || images.length === 0) {
+  if (!product.images || product.images.length === 0) {
     return (
       <div className="aspect-[16/9] bg-gray-200 rounded-2xl flex items-center justify-center text-gray-500">
         Gambar tidak tersedia
@@ -85,7 +84,7 @@ const CarImage = ({
             className="mySwiper2 rounded-none md:rounded-2xl h-full"
             onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
           >
-            {images.map((image, index) => (
+            {product.images.map((image, index) => (
               <SwiperSlide key={index}>
                 <div
                   className={`relative h-full cursor-pointer group`}
@@ -93,7 +92,7 @@ const CarImage = ({
                 >
                   <Image
                     src={image}
-                    alt={`${carName} - ${index + 1}`}
+                    alt={`${product.carName} - ${index + 1}`}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
                     className="object-cover"
@@ -167,7 +166,7 @@ const CarImage = ({
                 <div className="absolute top-2 md:top-4 right-3 z-10 cursor-pointer transition">
                   <div className="flex items-center gap-3">
                     <ShareProduct
-                      title={`Lihat mobil ini: ${carName}`}
+                      title={`Lihat mobil ini: ${product.carName}`}
                       isMobile={isMobile}
                       buttonClass={`
                         ${
@@ -188,7 +187,11 @@ const CarImage = ({
                         toggleBookmark(productId);
                       }}
                     >
-                      <div className="bg-white/80 hover:bg-white p-2 rounded-full shadow transition">
+                      <div
+                        className={`bg-white/80 hover:bg-white p-2 rounded-full shadow transition ${
+                          product.status === "Terjual" ? "hidden" : ""
+                        }`}
+                      >
                         <Heart
                           className={`w-4 h-4 md:w-5 md:h-5 ${
                             liked
@@ -244,13 +247,13 @@ const CarImage = ({
                     <ArrowLeft className="w-5 h-5 text-gray-700" />
                   </button>
                   <p className="text-sm font-medium text-gray-800 line-clamp-1">
-                    {carName}
+                    {product.carName}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-3 pl-3">
                   <ShareProduct
-                    title={`Lihat mobil ini: ${carName}`}
+                    title={`Lihat mobil ini: ${product.carName}`}
                     isMobile={isMobile}
                     buttonClass="p-2 rounded-full hover:bg-gray-100"
                     iconClass="w-4.5 h-4.5 text-gray-700"
@@ -277,7 +280,7 @@ const CarImage = ({
             className="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2.5 py-1 rounded-full select-none"
             style={{ zIndex: "1" }}
           >
-            {activeIndex + 1} / {images.length}
+            {activeIndex + 1} / {product.images.length}
           </div>
         </div>
       </div>
@@ -293,7 +296,7 @@ const CarImage = ({
           modules={[FreeMode, Thumbs]}
           className="mySwiper rounded-lg"
         >
-          {images.map((image, index) => (
+          {product.images.map((image, index) => (
             <SwiperSlide key={index}>
               <button
                 type="button"
@@ -307,7 +310,7 @@ const CarImage = ({
               >
                 <Image
                   src={image}
-                  alt={`${carName} - Thumbnail ${index + 1}`}
+                  alt={`${product.carName} - Thumbnail ${index + 1}`}
                   fill
                   sizes="100px"
                   className="object-cover"
