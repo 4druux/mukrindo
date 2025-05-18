@@ -43,9 +43,9 @@ const BuyCarDetails = ({ productId }) => {
     };
 
     const incrementView = () => {
-      console.log(
-        `[EFFECT BuyCarDetails] Incrementing view for product ID: ${productId}`
-      );
+      // console.log(
+      //   `[EFFECT BuyCarDetails] Incrementing view for product ID: ${productId}`
+      // );
       incrementProductView(productId).catch((err) => {
         console.warn("Gagal mencatat view:", err);
       });
@@ -132,8 +132,8 @@ const BuyCarDetails = ({ productId }) => {
         <div className="xl:w-3/5">
           <CarImage
             productId={product._id}
+            product={product}
             images={product.images}
-            carName={product.carName}
             isMobile={isMobile}
             onImageClick={openModal}
             isAdminRoute={false}

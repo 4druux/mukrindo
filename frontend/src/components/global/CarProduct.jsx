@@ -39,19 +39,21 @@ const CarProductModernNoHelper = ({ product, isAdminRoute = false }) => {
           <h1 className="text-md lg:text-lg font-medium text-gray-700">
             Spesifikasi Kendaraan
           </h1>
-          <div
-            className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs lg:text-sm font-semibold ${
-              product.status === "Terjual"
-                ? "bg-red-100 text-red-700"
-                : "bg-green-100 text-green-700"
-            }`}
-          >
-            {product.status === "Terjual" ? (
-              <XCircle className="w-4 h-4 mr-1.5" />
-            ) : (
-              <CheckCircle className="w-4 h-4 mr-1.5" />
-            )}
-            {product.status}
+          <div className={`${isAdminRoute ? "block" : "hidden"}`}>
+            <div
+              className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs lg:text-sm font-semibold ${
+                product.status === "Terjual"
+                  ? "bg-red-100 text-red-700"
+                  : "bg-green-100 text-green-700"
+              }`}
+            >
+              {product.status === "Terjual" ? (
+                <XCircle className="w-4 h-4 mr-1.5" />
+              ) : (
+                <CheckCircle className="w-4 h-4 mr-1.5" />
+              )}
+              {product.status}
+            </div>
           </div>
         </div>
 
