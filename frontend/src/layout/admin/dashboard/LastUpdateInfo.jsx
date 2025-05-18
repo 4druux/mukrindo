@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useProducts } from "@/context/ProductContext";
 import { useTraffic } from "@/context/TrafficContext";
 import { formatDistanceToNow } from "date-fns";
@@ -7,62 +7,10 @@ import { id as localeID } from "date-fns/locale";
 import { FiRefreshCw } from "react-icons/fi";
 import { Loader2 } from "lucide-react";
 
-// Constants
 const LAST_UPDATE_TIME_KEY = "lastUpdateTime";
 const PREVIOUS_DATA_KEY = "previousData";
 const MAX_STORAGE_SIZE = 4 * 1024 * 1024; // 4MB
 
-// Custom hook for safe localStorage access
-const useLocalStorage = () => {
-  const isClient = typeof window !== "undefined";
-
-  const getItem = useCallback(
-    (key) => {
-      if (!isClient) return null;
-      try {
-        return localStorage.getItem(key);
-      } catch (error) {
-        console.error("LocalStorage access error:", error);
-        return null;
-      }
-    },
-    [isClient]
-  );
-
-  const setItem = useCallback(
-    (key, value) => {
-      if (!isClient) return false;
-
-      try {
-        if (value.length > MAX_STORAGE_SIZE) {
-          console.warn(`Data too large for ${key}, truncating`);
-          return false;
-        }
-        localStorage.setItem(key, value);
-        return true;
-      } catch (error) {
-        if (error.name === "QuotaExceededError") {
-          console.warn("Storage quota exceeded, clearing some space");
-          localStorage.removeItem(key);
-          localStorage.removeItem(PREVIOUS_DATA_KEY);
-          try {
-            localStorage.setItem(key, value);
-            return true;
-          } catch (e) {
-            console.error("Failed to store after cleanup", e);
-            return false;
-          }
-        }
-        return false;
-      }
-    },
-    [isClient]
-  );
-
-  return { getItem, setItem };
-};
-
-// Data hashing function
 const generateDataHash = (data) => {
   if (!data) return null;
 
@@ -79,45 +27,59 @@ const generateDataHash = (data) => {
   return null;
 };
 
+// Safe storage handler
+const safeLocalStorageSet = (key, value) => {
+  try {
+    if (value.length > MAX_STORAGE_SIZE) {
+      console.warn(`Data too large for ${key}, truncating`);
+      return false;
+    }
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    if (e.name === "QuotaExceededError") {
+      console.warn("Storage quota exceeded, clearing some space");
+      localStorage.removeItem(key);
+      localStorage.removeItem(PREVIOUS_DATA_KEY);
+      try {
+        localStorage.setItem(key, value);
+        return true;
+      } catch (e) {
+        console.error("Failed to store after cleanup", e);
+        return false;
+      }
+    }
+    return false;
+  }
+};
+
 export default function LastUpdatedInfo() {
-  // Context hooks
   const {
     products,
     loading: productsLoading,
     error: productsError,
     mutateProducts,
   } = useProducts();
-
-  const {
-    trafficStats,
-    loading: statsLoading,
-    error: statsError,
-    mutateTrafficStats,
-  } = useTraffic();
-
-  // Local storage hook
-  const { getItem, setItem } = useLocalStorage();
-
-  // State management
+  const { trafficStats, statsLoading, statsError, mutateTrafficStats } =
+    useTraffic();
   const [lastUpdateTime, setLastUpdateTime] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [hasRealChange, setHasRealChange] = useState(false);
 
-  // Refs
   const prevDataRef = useRef({ products: null, traffic: null });
   const isInitialLoadRef = useRef(true);
 
-  // Load initial data
+  // Load initial data from localStorage
   useEffect(() => {
-    const storedTime = getItem(LAST_UPDATE_TIME_KEY);
-    const storedData = getItem(PREVIOUS_DATA_KEY);
+    const storedTime = localStorage.getItem(LAST_UPDATE_TIME_KEY);
+    const storedData = localStorage.getItem(PREVIOUS_DATA_KEY);
 
     if (storedTime) {
       const date = new Date(storedTime);
       if (!isNaN(date.getTime())) {
         setLastUpdateTime(date);
       } else {
-        setItem(LAST_UPDATE_TIME_KEY, "");
+        localStorage.removeItem(LAST_UPDATE_TIME_KEY);
       }
     }
 
@@ -125,14 +87,14 @@ export default function LastUpdatedInfo() {
       try {
         prevDataRef.current = JSON.parse(storedData);
       } catch {
-        setItem(PREVIOUS_DATA_KEY, "");
+        localStorage.removeItem(PREVIOUS_DATA_KEY);
       }
     }
 
     isInitialLoadRef.current = true;
-  }, [getItem, setItem]);
+  }, []);
 
-  // Check for data changes
+  // Check for data changes with optimized comparison
   useEffect(() => {
     if (productsLoading || statsLoading) return;
 
@@ -145,7 +107,10 @@ export default function LastUpdatedInfo() {
         products: currentProductsHash,
         traffic: currentTrafficHash,
       };
-      setItem(PREVIOUS_DATA_KEY, JSON.stringify(prevDataRef.current));
+      safeLocalStorageSet(
+        PREVIOUS_DATA_KEY,
+        JSON.stringify(prevDataRef.current)
+      );
       return;
     }
 
@@ -159,36 +124,33 @@ export default function LastUpdatedInfo() {
       setLastUpdateTime(newTime);
       setHasRealChange(true);
 
-      setItem(LAST_UPDATE_TIME_KEY, newTime.toISOString());
+      safeLocalStorageSet(LAST_UPDATE_TIME_KEY, newTime.toISOString());
       prevDataRef.current = {
         products: currentProductsHash,
         traffic: currentTrafficHash,
       };
-      setItem(PREVIOUS_DATA_KEY, JSON.stringify(prevDataRef.current));
+      safeLocalStorageSet(
+        PREVIOUS_DATA_KEY,
+        JSON.stringify(prevDataRef.current)
+      );
     } else {
       setHasRealChange(false);
     }
-  }, [products, trafficStats, productsLoading, statsLoading, setItem]);
+  }, [products, trafficStats, productsLoading, statsLoading]);
 
-  // Manual refresh handler
-  const handleManualRefresh = useCallback(async () => {
+  const handleManualRefresh = async () => {
     setIsUpdating(true);
     try {
       await Promise.all([mutateProducts(), mutateTrafficStats()]);
-    } catch (error) {
-      console.error("Refresh failed:", error);
+    } catch (e) {
+      console.error("Refresh failed:", e);
     } finally {
       setIsUpdating(false);
     }
-  }, [mutateProducts, mutateTrafficStats]);
+  };
 
-  // Render timestamp logic
-  const renderTimestamp = useCallback(() => {
-    if (productsError || statsError) {
-      return <span className="text-red-500 italic">Gagal memuat data.</span>;
-    }
-
-    if (!products && !trafficStats) {
+  const renderTimestamp = () => {
+    if (productsLoading || statsLoading) {
       return (
         <span className="flex items-center">
           <Loader2 className="w-4 h-4 animate-spin mr-2" />
@@ -196,8 +158,17 @@ export default function LastUpdatedInfo() {
         </span>
       );
     }
-
-    if (!lastUpdateTime) return null;
+    if (productsError || statsError) {
+      return <span className="text-red-500 italic">Gagal memuat data.</span>;
+    }
+    if (!lastUpdateTime) {
+      return (
+        <span className="flex items-center">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Memuat data...
+        </span>
+      );
+    }
 
     if (hasRealChange) {
       return <span className="font-semibold">baru saja</span>;
@@ -211,14 +182,7 @@ export default function LastUpdatedInfo() {
         })}
       </span>
     );
-  }, [
-    products,
-    trafficStats,
-    productsError,
-    statsError,
-    lastUpdateTime,
-    hasRealChange,
-  ]);
+  };
 
   return (
     <div className="p-4 border border-gray-200 md:border-none md:rounded-2xl md:shadow-sm text-sm text-gray-600 bg-white flex items-center justify-between gap-2">
