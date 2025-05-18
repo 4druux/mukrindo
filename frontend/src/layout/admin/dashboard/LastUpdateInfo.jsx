@@ -2,8 +2,11 @@
 import React, { useState, useEffect } from "react";
 import { useProducts } from "@/context/ProductContext";
 import { useTraffic } from "@/context/TrafficContext";
-import { formatDistanceToNow } from "date-fns";
-import { id as localeID } from "date-fns/locale";
+import {
+  differenceInMinutes,
+  differenceInHours,
+  differenceInDays,
+} from "date-fns";
 import { FiRefreshCw } from "react-icons/fi";
 import { Loader2 } from "lucide-react";
 
@@ -71,7 +74,6 @@ export default function LastUpdatedInfo() {
 
   const [lastUpdateTime, setLastUpdateTime] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [hasRealChange, setHasRealChange] = useState(false);
   const [prevHash, setPrevHash] = useState({
     products: "no_data",
     traffic: "no_data",
@@ -82,29 +84,19 @@ export default function LastUpdatedInfo() {
     if (typeof window === "undefined") return;
 
     const storedTime = localStorage.getItem(LAST_UPDATE_TIME_KEY);
+    const storedData = localStorage.getItem(PREVIOUS_DATA_KEY);
+
     if (storedTime) {
       const parsed = new Date(storedTime);
       if (!isNaN(parsed.getTime())) {
         setLastUpdateTime(parsed);
-      } else {
-        const now = new Date();
-        setLastUpdateTime(now);
-        safeSetToLocalStorage(LAST_UPDATE_TIME_KEY, now.toISOString());
       }
-    } else {
-      const now = new Date();
-      setLastUpdateTime(now);
-      safeSetToLocalStorage(LAST_UPDATE_TIME_KEY, now.toISOString());
     }
 
-    const storedData = localStorage.getItem(PREVIOUS_DATA_KEY);
     if (storedData) {
       try {
         const parsed = JSON.parse(storedData);
-        setPrevHash({
-          products: parsed.products || "no_data",
-          traffic: parsed.traffic || "no_data",
-        });
+        setPrevHash(parsed);
       } catch {
         localStorage.removeItem(PREVIOUS_DATA_KEY);
       }
@@ -127,37 +119,45 @@ export default function LastUpdatedInfo() {
     if (hasChange) {
       const now = new Date();
       setLastUpdateTime(now);
-      setHasRealChange(true);
       safeSetToLocalStorage(LAST_UPDATE_TIME_KEY, now.toISOString());
-    } else {
-      setHasRealChange(false);
-    }
 
-    setPrevHash({
-      products: currentProductsHash,
-      traffic: currentTrafficHash,
-    });
-    safeSetToLocalStorage(
-      PREVIOUS_DATA_KEY,
-      JSON.stringify({
+      setPrevHash({
         products: currentProductsHash,
         traffic: currentTrafficHash,
-      })
-    );
+      });
+      safeSetToLocalStorage(
+        PREVIOUS_DATA_KEY,
+        JSON.stringify({
+          products: currentProductsHash,
+          traffic: currentTrafficHash,
+        })
+      );
+    }
   }, [products, trafficStats, productsLoading, statsLoading]);
 
   const handleManualRefresh = async () => {
     setIsUpdating(true);
     try {
       await Promise.all([mutateProducts(), mutateTrafficStats()]);
-      const now = new Date();
-      setLastUpdateTime(now);
-      safeSetToLocalStorage(LAST_UPDATE_TIME_KEY, now.toISOString());
     } catch (err) {
       console.error("Refresh failed:", err);
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  const formatTimeAgo = (date) => {
+    if (!date) return "";
+
+    const now = new Date();
+    const minutes = differenceInMinutes(now, date);
+    const hours = differenceInHours(now, date);
+    const days = differenceInDays(now, date);
+
+    if (minutes < 1) return "baru saja";
+    if (minutes < 60) return `${minutes} menit lalu`;
+    if (hours < 24) return `${hours} jam lalu`;
+    return `${days} hari lalu`;
   };
 
   const renderTimestamp = () => {
@@ -171,27 +171,12 @@ export default function LastUpdatedInfo() {
     }
 
     if (productsError || statsError) {
-      return (
-        <span className="text-red-500 italic">
-          Gagal memuat data: {productsError?.message || statsError?.message}
-        </span>
-      );
-    }
-
-    if (!lastUpdateTime) {
-      return <span className="text-gray-500">Menunggu inisialisasi...</span>;
-    }
-
-    if (hasRealChange) {
-      return <span className="font-semibold">Baru saja diperbarui</span>;
+      return <span className="text-red-500 italic">Gagal memuat data</span>;
     }
 
     return (
       <span className="font-semibold">
-        {formatDistanceToNow(lastUpdateTime, {
-          addSuffix: true,
-          locale: localeID,
-        })}
+        {lastUpdateTime ? formatTimeAgo(lastUpdateTime) : "Belum diupdate"}
       </span>
     );
   };
@@ -199,7 +184,7 @@ export default function LastUpdatedInfo() {
   return (
     <div className="p-4 border border-gray-200 md:border-none md:rounded-2xl md:shadow-sm text-sm text-gray-600 bg-white flex items-center justify-between gap-2">
       <div className="flex items-center gap-2">
-        Terakhir diperbarui: {renderTimestamp()}
+        Data terakhir diupdate: {renderTimestamp()}
       </div>
       <button
         onClick={handleManualRefresh}
