@@ -1,9 +1,12 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useProducts } from "@/context/ProductContext";
 import { useTraffic } from "@/context/TrafficContext";
-import { formatDistanceToNow } from "date-fns";
-import { id as localeID } from "date-fns/locale";
+import {
+  differenceInMinutes,
+  differenceInHours,
+  differenceInDays,
+} from "date-fns";
 import { FiRefreshCw } from "react-icons/fi";
 import { Loader2 } from "lucide-react";
 
@@ -12,43 +15,49 @@ const PREVIOUS_DATA_KEY = "previousData";
 const MAX_STORAGE_SIZE = 4 * 1024 * 1024; // 4MB
 
 const generateDataHash = (data) => {
-  if (!data) return null;
+  if (!data) return "no_data";
 
   if (data.totalVisits !== undefined) {
-    return `${data.totalVisits}|${data.uniqueVisitors}|${data.todayVisits}|${
-      data.currentMonthVisits
-    }|${data.lastUpdated ? new Date(data.lastUpdated).getTime() : 0}`;
+    return [
+      data.totalVisits,
+      data.uniqueVisitors,
+      data.todayVisits,
+      data.currentMonthVisits,
+      data.lastUpdated ? new Date(data.lastUpdated).getTime() : 0,
+    ].join("|");
   }
 
   if (Array.isArray(data)) {
     return `${data.length}|${data.reduce((acc, p) => acc ^ p.id, 0)}`;
   }
 
-  return null;
+  return "invalid_data";
 };
 
-// Safe storage handler
-const safeLocalStorageSet = (key, value) => {
+const safeSetToLocalStorage = (key, value) => {
   try {
-    if (value.length > MAX_STORAGE_SIZE) {
-      console.warn(`Data too large for ${key}, truncating`);
+    const strValue = typeof value !== "string" ? JSON.stringify(value) : value;
+
+    if (strValue.length > MAX_STORAGE_SIZE) {
+      console.warn(`Data too large for localStorage (${key})`);
       return false;
     }
-    localStorage.setItem(key, value);
+
+    localStorage.setItem(key, strValue);
     return true;
   } catch (e) {
     if (e.name === "QuotaExceededError") {
-      console.warn("Storage quota exceeded, clearing some space");
       localStorage.removeItem(key);
       localStorage.removeItem(PREVIOUS_DATA_KEY);
       try {
-        localStorage.setItem(key, value);
+        localStorage.setItem(key, JSON.stringify(value));
         return true;
-      } catch (e) {
-        console.error("Failed to store after cleanup", e);
+      } catch (err) {
+        console.error("Failed to save to localStorage:", err);
         return false;
       }
     }
+    console.error("LocalStorage error:", e);
     return false;
   }
 };
@@ -62,79 +71,67 @@ export default function LastUpdatedInfo() {
   } = useProducts();
   const { trafficStats, statsLoading, statsError, mutateTrafficStats } =
     useTraffic();
+
   const [lastUpdateTime, setLastUpdateTime] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [hasRealChange, setHasRealChange] = useState(false);
+  const [prevHash, setPrevHash] = useState({
+    products: "no_data",
+    traffic: "no_data",
+  });
 
-  const prevDataRef = useRef({ products: null, traffic: null });
-  const isInitialLoadRef = useRef(true);
-
-  // Load initial data from localStorage
+  // Initialize from localStorage
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const storedTime = localStorage.getItem(LAST_UPDATE_TIME_KEY);
     const storedData = localStorage.getItem(PREVIOUS_DATA_KEY);
 
     if (storedTime) {
-      const date = new Date(storedTime);
-      if (!isNaN(date.getTime())) {
-        setLastUpdateTime(date);
-      } else {
-        localStorage.removeItem(LAST_UPDATE_TIME_KEY);
+      const parsed = new Date(storedTime);
+      if (!isNaN(parsed.getTime())) {
+        setLastUpdateTime(parsed);
       }
     }
 
     if (storedData) {
       try {
-        prevDataRef.current = JSON.parse(storedData);
+        const parsed = JSON.parse(storedData);
+        setPrevHash(parsed);
       } catch {
         localStorage.removeItem(PREVIOUS_DATA_KEY);
       }
     }
-
-    isInitialLoadRef.current = true;
   }, []);
 
-  // Check for data changes with optimized comparison
+  // Detect data changes
   useEffect(() => {
     if (productsLoading || statsLoading) return;
 
     const currentProductsHash = generateDataHash(products);
-    const currentTrafficHash = generateDataHash(trafficStats);
+    const currentTrafficHash = trafficStats
+      ? generateDataHash(trafficStats)
+      : "no_data";
 
-    if (isInitialLoadRef.current) {
-      isInitialLoadRef.current = false;
-      prevDataRef.current = {
-        products: currentProductsHash,
-        traffic: currentTrafficHash,
-      };
-      safeLocalStorageSet(
-        PREVIOUS_DATA_KEY,
-        JSON.stringify(prevDataRef.current)
-      );
-      return;
-    }
-
-    const hasProductChange =
-      prevDataRef.current.products !== currentProductsHash;
-    const hasTrafficChange = prevDataRef.current.traffic !== currentTrafficHash;
+    const hasProductChange = prevHash.products !== currentProductsHash;
+    const hasTrafficChange = prevHash.traffic !== currentTrafficHash;
     const hasChange = hasProductChange || hasTrafficChange;
 
     if (hasChange) {
-      const newTime = new Date();
-      setLastUpdateTime(newTime);
-      setHasRealChange(true);
+      const now = new Date();
+      setLastUpdateTime(now);
+      safeSetToLocalStorage(LAST_UPDATE_TIME_KEY, now.toISOString());
 
-      safeLocalStorageSet(LAST_UPDATE_TIME_KEY, newTime.toISOString());
-      prevDataRef.current = {
+      setPrevHash({
         products: currentProductsHash,
         traffic: currentTrafficHash,
-      };
-      safeLocalStorageSet(
+      });
+      safeSetToLocalStorage(
         PREVIOUS_DATA_KEY,
-        JSON.stringify(prevDataRef.current)
+        JSON.stringify({
+          products: currentProductsHash,
+          traffic: currentTrafficHash,
+        })
       );
-    } else {
-      setHasRealChange(false);
     }
   }, [products, trafficStats, productsLoading, statsLoading]);
 
@@ -142,11 +139,25 @@ export default function LastUpdatedInfo() {
     setIsUpdating(true);
     try {
       await Promise.all([mutateProducts(), mutateTrafficStats()]);
-    } catch (e) {
-      console.error("Refresh failed:", e);
+    } catch (err) {
+      console.error("Refresh failed:", err);
     } finally {
       setIsUpdating(false);
     }
+  };
+
+  const formatTimeAgo = (date) => {
+    if (!date) return "";
+
+    const now = new Date();
+    const minutes = differenceInMinutes(now, date);
+    const hours = differenceInHours(now, date);
+    const days = differenceInDays(now, date);
+
+    if (minutes < 1) return "baru saja";
+    if (minutes < 60) return `${minutes} menit lalu`;
+    if (hours < 24) return `${hours} jam lalu`;
+    return `${days} hari lalu`;
   };
 
   const renderTimestamp = () => {
@@ -158,28 +169,14 @@ export default function LastUpdatedInfo() {
         </span>
       );
     }
-    if (productsError || statsError) {
-      return <span className="text-red-500 italic">Gagal memuat data.</span>;
-    }
-    if (!lastUpdateTime) {
-      return (
-        <span className="flex items-center">
-          <Loader2 className="w-4 h-4 animate-spin mr-2" />
-          Memuat data...
-        </span>
-      );
-    }
 
-    if (hasRealChange) {
-      return <span className="font-semibold">baru saja</span>;
+    if (productsError || statsError) {
+      return <span className="text-red-500 italic">Gagal memuat data</span>;
     }
 
     return (
       <span className="font-semibold">
-        {formatDistanceToNow(lastUpdateTime, {
-          addSuffix: true,
-          locale: localeID,
-        })}
+        {lastUpdateTime ? formatTimeAgo(lastUpdateTime) : "Belum diupdate"}
       </span>
     );
   };
@@ -187,13 +184,13 @@ export default function LastUpdatedInfo() {
   return (
     <div className="p-4 border border-gray-200 md:border-none md:rounded-2xl md:shadow-sm text-sm text-gray-600 bg-white flex items-center justify-between gap-2">
       <div className="flex items-center gap-2">
-        Terakhir data diperbarui: {renderTimestamp()}
+        Data terakhir diupdate: {renderTimestamp()}
       </div>
       <button
         onClick={handleManualRefresh}
         disabled={isUpdating || productsLoading || statsLoading}
         className="p-2 text-orange-600 bg-orange-100 rounded-md hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-        aria-label={isUpdating ? "Sedang menyegarkan data" : "Segarkan data"}
+        aria-label={isUpdating ? "memperbarui data..." : "perbarui data"}
       >
         <FiRefreshCw size={16} className={isUpdating ? "animate-spin" : ""} />
       </button>
