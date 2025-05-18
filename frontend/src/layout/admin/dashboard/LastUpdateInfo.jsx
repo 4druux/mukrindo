@@ -11,9 +11,8 @@ const LAST_UPDATE_TIME_KEY = "lastUpdateTime";
 const PREVIOUS_DATA_KEY = "previousData";
 const MAX_STORAGE_SIZE = 4 * 1024 * 1024; // 4MB
 
-// Utility: hash data produk dan traffic
 const generateDataHash = (data) => {
-  if (!data) return null;
+  if (!data) return "no_data";
 
   if (data.totalVisits !== undefined) {
     return [
@@ -29,27 +28,36 @@ const generateDataHash = (data) => {
     return `${data.length}|${data.reduce((acc, p) => acc ^ p.id, 0)}`;
   }
 
-  return null;
+  return "invalid_data";
 };
 
-// Utility: simpan ke localStorage secara aman
 const safeSetToLocalStorage = (key, value) => {
   try {
-    if (value.length > MAX_STORAGE_SIZE) return false;
+    if (typeof value !== "string") {
+      value = JSON.stringify(value);
+    }
+
+    if (value.length > MAX_STORAGE_SIZE) {
+      console.warn(`Data too large for localStorage (${key})`);
+      return false;
+    }
+
     localStorage.setItem(key, value);
     return true;
   } catch (e) {
     if (e.name === "QuotaExceededError") {
+      console.warn("LocalStorage quota exceeded, clearing old data");
       localStorage.removeItem(key);
       localStorage.removeItem(PREVIOUS_DATA_KEY);
       try {
         localStorage.setItem(key, value);
         return true;
       } catch (err) {
-        console.error("Gagal menyimpan ulang ke localStorage", err);
+        console.error("Failed to save to localStorage:", err);
         return false;
       }
     }
+    console.error("LocalStorage error:", e);
     return false;
   }
 };
@@ -64,52 +72,64 @@ export default function LastUpdatedInfo() {
   const { trafficStats, statsLoading, statsError, mutateTrafficStats } =
     useTraffic();
 
-  const [lastUpdateTime, setLastUpdateTime] = useState(null);
+  const [lastUpdateTime, setLastUpdateTime] = (useState < Date) | (null > null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [hasRealChange, setHasRealChange] = useState(false);
   const [prevHash, setPrevHash] = useState({
-    products: null,
-    traffic: null,
+    products: "no_data",
+    traffic: "no_data",
   });
 
-  // Load dari localStorage saat pertama kali render
+  // Initialize from localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    // Initialize or recover lastUpdateTime
     const storedTime = localStorage.getItem(LAST_UPDATE_TIME_KEY);
-    const storedData = localStorage.getItem(PREVIOUS_DATA_KEY);
-
     if (storedTime) {
       const parsed = new Date(storedTime);
       if (!isNaN(parsed.getTime())) {
         setLastUpdateTime(parsed);
+      } else {
+        // Handle invalid date
+        const now = new Date();
+        setLastUpdateTime(now);
+        safeSetToLocalStorage(LAST_UPDATE_TIME_KEY, now.toISOString());
       }
+    } else {
+      // First time load - set initial time
+      const now = new Date();
+      setLastUpdateTime(now);
+      safeSetToLocalStorage(LAST_UPDATE_TIME_KEY, now.toISOString());
     }
 
+    // Initialize previous data hash
+    const storedData = localStorage.getItem(PREVIOUS_DATA_KEY);
     if (storedData) {
       try {
         const parsed = JSON.parse(storedData);
-        setPrevHash(parsed);
+        setPrevHash({
+          products: parsed.products || "no_data",
+          traffic: parsed.traffic || "no_data",
+        });
       } catch {
         localStorage.removeItem(PREVIOUS_DATA_KEY);
       }
     }
   }, []);
 
-  // Deteksi perubahan data
+  // Detect data changes
   useEffect(() => {
     if (productsLoading || statsLoading) return;
 
     const currentProductsHash = generateDataHash(products);
     const currentTrafficHash = generateDataHash(trafficStats);
 
-    const isFirstLoad = prevHash.products === null && prevHash.traffic === null;
-
     const hasProductChange = prevHash.products !== currentProductsHash;
     const hasTrafficChange = prevHash.traffic !== currentTrafficHash;
     const hasChange = hasProductChange || hasTrafficChange;
 
-    if (!isFirstLoad && hasChange) {
+    if (hasChange) {
       const now = new Date();
       setLastUpdateTime(now);
       setHasRealChange(true);
@@ -131,8 +151,11 @@ export default function LastUpdatedInfo() {
     setIsUpdating(true);
     try {
       await Promise.all([mutateProducts(), mutateTrafficStats()]);
+      const now = new Date();
+      setLastUpdateTime(now);
+      safeSetToLocalStorage(LAST_UPDATE_TIME_KEY, now.toISOString());
     } catch (err) {
-      console.error("Gagal refresh data:", err);
+      console.error("Refresh failed:", err);
     } finally {
       setIsUpdating(false);
     }
@@ -149,20 +172,19 @@ export default function LastUpdatedInfo() {
     }
 
     if (productsError || statsError) {
-      return <span className="text-red-500 italic">Gagal memuat data.</span>;
-    }
-
-    if (!lastUpdateTime) {
       return (
-        <span className="flex items-center">
-          <Loader2 className="w-4 h-4 animate-spin mr-2" />
-          Memuat data...
+        <span className="text-red-500 italic">
+          Gagal memuat data: {productsError?.message || statsError?.message}
         </span>
       );
     }
 
+    if (!lastUpdateTime) {
+      return <span className="text-gray-500">Menunggu inisialisasi...</span>;
+    }
+
     if (hasRealChange) {
-      return <span className="font-semibold">baru saja</span>;
+      return <span className="font-semibold">Baru saja diperbarui</span>;
     }
 
     return (
@@ -178,13 +200,13 @@ export default function LastUpdatedInfo() {
   return (
     <div className="p-4 border border-gray-200 md:border-none md:rounded-2xl md:shadow-sm text-sm text-gray-600 bg-white flex items-center justify-between gap-2">
       <div className="flex items-center gap-2">
-        Terakhir data diperbarui: {renderTimestamp()}
+        Terakhir diperbarui: {renderTimestamp()}
       </div>
       <button
         onClick={handleManualRefresh}
         disabled={isUpdating || productsLoading || statsLoading}
         className="p-2 text-orange-600 bg-orange-100 rounded-md hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
-        aria-label={isUpdating ? "Sedang menyegarkan data" : "Segarkan data"}
+        aria-label={isUpdating ? "Menyegarkan data..." : "Segarkan data"}
       >
         <FiRefreshCw size={16} className={isUpdating ? "animate-spin" : ""} />
       </button>
