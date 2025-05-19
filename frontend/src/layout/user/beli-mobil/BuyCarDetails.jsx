@@ -86,7 +86,7 @@ const BuyCarDetails = ({ productId }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[90vh] bg-gray asdadsa-50">
+      <div className="flex items-center justify-center h-[90vh] bg-gray-50">
         <Loader2 className="animate-spin w-8 h-8 text-gray-400" />
       </div>
     );
