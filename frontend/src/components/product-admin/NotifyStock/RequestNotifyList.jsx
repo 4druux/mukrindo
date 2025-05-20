@@ -27,9 +27,9 @@ const RequestNotifyList = ({
   };
 
   return (
-    <div className="lg:p-6 rounded-xl lg:shadow-lg lg:bg-white px-2">
+    <div>
       {/* Mobile View */}
-      <div className="space-y-4 lg:space-y-0 lg:hidden">
+      <div className="space-y-4 lg:space-y-0 lg:hidden px-2 pt-4 md:pt-0">
         {requests.map((request) => {
           const isUpdating = updatingStatusRequestId === request._id;
           const hasPhone = !!request.phoneNumber;
@@ -38,9 +38,9 @@ const RequestNotifyList = ({
             <div
               key={`mobile-${request._id}`}
               id={`request-${request._id}`}
-              className={`bg-white border border-gray-200 md:rounded-2xl md:shadow-md p-4 cursor-pointer hover:bg-blue-50 transition-colors duration-150 ease-in-out ${
+              className={`bg-white border border-gray-200 rounded-2xl shadow-sm p-4 cursor-pointer hover:bg-blue-50 transition-colors duration-150 ease-in-out ${
                 fromNotification === "true" && idParam === request._id
-                  ? "ring-2 ring-orange-500 !bg-orange-50"
+                  ? "ring-1 ring-orange-500 !bg-orange-50"
                   : ""
               }`}
               onClick={() => onRowClick(request._id)}
