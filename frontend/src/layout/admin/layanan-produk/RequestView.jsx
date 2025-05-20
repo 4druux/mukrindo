@@ -38,7 +38,7 @@ const REQUESTS_PER_PAGE = 12;
 
 const requestConfigs = {
   tradeIn: {
-    apiEndpoint: "https://mukrindo-backend.vercel.app/api/trade-in",
+    apiEndpoint: "http://localhost:5000/api/trade-in",
     statusConstants: TRADE_IN_STATUS_FILTER,
     locationConstants: TRADE_IN_LOCATION_FILTER,
     sortConstants: TRADE_IN_SORT_ORDER,
@@ -54,7 +54,7 @@ const requestConfigs = {
     errorTitle: "Permintaan Tukar Tambah",
   },
   buySell: {
-    apiEndpoint: "https://mukrindo-backend.vercel.app/api/sell-requests",
+    apiEndpoint: "http://localhost:5000/api/sell-requests",
     statusConstants: SELL_REQUEST_STATUS_FILTER,
     locationConstants: SELL_REQUEST_LOCATION_FILTER,
     sortConstants: SELL_REQUEST_SORT_ORDER,
@@ -70,7 +70,7 @@ const requestConfigs = {
     errorTitle: "Permintaan Jual Beli",
   },
   notifyMe: {
-    apiEndpoint: "https://mukrindo-backend.vercel.app/api/notif-stock",
+    apiEndpoint: "http://localhost:5000/api/notif-stock",
     statusConstants: NOTIFY_STATUS_FILTER,
     locationConstants: {},
     sortConstants: NOTIFY_SORT_ORDER,
@@ -422,48 +422,48 @@ const RequestView = () => {
   };
 
   return (
-    <div className="mt-6 md:mt-0">
-      <h1 className="text-lg lg:text-xl font-medium text-gray-700 mb-2 md:mb-4 px-3 md:px-0">
-        Layanan Produk
-      </h1>
-      <div className="mb-6">
-        <nav className="flex space-x-3 px-3 md:px-0" aria-label="Tabs">
-          <button
-            onClick={() => handleTabChange("tradeIn")}
-            className={`whitespace-nowrap border px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full shadow-sm cursor-pointer ${
-              activeTab === "tradeIn"
-                ? "text-orange-500 bg-orange-100 border-orange-500"
-                : "bg-white text-gray-500 hover:text-gray-700 border-gray-200"
-            }`}
-          >
-            Tukar Tambah
-          </button>
+    <div className="bg-gradient-to-b from-white to-gray-50 md:bg-transparent lg:p-6 lg:rounded-xl lg:shadow-lg lg:bg-white">
+      <div className="flex flex-col gap-2 md:gap-5 pt-6 md:pt-0 mb-6 md:flex-row md:items-center md:justify-between px-3 md:px-0">
+        <h1 className="text-md lg:text-lg font-medium text-gray-700">
+          {config.pageTitle}
+        </h1>
+
+        <nav
+          className="flex items-center gap-0.5 rounded-full bg-gray-100 p-1 w-full sm:w-auto"
+          aria-label="Tabs"
+        >
           <button
             onClick={() => handleTabChange("buySell")}
-            className={`whitespace-nowrap border px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full shadow-sm cursor-pointer ${
+            className={`px-3 py-1.5 font-semibold w-full rounded-full text-xs cursor-pointer transition-colors duration-150 flex items-center justify-center gap-1 whitespace-nowrap ${
               activeTab === "buySell"
-                ? "text-orange-500 bg-orange-100 border-orange-500"
-                : "bg-white text-gray-500 hover:text-gray-700 border-gray-200"
+                ? "bg-white shadow-sm text-orange-500"
+                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
             }`}
           >
             Jual Mobil
           </button>
           <button
+            onClick={() => handleTabChange("tradeIn")}
+            className={`px-3 py-1.5 font-semibold w-full rounded-full text-xs cursor-pointer transition-colors duration-150 flex items-center justify-center gap-1 whitespace-nowrap ${
+              activeTab === "tradeIn"
+                ? "bg-white shadow-sm text-orange-500"
+                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+            }`}
+          >
+            Tukar Tambah
+          </button>
+          <button
             onClick={() => handleTabChange("notifyMe")}
-            className={`whitespace-nowrap border px-3 py-1 lg:px-4 lg:py-1.5 text-xs lg:text-sm font-medium rounded-full shadow-sm cursor-pointer ${
+            className={`px-3 py-1.5 font-semibold w-full rounded-full text-xs cursor-pointer transition-colors duration-150 flex items-center justify-center gap-1 whitespace-nowrap ${
               activeTab === "notifyMe"
-                ? "text-orange-500 bg-orange-100 border-orange-500"
-                : "bg-white text-gray-500 hover:text-gray-700 border-gray-200"
+                ? "bg-white shadow-sm text-orange-500"
+                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
             }`}
           >
             Notifikasi Stok
           </button>
         </nav>
       </div>
-
-      <h1 className="text-md lg:text-lg font-medium text-gray-700 mb-2 md:mb-4 px-3 md:px-0">
-        {config.pageTitle}
-      </h1>
 
       <RequestFilter
         key={activeTab}
@@ -475,7 +475,7 @@ const RequestView = () => {
         sortOptions={config.sortConstants}
       />
 
-      <div className="mt-6">{renderContent()}</div>
+      <div className="mt-4 lg:mt-6">{renderContent()}</div>
 
       <AnimatePresence>{renderModalContent()}</AnimatePresence>
 
