@@ -38,10 +38,8 @@ export default function Home() {
         <Suspense fallback={<div>Loading...</div>}>
           <CarForm />
         </Suspense>
-        <Suspense fallback={null}>
-          <ProductByRecom />
-          <ProductByPrice />
-        </Suspense>
+        <ProductByRecom />
+        <ProductByPrice />
         <Testimoni />
         <NotifyMeForm />
         <HomeBedge />
