@@ -12,6 +12,11 @@
   font-style: normal;
 }
 
+.font-medium {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+}
+
 @media (min-width: 768px) {
   .container {
     padding-left: 3vw;
