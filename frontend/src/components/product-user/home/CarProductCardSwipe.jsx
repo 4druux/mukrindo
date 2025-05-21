@@ -2,7 +2,6 @@
 import React from "react";
 import Link from "next/link";
 import generateSlug from "@/utils/generateSlug";
-import { motion, AnimatePresence } from "framer-motion";
 
 // Import Components
 import { useProducts } from "@/context/ProductContext";
@@ -131,6 +130,7 @@ const CarProductCardSwipe = ({
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleBookmark(product._id);
+                      e.preventDefault();
                     }}
                   >
                     <div className="bg-black/30 p-2 rounded-full shadow transition">
