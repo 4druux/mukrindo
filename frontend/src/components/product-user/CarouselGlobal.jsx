@@ -14,7 +14,7 @@ const CarouselGlobal = ({ imageUrl, imageAlt, title, subtitle }) => {
           priority
           sizes="(max-width: 768px) 100vw, 100vw"
         />
-        <div className="absolute inset-0 bg-black opacity-30"></div>
+        <div className="absolute inset-0 bg-black opacity-10"></div>
         {/* Teks di atas Banner */}
         <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center p-4 z-10">
           <h1 className="text-3xl md:text-5xl font-bold mb-4">{title}</h1>

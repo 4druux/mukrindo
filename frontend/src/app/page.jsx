@@ -13,13 +13,10 @@ import { useTraffic } from "@/context/TrafficContext";
 
 export default function Home() {
   const bannerImages = [
-    "/images/carousel/carousel-1.jpg",
-    "/images/carousel/carousel-2.jpg",
-    "/images/carousel/carousel-3.jpg",
-    "/images/carousel/carousel-4.jpg",
-    "/images/carousel/2.jpg",
-    "/images/carousel/5.jpg",
-    "/images/carousel/7.jpg",
+    "/images/placeholder-banner.jpg",
+    "/images/placeholder-banner.jpg",
+    "/images/placeholder-banner.jpg",
+    "/images/placeholder-banner.jpg",
   ];
 
   const { trackHomepageVisit } = useTraffic();
