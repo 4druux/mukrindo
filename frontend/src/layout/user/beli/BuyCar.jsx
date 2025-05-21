@@ -211,6 +211,8 @@ const BuyCar = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  
+
   useEffect(() => {
     setCurrentPage(0);
   }, [searchParams]);

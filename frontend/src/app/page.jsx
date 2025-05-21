@@ -30,6 +30,10 @@ export default function Home() {
     });
   }, [trackHomepageVisit]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="container mx-auto">
       <p className="md:pt-5 lg:pt-10 border-t-2 border-gray-200"></p>

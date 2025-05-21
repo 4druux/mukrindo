@@ -99,6 +99,8 @@ const HomeCarousel = ({
               alt={`Slide ${index + 1}`}
               fill
               className="object-cover"
+              placeholder="blur"
+              blurDataURL={image}
               priority={index === 0}
               fetchPriority={index === 0 ? "high" : "auto"}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -113,16 +115,16 @@ const HomeCarousel = ({
             <div
               key={index}
               className={`relative h-2 rounded-full transition-all duration-200 ${
-                index === currentSlide ? "bg-gray-400 w-10" : "bg-gray-400 w-2"
+                index === currentSlide ? "bg-gray-400" : "bg-gray-400/50"
               }`}
+              style={{ width: index === currentSlide ? "24px" : "8px" }}
             >
-              {/* Progress Bar Overlay */}
               {index === currentSlide && (
                 <div
                   ref={index === currentSlide ? progressRef : null}
                   className="absolute inset-0 bg-gray-50 h-full rounded-full z-10 transition-all duration-[5000ms] ease-linear"
                   style={{ width: "0%" }}
-                ></div>
+                />
               )}
             </div>
           ))}
