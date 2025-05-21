@@ -100,6 +100,7 @@ const HomeCarousel = ({
               fill
               className="object-cover"
               priority={index === 0}
+              fetchPriority={index === 0 ? "high" : "auto"}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           </SwiperSlide>
