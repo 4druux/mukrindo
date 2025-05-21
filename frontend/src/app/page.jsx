@@ -13,10 +13,10 @@ import { useTraffic } from "@/context/TrafficContext";
 
 export default function Home() {
   const bannerImages = [
-    "/images/placeholder-banner.jpg",
-    "/images/placeholder-banner.jpg",
-    "/images/placeholder-banner.jpg",
-    "/images/placeholder-banner.jpg",
+    "/images/placeholder-banner.webp",
+    "/images/placeholder-banner.webp",
+    "/images/placeholder-banner.webp",
+    "/images/placeholder-banner.webp",
   ];
 
   const { trackHomepageVisit } = useTraffic();
@@ -38,8 +38,10 @@ export default function Home() {
         <Suspense fallback={<div>Loading...</div>}>
           <CarForm />
         </Suspense>
-        <ProductByRecom />
-        <ProductByPrice />
+        <Suspense fallback={null}>
+          <ProductByRecom />
+          <ProductByPrice />
+        </Suspense>
         <Testimoni />
         <NotifyMeForm />
         <HomeBedge />
