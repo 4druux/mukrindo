@@ -17,7 +17,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={` ${poppins.variable} antialiased`}>
+      <body className={` ${poppins.variable}  font-antialiased`}>
         <Suspense fallback={<div>Loading...</div>}></Suspense>
         <RootLayoutClient>{children}</RootLayoutClient>
       </body>
