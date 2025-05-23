@@ -29,7 +29,7 @@ export default function Home() {
       }
     });
   }, [trackHomepageVisit]);
-// terbaru
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
