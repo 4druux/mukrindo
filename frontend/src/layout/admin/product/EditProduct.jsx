@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import axios from "axios";
+import axiosInstance from "@/utils/axiosInstance";
 
 // Import Components
 import { useProducts } from "@/context/ProductContext";
@@ -77,7 +78,7 @@ const EditProduct = ({ productId }) => {
   const initialProductData = useRef(null);
   const initialMediaFiles = useRef(null);
 
-  const API_ENDPOINT = "http://localhost:5000/api/products";
+  const API_ENDPOINT = "/api/products";
 
   const allRefs = useMemo(
     () => ({
@@ -431,7 +432,7 @@ const EditProduct = ({ productId }) => {
         images: base64Images,
       };
 
-      const response = await axios.put(
+      const response = await axiosInstance.put(
         `${API_ENDPOINT}/${productId}`,
         submitData
       );

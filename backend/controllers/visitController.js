@@ -1,6 +1,6 @@
-// controllers/visitController.js
-const TrackingVisit = require("../models/TrackingVisit");
-const { v4: uuidv4 } = require("uuid");
+// backend/controllers/visitController.js
+const TrackingVisit = require("../models/trackingVisit"); //
+const { v4: uuidv4 } = require("uuid"); //
 const {
   startOfDay,
   endOfDay,
@@ -18,16 +18,24 @@ const {
 } = require("date-fns");
 
 const VISITOR_COOKIE_NAME =
-  process.env.VISITOR_COOKIE_NAME || "mukrindo_visitor_id";
+  process.env.VISITOR_COOKIE_NAME || "mukrindo_visitor_id"; //
 
 exports.trackHomepageVisit = async (req, res) => {
+  //
   try {
     let visitorId = req.cookies[VISITOR_COOKIE_NAME];
-    let isNewVisitor = false;
+    let isNewVisitorSession = false;
+    let httpStatus = 200;
+
+    const ipAddress =
+      req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+    const userAgent = req.headers["user-agent"];
+    const now = new Date();
 
     if (!visitorId) {
       visitorId = uuidv4();
-      isNewVisitor = true;
+      isNewVisitorSession = true;
+      httpStatus = 201;
       res.cookie(VISITOR_COOKIE_NAME, visitorId, {
         maxAge: 365 * 24 * 60 * 60 * 1000,
         httpOnly: true,
@@ -35,33 +43,56 @@ exports.trackHomepageVisit = async (req, res) => {
         sameSite: "lax",
         path: "/",
       });
-    }
 
-    const ipAddress =
-      req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    const userAgent = req.headers["user-agent"];
+      await TrackingVisit.create({
+        visitorCookieId: visitorId,
+        visitTimestamp: now,
+        ipAddress: ipAddress,
+        userAgent: userAgent,
+      });
+    } else {
+      const lastVisit = await TrackingVisit.findOne({
+        visitorCookieId: visitorId,
+      }).sort({ visitTimestamp: -1 });
+      let shouldUpdateTimestamp = true;
 
-    const updatedVisitEntry = await TrackingVisit.findOneAndUpdate(
-      { visitorCookieId: visitorId },
-      {
-        $set: {
-          ipAddress: ipAddress,
-          userAgent: userAgent,
-          visitTimestamp: new Date(),
-        },
-      },
-      {
-        upsert: true,
-        new: true,
-        setDefaultsOnInsert: true,
+      if (lastVisit) {
+        const lastVisitDayStart = startOfDay(lastVisit.visitTimestamp);
+        const currentDayStart = startOfDay(now);
+
+        if (lastVisitDayStart.getTime() === currentDayStart.getTime()) {
+          shouldUpdateTimestamp = false;
+        } else {
+          isNewVisitorSession = true;
+        }
+      } else {
+        isNewVisitorSession = true;
+        httpStatus = 201;
       }
-    );
-
-    res.status(isNewVisitor ? 201 : 200).json({
+      const updateData = {
+        ipAddress: ipAddress,
+        userAgent: userAgent,
+      };
+      if (shouldUpdateTimestamp) {
+        updateData.visitTimestamp = now;
+      }
+      await TrackingVisit.findOneAndUpdate(
+        { visitorCookieId: visitorId },
+        { $set: updateData },
+        {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true,
+        }
+      );
+    }
+    res.status(httpStatus).json({
       message: `Homepage visit ${
-        isNewVisitor ? "tracked" : "updated"
+        isNewVisitorSession
+          ? "tracked (new session/day or new visitor)"
+          : "acknowledged (same day session)"
       } successfully`,
-      visitorId: updatedVisitEntry.visitorCookieId,
+      visitorId: visitorId,
     });
   } catch (error) {
     console.error("Error tracking/updating homepage visit:", error);
@@ -73,12 +104,13 @@ exports.trackHomepageVisit = async (req, res) => {
 };
 
 exports.getHomepageVisitStats = async (req, res) => {
+  //
   try {
     const now = new Date();
-    const currentMonthStart = startOfMonth(now);
-    const currentMonthEnd = endOfMonth(now);
+    const currentMonthStart = startOfMonth(now); // Pastikan startOfMonth diimpor
+    const currentMonthEnd = endOfMonth(now); // Pastikan endOfMonth diimpor
 
-    const prevMonthDate = subMonths(now, 1);
+    const prevMonthDate = subMonths(now, 1); // Pastikan subMonths diimpor
     const prevMonthStart = startOfMonth(prevMonthDate);
     const prevMonthEnd = endOfMonth(prevMonthDate);
 
@@ -114,80 +146,93 @@ exports.getHomepageVisitStats = async (req, res) => {
 };
 
 exports.getHomepageVisitHistory = async (req, res) => {
+  //
   try {
     const { period = "daily" } = req.query;
     const now = new Date();
-    let startDate, groupBy;
+    let startDate, groupByFormat, dateFieldForGroup;
 
-    // Atur range tanggal berdasarkan period
     switch (period) {
       case "weekly":
-        startDate = subWeeks(now, 4);
-        groupBy = {
-          week: { $week: "$visitTimestamp" },
+        startDate = subWeeks(now, 4); // Pastikan subWeeks diimpor
+        groupByFormat = {
           year: { $year: "$visitTimestamp" },
+          week: { $isoWeek: "$visitTimestamp" },
+        };
+        dateFieldForGroup = {
+          $dateFromParts: { isoWeekYear: "$_id.year", isoWeek: "$_id.week" },
         };
         break;
       case "monthly":
-        startDate = subMonths(now, 12);
-        groupBy = {
-          month: { $month: "$visitTimestamp" },
+        startDate = subMonths(now, 12); // Pastikan subMonths diimpor
+        groupByFormat = {
           year: { $year: "$visitTimestamp" },
+          month: { $month: "$visitTimestamp" },
+        };
+        dateFieldForGroup = {
+          $dateFromParts: { year: "$_id.year", month: "$_id.month" },
         };
         break;
       case "yearly":
-        startDate = subYears(now, 5);
-        groupBy = { year: { $year: "$visitTimestamp" } };
+        startDate = subYears(now, 5); // Pastikan subYears diimpor
+        groupByFormat = { year: { $year: "$visitTimestamp" } };
+        dateFieldForGroup = { $dateFromParts: { year: "$_id.year" } };
         break;
       default: // daily
-        startDate = subDays(now, 7);
-        groupBy = {
-          day: { $dayOfMonth: "$visitTimestamp" },
-          month: { $month: "$visitTimestamp" },
+        startDate = subDays(now, 7); // Pastikan subDays diimpor
+        groupByFormat = {
           year: { $year: "$visitTimestamp" },
+          month: { $month: "$visitTimestamp" },
+          day: { $dayOfMonth: "$visitTimestamp" },
+        };
+        dateFieldForGroup = {
+          $dateFromParts: {
+            year: "$_id.year",
+            month: "$_id.month",
+            day: "$_id.day",
+          },
         };
     }
 
     const visits = await TrackingVisit.aggregate([
       {
         $match: {
-          visitTimestamp: { $gte: startDate, $lte: now },
+          // Pastikan startOfDay dan endOfDay diimpor jika Anda ingin menggunakannya di sini
+          visitTimestamp: { $gte: startOfDay(startDate), $lte: endOfDay(now) },
         },
       },
       {
         $group: {
-          _id: groupBy,
-          count: { $sum: 1 },
-          date: { $first: "$visitTimestamp" },
+          _id: groupByFormat,
+          uniqueVisitors: { $addToSet: "$visitorCookieId" },
+          firstVisitTimestampInPeriod: { $min: "$visitTimestamp" },
         },
       },
-      { $sort: { date: 1 } },
       {
         $project: {
           _id: 0,
-          timestamp: "$date",
-          count: 1,
           date: {
             $dateToString: {
-              format: "%Y-%m-%dT%H:%M:%S.%LZ",
-              date: "$date",
+              format: "%Y-%m-%d",
+              date: "$firstVisitTimestampInPeriod",
             },
           },
+          visits: { $size: "$uniqueVisitors" },
         },
       },
+      { $sort: { date: 1 } },
     ]);
 
     res.status(200).json({
       success: true,
       period,
       data: visits.map((v) => ({
-        ...v,
-        date: new Date(v.timestamp).toISOString(),
-        visits: v.count,
+        date: v.date,
+        visits: v.visits,
       })),
     });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error fetching visit history:", error);
     res.status(500).json({
       success: false,
       error: error.message,

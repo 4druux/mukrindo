@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import useSWR from "swr";
-import axios from "axios";
+import axiosInstance from "@/utils/axiosInstance";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 
@@ -33,12 +33,12 @@ import { useRequestContact } from "@/hooks/useRequestContact";
 import { FaBoxOpen } from "react-icons/fa";
 
 // --- Constants ---
-const fetcher = (url) => axios.get(url).then((res) => res.data);
+const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);
 const REQUESTS_PER_PAGE = 12;
 
 const requestConfigs = {
   tradeIn: {
-    apiEndpoint: "http://localhost:5000/api/trade-in",
+    apiEndpoint: "/api/trade-in",
     statusConstants: TRADE_IN_STATUS_FILTER,
     locationConstants: TRADE_IN_LOCATION_FILTER,
     sortConstants: TRADE_IN_SORT_ORDER,
@@ -54,7 +54,7 @@ const requestConfigs = {
     errorTitle: "Permintaan Tukar Tambah",
   },
   buySell: {
-    apiEndpoint: "http://localhost:5000/api/sell-requests",
+    apiEndpoint: "api/sell-requests",
     statusConstants: SELL_REQUEST_STATUS_FILTER,
     locationConstants: SELL_REQUEST_LOCATION_FILTER,
     sortConstants: SELL_REQUEST_SORT_ORDER,
@@ -70,7 +70,7 @@ const requestConfigs = {
     errorTitle: "Permintaan Jual Beli",
   },
   notifyMe: {
-    apiEndpoint: "http://localhost:5000/api/notif-stock",
+    apiEndpoint: "api/notif-stock",
     statusConstants: NOTIFY_STATUS_FILTER,
     locationConstants: {},
     sortConstants: NOTIFY_SORT_ORDER,

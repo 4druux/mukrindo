@@ -1,15 +1,15 @@
 "use client";
 
 import React, { createContext, useState, useContext } from "react";
-import axios from "axios";
 import toast from "react-hot-toast";
+import axiosInstance from "@/utils/axiosInstance";
 
 const BuySellContext = createContext();
 
 export const useBuySell = () => useContext(BuySellContext);
 
 // Sesuaikan dengan endpoint backend Anda untuk jual mobil
-const API_ENDPOINT = "http://localhost:5000/api/sell-requests"; // Endpoint baru untuk jual mobil
+const BUYSELL_API_PATH = "/api/sell-requests";
 
 export const BuySellProvider = ({ children }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,7 +23,10 @@ export const BuySellProvider = ({ children }) => {
 
     try {
       // Kirim data ke backend
-      const response = await axios.post(API_ENDPOINT, submissionData);
+      const response = await axiosInstance.post(
+        BUYSELL_API_PATH,
+        submissionData
+      );
 
       if (response.status === 201) {
         // 201 Created biasanya untuk POST sukses

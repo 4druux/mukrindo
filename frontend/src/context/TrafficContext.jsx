@@ -1,8 +1,8 @@
 "use client";
 import React, { createContext, useContext, useCallback } from "react";
-import axios from "axios";
 import useSWR from "swr";
 import isEqual from "lodash/isEqual";
+import axiosInstance from "@/utils/axiosInstance";
 
 const TrafficContext = createContext();
 
@@ -14,21 +14,19 @@ export const useTraffic = () => {
   return context;
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-const STATS_API_ENDPOINT = `${API_BASE_URL}/api/visits/homepage/stats`;
-const TRACK_API_ENDPOINT = `${API_BASE_URL}/api/visits/homepage/track`;
-const HISTORY_API_ENDPOINT = `${API_BASE_URL}/api/visits/homepage/history`;
+const STATS_API_PATH = "/api/visits/homepage/stats";
+const TRACK_API_PATH = "/api/visits/homepage/track";
+const HISTORY_API_PATH = "/api/visits/homepage/history";
 
-const fetcher = (url) =>
-  axios.get(url, { withCredentials: true }).then((res) => res.data);
+const fetcher = (path) => axiosInstance.get(path).then((res) => res.data);
 
 export const TrafficProvider = ({ children }) => {
   const {
-    data: trafficStats,
-    error: statsError,
+    data: rawTrafficStats,
+    error: rawStatsError,
     isLoading: statsLoading,
     mutate: mutateTrafficStats,
-  } = useSWR(STATS_API_ENDPOINT, fetcher, {
+  } = useSWR(STATS_API_PATH, fetcher, {
     revalidateOnFocus: true,
     compare: (a, b) => {
       if (a === b) return true;
@@ -37,28 +35,39 @@ export const TrafficProvider = ({ children }) => {
     },
   });
 
-  const getTrafficHistory = useCallback((period, year) => {
-    return fetcher(`${HISTORY_API_ENDPOINT}?period=${period}&year=${year}`);
-  }, []);
+  const trafficStats = rawTrafficStats;
+  const statsError = rawStatsError
+    ? rawStatsError.response?.data?.message ||
+      rawStatsError.message ||
+      "Gagal memuat statistik trafik."
+    : null;
 
- 
+  const getTrafficHistory = useCallback((period, year) => {
+    return fetcher(`${HISTORY_API_PATH}?period=${period}&year=${year}`);
+  }, []);
 
   const trackHomepageVisit = useCallback(async () => {
     try {
-      const response = await axios.post(
-        TRACK_API_ENDPOINT,
+      const response = await axiosInstance.post(
+        TRACK_API_PATH,
         {},
         { withCredentials: true }
       );
       return {
         success: response.status === 200 || response.status === 201,
         data: response.data,
-        error: response.statusText,
       };
     } catch (error) {
+      console.error(
+        "Error in trackHomepageVisit:",
+        error.response?.data || error.message || error
+      );
       return {
         success: false,
-        error: error.response?.data?.message || error.message,
+        error:
+          error.response?.data?.message ||
+          error.message ||
+          "Network error during visit tracking",
       };
     }
   }, []);

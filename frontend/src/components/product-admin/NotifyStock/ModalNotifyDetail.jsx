@@ -1,7 +1,7 @@
 // src/components/product-admin/NotifyStock/ModalNotifyDetail.js
 import React, { useState, useEffect, useRef } from "react";
 import useSWR from "swr";
-import axios from "axios";
+import axiosInstance from "@/utils/axiosInstance";
 import { formatNumberPhone } from "@/utils/formatNumberPhone";
 import { X, ChevronDown, Loader2 } from "lucide-react";
 import { FaPhone, FaCar, FaCalendarAlt, FaWhatsapp } from "react-icons/fa";
@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import { useRequestContact } from "@/hooks/useRequestContact";
 import { NOTIFY_STATUS_FILTER } from "../BuySell-TradeIn/RequestFilter";
 
-const fetcher = (url) => axios.get(url).then((res) => res.data);
+const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);
 
 const ModalNotifyDetail = ({
   requestId,
@@ -19,7 +19,7 @@ const ModalNotifyDetail = ({
   currentRequests,
   onStatusUpdated,
 }) => {
-  const API_BASE_URL = "http://localhost:5000/api/notif-stock";
+  const API_BASE_URL = "/api/notif-stock";
   const requestType = "notifyMe";
   const statusConstants = NOTIFY_STATUS_FILTER;
 
@@ -62,9 +62,12 @@ const ModalNotifyDetail = ({
     setIsDropdownOpen(false);
 
     try {
-      const updateResponse = await axios.patch(`${API_BASE_URL}/${requestId}`, {
-        status: newStatus,
-      });
+      const updateResponse = await axiosInstance.patch(
+        `${API_BASE_URL}/${requestId}`,
+        {
+          status: newStatus,
+        }
+      );
 
       if (updateResponse.data && updateResponse.data.success) {
         await mutateDetail();

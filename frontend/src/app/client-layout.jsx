@@ -26,6 +26,54 @@ export default function ClientLayout({ children }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const cleanupOldViewedProducts = () => {
+        const oneDayAgo = new Date();
+        oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+
+        oneDayAgo.setHours(0, 0, 0, 0);
+
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith("viewedProduct_")) {
+            const parts = key.split("_");
+            if (parts.length === 3) {
+              const datePart = parts[2];
+              try {
+                const dateParts = datePart.split("-");
+                if (dateParts.length === 3) {
+                  const viewedDate = new Date(
+                    parseInt(dateParts[0]),
+                    parseInt(dateParts[1]) - 1,
+                    parseInt(dateParts[2])
+                  );
+                  viewedDate.setHours(0, 0, 0, 0);
+
+                  if (viewedDate.getTime() < oneDayAgo.getTime()) {
+                    localStorage.removeItem(key);
+                  }
+                } else {
+                  localStorage.removeItem(key);
+                }
+              } catch (e) {
+                console.warn(
+                  `Error parsing date from localStorage key, removing: ${key}`,
+                  e
+                );
+                localStorage.removeItem(key);
+              }
+            } else {
+              localStorage.removeItem(key);
+            }
+          }
+        }
+      };
+
+      cleanupOldViewedProducts();
+    }
+  }, []);
+
   const isNotHeader =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/login") ||

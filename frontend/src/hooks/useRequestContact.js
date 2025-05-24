@@ -1,6 +1,6 @@
 // src/hooks/useRequestContact.js
 import { useState } from "react";
-import axios from "axios";
+import axiosInstance from "@/utils/axiosInstance";
 import toast from "react-hot-toast";
 
 const formatPhoneNumber = (phoneNumber) => {
@@ -154,7 +154,7 @@ export const useRequestContact = ({
     if (request.status === statusConstants.PENDING) {
       setUpdatingRequestId(requestId);
       try {
-        const updateResponse = await axios.patch(
+        const updateResponse = await axiosInstance.patch(
           `${apiEndpoint}/${requestId}`,
           { status: statusConstants.CONTACTED }
         );

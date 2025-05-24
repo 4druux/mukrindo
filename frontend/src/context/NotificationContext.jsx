@@ -1,15 +1,15 @@
 "use client";
 import { createContext, useContext } from "react";
-import axios from "axios";
 import useSWR from "swr";
 import isEqual from "lodash/isEqual";
+import axiosInstance from "@/utils/axiosInstance";
 
 const NotificationContext = createContext();
 export const useNotifications = () => useContext(NotificationContext);
 
-const fetcher = (url) => axios.get(url).then((res) => res.data);
+const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);
 
-const API_ENDPOINT = "http://localhost:5000/api/notifications";
+const NOTIFICATION_API_PATH = "/api/notifications";
 
 export const NotificationProvider = ({ children }) => {
   const {
@@ -17,7 +17,7 @@ export const NotificationProvider = ({ children }) => {
     error: swrError,
     isLoading: swrLoading,
     mutate,
-  } = useSWR(API_ENDPOINT, fetcher, {
+  } = useSWR(NOTIFICATION_API_PATH, fetcher, {
     revalidateOnFocus: true,
     compare: (a, b) => {
       if (a === b) return true;
@@ -32,7 +32,7 @@ export const NotificationProvider = ({ children }) => {
 
   const deleteAllNotifications = async () => {
     try {
-      await axios.delete(API_ENDPOINT);
+      await axiosInstance.delete(NOTIFICATION_API_PATH);
       mutate([]);
       return { success: true };
     } catch (error) {
@@ -46,7 +46,7 @@ export const NotificationProvider = ({ children }) => {
       const unreadNotifications = notifications.filter((n) => !n.isRead);
       await Promise.all(
         unreadNotifications.map((n) =>
-          axios.patch(`${API_ENDPOINT}/${n._id}/read`)
+          axiosInstance.patch(`${NOTIFICATION_API_PATH}/${n._id}/read`)
         )
       );
       mutate();
@@ -59,7 +59,7 @@ export const NotificationProvider = ({ children }) => {
 
   const markAsRead = async (id) => {
     try {
-      await axios.patch(`${API_ENDPOINT}/${id}/read`);
+      await axiosInstance.patch(`${NOTIFICATION_API_PATH}/${id}/read`);
       mutate();
       return { success: true };
     } catch (error) {

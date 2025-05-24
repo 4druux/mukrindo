@@ -1,15 +1,14 @@
 "use client";
 
 import React, { createContext, useState, useContext } from "react";
-import axios from "axios";
 import toast from "react-hot-toast";
+import axiosInstance from "@/utils/axiosInstance";
 
 const TradeInContext = createContext();
 
 export const useTradeIn = () => useContext(TradeInContext);
 
-// Sesuaikan dengan endpoint backend Anda nanti
-const API_ENDPOINT = "http://localhost:5000/api/trade-in"; // Endpoint baru
+const TRADE_IN_API_PATH = "/api/trade-in";
 
 export const TradeInProvider = ({ children }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,7 +22,10 @@ export const TradeInProvider = ({ children }) => {
 
     try {
       // Kirim data ke backend
-      const response = await axios.post(API_ENDPOINT, submissionData);
+      const response = await axiosInstance.post(
+        TRADE_IN_API_PATH,
+        submissionData
+      );
 
       if (response.status === 201) {
         // 201 Created biasanya untuk POST sukses
