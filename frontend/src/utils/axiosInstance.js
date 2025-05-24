@@ -1,11 +1,11 @@
 // frontend/src/utils/axiosInstance.js
 import axios from "axios";
 
-const baseURL = process.env.NEXT_API_URL;
+const baseURL = process.env.NEXT_PUBLIC_API_URL;
 
 if (!baseURL) {
   console.error(
-    "FATAL ERROR: NEXT_API_URL is not defined in your environment variables."
+    "FATAL ERROR: NEXT_PUBLIC_API_URL is not defined in your environment variables."
   );
 }
 
@@ -15,11 +15,11 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const apiKey = process.env.NEXT_BACKEND_API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_BACKEND_API_KEY;
     if (apiKey) {
       config.headers["X-API-Key"] = apiKey;
     } else {
-      console.warn("Frontend: NEXT_BACKEND_API_KEY is not set.");
+      console.warn("Frontend: NEXT_PUBLIC_BACKEND_API_KEY is not set.");
     }
 
     return config;
