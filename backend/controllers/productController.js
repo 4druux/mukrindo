@@ -193,19 +193,16 @@ exports.deleteProduct = async (req, res) => {
   }
 };
 
-// @desc    Increment view count for a product
-// @route   PUT /api/products/:id/increment-view
-// @access  Public (atau Private jika Anda ingin membatasi siapa yang bisa memicu ini)
 exports.incrementViewCount = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id: productId } = req.params;
 
-    if (!id) {
+    if (!productId) {
       return res.status(400).json({ message: "ID Produk diperlukan" });
     }
 
     const product = await Product.findByIdAndUpdate(
-      id,
+      productId,
       { $inc: { viewCount: 1 } },
       { new: true }
     );
@@ -214,7 +211,10 @@ exports.incrementViewCount = async (req, res) => {
       return res.status(404).json({ message: "Produk tidak ditemukan" });
     }
 
-    res.status(200).json({ viewCount: product.viewCount });
+    res.status(200).json({
+      viewCount: product.viewCount,
+      message: "View count incremented by frontend trigger.",
+    });
   } catch (error) {
     if (error.name === "CastError" && error.kind === "ObjectId") {
       return res.status(400).json({ message: "ID Produk tidak valid" });

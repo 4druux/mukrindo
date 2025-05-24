@@ -3,7 +3,7 @@
 import React, { useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import axios from "axios";
+import axiosInstance from "@/utils/axiosInstance";
 
 // Import Components
 import { useProducts } from "@/context/ProductContext";
@@ -72,7 +72,7 @@ const AddProduct = () => {
   const [errors, setErrors] = useState({});
   const router = useRouter();
   const { mutateProducts } = useProducts();
-  const API_ENDPOINT = "https://mukrindo-backend.vercel.app/api/products";
+  const API_ENDPOINT = "/api/products";
 
   const allRefs = useMemo(
     () => ({
@@ -293,7 +293,7 @@ const AddProduct = () => {
         images: base64Images,
       };
 
-      const response = await axios.post(API_ENDPOINT, submitData);
+      const response = await axiosInstance.post(API_ENDPOINT, submitData);
       toast.success("Produk berhasil ditambahkan.", {
         className: "custom-toast",
       });

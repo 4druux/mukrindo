@@ -6,14 +6,15 @@ import {
   useState,
   useEffect,
 } from "react";
-import axios from "axios";
 import useSWR from "swr";
 import isEqual from "lodash/isEqual";
+import axiosInstance from "@/utils/axiosInstance";
 
 const ProductContext = createContext();
+const PRODUCTS_API_PATH = "/api/products";
 export const useProducts = () => useContext(ProductContext);
 
-const fetcher = (url) => axios.get(url).then((res) => res.data);
+const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);
 
 // const fetcher = async (url) => {
 //   // Delay 2 menit (120000 ms)
@@ -23,15 +24,13 @@ const fetcher = (url) => axios.get(url).then((res) => res.data);
 //   return res.data;
 // };
 
-const API_ENDPOINT = "https://mukrindo-backend.vercel.app/api/products";
-
 export const ProductProvider = ({ children }) => {
   const {
-    data,
+    data: productsData,
     error: swrError,
     isLoading: swrLoading,
     mutate,
-  } = useSWR(API_ENDPOINT, fetcher, {
+  } = useSWR(PRODUCTS_API_PATH, fetcher, {
     revalidateOnFocus: true,
     // refreshInterval: 30000, // Jika Anda menggunakan ini, pertimbangkan dampaknya
 
@@ -44,15 +43,19 @@ export const ProductProvider = ({ children }) => {
     },
   });
 
-  const products = data || [];
+  const products = productsData || [];
   const loading = swrLoading;
-  const error = swrError;
+  const error = swrError
+    ? swrError.response?.data?.message ||
+      swrError.message ||
+      "Gagal memuat produk."
+    : null;
 
   const [bookmarks, setBookmarks] = useState(new Set());
 
   const deleteProduct = async (productId) => {
     try {
-      await axios.delete(`${API_ENDPOINT}/${productId}`);
+      await axiosInstance.delete(`${PRODUCTS_API_PATH}/${productId}`);
       mutate();
       return { success: true };
     } catch (error) {
@@ -67,7 +70,7 @@ export const ProductProvider = ({ children }) => {
 
   const updateProductStatus = async (productId, newStatus) => {
     try {
-      await axios.put(`${API_ENDPOINT}/${productId}`, {
+      await axiosInstance.put(`${PRODUCTS_API_PATH}/${productId}`, {
         status: newStatus,
       });
       mutate();
@@ -84,7 +87,9 @@ export const ProductProvider = ({ children }) => {
 
   const fetchProductById = useCallback(async (productId) => {
     try {
-      const response = await axios.get(`${API_ENDPOINT}/${productId}`);
+      const response = await axiosInstance.get(
+        `${PRODUCTS_API_PATH}/${productId}`
+      );
       return { success: true, data: response.data };
     } catch (error) {
       const errorMessage =
@@ -96,16 +101,50 @@ export const ProductProvider = ({ children }) => {
     }
   }, []);
 
-  const incrementProductView = useCallback(async (productId) => {
-    try {
-      await axios.put(`${API_ENDPOINT}/${productId}/increment-view`);
+  const incrementProductView = useCallback(
+    async (productId) => {
+      if (typeof window === "undefined" || !productId) {
+        return {
+          success: false,
+          error: "Invalid operation environment or missing product ID.",
+        };
+      }
 
-      return { success: true };
-    } catch (error) {
-      console.error("Failed to increment view count:", error);
-      return { success: false, error: "Failed to increment view count" };
-    }
-  }, []);
+      const today = new Date().toISOString().split("T")[0];
+      const localStorageKey = `viewedProduct_${productId}_${today}`;
+
+      if (localStorage.getItem(localStorageKey)) {
+        return { success: true, message: "Already viewed today." };
+      }
+
+      try {
+        const response = await axiosInstance.put(
+          `${PRODUCTS_API_PATH}/${productId}/increment-view`
+        );
+
+        localStorage.setItem(localStorageKey, "true");
+
+        mutate((currentData) => {
+          if (!currentData) return currentData;
+          return currentData.map((p) =>
+            p._id === productId
+              ? { ...p, viewCount: response.data.viewCount }
+              : p
+          );
+        }, false);
+
+        return { success: true, viewCount: response.data.viewCount };
+      } catch (err) {
+        console.error("Failed to increment product view count:", err);
+        const errorMessage =
+          err.response?.data?.message ||
+          err.message ||
+          "Gagal mencatat view produk";
+        return { success: false, error: errorMessage };
+      }
+    },
+    [mutate]
+  );
 
   useEffect(() => {
     const storedBookmarks = localStorage.getItem("bookmarks");

@@ -32,24 +32,17 @@ const AllProducts = () => {
   useEffect(() => {
     const urlSearchQuery = searchParams.get("search");
 
-    // Jika URL punya query search
     if (urlSearchQuery) {
-      // Jika query URL berbeda dengan query di context, update context
       if (urlSearchQuery !== searchQuery) {
         console.log("Syncing URL query to context:", urlSearchQuery);
         setSearchQuery(urlSearchQuery);
       }
-    }
-    // Jika URL TIDAK punya query search
-    else {
-      // Jika context MASIH punya query, kosongkan context
+    } else {
       if (searchQuery) {
         console.log("Clearing context query because URL is empty");
-        setSearchQuery(""); // Pastikan context juga kosong
+        setSearchQuery("");
       }
     }
-    // Dependency tetap sama, pastikan searchQuery ada di dependency array
-    // agar bisa mendeteksi perubahan dari context juga (misal dari header)
   }, [searchParams, searchQuery, setSearchQuery]);
 
   const handleDelete = async (productId) => {

@@ -1,14 +1,14 @@
 "use client";
 
 import React, { createContext, useState, useContext } from "react";
-import axios from "axios";
 import toast from "react-hot-toast";
+import axiosInstance from "@/utils/axiosInstance";
 
 const NotifStockContext = createContext();
 
 export const useNotification = () => useContext(NotifStockContext);
 
-const API_ENDPOINT = "https://mukrindo-backend.vercel.app/api/notif-stock";
+const NOTIFY_API_PATH = "/api/notif-stock";
 
 export const NotifStockProvider = ({ children }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,7 +22,10 @@ export const NotifStockProvider = ({ children }) => {
     console.log("Submitting notification request:", submissionData);
 
     try {
-      const response = await axios.post(API_ENDPOINT, submissionData);
+      const response = await axiosInstance.post(
+        NOTIFY_API_PATH,
+        submissionData
+      );
 
       if (response.status === 201) {
         setSubmitSuccess(true);
@@ -31,7 +34,7 @@ export const NotifStockProvider = ({ children }) => {
           {
             className: "custom-toast",
             duration: 5000,
-          }  
+          }
         );
         return { success: true, data: response.data };
       } else {

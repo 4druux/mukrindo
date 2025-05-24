@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import useSWR from "swr";
-import axios from "axios";
+import axiosInstance from "@/utils/axiosInstance";
 import { formatNumberPhone } from "@/utils/formatNumberPhone";
 import { formatNumber } from "@/utils/formatNumber";
 import { X, ChevronDown, Loader2, FileCheck } from "lucide-react";
@@ -32,7 +32,7 @@ import {
   TRADE_IN_LOCATION_FILTER,
 } from "./RequestFilter";
 
-const fetcher = (url) => axios.get(url).then((res) => res.data);
+const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);
 
 const ModalRequestDetail = ({
   requestId,
@@ -43,9 +43,7 @@ const ModalRequestDetail = ({
   onStatusUpdated,
 }) => {
   const API_BASE_URL =
-    requestType === "tradeIn"
-      ? "https://mukrindo-backend.vercel.app/api/trade-in"
-      : "https://mukrindo-backend.vercel.app/api/sell-requests";
+    requestType === "tradeIn" ? "/api/trade-in" : "/api/sell-requests";
 
   const statusConstants =
     requestType === "tradeIn"
@@ -101,9 +99,12 @@ const ModalRequestDetail = ({
 
     try {
       //  Use dynamic API endpoint
-      const updateResponse = await axios.patch(`${API_BASE_URL}/${requestId}`, {
-        status: newStatus,
-      });
+      const updateResponse = await axiosInstance.patch(
+        `${API_BASE_URL}/${requestId}`,
+        {
+          status: newStatus,
+        }
+      );
 
       if (updateResponse.data && updateResponse.data.success) {
         await mutateDetail();
