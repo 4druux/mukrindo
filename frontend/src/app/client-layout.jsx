@@ -1,21 +1,29 @@
-// app/client-layout.jsx (user)
+// frontend/src/app/client-layout.jsx
 "use client";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import AppHeader from "@/layout/user/AppHeader";
 import AppFooter from "@/layout/user/AppFooter";
-import { HeaderProvider } from "@/context/HeaderContext";
 import BookmarkRightbar from "@/layout/user/BookmarkRightbar";
 
 export default function ClientLayout({ children }) {
   const pathname = usePathname();
   const [isMobile, setIsMobile] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
+    if (hasMounted) {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname, hasMounted]);
+
+  useEffect(() => {
+    if (!hasMounted) return;
+
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth <= 760);
     };
@@ -24,14 +32,13 @@ export default function ClientLayout({ children }) {
     return () => {
       window.removeEventListener("resize", checkIsMobile);
     };
-  }, []);
+  }, [hasMounted]);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (hasMounted && typeof window !== "undefined") {
       const cleanupOldViewedProducts = () => {
         const oneDayAgo = new Date();
         oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-
         oneDayAgo.setHours(0, 0, 0, 0);
 
         for (let i = localStorage.length - 1; i >= 0; i--) {
@@ -49,7 +56,6 @@ export default function ClientLayout({ children }) {
                     parseInt(dateParts[2])
                   );
                   viewedDate.setHours(0, 0, 0, 0);
-
                   if (viewedDate.getTime() < oneDayAgo.getTime()) {
                     localStorage.removeItem(key);
                   }
@@ -69,31 +75,32 @@ export default function ClientLayout({ children }) {
           }
         }
       };
-
       cleanupOldViewedProducts();
     }
-  }, []);
+  }, [hasMounted]);
 
-  const isNotHeader =
+  const isAuthFlowPage =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/login") ||
-    pathname.startsWith("/register");
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/auth/callback");
 
   const hideHeaderOnBeliMobilMobile =
-    isMobile && pathname.startsWith("/beli-mobil");
+    hasMounted && isMobile && pathname.startsWith("/beli-mobil");
 
-  const showHeader = !isNotHeader && !hideHeaderOnBeliMobilMobile;
+  const showHeaderAndStandardLayout =
+    !isAuthFlowPage && !hideHeaderOnBeliMobilMobile;
+
+  if (pathname.startsWith("/auth/callback")) {
+    return <>{children}</>;
+  }
 
   return (
-    <>
-      <HeaderProvider>
-        <div className="min-h-screen bg-gray-50 mb-18 md:mb-0">
-          {showHeader && <AppHeader />}
-          <BookmarkRightbar />
-          <div className="">{children}</div>
-          <AppFooter />
-        </div>
-      </HeaderProvider>
-    </>
+    <div className="min-h-screen bg-gray-50 mb-18 md:mb-0">
+      {showHeaderAndStandardLayout && <AppHeader />}
+      {showHeaderAndStandardLayout && <BookmarkRightbar />}
+      <div className="">{children}</div>
+      {showHeaderAndStandardLayout && <AppFooter />}
+    </div>
   );
 }

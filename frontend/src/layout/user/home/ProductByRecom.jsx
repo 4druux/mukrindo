@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useProducts } from "@/context/ProductContext";
 import CarProductCardSwipe from "@/components/product-user/home/CarProductCardSwipe";
+import TittleText from "@/components/common/TittleText";
 
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";
 const MAX_VIEWED_ITEMS = 10;
@@ -133,9 +134,7 @@ const ProductByRecom = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-2 lg:mb-4 px-3 md:px-0">
-        <h1 className="text-md lg:text-xl font-medium text-gray-700">
-          Mobil Pilihan Terbaik
-        </h1>
+        <TittleText text="Mobil Pilihan Terbaik" />
         <div className="block md:hidden">
           <Link href="/beli">
             <p className="text-xs text-orange-500 font-medium hover:text-orange-600 hover:text-underline hover:underline cursor-pointer">
