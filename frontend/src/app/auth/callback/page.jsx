@@ -1,16 +1,17 @@
 // frontend/src/app/auth/callback/page.jsx
 "use client";
-import { useEffect, useState } from "react"; // useState untuk pesan dinamis jika perlu
+
+import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 import DotLoader from "@/components/common/DotLoader";
 import Link from "next/link";
 
-export default function AuthCallbackPage() {
+function CallbackPageLogic() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { handleOAuthSuccess } = useAuth(); // Ini untuk alur login sukses
+  const { handleOAuthSuccess } = useAuth();
   const [pageMessage, setPageMessage] = useState(
     "Sedang memproses, mohon tunggu..."
   );
@@ -26,23 +27,16 @@ export default function AuthCallbackPage() {
     const errorType = searchParams.get("error");
 
     if (errorType === "admin_access_denied") {
-      // **PENANGANAN BARU UNTUK AKSES ADMIN DITOLAK**
-      setPageMessage("Akses ditolak. Mengalihkan..."); // Ubah pesan di halaman callback
       const displayMessage =
         messageFromParams ||
         "Anda tidak memiliki izin untuk mengakses halaman ini.";
       toast.error(displayMessage, { className: "custom-toast" });
 
-      // Penting: JANGAN panggil handleOAuthSuccess atau logout.
-      // Sesi user tetap ada. Langsung redirect ke homepage.
-      // Tambahkan delay kecil jika ingin loader dan pesan di callback page terlihat lebih lama.
-      const redirectTimer = setTimeout(() => {
-        router.replace("/");
-      }, 1500); // Delay 1.5 detik (sesuaikan atau hapus jika tidak perlu delay)
+      router.replace("/");
 
-      return () => clearTimeout(redirectTimer); // Cleanup timer jika komponen unmount
+      return;
     } else if (token && role && userId && email) {
-      // Logika yang sudah ada untuk login sukses (OAuth atau manual)
+      setPageMessage("Login berhasil! Mengalihkan...");
       let dynamicMessage = messageFromParams;
       if (!dynamicMessage) {
         dynamicMessage = `Login dengan ${
@@ -61,8 +55,7 @@ export default function AuthCallbackPage() {
       };
       handleOAuthSuccess(authData);
     } else if (!errorType) {
-      // Hanya jika tidak ada errorType spesifik yang ditangani
-      // Parameter tidak lengkap untuk login sukses
+      setPageMessage("Gagal memproses. Mengalihkan ke login...");
       console.error(
         "Auth callback: Parameter login sukses tidak lengkap.",
         Object.fromEntries(searchParams)
@@ -72,13 +65,10 @@ export default function AuthCallbackPage() {
       });
       router.replace("/login?error=incomplete_login_params");
     }
-    // Jika ada errorType lain yang tidak ditangani, tidak akan melakukan apa-apa,
-    // pengguna akan tetap di halaman callback dengan loader.
-    // Anda bisa menambahkan penanganan error default di sini jika perlu.
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, router, handleOAuthSuccess]);
+  }, [searchParams, router, handleOAuthSuccess]); // pageMessage tidak perlu di deps
 
+  // JSX return untuk CallbackPageLogic tetap sama (menampilkan DotLoader dan pageMessage)
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
       <DotLoader
@@ -102,5 +92,31 @@ export default function AuthCallbackPage() {
         </div>
       </noscript>
     </div>
+  );
+}
+
+// Komponen Loader untuk fallback Suspense di halaman ini
+function CallbackPageFallbackLoader() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+      <DotLoader
+        dotSize="w-5 h-5"
+        dotColor="bg-gradient-to-r from-orange-500 to-amber-500"
+        textSize="text-xl"
+        textColor="text-gray-700"
+      />
+      <p className="mt-6 text-gray-600 text-center">
+        Memuat halaman autentikasi...
+      </p>
+    </div>
+  );
+}
+
+// 3. Komponen Page default mengekspor Suspense yang membungkus komponen logika
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={<CallbackPageFallbackLoader />}>
+      <CallbackPageLogic />
+    </Suspense>
   );
 }
