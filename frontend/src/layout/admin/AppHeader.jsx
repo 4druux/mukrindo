@@ -2,7 +2,7 @@
 "use client";
 import { useSidebar } from "@/context/SidebarContext";
 import NotificationDropdown from "@/components/header-admin/NotificationDropdown";
-import UserDropdown from "@/components/header-admin/UserDropdown";
+import AdminDropdown from "@/components/header-admin/AdminDropdown";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
@@ -122,7 +122,7 @@ const AppHeader = () => {
               </form>
             </div>
             <NotificationDropdown />
-            <UserDropdown />
+            <AdminDropdown />
           </div>
         </div>
       </div>

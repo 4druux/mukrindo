@@ -14,6 +14,7 @@ import "swiper/css/a11y";
 
 // Import Icons for buttons
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
+import TittleText from "../common/TittleText";
 
 function Testimoni() {
   const testimonials = [
@@ -93,9 +94,7 @@ function Testimoni() {
   return (
     <div>
       <div className="px-3 md:px-0">
-        <h1 className="text-md lg:text-xl font-medium text-gray-700 mt-6 mb-1">
-          Cerita Mereka Bersama Kami
-        </h1>
+        <TittleText text="Cerita Mereka Bersama Kami" className="mt-6 mb-1" />
         <p className="text-xs lg:text-sm text-gray-500 mb-2 lg:mb-4">
           Lihat pengalaman pelanggan yang puas dengan layanan dan kualitas mobil
           dari Mukrindo Motor.

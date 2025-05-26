@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import ClientLayout from "./client-layout";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { HeaderProvider } from "@/context/HeaderContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { ProductProvider } from "@/context/ProductContext";
 import { TradeInProvider } from "@/context/TradeInContext";
 import { BuySellProvider } from "@/context/BuySellContext";
@@ -21,26 +22,28 @@ export default function RootLayoutClient({ children }) {
 
   return (
     <TrafficProvider>
-      <ProductProvider>
-        <NotificationProvider>
-          <TradeInProvider>
-            <BuySellProvider>
-              <NotifStockProvider>
-                <SidebarProvider>
-                  <HeaderProvider>
-                    <Toaster position="top-right" reverseOrder={true} />
-                    {isAdminPage ? (
-                      children
-                    ) : (
-                      <ClientLayout>{children}</ClientLayout>
-                    )}
-                  </HeaderProvider>
-                </SidebarProvider>
-              </NotifStockProvider>
-            </BuySellProvider>
-          </TradeInProvider>
-        </NotificationProvider>
-      </ProductProvider>
+      <AuthProvider>
+        <ProductProvider>
+          <NotificationProvider>
+            <TradeInProvider>
+              <BuySellProvider>
+                <NotifStockProvider>
+                  <SidebarProvider>
+                    <HeaderProvider>
+                      <Toaster position="top-right" reverseOrder={true} />
+                      {isAdminPage ? (
+                        children
+                      ) : (
+                        <ClientLayout>{children}</ClientLayout>
+                      )}
+                    </HeaderProvider>
+                  </SidebarProvider>
+                </NotifStockProvider>
+              </BuySellProvider>
+            </TradeInProvider>
+          </NotificationProvider>
+        </ProductProvider>
+      </AuthProvider>
     </TrafficProvider>
   );
 }

@@ -15,6 +15,7 @@ import {
 import { useNotification } from "@/context/NotifStockContext";
 import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
+import TittleText from "../common/TittleText";
 
 const PHONE_PREFIX = "+62 ";
 const QUICK_OPEN_DELAY = 50;
@@ -259,9 +260,11 @@ const NotifyMeForm = () => {
     <div className="bg-white px-6 pb-6 lg:py-4 xl:py-0 border-y border-gray-200 md:border-none md:rounded-2xl md:shadow-md flex flex-col-reverse lg:flex-row items-center justify-between">
       <div className="w-full lg:w-3/4">
         <div className="flex items-start gap-3">
-          <h2 className="text-md lg:text-xl font-medium text-gray-700 -mt-1">
-            Tidak Menemukan Mobil yang Dicari?
-          </h2>
+          <TittleText
+            text="Tidak Menemukan Mobil yang Dicari?"
+            className="-mt-1"
+            separator={false}
+          />
           {!isFormExpanded && (
             <div className="lg:hidden text-center">
               <button

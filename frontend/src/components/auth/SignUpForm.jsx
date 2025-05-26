@@ -3,14 +3,48 @@
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
-import { FaXTwitter } from "react-icons/fa6";
 import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
+import toast from "react-hot-toast";
+import TittleText from "../common/TittleText";
 
 export default function SignUpForm() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const { register, loading: authLoading, authError } = useAuth();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!firstName || !lastName || !email || !password) {
+      toast.error("Semua field wajib diisi.", { className: "custom-toast" });
+      return;
+    }
+    if (!termsAccepted) {
+      toast.error(
+        "Anda harus menyetujui Syarat & Ketentuan serta Kebijakan Privasi.",
+        {
+          className: "custom-toast",
+        }
+      );
+      return;
+    }
+    await register(firstName, lastName, email, password);
+  };
+
+  const handleGoogleLogin = () => {
+    if (process.env.NEXT_PUBLIC_API_URL) {
+      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`;
+    } else {
+      console.error("NEXT_PUBLIC_API_URL is not defined");
+      toast.error("Konfigurasi error, tidak bisa daftar dengan Google.");
+    }
+  };
 
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full py-4">
@@ -30,27 +64,18 @@ export default function SignUpForm() {
 
       <div className="flex flex-col justify-center pt-5 w-full max-w-md mx-auto">
         <div>
-          <div className="mb-5 text-left">
-            <div className="inline-flex items-center gap-2 mb-1">
-              <p className="prata-regular text-xl md:text-2xl">
-                Daftar Sekarang
-              </p>
-              <hr className="border-none h-[1.5px] w-8 bg-gray-800" />
-            </div>
+          <div className="mb-2 md:mb-5 text-left">
+            <TittleText text="Daftar Sekarang" className="text-xl md:text-2xl" />
           </div>
 
           <div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-5">
-              {/* --- Google Sign-Up Button --- */}
-              <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-medium text-gray-700 transition-colors bg-gray-50 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 cursor-pointer">
-                <FcGoogle className="w-8 h-8 lg:w-12 lg:h-12" />
+            <div className="grid grid-cols-1">
+              <button
+                onClick={handleGoogleLogin}
+                className="inline-flex items-center justify-center gap-3 py-3 text-sm font-medium text-gray-600 transition-colors bg-gray-50 rounded-lg px-7 hover:bg-gray-100 hover:text-gray-800 cursor-pointer"
+              >
+                <FcGoogle className="w-8 h-8" />
                 Daftar dengan Google
-              </button>
-
-              {/* --- X Sign-Up Button --- */}
-              <button className="inline-flex items-center justify-center gap-3 py-3 text-sm font-medium text-gray-700 transition-colors bg-gray-50 rounded-lg px-7 hover:bg-gray-200 hover:text-gray-800 cursor-pointer">
-                <FaXTwitter className="w-6 h-6" />
-                Daftar dengan X
               </button>
             </div>
 
@@ -66,82 +91,88 @@ export default function SignUpForm() {
               </div>
             </div>
 
+            {authError && !authLoading && (
+              <p className="text-xs text-red-500 text-center mt-4 mb-2">
+                {authError}
+              </p>
+            )}
+
             {/* --- Form --- */}
-            <form>
+            <form onSubmit={handleSubmit}>
               <div className="space-y-5">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                  {/* --- First Name --- */}
                   <div className="sm:col-span-1">
                     <label
-                      htmlFor="fname"
+                      htmlFor="fname-signup"
                       className="block mb-2 text-sm font-medium text-gray-700"
                     >
-                      Nama Depan<span className="text-error-500">*</span>
+                      Nama Depan<span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      id="fname"
+                      id="fname-signup"
                       name="fname"
                       placeholder="Nama Depan anda"
-                      className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg
-                       placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 
-                       focus:ring-opacity-40"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      required
+                      className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
                     />
                   </div>
-
-                  {/* --- Last Name --- */}
                   <div className="sm:col-span-1">
                     <label
-                      htmlFor="lname"
+                      htmlFor="lname-signup"
                       className="block mb-2 text-sm font-medium text-gray-700"
                     >
-                      Nama Belakang<span className="text-error-500">*</span>
+                      Nama Belakang<span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      id="lname"
+                      id="lname-signup"
                       name="lname"
                       placeholder="Nama Belakang anda"
-                      className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg
-                     placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 
-                     focus:ring-opacity-40"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      required
+                      className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
                     />
                   </div>
                 </div>
-
-                {/* --- Email --- */}
                 <div>
                   <label
-                    htmlFor="email"
+                    htmlFor="email-signup"
                     className="block mb-2 text-sm font-medium text-gray-700"
                   >
-                    Email<span className="text-error-500">*</span>
+                    Email<span className="text-red-500">*</span>
                   </label>
                   <input
                     type="email"
-                    id="email"
+                    id="email-signup"
                     name="email"
                     placeholder="Masukkan email anda"
-                    className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 
-                    focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
                   />
                 </div>
-
-                {/* --- Password --- */}
                 <div>
                   <label
-                    htmlFor="password"
+                    htmlFor="password-signup"
                     className="block mb-2 text-sm font-medium text-gray-700"
                   >
-                    Kata Sandi<span className="text-error-500">*</span>
+                    Kata Sandi<span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
                       placeholder="Masukkan kata sandi anda"
                       type={showPassword ? "text" : "password"}
-                      id="password"
-                      className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 
-                      focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
+                      id="password-signup"
+                      name="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -155,46 +186,50 @@ export default function SignUpForm() {
                     </span>
                   </div>
                 </div>
-
-                {/* --- Checkbox --- */}
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     className="rounded border-gray-300 accent-orange-600 focus:outline-none w-3.5 h-3.5 cursor-pointer"
-                    checked={isChecked}
-                    onChange={(e) => setIsChecked(e.target.checked)}
-                    id="agree"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    id="agree-signup"
                   />
                   <label
-                    htmlFor="agree"
-                    className="inline-block font-normal text-gray-500 text-xs"
+                    htmlFor="agree-signup"
+                    className="inline-block text-gray-500 text-xs"
                   >
                     Saya setuju dengan{" "}
                     <a
-                      href="#"
+                      href="/syarat-ketentuan"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-orange-600 underline cursor-pointer"
                     >
                       Syarat & Ketentuan
                     </a>{" "}
                     serta{" "}
                     <a
-                      href="#"
+                      href="/kebijakan-privasi"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-orange-600 underline cursor-pointer"
                     >
                       Kebijakan Privasi
                     </a>
                   </label>
                 </div>
-
-                {/* --- Button --- */}
                 <div>
                   <button
                     type="submit"
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white transition cursor-pointer bg-gradient-to-r from-orange-400 to-orange-600 
-                    hover:bg-orange-600 hover:from-transparent hover:to-transparent  rounded-full"
+                    disabled={authLoading}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white transition cursor-pointer bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 hover:from-transparent hover:to-transparent rounded-full disabled:opacity-70"
                   >
-                    Daftar
-                    <ArrowRight className="w-5 h-5" />
+                    {authLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      "Daftar"
+                    )}
+                    {!authLoading && <ArrowRight className="w-5 h-5" />}
                   </button>
                 </div>
               </div>

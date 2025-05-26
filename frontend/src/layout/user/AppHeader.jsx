@@ -4,7 +4,13 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MdPersonOutline } from "react-icons/md";
+import {
+  MdPersonOutline,
+  MdAccountCircle,
+  MdLogout,
+  MdLogin,
+  MdAppRegistration,
+} from "react-icons/md";
 import { FiSearch } from "react-icons/fi";
 import { FaHome, FaShoppingBag, FaKey } from "react-icons/fa";
 import { usePathname } from "next/navigation";
@@ -13,11 +19,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "@/layout/user/SearchBar";
 import { useHeader } from "@/context/HeaderContext";
 import { useProducts } from "@/context/ProductContext";
+import { useAuth } from "@/context/AuthContext";
 import { Heart } from "lucide-react";
 
 function AppHeader() {
   const { isSearchOpen, toggleSearch, toggleBookmarkSidebar } = useHeader();
   const { bookmarkCount } = useProducts();
+  const { user, logout, isAuthenticated } = useAuth();
+
   const [isTop, setIsTop] = useState(true);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -45,8 +54,10 @@ function AppHeader() {
     closed: { opacity: 0, y: -10, transition: { duration: 0.2 } },
   };
 
-  const notchedBackgroundSvg =
-    "data:image/svg+xml,%3Csvg width='300' height='70' viewBox='0 0 300 70' fill='none' xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none'%3E%3Cpath d='M0 70 L0 20 A 20 20 0 0 1 20 0 L122 0 A 20 20 0 0 0 178 0 L280 0 A 20 20 0 0 1 300 20 L300 70 Z' fill='white'/%3E%3C/svg%3E";
+  const handleLogout = () => {
+    logout();
+    setIsDropdownOpen(false);
+  };
 
   return (
     <>
@@ -56,7 +67,6 @@ function AppHeader() {
         }`}
       >
         <div className="container mx-auto flex items-center justify-between px-3 py-3 lg:py-5">
-          {/* Logo */}
           <Link href="/">
             <div className="">
               <Image
@@ -88,7 +98,6 @@ function AppHeader() {
               >
                 Beli Mobil
               </Link>
-
               <Link
                 href="/jual-mobil"
                 className={`text-sm font-medium hover:text-orange-500 ${
@@ -99,7 +108,6 @@ function AppHeader() {
               >
                 Jual Mobil
               </Link>
-
               <Link
                 href="/tukar-tambah"
                 className={`text-sm font-medium hover:text-orange-500 relative ${
@@ -119,25 +127,44 @@ function AppHeader() {
               onClick={toggleSearch}
             />
 
-            <div className="block md:hidden border-l border-gray-400 h-7 mx-4" />
+            {/* Garis pemisah ini hanya untuk mobile, agar ikon search dan user tidak terlalu dempet jika perlu */}
+            <div className="block md:hidden border-l border-gray-300 h-6 mx-2" />
 
-            <div className="flex items-center space-x-3 md:space-x-4 bg-gray-100 px-2 lg:px-4 rounded-full border border-gray-300">
+            {/* Bagian Ikon Pengguna dan Bookmark */}
+            <div className="flex items-center space-x-2 bg-gray-100 px-2 py-1 lg:px-3 rounded-full border border-gray-300">
               <button
                 onClick={toggleBookmarkSidebar}
-                className="relative group focus:outline-none"
+                className="relative group focus:outline-none p-1" // Tambahkan padding jika perlu
                 aria-label={`Lihat ${bookmarkCount} item tersimpan`}
               >
-                <Heart className="w-4 h-4 lg:w-5 lg:h-5 text-gray-700 cursor-pointer" />
-                {bookmarkCount > -1 && (
-                  <span className="absolute -top-2 -right-2 flex items-center justify-center w-2 h-2 p-1.5 text-[10px] text-white bg-red-500 rounded-full group-hover:animate-bounce transition-all duration-300 ease-in-out">
+                <Heart className="w-5 h-5 text-gray-700 hover:text-red-500 transition-colors" />
+                {bookmarkCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-[10px] text-white bg-red-500 rounded-full group-hover:animate-bounce">
                     {bookmarkCount}
                   </span>
                 )}
               </button>
 
+              {/* Dropdown Pengguna */}
               <div className="relative" ref={dropdownRef}>
-                <button onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
-                  <MdPersonOutline className="w-5 h-5 lg:w-6 lg:h-6 text-gray-700 cursor-pointer mt-1.5" />
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center justify-center rounded-full focus:outline-none"
+                  aria-label="User menu"
+                >
+                  {isAuthenticated && user?.firstName ? (
+                    <div
+                      title={user.firstName} // Tooltip dengan nama depan pengguna
+                      className="w-7 h-7 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-semibold cursor-pointer hover:bg-orange-600 transition-colors"
+                    >
+                      {user.firstName.charAt(0).toUpperCase()}
+                    </div>
+                  ) : (
+                    <MdPersonOutline
+                      title="Masuk atau Daftar"
+                      className="w-6 h-6 text-gray-700 cursor-pointer hover:text-orange-500 transition-colors"
+                    />
+                  )}
                 </button>
 
                 <AnimatePresence>
@@ -147,23 +174,55 @@ function AppHeader() {
                       animate="open"
                       exit="closed"
                       variants={dropDownVariant}
-                      className={`absolute -right-2 md:-right-3 mt-2 min-w-[120px] rounded-xl border border-gray-200 shadow-lg z-20 ${
+                      className={`absolute right-0 md:-right-2 mt-2.5 min-w-[160px] rounded-xl border border-gray-200 shadow-lg z-20 ${
                         isTop ? "bg-gray-50" : "bg-white"
-                      }`}
+                      }`} // Disesuaikan posisi right-0
                     >
                       <div className="py-1">
-                        <Link
-                          href="/login"
-                          className="block w-full text-left text-xs font-medium px-4 py-2 text-gray-600 hover:text-gray-700 hover:bg-gray-100 cursor-pointer"
-                        >
-                          Masuk
-                        </Link>
-                        <Link
-                          href="/register"
-                          className="block w-full text-left text-xs font-medium px-4 py-2 text-gray-600 hover:text-gray-700 hover:bg-gray-100 cursor-pointer"
-                        >
-                          Daftar
-                        </Link>
+                        {isAuthenticated && user ? (
+                          <>
+                            <div className="px-4 py-2.5 text-xs text-gray-800 border-b border-gray-200">
+                              Halo,{" "}
+                              <span className="font-semibold">
+                                {user.firstName}
+                              </span>
+                            </div>
+                            <Link
+                              href="/profile" // Arahkan ke halaman profil pengguna
+                              className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-gray-700 hover:text-orange-600 hover:bg-orange-50 cursor-pointer transition-colors"
+                              onClick={() => setIsDropdownOpen(false)}
+                            >
+                              <MdAccountCircle className="w-4 h-4" />
+                              Profil Saya
+                            </Link>
+                            <button
+                              onClick={handleLogout}
+                              className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer transition-colors"
+                            >
+                              <MdLogout className="w-4 h-4" />
+                              Logout
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <Link
+                              href="/login"
+                              className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-gray-700 hover:text-orange-600 hover:bg-orange-50 cursor-pointer transition-colors"
+                              onClick={() => setIsDropdownOpen(false)}
+                            >
+                              <MdLogin className="w-4 h-4" />
+                              Masuk
+                            </Link>
+                            <Link
+                              href="/register"
+                              className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-gray-700 hover:text-orange-600 hover:bg-orange-50 cursor-pointer transition-colors"
+                              onClick={() => setIsDropdownOpen(false)}
+                            >
+                              <MdAppRegistration className="w-4 h-4" />
+                              Daftar
+                            </Link>
+                          </>
+                        )}
                       </div>
                     </motion.div>
                   )}
@@ -173,93 +232,82 @@ function AppHeader() {
           </div>
         </div>
       </header>
-
       <SearchBar />
-
+      {/* Navigasi Mobile Bawah (Tetap sama) */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-30 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] px-4 py-5 rounded-t-3xl
-          flex items-center justify-between md:hidden "
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] px-4 py-3 
+          flex items-center justify-around md:hidden "
       >
-        <div className="relative flex items-center gap-3 justify-between text-xs w-full">
-          {/* Left Icons */}
-          <Link
-            href="/"
-            className="flex flex-col items-center gap-1 cursor-pointer"
+        <Link
+          href="/"
+          className="flex flex-col items-center gap-1 cursor-pointer text-xs"
+        >
+          <FaHome
+            className={`w-5 h-5 ${
+              pathname === "/" ? "text-orange-600" : "text-gray-700"
+            }`}
+          />
+          <p
+            className={`${
+              pathname === "/" ? "text-orange-600" : "text-gray-700"
+            } font-medium`}
           >
-            <FaHome
-              className={`w-5 h-5 ${
-                pathname === "/" ? "text-orange-600" : "text-gray-700"
-              }`}
-            />
-            <p
-              className={`${
-                pathname === "/" ? "text-orange-600" : "text-gray-700"
-              } font-medium`}
-            >
-              Beranda
-            </p>
-          </Link>
-          <Link
-            href="/beli"
-            className="flex flex-col items-center gap-1 cursor-pointer"
+            Beranda
+          </p>
+        </Link>
+        <Link
+          href="/beli"
+          className="flex flex-col items-center gap-1 cursor-pointer text-xs"
+        >
+          <FaShoppingBag
+            className={`w-5 h-5 ${
+              pathname === "/beli" ? "text-orange-600" : "text-gray-700"
+            }`}
+          />
+          <p
+            className={`${
+              pathname === "/beli" ? "text-orange-600" : "text-gray-700"
+            } font-medium`}
           >
-            <FaShoppingBag
-              className={`w-5 h-5 ${
-                pathname === "/beli" ? "text-orange-600" : "text-gray-700"
-              }`}
-            />
-            <p
-              className={`${
-                pathname === "/beli" ? "text-orange-600" : "text-gray-700"
-              } font-medium`}
-            >
-              Beli Mobil
-            </p>
-          </Link>
-
-          {/* Right Icons */}
-          <Link
-            href="/jual-mobil"
-            className="flex flex-col items-center gap-1 cursor-pointer"
+            Beli Mobil
+          </p>
+        </Link>
+        <Link
+          href="/jual-mobil"
+          className="flex flex-col items-center gap-1 cursor-pointer text-xs"
+        >
+          <FaKey
+            className={`w-5 h-5 ${
+              pathname === "/jual-mobil" ? "text-orange-600" : "text-gray-700"
+            }`}
+          />
+          <p
+            className={`${
+              pathname === "/jual-mobil" ? "text-orange-600" : "text-gray-700"
+            } font-medium`}
           >
-            <FaKey
-              className={`w-5 h-5 ${
-                pathname === "/jual-mobil" ? "text-orange-600" : "text-gray-700"
-              }`}
-            />
-            <p
-              className={`${
-                pathname === "/jual-mobil" ? "text-orange-600" : "text-gray-700"
-              } font-medium`}
-            >
-              Jual Mobil
-            </p>
-          </Link>
-          <Link
-            href="/tukar-tambah"
-            className="flex flex-col items-center gap-1 cursor-pointer"
+            Jual Mobil
+          </p>
+        </Link>
+        <Link
+          href="/tukar-tambah"
+          className="flex flex-col items-center gap-1 cursor-pointer text-xs"
+        >
+          <FaArrowsRotate
+            className={`w-5 h-5 ${
+              pathname === "/tukar-tambah" ? "text-orange-600" : "text-gray-700"
+            }`}
+          />
+          <p
+            className={`${
+              pathname === "/tukar-tambah" ? "text-orange-600" : "text-gray-700"
+            } font-medium`}
           >
-            <FaArrowsRotate
-              className={`w-5 h-5 ${
-                pathname === "/tukar-tambah"
-                  ? "text-orange-600"
-                  : "text-gray-700"
-              }`}
-            />
-            <p
-              className={`${
-                pathname === "/tukar-tambah"
-                  ? "text-orange-600"
-                  : "text-gray-700"
-              } font-medium`}
-            >
-              Tukar Tambah
-            </p>
-          </Link>
-        </div>
+            Tukar Tambah
+          </p>
+        </Link>
       </div>
-
-      <div className="pb-0"></div>
+      <div className="md:pb-0"></div> {/* Spacer untuk bottom nav */}
     </>
   );
 }

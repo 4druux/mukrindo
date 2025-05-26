@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Accordion from "@/components/common/Accordion";
+import TittleText from "@/components/common/TittleText";
 
 const HomeAccordion = () => {
   const [openIndex, setOpenIndex] = useState(0);
@@ -143,9 +144,10 @@ const HomeAccordion = () => {
 
   return (
     <div className="px-3 md:px-0">
-      <h1 className="text-md lg:text-xl font-medium mb-2 lg:mb-4 text-center text-gray-700">
-        FAQ Seputar Mukrindo Motor
-      </h1>
+      <TittleText
+        text="FAQ Seputar Mukrindo Motor"
+        className="mb-2 lg:mb-4 text-center"
+      />
 
       {accordionItems.map((item, index) => (
         <Accordion

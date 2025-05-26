@@ -1,5 +1,6 @@
 //layout/user/jual-mobil/HomeBedge.jsx
 import FeatureCard from "@/components/common/FeatureCard";
+import TittleText from "@/components/common/TittleText";
 import React from "react";
 
 const featuresData = [
@@ -42,9 +43,10 @@ const featuresData = [
 const HomeBedge = () => {
   return (
     <div>
-      <h1 className="text-md lg:text-xl font-medium text-gray-700 mt-6 mb-1 px-3 md:px-0">
-        Bosan dengan mobil yang lama?
-      </h1>
+      <TittleText
+        text="Bosan dengan mobil yang lama?"
+        className="px-3 md:px-0 mt-6 mb-1"
+      />
       <p className="text-xs lg:text-sm text-gray-500 mb-2 lg:mb-4 px-3 md:px-0">
         Mau mobil bekas terbaru atau tukar tambah mobil lamamu bisa loh dengan
         pilihan yang beragam dari Mukrindo Motor
