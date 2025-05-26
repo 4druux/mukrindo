@@ -1,11 +1,12 @@
-// frontend/src/app/page.js (atau Home.js)
-"use client";
-import React, { useEffect, Suspense } from "react";
-// Impor hook yang diperlukan dari Next.js dan AuthContext
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useAuth } from "@/context/AuthContext"; // Pastikan path ini benar
-import toast from "react-hot-toast"; // Untuk menampilkan pesan error jika diperlukan
+// frontend/src/app/page.js (atau file Home.js Anda)
+"use client"; // Komponen ini sudah "use client" karena menggunakan hooks
 
+import React, { useEffect, Suspense } from "react"; // Impor Suspense dari React
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import toast from "react-hot-toast";
+
+// Impor komponen-komponen konten homepage Anda
 import CarForm from "@/layout/user/home/CarForm";
 import HomeAccordion from "@/layout/user/home/HomeAccordion";
 import HomeBedge from "@/layout/user/home/HomeBedge";
@@ -14,9 +15,17 @@ import HomeCarousel from "@/layout/user/home/HomeCarousel";
 import ProductByPrice from "@/layout/user/home/ProductByPrice";
 import ProductByRecom from "@/layout/user/home/ProductByRecom";
 import Testimoni from "@/components/product-user/Testimoni";
-import { useTraffic } from "@/context/TrafficContext";
+import { useTraffic } from "@/context/TrafficContext"; // Pastikan ini diimpor jika digunakan
+import DotLoader from "@/components/common/DotLoader"; // Impor loader Anda
 
-export default function Home() {
+// Buat komponen internal yang akan menggunakan hooks dan logika terkait searchParams
+function HomePageLogicAndContent() {
+  const searchParams = useSearchParams(); // Penggunaan hook ini yang memerlukan Suspense
+  const router = useRouter();
+  const pathname = usePathname();
+  const { handleOAuthSuccess } = useAuth();
+  const { trackHomepageVisit } = useTraffic(); // Pastikan useTraffic sudah di-provide di context jika perlu
+
   const bannerImages = [
     "/images/placeholder-banner.webp",
     "/images/placeholder-banner.webp",
@@ -24,91 +33,64 @@ export default function Home() {
     "/images/placeholder-banner.webp",
   ];
 
-  const { trackHomepageVisit } = useTraffic();
-
-  // Hook untuk OAuth dan navigasi
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname(); // Digunakan untuk membersihkan URL jika perlu
-  const { handleOAuthSuccess } = useAuth(); // Ambil fungsi dari AuthContext
-
-  // useEffect untuk melacak kunjungan (sudah ada)
+  // useEffect untuk melacak kunjungan (dari kode asli Anda)
   useEffect(() => {
-    trackHomepageVisit().then((result) => {
-      if (result.success) {
-        // console.log("Homepage visit tracked from Home page.");
-      } else {
-        // console.error("Failed to track homepage visit from Home page:", result.error);
-      }
-    });
+    if (trackHomepageVisit) {
+      // Pastikan fungsi ada sebelum dipanggil
+      trackHomepageVisit().then((result) => {
+        // Handle result
+      });
+    }
   }, [trackHomepageVisit]);
 
-  // useEffect untuk scroll ke atas (sudah ada)
+  // useEffect untuk scroll ke atas (dari kode asli Anda)
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // useEffect baru untuk menangani parameter OAuth
+  // useEffect untuk menangani parameter OAuth (dari solusi sebelumnya)
   useEffect(() => {
     const token = searchParams.get("token");
     const role = searchParams.get("role");
     const userId = searchParams.get("userId");
-    const firstName = searchParams.get("firstName");
+    const firstNameFromParams = searchParams.get("firstName");
     const email = searchParams.get("email");
-    const oauthCallbackError = searchParams.get("error"); // Menangkap parameter error dari backend
+    const oauthCallbackError = searchParams.get("error");
 
-    if (token && role && userId && email && firstName !== null) {
-      // Parameter OAuth sukses terdeteksi
+    if (token && role && userId && email && firstNameFromParams !== null) {
       const oauthData = {
         token,
         role,
         _id: userId,
-        firstName: decodeURIComponent(firstName),
+        firstName: decodeURIComponent(firstNameFromParams),
         email: decodeURIComponent(email),
-        // Pesan sukses bisa diatur di handleOAuthSuccess atau di sini
-        // message: "Login dengan Google berhasil!"
       };
-
-      // Panggil handleOAuthSuccess. Ini akan menyimpan token, setUser,
-      // menampilkan toast, dan melakukan navigasi (ke / atau /admin).
-      // Navigasi yang dilakukan oleh handleOAuthSuccess akan membersihkan URL.
       handleOAuthSuccess(oauthData);
-
-      // Membersihkan URL secara eksplisit (opsional, karena handleOAuthSuccess sudah navigasi)
-      // Jika Anda ingin memastikan URL bersih bahkan sebelum navigasi dari handleOAuthSuccess selesai,
-      // Anda bisa menggunakan ini, tapi biasanya navigasi dari context sudah cukup.
-      // router.replace(pathname, undefined, { shallow: true });
     } else if (oauthCallbackError) {
-      // Ada parameter 'error' di URL dari proses OAuth
-      console.error("OAuth Error from URL:", oauthCallbackError);
-      let errorMessage = "Terjadi kesalahan saat login dengan Google.";
-      if (oauthCallbackError === "oauth_incomplete_params_callback") {
-        errorMessage = "Login OAuth gagal, parameter tidak lengkap.";
-      } else if (oauthCallbackError === "google_auth_failed") {
-        errorMessage = "Autentikasi Google gagal di server.";
-      }
-      // Tambahkan penanganan untuk kode error lain jika ada
-
-      toast.error(errorMessage, { className: "custom-toast" });
-
-      // Bersihkan parameter error dari URL agar tidak muncul terus-menerus
+      toast.error(
+        `Login OAuth gagal: ${
+          oauthCallbackError === "oauth_incomplete_params_callback"
+            ? "Parameter tidak lengkap."
+            : oauthCallbackError
+        }`,
+        { className: "custom-toast" }
+      );
       router.replace(pathname, undefined, { shallow: true });
     }
-
-    // Dependensi useEffect:
-    // searchParams: untuk memicu efek saat query params berubah.
-    // router, pathname, handleOAuthSuccess: fungsi dan objek stabil atau memoized.
-    // Perhatikan: Jika searchParams adalah objek yang selalu baru pada setiap render,
-    // ini bisa menyebabkan loop. Namun, hook useSearchParams dari Next.js biasanya dioptimalkan.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, router, pathname, handleOAuthSuccess]); // Tambahkan dependensi
+  }, [searchParams, router, pathname, handleOAuthSuccess]); // Dependensi
 
+  // Kembalikan JSX untuk konten homepage Anda
   return (
     <div className="container mx-auto">
       <p className="md:pt-5 lg:pt-10 border-t-2 border-gray-200"></p>
       <HomeCarousel images={bannerImages} />
       <div className="space-y-4 md:space-y-16 mt-4 md:mt-10">
-        <Suspense fallback={<div>Loading CarForm...</div>}>
+        <Suspense
+          fallback={
+            <div className="text-center py-10">Memuat form mobil...</div>
+          }
+        >
           <CarForm />
         </Suspense>
         <ProductByRecom />
@@ -119,5 +101,31 @@ export default function Home() {
         <HomeAccordion />
       </div>
     </div>
+  );
+}
+
+// Komponen Loader untuk fallback Suspense utama
+function PageLoader() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+      {" "}
+      {/* Sesuaikan min-h */}
+      <DotLoader
+        dotSize="w-5 h-5"
+        dotColor="bg-gradient-to-r from-orange-500 to-amber-500"
+        textSize="text-xl"
+        textColor="text-gray-700"
+      />
+      <p className="mt-4 text-gray-600">Memuat halaman...</p>
+    </div>
+  );
+}
+
+// Komponen Home (default export untuk app/page.js)
+export default function Home() {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <HomePageLogicAndContent />
+    </Suspense>
   );
 }
