@@ -1,18 +1,18 @@
 // frontend/src/components/header-admin/AdminDropdown.jsx
 "use client";
 import Link from "next/link";
-import Image from "next/image"; // Tetap impor jika ada fallback image
+import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useAuth } from "@/context/AuthContext"; // 1. Impor useAuth
+import { useAuth } from "@/context/AuthContext";
 
-// Import Icons
-import { ChevronDown, CircleUser, LogOut, Settings2 } from "lucide-react";
+import { MdAccountCircle, MdLogout, MdSettings } from "react-icons/md";
+import { ChevronDown } from "lucide-react";
 
 export default function AdminDropdown() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const { user, logout, isAuthenticated } = useAuth(); // 2. Dapatkan data dari AuthContext
+  const { user, logout, isAuthenticated } = useAuth();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -32,20 +32,18 @@ export default function AdminDropdown() {
   };
 
   const handleLogout = () => {
-    logout(); // Panggil fungsi logout dari context
-    setIsDropdownOpen(false); // Tutup dropdown
+    logout();
+    setIsDropdownOpen(false);
   };
 
-  // Menentukan apa yang ditampilkan sebagai trigger dropdown (inisial atau ikon default)
   const renderTriggerContent = () => {
     if (isAuthenticated && user) {
       return (
         <>
           <div
             title={user.firstName || "Admin"}
-            className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-semibold select-none cursor-pointer hover:bg-indigo-700 transition-colors"
+            className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center text-sm font-semibold select-none cursor-pointer transition-colors"
           >
-            {/* Tampilkan inisial nama depan, fallback ke 'A' jika tidak ada */}
             {user.firstName ? user.firstName.charAt(0).toUpperCase() : "A"}
           </div>
           <span className="ml-2 mr-1 font-medium text-sm hidden lg:block text-gray-700">
@@ -54,14 +52,13 @@ export default function AdminDropdown() {
         </>
       );
     }
-    // Fallback jika tidak terautentikasi (seharusnya tidak terjadi di panel admin yang terproteksi)
     return (
       <>
         <span className="overflow-hidden rounded-full border border-gray-200 w-8 lg:w-11">
           <Image
             width={44}
             height={44}
-            src="/images/placeholder-avatar.png" // Ganti dengan placeholder avatar generik
+            src="/images/placeholder-avatar.png"
             alt="User"
           />
         </span>
@@ -82,7 +79,6 @@ export default function AdminDropdown() {
         {renderTriggerContent()}
         <div
           className={`transition-transform duration-200 ml-1 ${
-            // Tambah ml-1 untuk jarak
             isDropdownOpen ? "rotate-180" : ""
           }`}
         >
@@ -97,65 +93,66 @@ export default function AdminDropdown() {
             animate="open"
             exit="closed"
             variants={dropDownVariant}
-            className="absolute z-50 right-0 mt-2.5 w-64 rounded-lg border border-gray-200 bg-white shadow-xl" // Disesuaikan shadow dan width
+            className="absolute z-50 right-0 mt-2.5 w-64 rounded-lg border border-gray-200 bg-white shadow-xl"
           >
-            <div className="p-3 border-b border-gray-200">
-              {" "}
-              {/* Disesuaikan padding */}
+            <div className="py-1">
               {isAuthenticated && user ? (
                 <>
-                  <span className="block font-semibold text-gray-800 text-sm">
-                    {user.firstName || "Nama Admin"} {user.lastName || ""}
-                  </span>
-                  <span className="mt-0.5 block text-xs text-gray-500">
-                    {user.email || "admin@example.com"}
-                  </span>
+                  <div className="px-4 py-2.5 text-xs text-gray-800 border-b border-gray-200">
+                    Halo!,{" "}
+                    <span className="font-semibold">
+                      {user.firstName || "Admin"}
+                    </span>
+                    {user.email && (
+                      <span className="block text-xs text-gray-500 mt-0.5">
+                        {user.email}
+                      </span>
+                    )}
+                  </div>
+
+                  <ul className="flex flex-col gap-0 px-1 py-1">
+                    <li>
+                      <Link
+                        href="/admin/profile"
+                        className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-gray-700 hover:text-orange-600 hover:bg-orange-50 cursor-pointer transition-colors rounded-md"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <MdAccountCircle className="w-5 h-5" />
+                        Edit Profil
+                      </Link>
+                    </li>
+
+                    <li>
+                      <Link
+                        href="/admin/settings"
+                        className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-gray-700 hover:text-orange-600 hover:bg-orange-50 cursor-pointer transition-colors rounded-md"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <MdSettings className="w-5 h-5" />
+                        Pengaturan
+                      </Link>
+                    </li>
+                  </ul>
+
+                  <div className="px-1 py-1 border-t border-gray-200">
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer transition-colors rounded-md"
+                    >
+                      <MdLogout className="w-4 h-4" /> Keluar
+                    </button>
+                  </div>
                 </>
               ) : (
-                <>
-                  <span className="block font-medium text-gray-700 text-sm">
-                    Admin
-                  </span>
-                  <span className="mt-0.5 block text-xs text-gray-500">
-                    admin@example.com
-                  </span>
-                </>
+                <Link
+                  href="/admin/login"
+                  className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-gray-700 hover:text-orange-600 hover:bg-orange-50 cursor-pointer transition-colors"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <MdLogout className="w-4 h-4" />
+                  Masuk Admin
+                </Link>
               )}
-            </div>
-            <ul className="flex flex-col gap-0.5 p-2">
-              {" "}
-              {/* Disesuaikan padding dan gap */}
-              <li>
-                <Link
-                  href="/admin/profile" // Arahkan ke profil admin
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 group"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  <CircleUser className="w-5 h-5 text-gray-500 group-hover:text-gray-700" />
-                  Edit Profil
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/admin/settings" // Arahkan ke pengaturan admin
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 group"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  <Settings2 className="w-5 h-5 text-gray-500 group-hover:text-gray-700" />
-                  Pengaturan
-                </Link>
-              </li>
-            </ul>
-            <div className="p-2 border-t border-gray-200">
-              {" "}
-              {/* Disesuaikan padding */}
-              <button // 3. Ubah Link Logout menjadi button
-                onClick={handleLogout}
-                className="flex items-center gap-3 px-3 py-2.5 w-full text-sm font-medium text-red-600 rounded-md hover:bg-red-50 group"
-              >
-                <LogOut className="w-5 h-5 text-red-500 group-hover:text-red-600 transform rotate-180" />
-                Keluar
-              </button>
             </div>
           </motion.div>
         )}

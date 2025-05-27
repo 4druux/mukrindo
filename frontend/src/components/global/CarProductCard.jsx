@@ -1,25 +1,23 @@
-// src/components/global/CarProductCard.jsx
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import generateSlug from "@/utils/generateSlug";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Import Components
 import { useProducts } from "@/context/ProductContext";
+import generateSlug from "@/utils/generateSlug";
+
 import CarImageCard from "@/components/global/CarImageCard";
 import SkeletonAllProductUser from "@/components/skeleton/skeleton-user/SkeletonAllProduct";
 import SkeletonAllProductAdmin from "@/components/skeleton/skeleton-admin/SkeletonAllProduct";
+import DotLoader from "@/components/common/DotLoader";
 
-// Import Icons
 import { BsFuelPumpFill } from "react-icons/bs";
 import { FaRegCalendarAlt, FaRoad, FaEye } from "react-icons/fa";
 import { GiGearStickPattern } from "react-icons/gi";
 import { Ellipsis, Heart, SquarePen, Trash2 } from "lucide-react";
-import { MdOutlineColorLens } from "react-icons/md";
 
 const dropDownVariant = {
-  open: { opacity: 1, y: 0, transition: { duration: 0.2 } },
-  closed: { opacity: 0, y: -10, transition: { duration: 0.2 } },
+  open: { opacity: 1, transition: { duration: 0.05 } },
+  closed: { opacity: 0, transition: { duration: 0.05 } },
 };
 
 const CarProductCard = ({
@@ -29,7 +27,7 @@ const CarProductCard = ({
   isAdminRoute = false,
   skeletonCount = isAdminRoute ? 8 : 6,
   emptyMessage = "Tidak ada produk mobil yang ditemukan.",
-  handleStatusChange = () => {},
+  handleStatusChange = async (_productId, _newStatus) => {},
   handleDelete = () => {},
   toggleDropdown = () => {},
   isDropdownOpen = {},
@@ -40,6 +38,7 @@ const CarProductCard = ({
   }
 
   const { isBookmarked, toggleBookmark } = useProducts();
+  const [soldProductId, setSoldProductId] = useState(null);
 
   const SkeletonComponent = isAdminRoute
     ? SkeletonAllProductAdmin
@@ -48,6 +47,20 @@ const CarProductCard = ({
   const gridClass = isAdminRoute
     ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4 px-3 md:px-0"
     : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4 px-3 md:px-0";
+
+  const handleSoldClick = async (productId) => {
+    if (soldProductId === productId) return;
+
+    setSoldProductId(productId);
+    try {
+      await handleStatusChange(productId, "Terjual");
+      toggleDropdown(productId);
+    } catch (err) {
+      console.error("Gagal menandai Terjual dari Card:", err);
+    } finally {
+      setSoldProductId(null);
+    }
+  };
 
   return (
     <div className={gridClass}>
@@ -127,59 +140,44 @@ const CarProductCard = ({
                             {product.plateNumber}
                           </span>
                         </div>
-
-                        {/* <div
-                          className={`${
-                            isAdminRoute ? "block" : "block lg:hidden"
-                          }`}
-                        >
-                          <div className="flex flex-col items-center space-y-1 text-center">
-                            <MdOutlineColorLens className="w-5 h-5 text-gray-600" />
-                            <span className="text-gray-600 text-xs">
-                              {product.carColor}
-                            </span>
-                          </div>
-                        </div> */}
                       </div>
                     </div>
                   </div>
                 </Link>
 
                 {!isAdminRoute && (
-                  <>
+                  <div
+                    className={`absolute top-2 right-2 z-10 ${
+                      product.status === "Terjual" ? "hidden" : ""
+                    }`}
+                  >
                     <div
-                      className={`absolute top-2 right-2 z-10 ${
-                        product.status === "Terjual" ? "hidden" : ""
-                      }`}
+                      className="relative group cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleBookmark(product._id);
+                      }}
                     >
-                      <div
-                        className="relative group cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleBookmark(product._id);
-                        }}
-                      >
-                        <div className="bg-black/30 p-2 rounded-full shadow transition">
-                          <Heart
-                            className={`w-4 h-4 lg:w-5 lg:h-5 ${
-                              liked
-                                ? "text-red-500 fill-red-500"
-                                : "text-white fill-none"
-                            }`}
-                          />
-                        </div>
-                        <span
-                          className="absolute left-3 -translate-x-1/2 top-full mt-2
+                      <div className="bg-black/30 p-2 rounded-full shadow transition">
+                        <Heart
+                          className={`w-4 h-4 lg:w-5 lg:h-5 ${
+                            liked
+                              ? "text-red-500 fill-red-500"
+                              : "text-white fill-none"
+                          }`}
+                        />
+                      </div>
+                      <span
+                        className="absolute left-3 -translate-x-1/2 top-full mt-2
                           whitespace-nowrap rounded-lg bg-black/50 px-2 py-1 text-xs text-white
                           opacity-0 group-hover:opacity-100 transition-opacity duration-300
                           invisible group-hover:visible
                           pointer-events-none z-20"
-                        >
-                          Bookmark
-                        </span>
-                      </div>
+                      >
+                        Bookmark
+                      </span>
                     </div>
-                  </>
+                  </div>
                 )}
 
                 {isAdminRoute && (
@@ -196,11 +194,11 @@ const CarProductCard = ({
                           toggleDropdown(product._id);
                         }}
                         className={`p-1 rounded-full border border-gray-100 bg-gray-100 hover:bg-orange-200 hover:border-orange-500
-                        cursor-pointer group ${
-                          isDropdownOpen[product._id]
-                            ? "bg-orange-200 border-orange-500"
-                            : ""
-                        }`}
+                          cursor-pointer group ${
+                            isDropdownOpen[product._id]
+                              ? "bg-orange-200 border-orange-500"
+                              : ""
+                          }`}
                         aria-label="Ubah Status"
                       >
                         <Ellipsis
@@ -221,27 +219,22 @@ const CarProductCard = ({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleStatusChange(product._id, "Tersedia");
+                                handleSoldClick(product._id);
                               }}
-                              className="block w-full text-left text-xs px-4 py-2 text-gray-700 hover:text-gray-700 hover:bg-orange-100 rounded-t-lg cursor-pointer"
+                              disabled={!!soldProductId}
+                              className="flex items-center justify-center w-full text-xs px-3 py-2 text-gray-700 hover:text-orange-600 cursor-pointer rounded-lg"
                             >
-                              Tersedia
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleStatusChange(product._id, "Terjual");
-                              }}
-                              className="block w-full text-left text-xs px-4 py-2 text-gray-700 hover:text-gray-700 hover:bg-orange-100 rounded-b-lg cursor-pointer"
-                            >
-                              Terjual
+                              {soldProductId === product._id ? (
+                                <DotLoader dotSizeClassName="w-2 h-2" />
+                              ) : (
+                                "Tandai Terjual"
+                              )}
                             </button>
                           </motion.div>
                         )}
                       </AnimatePresence>
                     </div>
 
-                    {/* View Count dan Tombol Aksi */}
                     <div className="px-4 pb-4 pt-1 mt-auto">
                       <div className="flex justify-between items-center border-t border-gray-200">
                         <div className="flex items-center space-x-1 mt-2 text-xs text-gray-500">

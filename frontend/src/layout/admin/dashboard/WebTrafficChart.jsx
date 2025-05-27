@@ -25,8 +25,8 @@ import {
 import { id } from "date-fns/locale";
 import useSWR from "swr";
 import PeriodFilter from "@/components/product-admin/Dashboard/PeriodFilter";
-import { Loader2 } from "lucide-react";
 import { useAutoScrollToChart } from "@/hooks/useAutoScrollToChart";
+import DotLoader from "@/components/common/DotLoader";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -299,8 +299,11 @@ export default function WebTrafficChart() {
           className="flex flex-col gap-3 justify-center items-center w-full h-full text-gray-500"
           style={{ height: `${chartHeight}px` }}
         >
-          <Loader2 className="animate-spin mr-2" />
-          <span className="animate-pulse">Sedang memuat data...</span>
+          <DotLoader
+            dotSize="w-5 h-5"
+            textSize="text-xl"
+            text="Memuat data..."
+          />
         </div>
       </div>
     );

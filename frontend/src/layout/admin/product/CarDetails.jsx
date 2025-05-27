@@ -111,7 +111,7 @@ const CarDetails = ({ productId }) => {
 
   const breadcrumbItems = [
     { label: "Beranda", href: "/admin" },
-    { label: "Produk", href: "/admin/produk" },
+    { label: "Katalog Produk", href: "/admin/produk" },
     { label: product.carName, href: "" },
   ];
 

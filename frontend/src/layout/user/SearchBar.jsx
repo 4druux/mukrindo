@@ -93,7 +93,7 @@ const SearchBar = () => {
                     value={searchQuery}
                     onKeyDown={handleKeyDown}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="relative z-10 w-full h-full outline-none bg-transparent text-sm"
+                    className="relative z-10 w-full h-full outline-none bg-transparent text-base scale-90 origin-left"
                     type="text"
                     placeholder=""
                   />

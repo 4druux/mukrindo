@@ -65,10 +65,8 @@ function CallbackPageLogic() {
       });
       router.replace("/login?error=incomplete_login_params");
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, router, handleOAuthSuccess]); // pageMessage tidak perlu di deps
+  }, [searchParams, router, handleOAuthSuccess]);
 
-  // JSX return untuk CallbackPageLogic tetap sama (menampilkan DotLoader dan pageMessage)
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
       <DotLoader
@@ -95,7 +93,6 @@ function CallbackPageLogic() {
   );
 }
 
-// Komponen Loader untuk fallback Suspense di halaman ini
 function CallbackPageFallbackLoader() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
@@ -112,7 +109,6 @@ function CallbackPageFallbackLoader() {
   );
 }
 
-// 3. Komponen Page default mengekspor Suspense yang membungkus komponen logika
 export default function AuthCallbackPage() {
   return (
     <Suspense fallback={<CallbackPageFallbackLoader />}>

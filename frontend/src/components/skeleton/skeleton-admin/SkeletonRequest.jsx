@@ -66,7 +66,7 @@ const SkeletonRequest = ({ requestType }) => {
       </div>
 
       {/* Desktop Skeleton */}
-      <div className="hidden lg:block lg:p-6 rounded-xl lg:shadow-lg lg:bg-white">
+      <div className="hidden lg:block rounded-xl lg:bg-white">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>

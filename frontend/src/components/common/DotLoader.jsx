@@ -5,11 +5,11 @@ import React from "react";
 const DotLoader = ({
   containerClassName = "",
   dotCommonClassName = "rounded-full",
-  dotSizeClassName = "w-3 h-3", // Default ukuran dot menggunakan kelas Tailwind (sekitar 12px)
-  dotColorClassName = "bg-orange-500", // Default warna dot (kelas Tailwind)
+  dotSizeClassName = "w-3 h-3",
+  dotColorClassName = "bg-gradient-to-r from-orange-500 to-amber-500",
   text = "",
-  textSizeClassName = "text-sm", // Default ukuran teks
-  textColorClassName = "text-gray-700", // Default warna teks
+  textSizeClassName = "text-sm",
+  textColorClassName = "text-gray-700 animate-pulse",
 }) => {
   const animationBaseClass =
     "animate-[bounce-delay_1.4s_infinite_ease-in-out_both]";

@@ -246,7 +246,7 @@ const AllProducts = () => {
 
   const breadcrumbItems = [
     { label: "Beranda", href: "/admin" },
-    { label: "Produk", href: "" },
+    { label: "Katalog Produk", href: "" },
   ];
 
   return (

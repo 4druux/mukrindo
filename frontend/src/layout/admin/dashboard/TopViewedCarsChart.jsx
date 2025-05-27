@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { useExportData } from "@/hooks/useExportData";
 import ExportDropdown from "@/components/product-admin/Dashboard/ExportDropdown";
-import { Loader2 } from "lucide-react";
+import DotLoader from "@/components/common/DotLoader";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -253,8 +253,11 @@ const TopViewedCarsChart = () => {
           className="flex flex-col gap-3 justify-center items-center w-full h-full text-gray-500"
           style={{ height: 435 }}
         >
-          <Loader2 className="animate-spin mr-2" />
-          <span className="animate-pulse">Sedang memuat data...</span>
+          <DotLoader
+            dotSize="w-5 h-5"
+            textSize="text-xl"
+            text="Memuat data..."
+          />
         </div>
       </div>
     );
