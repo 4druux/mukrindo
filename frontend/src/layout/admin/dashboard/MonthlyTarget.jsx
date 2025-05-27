@@ -14,6 +14,7 @@ import {
 } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 import { Loader2 } from "lucide-react";
+import DotLoader from "@/components/common/DotLoader";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -189,8 +190,11 @@ export default function MonthlyTarget() {
             className="flex flex-col gap-3 justify-center items-center w-full h-full text-gray-500"
             style={{ height: "350px" }}
           >
-            <Loader2 className="animate-spin mr-2" />
-            <span className="animate-pulse">Sedang memuat data...</span>
+            <DotLoader
+              dotSize="w-5 h-5"
+              textSize="text-xl"
+              text="Memuat data..."
+            />
           </div>
         </div>
       </div>

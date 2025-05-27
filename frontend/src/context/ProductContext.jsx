@@ -17,10 +17,9 @@ export const useProducts = () => useContext(ProductContext);
 const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);
 
 // const fetcher = async (url) => {
-//   // Delay 2 menit (120000 ms)
-//   await new Promise((resolve) => setTimeout(resolve, 120000));
+//   await new Promise((resolve) => setTimeout(resolve, 120000000));
 
-//   const res = await axios.get(url);
+//   const res = await axiosInstance.get(url);
 //   return res.data;
 // };
 

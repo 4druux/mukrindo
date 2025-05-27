@@ -127,14 +127,12 @@ function AppHeader() {
               onClick={toggleSearch}
             />
 
-            {/* Garis pemisah ini hanya untuk mobile, agar ikon search dan user tidak terlalu dempet jika perlu */}
             <div className="block md:hidden border-l border-gray-300 h-6 mx-2" />
 
-            {/* Bagian Ikon Pengguna dan Bookmark */}
             <div className="flex items-center space-x-2 bg-gray-100 px-2 py-1 lg:px-3 rounded-full border border-gray-300">
               <button
                 onClick={toggleBookmarkSidebar}
-                className="relative group focus:outline-none p-1" // Tambahkan padding jika perlu
+                className="relative group focus:outline-none p-1"
                 aria-label={`Lihat ${bookmarkCount} item tersimpan`}
               >
                 <Heart className="w-5 h-5 text-gray-700 hover:text-red-500 transition-colors" />
@@ -145,7 +143,6 @@ function AppHeader() {
                 )}
               </button>
 
-              {/* Dropdown Pengguna */}
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -154,7 +151,7 @@ function AppHeader() {
                 >
                   {isAuthenticated && user?.firstName ? (
                     <div
-                      title={user.firstName} // Tooltip dengan nama depan pengguna
+                      title={user.firstName}
                       className="w-7 h-7 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-semibold cursor-pointer hover:bg-orange-600 transition-colors"
                     >
                       {user.firstName.charAt(0).toUpperCase()}
@@ -174,53 +171,66 @@ function AppHeader() {
                       animate="open"
                       exit="closed"
                       variants={dropDownVariant}
-                      className={`absolute right-0 md:-right-2 mt-2.5 min-w-[160px] rounded-xl border border-gray-200 shadow-lg z-20 ${
+                      className={`absolute right-0 md:-right-2 mt-2.5 min-w-[200px] rounded-lg border border-gray-200 shadow-lg z-20 ${
                         isTop ? "bg-gray-50" : "bg-white"
-                      }`} // Disesuaikan posisi right-0
+                      }`}
                     >
                       <div className="py-1">
                         {isAuthenticated && user ? (
                           <>
                             <div className="px-4 py-2.5 text-xs text-gray-800 border-b border-gray-200">
-                              Halo,{" "}
+                              Halo!,{" "}
                               <span className="font-semibold">
                                 {user.firstName}
                               </span>
                             </div>
-                            <Link
-                              href="/profile" // Arahkan ke halaman profil pengguna
-                              className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-gray-700 hover:text-orange-600 hover:bg-orange-50 cursor-pointer transition-colors"
-                              onClick={() => setIsDropdownOpen(false)}
-                            >
-                              <MdAccountCircle className="w-4 h-4" />
-                              Profil Saya
-                            </Link>
-                            <button
-                              onClick={handleLogout}
-                              className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer transition-colors"
-                            >
-                              <MdLogout className="w-4 h-4" />
-                              Logout
-                            </button>
+                            <ul className="flex flex-col gap-0 px-1 py-1">
+                              <li>
+                                <Link
+                                  href="/profile"
+                                  className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-gray-700 hover:text-orange-600 hover:bg-orange-50 cursor-pointer transition-colors rounded-md"
+                                  onClick={() => setIsDropdownOpen(false)}
+                                >
+                                  <MdAccountCircle className="w-5 h-5" />
+                                  Profil Saya
+                                </Link>
+                              </li>
+
+                              <li>
+                                <button
+                                  onClick={handleLogout}
+                                  className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer transition-colors rounded-md"
+                                >
+                                  <MdLogout className="w-5 h-5" />
+                                  Keluar
+                                </button>
+                              </li>
+                            </ul>
                           </>
                         ) : (
                           <>
-                            <Link
-                              href="/login"
-                              className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-gray-700 hover:text-orange-600 hover:bg-orange-50 cursor-pointer transition-colors"
-                              onClick={() => setIsDropdownOpen(false)}
-                            >
-                              <MdLogin className="w-4 h-4" />
-                              Masuk
-                            </Link>
-                            <Link
-                              href="/register"
-                              className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-gray-700 hover:text-orange-600 hover:bg-orange-50 cursor-pointer transition-colors"
-                              onClick={() => setIsDropdownOpen(false)}
-                            >
-                              <MdAppRegistration className="w-4 h-4" />
-                              Daftar
-                            </Link>
+                            <ul className="flex flex-col gap-0 px-1 py-1">
+                              <li>
+                                <Link
+                                  href="/login"
+                                  className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-gray-700 hover:text-orange-600 hover:bg-orange-50 cursor-pointer transition-colors"
+                                  onClick={() => setIsDropdownOpen(false)}
+                                >
+                                  <MdLogin className="w-4 h-4" />
+                                  Masuk
+                                </Link>
+                              </li>
+                              <li>
+                                <Link
+                                  href="/register"
+                                  className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-gray-700 hover:text-orange-600 hover:bg-orange-50 cursor-pointer transition-colors"
+                                  onClick={() => setIsDropdownOpen(false)}
+                                >
+                                  <MdAppRegistration className="w-4 h-4" />
+                                  Daftar
+                                </Link>
+                              </li>
+                            </ul>
                           </>
                         )}
                       </div>
@@ -233,10 +243,11 @@ function AppHeader() {
         </div>
       </header>
       <SearchBar />
-      {/* Navigasi Mobile Bawah (Tetap sama) */}
+
+      {/* Mobile */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-40 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] px-4 py-3 
-          flex items-center justify-around md:hidden "
+        className="fixed bottom-0 left-0 right-0 z-40 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] p-4 
+          flex items-center justify-around md:hidden rounded-t-3xl"
       >
         <Link
           href="/"
@@ -307,7 +318,7 @@ function AppHeader() {
           </p>
         </Link>
       </div>
-      <div className="md:pb-0"></div> {/* Spacer untuk bottom nav */}
+      <div className="md:pb-0"></div>
     </>
   );
 }

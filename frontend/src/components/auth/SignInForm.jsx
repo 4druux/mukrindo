@@ -109,7 +109,7 @@ export default function SignInForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
+                    className="block w-full px-4 py-2 text-base text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
                   />
                 </div>
                 <div>
@@ -128,7 +128,7 @@ export default function SignInForm() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="block w-full px-4 py-3 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
+                      className="block w-full px-4 py-2 text-base text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}

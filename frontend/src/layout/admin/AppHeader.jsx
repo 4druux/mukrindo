@@ -3,8 +3,6 @@
 import { useSidebar } from "@/context/SidebarContext";
 import NotificationDropdown from "@/components/header-admin/NotificationDropdown";
 import AdminDropdown from "@/components/header-admin/AdminDropdown";
-import Image from "next/image";
-import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { AlignLeft, Search, X } from "lucide-react";
 import AnimatedPlaceholder from "@/components/common/AnimatedPlaceholder";
@@ -13,7 +11,7 @@ import { useRouter } from "next/navigation";
 const AppHeader = () => {
   const { toggleSidebar, toggleMobileSidebar, searchQuery, setSearchQuery } =
     useSidebar();
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState(searchQuery || "");
   const inputRef = useRef(null);
   const router = useRouter();
 
@@ -36,26 +34,38 @@ const AppHeader = () => {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  useEffect(() => {
+    if (searchQuery === "") {
+      setInputValue("");
+    }
+  }, [searchQuery]);
+
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-    setSearchQuery(inputValue);
-    router.push(`/admin/produk?search=${inputValue}`, undefined, {
-      shallow: true,
-    });
+    const trimmedQuery = inputValue.trim();
+
+    setSearchQuery(trimmedQuery);
+
+    if (trimmedQuery) {
+      router.push(
+        `/admin/produk?search=${encodeURIComponent(trimmedQuery)}`,
+        undefined,
+        {
+          shallow: true,
+        }
+      );
+    } else {
+      router.push(`/admin/produk`, undefined, {
+        shallow: true,
+      });
+    }
+    setInputValue("");
   };
 
-  const handleResetSearch = () => {
+  const handleClearTypedInput = () => {
     setInputValue("");
-    setSearchQuery("");
-    router.push(`/admin/produk`, undefined, {
-      shallow: true,
-    });
     inputRef.current?.focus();
   };
-
-  useEffect(() => {
-    setInputValue(searchQuery);
-  }, [searchQuery]);
 
   const placeholderTexts = [
     "Cari berdasarkan Merek...",
@@ -85,25 +95,23 @@ const AppHeader = () => {
                   {inputValue === "" && (
                     <AnimatedPlaceholder
                       placeholderTexts={placeholderTexts}
-                      className="pl-9 lg:pl-13  max-w-[170px] lg:max-w-full whitespace-nowrap"
+                      className="pl-9 lg:pl-13 max-w-[170px] lg:max-w-full whitespace-nowrap"
                     />
                   )}
-
                   <input
                     ref={inputRef}
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder=""
-                    className="relative z-50 h-8 lg:h-11 w-full rounded-full border-2 border-gray-200 bg-transparent py-2.5 pl-8 lg:pl-12 pr-8 lg:pr-20 text-sm text-gray-800 focus:outline-hidden focus:border-gray-400 xl:w-[430px]"
+                    className="relative z-50 h-8 lg:h-11 w-full rounded-full border-2 border-gray-200 bg-transparent py-2.5 pl-8 lg:pl-12 pr-8 lg:pr-20 text-base xl:text-sm text-gray-800 focus:outline-hidden focus:border-gray-400 xl:w-[430px]"
                   />
-
                   {inputValue && (
                     <button
                       type="button"
-                      onClick={handleResetSearch}
+                      onClick={handleClearTypedInput}
                       className="absolute right-2 lg:right-14 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 z-50 cursor-pointer"
-                      aria-label="Reset Search"
+                      aria-label="Clear input"
                     >
                       <X className="w-4 h-4 text-gray-500" />
                     </button>
@@ -113,6 +121,7 @@ const AppHeader = () => {
                     <button
                       type="submit"
                       className="absolute right-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-full border border-gray-200 bg-gray-100 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500"
+                      aria-label="Submit Search with Command K"
                     >
                       <span> ⌘ </span>
                       <span> K </span>

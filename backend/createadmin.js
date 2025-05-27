@@ -13,14 +13,14 @@ const createAdminUsers = async () => {
       firstName: "Admin",
       lastName: "Satu",
       email: "admin1@mukrindo.com", // Ganti dengan email admin Anda
-      password: "admin123", // GANTI DENGAN PASSWORD KUAT
+      password: "Zaratustr4", // GANTI DENGAN PASSWORD KUAT
       role: "admin",
     },
     {
       firstName: "Admin",
       lastName: "Dua",
       email: "admin2@mukrindo.com", // Ganti dengan email admin Anda
-      password: "admin123!", // GANTI DENGAN PASSWORD KUAT
+      password: "Zaratustr4@", // GANTI DENGAN PASSWORD KUAT
       role: "admin",
     },
   ];

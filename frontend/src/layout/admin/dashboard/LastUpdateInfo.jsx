@@ -9,7 +9,7 @@ import {
   differenceInDays,
 } from "date-fns";
 import { FiRefreshCw } from "react-icons/fi";
-import { Loader2 } from "lucide-react";
+import DotLoader from "@/components/common/DotLoader";
 
 const LAST_UPDATE_TIME_KEY = "lastUpdateTime";
 const PREVIOUS_DATA_KEY = "previousData";
@@ -206,10 +206,13 @@ export default function LastUpdatedInfo() {
       ((productsLoading || statsLoading) && !lastUpdateTime)
     ) {
       return (
-        <span className="flex items-center">
-          <Loader2 className="w-4 h-4 animate-spin mr-2" />
-          Memuat data...
-        </span>
+        <div className="flex items-center">
+          <DotLoader
+            dotSize="w-5 h-5"
+            textSize="text-xl"
+            text="Memuat data..."
+          />
+        </div>
       );
     }
 

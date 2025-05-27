@@ -23,6 +23,7 @@ import carData from "@/utils/carData";
 
 // Import Hooks
 import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
+import DotLoader from "@/components/common/DotLoader";
 
 const QUICK_OPEN_DELAY = 50;
 const INACTIVITY_DELAY = 10000;
@@ -340,14 +341,14 @@ const AddProduct = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[80vh] bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-orange-500"></div>
+        <DotLoader dotSize="w-5 h-5" />
       </div>
     );
   }
 
   const breadcrumbItems = [
     { label: "Beranda", href: "/admin" },
-    { label: "Produk", href: "/admin/produk" },
+    { label: "Katalog Produk", href: "/admin/produk" },
     { label: "Tambah Produk", href: "" },
   ];
 

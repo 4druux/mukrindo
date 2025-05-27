@@ -20,6 +20,13 @@ const HISTORY_API_PATH = "/api/visits/homepage/history";
 
 const fetcher = (path) => axiosInstance.get(path).then((res) => res.data);
 
+// const fetcher = async (path) => {
+//   await new Promise((resolve) => setTimeout(resolve, 120000000));
+
+//   const res = await axiosInstance.get(path);
+//   return res.data;
+// };
+
 export const TrafficProvider = ({ children }) => {
   const {
     data: rawTrafficStats,
