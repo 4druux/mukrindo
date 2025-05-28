@@ -2,7 +2,7 @@
 
 // components/global/CarImage.jsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -32,17 +32,31 @@ const CarImage = ({
   const { toggleBookmarkSidebar } = useHeader();
   const { bookmarkCount, toggleBookmark, isBookmarked } = useProducts();
   const [isSticky, setIsSticky] = useState(false);
-  const isStickyMobile = window.innerWidth <= 760;
+  const isStickyMobile =
+    typeof window !== "undefined" && window.innerWidth <= 760;
   const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
   const [mainSwiper, setMainSwiper] = useState(null);
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
 
-  const liked = isBookmarked(productId);
+  const liked = productId ? isBookmarked(productId) : false;
 
-  if (!product.images || product.images.length === 0) {
+  // Penyaringan gambar yang valid
+  const validImages = useMemo(() => {
+    if (product && Array.isArray(product.images)) {
+      return product.images.filter(
+        (img) =>
+          typeof img === "string" &&
+          img.trim() !== "" &&
+          (img.startsWith("http") || img.startsWith("/"))
+      );
+    }
+    return [];
+  }, [product]);
+
+  if (!product || validImages.length === 0) {
     return (
-      <div className="aspect-[16/9] bg-gray-200 rounded-2xl flex items-center justify-center text-gray-500">
+      <div className="aspect-[16/9] bg-gray-200 rounded-none md:rounded-2xl flex items-center justify-center text-gray-500">
         Gambar tidak tersedia
       </div>
     );
@@ -59,18 +73,17 @@ const CarImage = ({
       }
     };
 
-    if (!isAdminRoute) {
+    if (!isAdminRoute && typeof window !== "undefined") {
       window.addEventListener("scroll", handleScroll, { passive: true });
-      handleScroll();
+      handleScroll(); // Panggil sekali saat mount untuk set state awal
       return () => window.removeEventListener("scroll", handleScroll);
-    } else {
-      if (isSticky) setIsSticky(false);
+    } else if (isSticky) {
+      setIsSticky(false);
     }
   }, [isAdminRoute, isStickyMobile, isSticky]);
 
   return (
     <div className="">
-      {/* Main Image */}
       <div className="md:flex-1 relative md:min-w-0">
         <div className="relative aspect-[16/9] rounded-none md:rounded-2xl transition-all duration-500 ease-in-out overflow-hidden">
           <Swiper
@@ -84,7 +97,7 @@ const CarImage = ({
             className="mySwiper2 rounded-none md:rounded-2xl h-full"
             onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
           >
-            {product.images.map((image, index) => (
+            {validImages.map((image, index) => (
               <SwiperSlide key={index}>
                 <div
                   className={`relative h-full cursor-pointer group`}
@@ -92,7 +105,7 @@ const CarImage = ({
                 >
                   <Image
                     src={image}
-                    alt={`${product.carName} - ${index + 1}`}
+                    alt={`${product.carName || "Gambar Mobil"} - ${index + 1}`}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 50vw"
                     className="object-cover"
@@ -104,7 +117,6 @@ const CarImage = ({
             ))}
           </Swiper>
 
-          {/* Tombol Kembali admin*/}
           {isAdminRoute && (
             <button
               onClick={() => router.back()}
@@ -130,7 +142,6 @@ const CarImage = ({
 
           {!isAdminRoute && (
             <>
-              {/*  Desktop & Mobile non-sticky */}
               <div
                 className={`
                   ${
@@ -162,11 +173,12 @@ const CarImage = ({
                   </div>
                 </div>
 
-                {/* Kontrol Kanan (Share & Bookmark) */}
                 <div className="absolute top-2 md:top-4 right-3 z-10 cursor-pointer transition">
                   <div className="flex items-center gap-3">
                     <ShareProduct
-                      title={`Lihat mobil ini: ${product.carName}`}
+                      title={`Lihat mobil ini: ${
+                        product.carName || "Mobil Bekas"
+                      }`}
                       isMobile={isMobile}
                       buttonClass={`
                         ${
@@ -179,37 +191,38 @@ const CarImage = ({
                       iconClass="w-4 h-4 md:w-5 md:h-5 text-gray-700"
                     />
 
-                    {/* Bookmark Desktop */}
-                    <div
-                      className="relative group cursor-pointer hidden md:block"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleBookmark(productId);
-                      }}
-                    >
+                    {productId && (
                       <div
-                        className={`bg-white/80 hover:bg-white p-2 rounded-full shadow transition ${
-                          product.status === "Terjual" ? "hidden" : ""
-                        }`}
+                        className="relative group cursor-pointer hidden md:block"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleBookmark(productId);
+                        }}
                       >
-                        <Heart
-                          className={`w-4 h-4 md:w-5 md:h-5 ${
-                            liked
-                              ? "text-red-500 fill-red-500"
-                              : "text-gray-700 fill-none"
+                        <div
+                          className={`bg-white/80 hover:bg-white p-2 rounded-full shadow transition ${
+                            product.status === "Terjual" ? "hidden" : ""
                           }`}
-                        />
+                        >
+                          <Heart
+                            className={`w-4 h-4 md:w-5 md:h-5 ${
+                              liked
+                                ? "text-red-500 fill-red-500"
+                                : "text-gray-700 fill-none"
+                            }`}
+                          />
+                        </div>
+                        <span
+                          className="absolute left-3 -translate-x-1/2 top-full mt-2
+                            whitespace-nowrap rounded-md bg-black/50 px-2 py-1 text-xs text-white
+                            opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                            invisible group-hover:visible
+                            pointer-events-none z-20"
+                        >
+                          Bookmark
+                        </span>
                       </div>
-                      <span
-                        className="absolute left-3 -translate-x-1/2 top-full mt-2
-                         whitespace-nowrap rounded-md bg-black/50 px-2 py-1 text-xs text-white
-                         opacity-0 group-hover:opacity-100 transition-opacity duration-300
-                         invisible group-hover:visible
-                         pointer-events-none z-20"
-                      >
-                        Bookmark
-                      </span>
-                    </div>
+                    )}
 
                     <div className="block md:hidden">
                       <button
@@ -229,7 +242,6 @@ const CarImage = ({
                 </div>
               </div>
 
-              {/* Mobile & Sticky */}
               <div
                 className={`
                   fixed top-0 left-0 right-0 z-20 bg-white shadow-md p-3
@@ -247,13 +259,15 @@ const CarImage = ({
                     <ArrowLeft className="w-5 h-5 text-gray-700" />
                   </button>
                   <p className="text-sm font-medium text-gray-800 line-clamp-1">
-                    {product.carName}
+                    {product.carName || "Detail Mobil"}
                   </p>
                 </div>
 
                 <div className="flex items-center gap-3 pl-3">
                   <ShareProduct
-                    title={`Lihat mobil ini: ${product.carName}`}
+                    title={`Lihat mobil ini: ${
+                      product.carName || "Mobil Bekas"
+                    }`}
                     isMobile={isMobile}
                     buttonClass="p-2 rounded-full hover:bg-gray-100"
                     iconClass="w-4.5 h-4.5 text-gray-700"
@@ -275,17 +289,15 @@ const CarImage = ({
             </>
           )}
 
-          {/* Indikator Slide */}
           <div
             className="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2.5 py-1 rounded-full select-none"
             style={{ zIndex: "1" }}
           >
-            {activeIndex + 1} / {product.images.length}
+            {activeIndex + 1} / {validImages.length}
           </div>
         </div>
       </div>
 
-      {/* Thumbnail */}
       <div className="mt-1 md:mt-4 px-1 relative overflow-hidden horizontal-gradient-fade">
         <Swiper
           onSwiper={setThumbsSwiper}
@@ -296,7 +308,7 @@ const CarImage = ({
           modules={[FreeMode, Thumbs]}
           className="mySwiper rounded-lg"
         >
-          {product.images.map((image, index) => (
+          {validImages.map((image, index) => (
             <SwiperSlide key={index}>
               <button
                 type="button"
@@ -310,7 +322,9 @@ const CarImage = ({
               >
                 <Image
                   src={image}
-                  alt={`${product.carName} - Thumbnail ${index + 1}`}
+                  alt={`${product.carName || "Thumbnail"} - Thumbnail ${
+                    index + 1
+                  }`}
                   fill
                   sizes="100px"
                   className="object-cover"

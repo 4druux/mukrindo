@@ -16,7 +16,14 @@ import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 const CarImageCard = ({ images, altText, status }) => {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const validImages = Array.isArray(images) && images.length > 0 ? images : [];
+  const validImages = Array.isArray(images)
+    ? images.filter(
+        (img) =>
+          typeof img === "string" &&
+          img.trim() !== "" &&
+          (img.startsWith("http") || img.startsWith("/"))
+      )
+    : [];
 
   const totalDots = validImages.length;
   const maxVisibleDots = 5;
@@ -76,21 +83,23 @@ const CarImageCard = ({ images, altText, status }) => {
         onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
         allowTouchMove={status !== "Terjual"}
       >
-        {validImages.map((image, index) => (
-          <SwiperSlide key={index}>
-            <Image
-              src={image}
-              alt={`${altText} - Gambar ${index + 1}`}
-              layout="fill"
-              objectFit="cover"
-              placeholder="blur"
-              blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
-              className="object-cover"
-              priority={index === 0}
-              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            />
-          </SwiperSlide>
-        ))}
+        {validImages
+          .filter((img) => typeof img === "string" && img.trim() !== "")
+          .map((image, index) => (
+            <SwiperSlide key={index}>
+              <Image
+                src={image}
+                alt={`${altText} - Gambar ${index + 1}`}
+                layout="fill"
+                objectFit="cover"
+                placeholder="blur"
+                blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+                className="object-cover"
+                priority={index === 0}
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              />
+            </SwiperSlide>
+          ))}
 
         {validImages.length > 1 && (
           <>
