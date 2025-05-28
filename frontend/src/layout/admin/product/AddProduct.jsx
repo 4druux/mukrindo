@@ -262,7 +262,6 @@ const AddProduct = () => {
       toast.error("Harap periksa kembali data yang Anda masukkan.", {
         className: "custom-toast",
       });
-
       const firstErrorKey = Object.keys(validationErrors)[0];
       const errorElement = document.getElementById(firstErrorKey);
       if (errorElement) {
@@ -273,32 +272,33 @@ const AddProduct = () => {
 
     setLoading(true);
 
+    const formDataToSend = new FormData();
+    Object.keys(productData).forEach((key) => {
+      if (productData[key] !== undefined && productData[key] !== null) {
+        formDataToSend.append(key, productData[key]);
+      }
+    });
+
+    mediaFiles.forEach((fileObj, index) => {
+      if (
+        fileObj.cropped &&
+        (fileObj.cropped instanceof File || fileObj.cropped instanceof Blob)
+      ) {
+        formDataToSend.append(
+          "images",
+          fileObj.cropped,
+          fileObj.original?.name || `image-${index}.jpg`
+        );
+      }
+    });
+
     try {
-      const base64Images = await Promise.all(
-        mediaFiles.map((fileObj) => {
-          return new Promise((resolve, reject) => {
-            if (!fileObj.cropped) {
-              reject(new Error("Gambar belum di-crop."));
-              return;
-            }
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(fileObj.cropped);
-          });
-        })
-      );
-
-      const submitData = {
-        ...productData,
-        images: base64Images,
-      };
-
-      const response = await axiosInstance.post(API_ENDPOINT, submitData);
+      const response = await axiosInstance.post(API_ENDPOINT, formDataToSend, {
+        headers: {},
+      });
       toast.success("Produk berhasil ditambahkan.", {
         className: "custom-toast",
       });
-      console.log("Product ditambahkan:", response.data);
 
       mutateProducts();
 
@@ -327,13 +327,18 @@ const AddProduct = () => {
 
       router.push("/admin/produk");
     } catch (error) {
-      console.error("Error adding product:", error);
+      console.error(
+        "Error adding product:",
+        error.response?.data || error.message || error
+      );
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
         "Gagal menambahkan produk. Silakan coba lagi.";
-      setErrors(errorMessage);
       setSubmitError(errorMessage);
+      toast.error(errorMessage, {
+        className: "custom-toast",
+      });
       setLoading(false);
     }
   };

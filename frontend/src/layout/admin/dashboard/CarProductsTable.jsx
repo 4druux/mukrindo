@@ -81,6 +81,19 @@ const CarProductsTable = () => {
     }
   };
 
+  const validImages = (images) => {
+    if (Array.isArray(images)) {
+      const validImage = images.find(
+        (img) =>
+          typeof img === "string" &&
+          img.trim() !== "" &&
+          (img.startsWith("http") || img.startsWith("/"))
+      );
+      return validImage || "/placeholder-car.png";
+    }
+    return "/placeholder-car.png";
+  };
+
   const currentSelectedTabConfig = useMemo(
     () => TAB_CONFIG.find((tab) => tab.id === selectedTabId) || TAB_CONFIG[0],
     [selectedTabId]
@@ -111,7 +124,6 @@ const CarProductsTable = () => {
         if (tabId === "tercepat") {
           return a.sellingDuration - b.sellingDuration;
         } else {
-          // "terlama"
           return b.sellingDuration - a.sellingDuration;
         }
       });
@@ -188,7 +200,7 @@ const CarProductsTable = () => {
                   <div className="flex-shrink-0">
                     <div className="w-20 h-16 sm:w-20 sm:h-12 relative">
                       <Image
-                        src={product.images?.[0] || "/placeholder-car.png"}
+                        src={validImages(product.images)}
                         alt={
                           product.carName || `${product.brand} ${product.model}`
                         }
@@ -198,7 +210,6 @@ const CarProductsTable = () => {
                       />
                     </div>
                   </div>
-                  {/* Mobile View */}
                   <div className="ml-3 sm:ml-0 flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-800 line-clamp-1 group-hover:text-orange-600 transition-colors">
                       {product.brand} {product.model} - {product.variant}
@@ -243,7 +254,6 @@ const CarProductsTable = () => {
                     </div>
                   </div>
                 </div>
-                {/* Desktop View */}
                 <div className="hidden sm:flex sm:col-span-2 sm:items-center text-sm text-orange-600 font-medium sm:justify-start">
                   {formatPrice(product.price)}
                 </div>

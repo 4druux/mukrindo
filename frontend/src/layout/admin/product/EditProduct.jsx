@@ -371,13 +371,11 @@ const EditProduct = ({ productId }) => {
     setErrors({});
 
     const validationErrors = validateProductData(productData, mediaFiles);
-
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       toast.error("Harap periksa kembali data yang Anda masukkan.", {
         className: "custom-toast",
       });
-
       const firstErrorKey = Object.keys(validationErrors)[0];
       const errorElement = document.getElementById(firstErrorKey);
       if (errorElement) {
@@ -390,52 +388,60 @@ const EditProduct = ({ productId }) => {
       toast.error("Tidak ada perubahan data untuk disimpan.", {
         className: "custom-toast",
       });
-      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
     setLoadingUpdate(true);
 
+    const formDataToSend = new FormData();
+    Object.keys(productData).forEach((key) => {
+      if (productData[key] !== undefined && productData[key] !== null) {
+        formDataToSend.append(key, productData[key]);
+      }
+    });
+
+    const newFilesToUpload = [];
+    const retainedImageUrls = [];
+
+    mediaFiles.forEach((fileObj) => {
+      if (fileObj.cropped instanceof File || fileObj.cropped instanceof Blob) {
+        newFilesToUpload.push({
+          file: fileObj.cropped,
+          name: fileObj.original?.name || `image-edited-${Date.now()}.jpg`,
+        });
+      } else if (
+        typeof fileObj.cropped === "string" &&
+        fileObj.cropped.startsWith("http")
+      ) {
+        retainedImageUrls.push(fileObj.cropped);
+      } else if (
+        fileObj.originalBase64 &&
+        typeof fileObj.originalBase64 === "string" &&
+        fileObj.originalBase64.startsWith("http")
+      ) {
+        retainedImageUrls.push(fileObj.originalBase64);
+      }
+    });
+
+    if (retainedImageUrls.length > 0) {
+      retainedImageUrls.forEach((url) =>
+        formDataToSend.append("existingImages", url)
+      );
+    } else {
+      formDataToSend.append("existingImages", JSON.stringify([]));
+    }
+
+    newFilesToUpload.forEach((fileData) => {
+      formDataToSend.append("images", fileData.file, fileData.name);
+    });
+
     try {
-      const base64Images = await Promise.all(
-        mediaFiles.map(async (fileObj) => {
-          if (
-            fileObj.cropped &&
-            fileObj.cropped instanceof Blob &&
-            fileObj.cropped !== fileObj.original
-          ) {
-            return new Promise((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(reader.result);
-              reader.onerror = (error) =>
-                reject(new Error("Gagal membaca file gambar: " + error));
-              reader.readAsDataURL(fileObj.cropped);
-            });
-          } else if (fileObj.originalBase64) {
-            return fileObj.originalBase64;
-          } else if (fileObj.cropped && fileObj.cropped instanceof Blob) {
-            return new Promise((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(reader.result);
-              reader.onerror = (error) =>
-                reject(new Error("Gagal membaca file gambar baru: " + error));
-              reader.readAsDataURL(fileObj.cropped);
-            });
-          } else {
-            console.warn("Skipping invalid file object:", fileObj);
-            return null;
-          }
-        })
-      ).then((images) => images.filter((img) => img !== null));
-
-      const submitData = {
-        ...productData,
-        images: base64Images,
-      };
-
       const response = await axiosInstance.put(
         `${API_ENDPOINT}/${productId}`,
-        submitData
+        formDataToSend,
+        {
+          headers: {},
+        }
       );
 
       toast.success("Produk berhasil diperbarui.", {
@@ -443,12 +449,28 @@ const EditProduct = ({ productId }) => {
       });
 
       mutateProducts();
+
+      if (
+        response.data &&
+        response.data.product &&
+        response.data.product.images
+      ) {
+        const updatedCloudImages = response.data.product.images.map((url) => ({
+          original: null,
+          cropped: url,
+          originalBase64: url,
+        }));
+        setMediaFiles(updatedCloudImages);
+        initialMediaFiles.current = [...updatedCloudImages];
+      }
       initialProductData.current = { ...productData };
-      initialMediaFiles.current = [...mediaFiles.map((f) => ({ ...f }))];
 
       router.push("/admin/produk");
     } catch (error) {
-      console.error("Error updating product:", error);
+      console.error(
+        "Error updating product:",
+        error.response?.data || error.message || error
+      );
       const errorMessage =
         error.response?.data?.message ||
         error.message ||

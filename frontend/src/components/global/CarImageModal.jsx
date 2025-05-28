@@ -1,6 +1,6 @@
 // components/CarImageModal.js
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 
 // Import Swiper
@@ -12,7 +12,7 @@ import "swiper/css/navigation";
 import { FreeMode, Thumbs, Navigation } from "swiper/modules";
 
 // Import Icon
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X } from "lucide-react";
 import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 
 const CarImageModal = ({
@@ -26,17 +26,31 @@ const CarImageModal = ({
   const [modalActiveIndex, setModalActiveIndex] = useState(initialIndex);
   const [thumbsSwiperModal, setThumbsSwiperModal] = useState(null);
 
+  const validImages = useMemo(() => {
+    if (Array.isArray(images)) {
+      return images.filter(
+        (img) =>
+          typeof img === "string" &&
+          img.trim() !== "" &&
+          (img.startsWith("http") || img.startsWith("/"))
+      );
+    }
+    return [];
+  }, [images]);
+
   useEffect(() => {
-    setModalActiveIndex(initialIndex);
+    if (show) {
+      setModalActiveIndex(initialIndex);
+    }
   }, [initialIndex, show]);
 
   useEffect(() => {
-    if (thumbsSwiperModal && !thumbsSwiperModal.destroyed) {
+    if (show && thumbsSwiperModal && !thumbsSwiperModal.destroyed) {
       thumbsSwiperModal.slideTo(modalActiveIndex);
     }
-  }, [modalActiveIndex, thumbsSwiperModal]);
+  }, [modalActiveIndex, thumbsSwiperModal, show]);
 
-  if (!show || !images || images.length === 0) {
+  if (!show || validImages.length === 0) {
     return null;
   }
 
@@ -74,14 +88,15 @@ const CarImageModal = ({
           className="mySwiper2Modal rounded-none lg:rounded-2xl"
           onSlideChange={(swiper) => setModalActiveIndex(swiper.activeIndex)}
         >
-          {images.map((image, index) => (
+          {validImages.map((image, index) => (
             <SwiperSlide key={index}>
               <div className="relative w-full aspect-[16/9]">
                 <Image
                   src={image}
-                  alt={`${carName} - ${index + 1}`}
+                  alt={`${carName || "Gambar Mobil"} - ${index + 1}`}
                   layout="fill"
                   className="object-cover md:object-cover cursor-grab"
+                  priority={index === initialIndex}
                 />
               </div>
             </SwiperSlide>
@@ -110,11 +125,10 @@ const CarImageModal = ({
         <div className="flex justify-between items-center px-2 mt-2">
           <p className="text-sm font-medium text-white">Semua gambar</p>
           <div className="bg-black/30 text-white text-xs px-3 py-2 rounded-full z-10">
-            {modalActiveIndex + 1} / {images.length}
+            {modalActiveIndex + 1} / {validImages.length}
           </div>
         </div>
 
-        {/* Thumbnail Modal */}
         <Swiper
           onSwiper={setThumbsSwiperModal}
           spaceBetween={isMobile ? 4 : 10}
@@ -124,7 +138,7 @@ const CarImageModal = ({
           modules={[FreeMode, Thumbs]}
           className="mySwiperModalThumbs rounded-md mt-4"
         >
-          {images.map((image, index) => (
+          {validImages.map((image, index) => (
             <SwiperSlide key={index}>
               <div
                 className={`relative w-full h-[50px] md:h-[90px] cursor-pointer ${
@@ -135,7 +149,7 @@ const CarImageModal = ({
               >
                 <Image
                   src={image}
-                  alt={`Thumbnail ${index + 1}`}
+                  alt={`${carName || "Thumbnail"} - Thumbnail ${index + 1}`}
                   layout="fill"
                   objectFit="cover"
                   className="rounded-md"
