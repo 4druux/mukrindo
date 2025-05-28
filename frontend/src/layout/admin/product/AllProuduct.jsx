@@ -19,8 +19,14 @@ import Pagination from "@/components/global/Pagination";
 import { Plus } from "lucide-react";
 
 const AllProducts = () => {
-  const { products, loading, error, updateProductStatus, deleteProduct } =
-    useProducts();
+  const {
+    products: allFetchedProducts,
+    loading: swrIsLoading,
+    error,
+    updateProductStatus,
+    deleteProduct,
+  } = useProducts();
+
   const [isDropdownOpen, setIsDropdownOpen] = useState({});
   const dropdownRefs = useRef({});
   const router = useRouter();
@@ -29,40 +35,24 @@ const AllProducts = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const productsPerPage = 12;
 
+  const initialLoadCompleted = useRef(false);
+  useEffect(() => {
+    if (!swrIsLoading) {
+      initialLoadCompleted.current = true;
+    }
+  }, [swrIsLoading]);
+
   useEffect(() => {
     const urlSearchQuery = searchParams.get("search");
-
-    if (urlSearchQuery) {
-      if (urlSearchQuery !== searchQuery) {
-        console.log("Syncing URL query to context:", urlSearchQuery);
-        setSearchQuery(urlSearchQuery);
-      }
-    } else {
-      if (searchQuery) {
-        console.log("Clearing context query because URL is empty");
-        setSearchQuery("");
-      }
+    if (urlSearchQuery && urlSearchQuery !== searchQuery) {
+      setSearchQuery(urlSearchQuery);
+    } else if (!urlSearchQuery && searchQuery) {
+      setSearchQuery("");
     }
   }, [searchParams, searchQuery, setSearchQuery]);
 
-  const handleDelete = async (productId) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      const result = await deleteProduct(productId);
-      if (result.success) {
-        alert("Product deleted successfully");
-      } else {
-        alert(result.error);
-      }
-    }
-  };
-
-  const handleStatusChange = async (productId, newStatus) => {
-    const result = await updateProductStatus(productId, newStatus);
-    if (result.success) {
-      closeDropdown(productId);
-    } else {
-      alert(result.error);
-    }
+  const closeDropdown = (productId) => {
+    setIsDropdownOpen((prev) => ({ ...prev, [productId]: false }));
   };
 
   useEffect(() => {
@@ -78,12 +68,22 @@ const AllProducts = () => {
         });
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const handleDelete = async (productId) => {
+    if (window.confirm("Apakah Anda yakin ingin menghapus produk ini?")) {
+      await deleteProduct(productId);
+    }
+  };
+
+  const handleStatusChange = async (productId, newStatus) => {
+    await updateProductStatus(productId, newStatus);
+    closeDropdown(productId);
+  };
 
   const toggleDropdown = (productId) => {
     setIsDropdownOpen((prev) => ({
@@ -92,13 +92,9 @@ const AllProducts = () => {
     }));
   };
 
-  const closeDropdown = (productId) => {
-    setIsDropdownOpen((prev) => ({ ...prev, [productId]: false }));
-  };
-
   const { processedProducts, suggestedQuery, activeFilter } =
     useFilterAndSuggest({
-      initialProducts: products || [],
+      initialProducts: allFetchedProducts || [],
       searchQuery: searchQuery,
       options: {
         searchFields: [
@@ -112,105 +108,79 @@ const AllProducts = () => {
         suggestionTargets: ["brand", "model", "carName", "plateNumber"],
         defaultSort: SHORT_BY.LATEST,
       },
-      isLoading: loading,
+      isLoading: swrIsLoading,
     });
 
   const splitSearchFilter = useMemo(() => {
     const result = { brand: null, modelQuery: null, fullQuery: searchQuery };
-    if (!searchQuery) return result;
-
-    const productsSource = products || [];
-    if (productsSource.length === 0) return result;
-
+    if (!searchQuery || !allFetchedProducts || allFetchedProducts.length === 0)
+      return result;
     const uniqueBrands = [
       ...new Set(
-        productsSource.map((p) => p.brand?.toLowerCase()).filter(Boolean)
+        allFetchedProducts.map((p) => p.brand?.toLowerCase()).filter(Boolean)
       ),
     ];
     uniqueBrands.sort((a, b) => b.length - a.length);
-
-    let foundBrand = null;
-    let remainingQuery = searchQuery;
-    let originalBrandName = null;
-
     for (const brand of uniqueBrands) {
       if (
         searchQuery.toLowerCase().startsWith(brand + " ") ||
         searchQuery.toLowerCase() === brand
       ) {
-        originalBrandName =
-          productsSource.find((p) => p.brand?.toLowerCase() === brand)?.brand ||
-          brand.charAt(0).toUpperCase() + brand.slice(1);
-        foundBrand = brand;
-        if (searchQuery.toLowerCase().startsWith(brand + " ")) {
-          remainingQuery = searchQuery.substring(brand.length).trim();
-        } else {
-          remainingQuery = "";
-        }
-        break;
+        const originalBrandName =
+          allFetchedProducts.find((p) => p.brand?.toLowerCase() === brand)
+            ?.brand || brand.charAt(0).toUpperCase() + brand.slice(1);
+        result.brand = originalBrandName;
+        result.modelQuery = searchQuery.toLowerCase().startsWith(brand + " ")
+          ? searchQuery.substring(brand.length).trim()
+          : "";
+        if (!result.modelQuery) result.modelQuery = null;
+        return result;
       }
     }
-
-    if (originalBrandName) {
-      result.brand = originalBrandName;
-      result.modelQuery = remainingQuery || null;
-    } else {
-      result.modelQuery = searchQuery;
-    }
-
+    result.modelQuery = searchQuery;
     return result;
-  }, [searchQuery, products]);
+  }, [searchQuery, allFetchedProducts]);
 
   const handleClearAllAdminFilters = () => {
-    // Hapus hanya query 'search' dari URL admin
-    const currentPath = window.location.pathname; // Tetap di halaman admin
-    router.push(currentPath); // Navigasi ke path tanpa query
-    setSearchQuery(""); // Juga clear context sidebar
+    const currentPath = window.location.pathname;
+    router.push(currentPath);
+    setSearchQuery("");
   };
 
   const handleRemoveAdminSearchPart = (partToRemove) => {
     let newSearchQuery = "";
     const currentPath = window.location.pathname;
-
-    if (partToRemove === "brand" && splitSearchFilter.modelQuery) {
+    if (partToRemove === "brand" && splitSearchFilter.modelQuery)
       newSearchQuery = splitSearchFilter.modelQuery;
-    } else if (partToRemove === "model" && splitSearchFilter.brand) {
+    else if (partToRemove === "model" && splitSearchFilter.brand)
       newSearchQuery = splitSearchFilter.brand;
-    }
-    // Jika partToRemove 'full' atau bagian terakhir, query jadi kosong
-
-    setSearchQuery(newSearchQuery); // Update context sidebar
-
-    if (newSearchQuery) {
-      router.push(
-        `${currentPath}?search=${encodeURIComponent(newSearchQuery)}`
-      );
-    } else {
-      router.push(currentPath); // Hapus query jika kosong
-    }
+    setSearchQuery(newSearchQuery);
+    router.push(
+      newSearchQuery
+        ? `${currentPath}?search=${encodeURIComponent(newSearchQuery)}`
+        : currentPath
+    );
   };
 
-  // Handler ini kemungkinan tidak akan dipanggil di admin, tapi perlu ada
-  const handleRemoveAdminFilterParam = (paramName) => {
+  const handleRemoveAdminFilterParam = () => {
     console.warn(
-      `Attempted to remove URL filter param "${paramName}" from admin page. This is not expected.`
+      "URL filter param removal not typically used in admin product list."
     );
   };
 
   const handleAdminSortChange = (newSortValue) => {
     const currentParams = new URLSearchParams(searchParams.toString());
     currentParams.set("sort", newSortValue);
-    const currentPath = window.location.pathname; // Get current admin path
-    // Reset halaman ke 0 saat filter/sort berubah
+    const currentPath = window.location.pathname;
     setCurrentPage(0);
     router.push(`${currentPath}?${currentParams.toString()}`, {
       scroll: false,
-    }); // Navigate within admin path
+    });
   };
 
   useEffect(() => {
     setCurrentPage(0);
-  }, [searchQuery, searchParams]);
+  }, [searchQuery, searchParams, activeFilter]);
 
   const indexOfLastProduct = (currentPage + 1) * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -224,23 +194,20 @@ const AllProducts = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  if (error) {
-    return <div className="text-center p-4 text-red-500">Error: {error}</div>;
-  }
-
-  const isPriceFilterActive = [
-    SHORT_BY.PRICE_UNDER_150,
-    SHORT_BY.PRICE_BETWEEN_150_300,
-    SHORT_BY.PRICE_OVER_300,
-  ].includes(activeFilter);
+  const isInitialLoading = swrIsLoading && !initialLoadCompleted.current;
+  const isRevalidating = swrIsLoading && initialLoadCompleted.current;
 
   let emptyMessage = "Belum ada produk mobil tersedia.";
   if (searchQuery) {
     emptyMessage = `Tidak ada produk mobil yang cocok dengan pencarian "${searchQuery}".`;
-    if (activeFilter !== SHORT_BY.LATEST || isPriceFilterActive) {
-      emptyMessage += ` Coba sesuaikan filter Anda atau periksa ejaan pencarian.`;
-    }
-  } else if (activeFilter !== SHORT_BY.LATEST || isPriceFilterActive) {
+  } else if (
+    activeFilter !== SHORT_BY.LATEST &&
+    ![
+      SHORT_BY.PRICE_UNDER_150,
+      SHORT_BY.PRICE_BETWEEN_150_300,
+      SHORT_BY.PRICE_OVER_300,
+    ].includes(activeFilter)
+  ) {
     emptyMessage = `Tidak ada produk mobil yang cocok dengan filter yang dipilih.`;
   }
 
@@ -250,19 +217,16 @@ const AllProducts = () => {
   ];
 
   return (
-    <div className="my-6 md:my-0">
+    <div className="my-6 md:my-0 relative">
       <BreadcrumbNav items={breadcrumbItems} />
-
       <div className="flex items-end justify-end px-3 md:px-0">
-        <button
-          onClick={() => router.push("/admin/produk/tambah-produk")}
-          className="flex items-start space-x-1 px-3 py-1 lg:px-4 lg:py-2 rounded-full border border-orange-500 bg-orange-100
-             hover:bg-gradient-to-r from-orange-400 to-orange-600 hover:text-white text-orange-500 font-medium
-            cursor-pointer transition-colors mb-4 lg:mb-0"
+        <Link
+          href="/admin/produk/tambah-produk"
+          className="flex items-start space-x-1 px-3 py-1 lg:px-4 lg:py-2 rounded-full border border-orange-500 bg-orange-100 hover:bg-gradient-to-r from-orange-400 to-orange-600 hover:text-white text-orange-500 font-medium cursor-pointer transition-colors mb-4 lg:mb-0"
         >
           <Plus className="w-4 md:w-5" />
           <span className="text-xs md:text-sm mt-1">Tambah Produk</span>
-        </button>
+        </Link>
       </div>
 
       <div className="mb-4">
@@ -270,27 +234,30 @@ const AllProducts = () => {
           {searchQuery
             ? `Hasil pencarian untuk "${searchQuery}"`
             : "Menampilkan"}
-          {!loading && ` ${processedProducts.length} Produk Mobil`}
+          {!swrIsLoading && ` ${processedProducts.length} Produk Mobil`}
         </h1>
       </div>
 
-      {!loading && searchQuery && (
+      {!swrIsLoading && searchQuery && (
         <ActiveSearchFilters
           searchParams={searchParams}
           splitResult={splitSearchFilter}
           onClearAll={handleClearAllAdminFilters}
           onRemoveSearchPart={handleRemoveAdminSearchPart}
           onRemoveFilterParam={handleRemoveAdminFilterParam}
+          isAdminRoute={true}
         />
       )}
-      {!loading &&
+      {!swrIsLoading &&
         processedProducts.length === 0 &&
         suggestedQuery &&
         searchQuery && (
-          <p className="mt-1 mb-3 text-sm text-gray-600">
+          <p className="mt-1 mb-3 text-sm text-gray-600 px-3 md:px-0">
             Mungkin maksud Anda:{" "}
             <Link
-              href={`?search=${encodeURIComponent(suggestedQuery)}`}
+              href={`/admin/produk?search=${encodeURIComponent(
+                suggestedQuery
+              )}`}
               className="text-orange-500 hover:underline font-medium"
               onClick={() => setSearchQuery(suggestedQuery)}
             >
@@ -309,49 +276,68 @@ const AllProducts = () => {
         />
       </div>
 
-      {/* Daftar Produk */}
-      <CarProductCard
-        products={currentProducts}
-        loading={loading}
-        error={error}
-        isAdminRoute={true}
-        handleStatusChange={handleStatusChange}
-        handleDelete={handleDelete}
-        toggleDropdown={toggleDropdown}
-        isDropdownOpen={isDropdownOpen}
-        dropdownRefs={dropdownRefs}
-        emptyMessage={null}
-        skeletonCount={productsPerPage}
-      />
+      <div className="relative">
+        {isRevalidating && (
+          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-20 rounded-xl">
+            <DotLoader
+              text="Memperbarui data..."
+              dotSize="w-4 h-4"
+              textSize="text-sm"
+            />
+          </div>
+        )}
+        <div className={isRevalidating ? "opacity-60 pointer-events-none" : ""}>
+          <CarProductCard
+            products={currentProducts}
+            loading={isInitialLoading}
+            error={error}
+            isAdminRoute={true}
+            handleStatusChange={handleStatusChange}
+            handleDelete={handleDelete}
+            toggleDropdown={toggleDropdown}
+            isDropdownOpen={isDropdownOpen}
+            dropdownRefs={dropdownRefs}
+            emptyMessage={null}
+            skeletonCount={productsPerPage}
+          />
+        </div>
+      </div>
 
-      {/* Pagination */}
-      {!loading &&
+      {!isInitialLoading &&
+        !isRevalidating &&
         currentProducts.length > 0 &&
         processedProducts.length > productsPerPage && (
           <Pagination
-            key={`pagination-${searchParams.toString()}`}
+            key={`pagination-${searchParams.toString()}-${currentPage}`}
             pageCount={Math.ceil(processedProducts.length / productsPerPage)}
             forcePage={currentPage}
             onPageChange={handlePageChange}
           />
         )}
 
-      {/* Produk Kosong */}
-      {processedProducts.length === 0 && !loading && (
-        <EmptyProductDisplay
-          emptyMessage={emptyMessage}
-          suggestedQuery={suggestedQuery}
-          searchQuery={searchQuery}
-          suggestionLinkHref={
-            suggestedQuery
-              ? `?search=${encodeURIComponent(suggestedQuery)}`
-              : null
-          }
-          onSuggestionClick={() =>
-            suggestedQuery && setSearchQuery(suggestedQuery)
-          }
-          isAdminRoute={true}
-        />
+      {!isInitialLoading &&
+        !isRevalidating &&
+        processedProducts.length === 0 &&
+        !error && (
+          <EmptyProductDisplay
+            emptyMessage={emptyMessage}
+            suggestedQuery={suggestedQuery}
+            searchQuery={searchQuery}
+            suggestionLinkHref={
+              suggestedQuery
+                ? `/admin/produk?search=${encodeURIComponent(suggestedQuery)}`
+                : null
+            }
+            onSuggestionClick={() =>
+              suggestedQuery && setSearchQuery(suggestedQuery)
+            }
+            isAdminRoute={true}
+          />
+        )}
+      {error && !swrIsLoading && (
+        <div className="text-center p-4 text-red-500">
+          Error: {error.message || "Gagal memuat data produk."}
+        </div>
       )}
     </div>
   );

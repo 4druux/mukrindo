@@ -291,31 +291,67 @@ const EditProduct = ({ productId }) => {
           };
           setProductData(fetchedData);
 
-          const initialFiles = await Promise.all(
-            (data.images || []).map(async (base64, index) => {
+          const initialFilesPromises = (data.images || []).map(
+            async (imageUrl, index) => {
+              if (
+                typeof imageUrl !== "string" ||
+                !imageUrl.trim().startsWith("http")
+              ) {
+                console.warn(
+                  `Invalid image URL at index ${index} for product ${productId}:`,
+                  imageUrl
+                );
+                return null;
+              }
               try {
-                const response = await fetch(base64);
+                const response = await fetch(imageUrl);
+                if (!response.ok) {
+                  console.error(
+                    `Failed to fetch image ${imageUrl} for product ${productId}: ${response.status} ${response.statusText}`
+                  );
+                  return null;
+                }
                 const blob = await response.blob();
-                const file = new File([blob], `image${index}.jpg`, {
+                if (!blob || blob.size === 0) {
+                  console.warn(
+                    `Fetched empty or invalid blob for image ${imageUrl} (product ${productId}). Blob type: ${blob?.type}, size: ${blob?.size}`
+                  );
+                  return null;
+                }
+
+                const originalNameFromServer = imageUrl.substring(
+                  imageUrl.lastIndexOf("/") + 1
+                );
+                const safeOriginalName =
+                  originalNameFromServer.replace(/[^\w.-]/g, "_") ||
+                  `image${index}.jpg`;
+
+                const file = new File([blob], safeOriginalName, {
                   type: blob.type || "image/jpeg",
                 });
 
                 return {
                   original: file,
-                  cropped: file,
-                  originalBase64: base64,
+                  cropped: file, 
+                  originalBase64: imageUrl,
                 };
               } catch (fetchError) {
-                console.error("Error fetching image blob:", fetchError);
+                console.error(
+                  `Error processing image URL ${imageUrl} for product ${productId}:`,
+                  fetchError
+                );
                 return null;
               }
-            })
-          ).then((files) => files.filter((file) => file !== null));
+            }
+          );
 
-          setMediaFiles(initialFiles);
+          const processedInitialFiles = (
+            await Promise.all(initialFilesPromises)
+          ).filter((file) => file !== null);
 
+          setMediaFiles(processedInitialFiles);
           initialProductData.current = { ...fetchedData };
-          initialMediaFiles.current = [...initialFiles];
+          initialMediaFiles.current = [...processedInitialFiles];
         } else {
           setSubmitError(result.error || "Gagal memuat data produk.");
         }
