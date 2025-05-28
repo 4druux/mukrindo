@@ -17,6 +17,7 @@ import Pagination from "@/components/global/Pagination";
 
 // Import Icons
 import { Plus } from "lucide-react";
+import DotLoader from "@/components/common/DotLoader";
 
 const AllProducts = () => {
   const {
@@ -279,11 +280,7 @@ const AllProducts = () => {
       <div className="relative">
         {isRevalidating && (
           <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-20 rounded-xl">
-            <DotLoader
-              text="Memperbarui data..."
-              dotSize="w-4 h-4"
-              textSize="text-sm"
-            />
+            <DotLoader dotSize="w-4 h-4" />
           </div>
         )}
         <div className={isRevalidating ? "opacity-60 pointer-events-none" : ""}>
