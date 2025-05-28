@@ -7,7 +7,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Helper function untuk handle error
 const handleServerError = (res, error) => {
   console.error("Server Error:", error);
   return res.status(500).json({
@@ -18,29 +17,22 @@ const handleServerError = (res, error) => {
 
 const uploadToCloudinary = (fileBuffer, originalFilename) => {
   return new Promise((resolve, reject) => {
-    // Bersihkan nama file dari ekstensi dan ganti karakter non-alfanumerik (kecuali _) dengan underscore
-    const baseFilename = originalFilename.split('.')[0].replace(/\s+/g, '_').replace(/[^\w-]/g, '');
+    const baseFilename = originalFilename
+      .split(".")[0]
+      .replace(/\s+/g, "_")
+      .replace(/[^\w-]/g, "");
     const uniquePublicId = `${Date.now()}-${baseFilename}`;
-
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: "mukrindo_products",
-        public_id: uniquePublicId, // Gunakan variabel yang sudah bersih
-        transformation: [
-             {quality: "auto:good"},
-             {fetch_format: "auto"}
-        ],
-        resource_type: "image"
+        public_id: uniquePublicId,
+        transformation: [{ quality: "auto:good" }, { fetch_format: "auto" }],
+        resource_type: "image",
       },
       (error, result) => {
-        if (error) {
-          console.error("Cloudinary Upload Error Details:", JSON.stringify(error, null, 2));
-          return reject(error);
-        }
-        if (!result || !result.secure_url) {
-          console.error("Cloudinary Upload Failed: No secure_url returned", JSON.stringify(result, null, 2));
+        if (error) return reject(error);
+        if (!result || !result.secure_url)
           return reject(new Error("Cloudinary upload failed, no secure_url."));
-        }
         resolve(result.secure_url);
       }
     );
@@ -61,13 +53,7 @@ const deleteFromCloudinary = async (imageUrl) => {
         0,
         publicIdWithExtension.lastIndexOf(".")
       );
-      if (publicId) {
-        console.log(
-          `Attempting to delete from Cloudinary with public_id: ${publicId}`
-        );
-        await cloudinary.uploader.destroy(publicId);
-        console.log(`Successfully deleted from Cloudinary: ${publicId}`);
-      }
+      if (publicId) await cloudinary.uploader.destroy(publicId);
     }
   } catch (error) {
     console.warn(
@@ -77,7 +63,6 @@ const deleteFromCloudinary = async (imageUrl) => {
   }
 };
 
-// Create Product
 exports.createProduct = async (req, res) => {
   try {
     const {
@@ -100,24 +85,25 @@ exports.createProduct = async (req, res) => {
       status,
     } = req.body;
 
-    if (
-      !carName ||
-      !brand ||
-      !model ||
-      !variant ||
-      !type ||
-      !numberOfSeats ||
-      !carColor ||
-      !cc ||
-      !travelDistance ||
-      !driveSystem ||
-      !transmission ||
-      !fuelType ||
-      !stnkExpiry ||
-      !plateNumber ||
-      !yearOfAssembly ||
-      !price
-    ) {
+    const requiredFields = [
+      carName,
+      brand,
+      model,
+      variant,
+      type,
+      numberOfSeats,
+      carColor,
+      cc,
+      travelDistance,
+      driveSystem,
+      transmission,
+      fuelType,
+      stnkExpiry,
+      plateNumber,
+      yearOfAssembly,
+      price,
+    ];
+    if (requiredFields.some((field) => !field)) {
       return res.status(400).json({
         success: false,
         message: "Semua field produk (non-gambar) harus diisi",
@@ -140,7 +126,6 @@ exports.createProduct = async (req, res) => {
         );
         imageUrls.push(imageUrl);
       } catch (uploadError) {
-        console.error("Gagal mengunggah gambar ke Cloudinary:", uploadError);
         return res.status(500).json({
           success: false,
           message: "Gagal mengunggah salah satu gambar ke cloud.",
@@ -183,7 +168,6 @@ exports.createProduct = async (req, res) => {
       product: savedProduct,
     });
   } catch (error) {
-    console.error("Server Error - Create Product:", error);
     if (error.name === "ValidationError") {
       return res.status(400).json({
         success: false,
@@ -191,20 +175,33 @@ exports.createProduct = async (req, res) => {
         errors: error.errors,
       });
     }
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan pada server saat membuat produk",
-      error: error.message || error.toString(),
-    });
+    return handleServerError(res, error);
   }
 };
 
-// Update Product
 exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
-
-    const { existingImages, ...productDataFields } = req.body;
+    const {
+      existingImages,
+      carName,
+      brand,
+      model,
+      variant,
+      type,
+      numberOfSeats,
+      carColor,
+      cc,
+      travelDistance,
+      driveSystem,
+      transmission,
+      fuelType,
+      stnkExpiry,
+      plateNumber,
+      yearOfAssembly,
+      price,
+      status,
+    } = req.body;
 
     const productToUpdate = await Product.findById(id);
     if (!productToUpdate) {
@@ -213,58 +210,94 @@ exports.updateProduct = async (req, res) => {
         .json({ success: false, message: "Produk tidak ditemukan" });
     }
 
-    let finalImageUrls = [];
+    const productDataFields = {};
+    const fieldsToUpdate = {
+      carName,
+      brand,
+      model,
+      variant,
+      type,
+      numberOfSeats,
+      carColor,
+      cc,
+      travelDistance,
+      driveSystem,
+      transmission,
+      fuelType,
+      stnkExpiry,
+      plateNumber,
+      yearOfAssembly,
+      price,
+      status,
+    };
+    const numericFields = [
+      "numberOfSeats",
+      "cc",
+      "travelDistance",
+      "yearOfAssembly",
+      "price",
+    ];
 
-    const retainedImageUrls = Array.isArray(existingImages)
-      ? existingImages
-      : existingImages
-      ? [existingImages]
-      : [];
-    finalImageUrls.push(...retainedImageUrls);
-
-    const imagesToDeleteFromCloud = productToUpdate.images.filter(
-      (imgUrl) => !retainedImageUrls.includes(imgUrl)
-    );
-
-    for (const imgUrl of imagesToDeleteFromCloud) {
-      await deleteFromCloudinary(imgUrl);
+    for (const key in fieldsToUpdate) {
+      if (fieldsToUpdate[key] !== undefined) {
+        productDataFields[key] =
+          numericFields.includes(key) && fieldsToUpdate[key] !== ""
+            ? Number(fieldsToUpdate[key])
+            : fieldsToUpdate[key];
+      }
     }
 
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        try {
-          const newImageUrl = await uploadToCloudinary(
-            file.buffer,
-            file.originalname
-          );
-          finalImageUrls.push(newImageUrl);
-        } catch (uploadError) {
-          console.error("Cloudinary upload error during update:", uploadError);
+    const updatePayload = { ...productDataFields };
+
+    const intendsToUpdateImages =
+      (req.body &&
+        typeof req.body === "object" &&
+        Object.prototype.hasOwnProperty.call(req.body, "existingImages")) ||
+      (req.files && req.files.length > 0);
+
+    if (intendsToUpdateImages) {
+      let finalImageUrls = [];
+      const retainedImageUrls = Array.isArray(existingImages)
+        ? existingImages
+        : existingImages
+        ? [existingImages]
+        : [];
+
+      finalImageUrls.push(...retainedImageUrls);
+
+      const imagesToDeleteFromCloud = productToUpdate.images.filter(
+        (imgUrl) => !retainedImageUrls.includes(imgUrl)
+      );
+      for (const imgUrl of imagesToDeleteFromCloud) {
+        await deleteFromCloudinary(imgUrl);
+      }
+
+      if (req.files && req.files.length > 0) {
+        for (const file of req.files) {
+          try {
+            const newImageUrl = await uploadToCloudinary(
+              file.buffer,
+              file.originalname
+            );
+            finalImageUrls.push(newImageUrl);
+          } catch (uploadError) {
+            console.error(
+              "Cloudinary upload error during update:",
+              uploadError
+            );
+          }
         }
       }
-    }
 
-    if (finalImageUrls.length === 0) {
-      if (
-        productToUpdate.images &&
-        productToUpdate.images.length > 0 &&
-        (!req.files || req.files.length === 0)
-      ) {
-      } else if (
-        !productToUpdate.images ||
-        productToUpdate.images.length === 0
-      ) {
+      if (finalImageUrls.length === 0) {
         return res.status(400).json({
           success: false,
-          message: "Minimal satu gambar harus tersedia setelah update.",
+          message:
+            "Minimal satu gambar harus dipertahankan atau diunggah saat memperbarui gambar.",
         });
       }
+      updatePayload.images = finalImageUrls;
     }
-
-    const updatePayload = {
-      ...productDataFields,
-      images: finalImageUrls,
-    };
 
     if (
       updatePayload.status &&
@@ -278,6 +311,7 @@ exports.updateProduct = async (req, res) => {
     const updatedProduct = await Product.findByIdAndUpdate(id, updatePayload, {
       new: true,
       runValidators: true,
+      context: "query",
     });
 
     if (!updatedProduct) {
@@ -293,7 +327,6 @@ exports.updateProduct = async (req, res) => {
       product: updatedProduct,
     });
   } catch (error) {
-    console.error("Server Error - Update Product:", error);
     if (error.name === "ValidationError") {
       return res.status(400).json({
         success: false,
@@ -306,15 +339,10 @@ exports.updateProduct = async (req, res) => {
         .status(400)
         .json({ success: false, message: "ID Produk tidak valid" });
     }
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan pada server saat memperbarui produk",
-      error: error.message || error.toString(),
-    });
+    return handleServerError(res, error);
   }
 };
 
-// Delete Product
 exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -335,36 +363,24 @@ exports.deleteProduct = async (req, res) => {
     await Product.findByIdAndDelete(id);
     res.status(200).json({ success: true, message: "Produk berhasil dihapus" });
   } catch (error) {
-    console.error("Server Error - Delete Product:", error);
     if (error.name === "CastError" && error.kind === "ObjectId") {
       return res
         .status(400)
         .json({ success: false, message: "ID Produk tidak valid" });
     }
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan pada server saat menghapus produk",
-      error: error.message || error.toString(),
-    });
+    return handleServerError(res, error);
   }
 };
 
-// Get All Products
 exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
-    res.status(200).json(products); 
+    res.status(200).json(products);
   } catch (error) {
-    console.error("Server Error - Get All Products:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan pada server saat mengambil semua produk",
-      error: error.message || error.toString(),
-    });
+    return handleServerError(res, error);
   }
 };
 
-// Get Product By ID
 exports.getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -373,57 +389,42 @@ exports.getProductById = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Produk tidak ditemukan" });
     }
-    res.status(200).json(product); 
+    res.status(200).json(product);
   } catch (error) {
-    console.error("Server Error - Get Product By ID:", error);
     if (error.name === "CastError" && error.kind === "ObjectId") {
       return res
         .status(400)
         .json({ success: false, message: "ID Produk tidak valid" });
     }
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan pada server saat mengambil produk by ID",
-      error: error.message || error.toString(),
-    });
+    return handleServerError(res, error);
   }
 };
 
-// Increment View Count
 exports.incrementViewCount = async (req, res) => {
   try {
     const { id: productId } = req.params;
-
     if (!productId) {
       return res.status(400).json({ message: "ID Produk diperlukan" });
     }
-
     const product = await Product.findByIdAndUpdate(
       productId,
       { $inc: { viewCount: 1 } },
       { new: true }
     );
-
     if (!product) {
       return res.status(404).json({ message: "Produk tidak ditemukan" });
     }
-
     res.status(200).json({
       success: true,
       viewCount: product.viewCount,
       message: "View count incremented.",
     });
   } catch (error) {
-    console.error("Server Error - Increment View:", error);
     if (error.name === "CastError" && error.kind === "ObjectId") {
       return res
         .status(400)
         .json({ success: false, message: "ID Produk tidak valid" });
     }
-    return res.status(500).json({
-      success: false,
-      message: "Terjadi kesalahan pada server saat increment view count",
-      error: error.message || error.toString(),
-    });
+    return handleServerError(res, error);
   }
 };
