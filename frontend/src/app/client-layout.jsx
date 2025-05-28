@@ -98,9 +98,9 @@ export default function ClientLayout({ children }) {
   return (
     <div className="min-h-screen bg-gray-50 mb-18 md:mb-0">
       {showHeaderAndStandardLayout && <AppHeader />}
-      {showHeaderAndStandardLayout && <BookmarkRightbar />}
+      <BookmarkRightbar />
       <div className="">{children}</div>
-      {showHeaderAndStandardLayout && <AppFooter />}
+      <AppFooter />
     </div>
   );
 }
