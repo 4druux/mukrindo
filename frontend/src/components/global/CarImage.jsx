@@ -75,7 +75,7 @@ const CarImage = ({
 
     if (!isAdminRoute && typeof window !== "undefined") {
       window.addEventListener("scroll", handleScroll, { passive: true });
-      handleScroll(); // Panggil sekali saat mount untuk set state awal
+      handleScroll();
       return () => window.removeEventListener("scroll", handleScroll);
     } else if (isSticky) {
       setIsSticky(false);
@@ -263,7 +263,7 @@ const CarImage = ({
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3 pl-3">
+                <div className="flex items-center gap-2 pl-3">
                   <ShareProduct
                     title={`Lihat mobil ini: ${
                       product.carName || "Mobil Bekas"
