@@ -24,7 +24,6 @@ export const AuthProvider = ({ children }) => {
   const router = useRouter();
 
   const fetchUserProfile = useCallback(async (token) => {
-    // setLoading(true); // Mungkin tidak perlu di sini jika hanya refresh profil
     try {
       const config = {
         headers: { Authorization: `Bearer ${token}` },
@@ -44,10 +43,7 @@ export const AuthProvider = ({ children }) => {
         error.message ||
         "Gagal mengambil profil.";
       console.error("Fetch Profile Error:", message);
-      // Tidak set authError di sini agar tidak persisten
       return null;
-    } finally {
-      // setLoading(false); // Hanya set false jika ini loading utama
     }
   }, []);
 
@@ -61,7 +57,7 @@ export const AuthProvider = ({ children }) => {
   }, [fetchUserProfile]);
 
   const login = async (email, password) => {
-    setLoading(true); // Mulai loading untuk proses login
+    setLoading(true);
     setAuthError(null);
     try {
       const { data } = await axiosInstance.post(`${AUTH_API_PATH}/login`, {
@@ -69,29 +65,25 @@ export const AuthProvider = ({ children }) => {
         password,
       });
 
-      // **PERUBAHAN DI SINI:** Arahkan ke /auth/callback
       const params = new URLSearchParams();
       params.append("token", data.token);
       params.append("role", data.role);
       params.append("userId", data._id);
       params.append("firstName", data.firstName || "");
       params.append("email", data.email);
-      params.append("loginType", "manual"); // Penanda login manual
-      params.append("message", "Login manual berhasil!"); // Pesan kustom
+      params.append("loginType", "manual");
 
       router.push(`/auth/callback?${params.toString()}`);
-      // Jangan set user/token di sini, biarkan callback page yang memanggil handleOAuthSuccess
       return { success: true, redirectedToCallback: true };
     } catch (error) {
       const message =
         error.response?.data?.message || error.message || "Login gagal.";
       setAuthError(message);
-      toast.error(message, { className: "custom-toast" });
-      setUser(null); // Pastikan user null jika error
-      setLoading(false); // Hentikan loading jika error di sini
+      toast.error(message, { className: "custom-toast" }); 
+      setUser(null);
+      setLoading(false);
       return { success: false, error: message };
     }
-    // setLoading(false) akan di-handle oleh handleOAuthSuccess atau jika error di atas
   };
 
   const register = async (firstName, lastName, email, password) => {
@@ -104,10 +96,6 @@ export const AuthProvider = ({ children }) => {
         email,
         password,
       });
-      // Setelah registrasi, kita juga bisa arahkan ke callback untuk konsistensi
-      // atau langsung proses seperti login manual baru.
-      // Untuk saat ini, biarkan register mengarahkan langsung ke homepage setelah set token & user.
-      // Jika ingin lewat callback, modifikasinya mirip dengan fungsi login di atas.
       localStorage.setItem("mukrindoAuthToken", data.token);
       setUser({
         _id: data._id,
@@ -119,13 +107,13 @@ export const AuthProvider = ({ children }) => {
       toast.success(data.message || "Registrasi berhasil!", {
         className: "custom-toast",
       });
-      router.push("/"); // User baru selalu ke homepage
+      router.push("/");
       return { success: true, user: data };
     } catch (error) {
       const message =
         error.response?.data?.message || error.message || "Registrasi gagal.";
       setAuthError(message);
-      toast.error(message, { className: "custom-toast" });
+      toast.error(message, { className: "custom-toast" }); 
       setUser(null);
       return { success: false, error: message };
     } finally {
@@ -137,29 +125,23 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("mukrindoAuthToken");
     setUser(null);
     setAuthError(null);
-    setLoading(false); // Pastikan loading false saat logout
+    setLoading(false);
     toast.success("Logout berhasil.", { className: "custom-toast" });
     router.push("/login");
   };
 
   const handleOAuthSuccess = useCallback(
-    // Diubah nama parameter menjadi authData
     (authData) => {
       localStorage.setItem("mukrindoAuthToken", authData.token);
       const userData = {
         _id: authData._id,
         firstName: authData.firstName,
-        // lastName: authData.lastName || '', // Jika ada
         email: authData.email,
         role: authData.role,
       };
       setUser(userData);
-      setAuthError(null); // Hapus error sebelumnya
-      setLoading(false); // **PENTING**: Hentikan loading di sini
-
-      toast.success(authData.message || "Login berhasil!", {
-        className: "custom-toast",
-      });
+      setAuthError(null);
+      setLoading(false);
 
       if (authData.role === "admin") {
         router.push("/admin");
@@ -167,7 +149,7 @@ export const AuthProvider = ({ children }) => {
         router.push("/");
       }
     },
-    [router] // router sebagai dependensi
+    [router]
   );
 
   const contextValue = {

@@ -217,14 +217,14 @@ const AllProducts = () => {
     if (isActionLoading && !swrIsLoading) {
       return (
         <div className="flex items-center justify-center h-[80vh] bg-gray-50">
-          <DotLoader dotSize="w-5 h-5" text="Memproses aksi..." />
+          <DotLoader dotSize="w-5 h-5" />
         </div>
       );
     }
 
     return (
       <div className="flex items-center justify-center h-[80vh] bg-gray-50">
-        <DotLoader dotSize="w-5 h-5" text="Memproses perubahan data..." />
+        <DotLoader dotSize="w-5 h-5" />
       </div>
     );
   }

@@ -9,10 +9,11 @@ import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import CarImage from "@/components/global/CarImage";
 import CarProduct from "@/components/global/CarProduct";
 import CarImageModal from "@/components/global/CarImageModal";
+import DotLoader from "@/components/common/DotLoader";
 import CarPricingInfo from "@/components/product-user/beli-mobil/CarPricingInfo";
 
 // Import Icon
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 const BuyCarDetails = ({ productId }) => {
   const router = useRouter();
@@ -87,7 +88,7 @@ const BuyCarDetails = ({ productId }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[90vh] bg-gray-50">
-        <Loader2 className="animate-spin w-8 h-8 text-gray-400" />
+        <DotLoader dotSize="w-5 h-5" />
       </div>
     );
   }

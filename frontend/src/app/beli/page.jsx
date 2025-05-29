@@ -3,6 +3,7 @@ import BuyCar from "@/layout/user/beli/BuyCar";
 import Testimoni from "@/components/product-user/Testimoni";
 import BuyAccordion from "@/layout/user/beli/BuyAccordion";
 import NotifyMeForm from "@/components/product-user/NotifyMeForm";
+import DotLoader from "@/components/common/DotLoader";
 
 export const metadata = {
   title: "Beli Mobil | Mukrindo Motor",
@@ -14,7 +15,13 @@ const CarShopPage = () => {
     <div className="container mx-auto">
       <div className="md:pt-5 lg:pt-10 border-t-2 border-gray-200">
         <div className="space-y-4 md:space-y-16 mt-4 md:mt-0">
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center h-screen bg-gray-50">
+                <DotLoader dotSize="w-5 h-5" />
+              </div>
+            }
+          >
             <BuyCar />
           </Suspense>
           <Testimoni />

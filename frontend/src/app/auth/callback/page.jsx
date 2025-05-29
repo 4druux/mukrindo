@@ -1,20 +1,17 @@
 // frontend/src/app/auth/callback/page.jsx
 "use client";
 
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 import DotLoader from "@/components/common/DotLoader";
 import Link from "next/link";
 
-function CallbackPageLogic() {
+const AuthCallbackPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { handleOAuthSuccess } = useAuth();
-  const [pageMessage, setPageMessage] = useState(
-    "Sedang memproses, mohon tunggu..."
-  );
 
   useEffect(() => {
     const token = searchParams.get("token");
@@ -27,22 +24,20 @@ function CallbackPageLogic() {
     const errorType = searchParams.get("error");
 
     if (errorType === "admin_access_denied") {
-      const displayMessage =
-        messageFromParams ||
-        "Anda tidak memiliki izin untuk mengakses halaman ini.";
+      const displayMessage = messageFromParams || "Anda tidak memiliki akses.";
       toast.error(displayMessage, { className: "custom-toast" });
-
       router.replace("/");
-
       return;
-    } else if (token && role && userId && email) {
-      setPageMessage("Login berhasil! Mengalihkan...");
+    }
+
+    if (token && role && userId && email) {
       let dynamicMessage = messageFromParams;
       if (!dynamicMessage) {
         dynamicMessage = `Login dengan ${
           role === "admin" ? "akun admin " : ""
         }${loginType === "manual" ? "email" : "Google"} berhasil!`;
       }
+
       const authData = {
         token,
         role,
@@ -55,7 +50,6 @@ function CallbackPageLogic() {
       };
       handleOAuthSuccess(authData);
     } else if (!errorType) {
-      setPageMessage("Gagal memproses. Mengalihkan ke login...");
       console.error(
         "Auth callback: Parameter login sukses tidak lengkap.",
         Object.fromEntries(searchParams)
@@ -68,51 +62,32 @@ function CallbackPageLogic() {
   }, [searchParams, router, handleOAuthSuccess]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
-      <DotLoader
-        dotSize="w-5 h-5"
-        dotColor="bg-gradient-to-r from-orange-500 to-amber-500"
-        textSize="text-xl"
-        textColor="text-gray-700"
-      />
-      <p className="mt-6 text-gray-600 text-center">{pageMessage}</p>
-      <noscript>
-        <div className="mt-8 text-center">
-          <p className="text-red-500">
-            JavaScript dibutuhkan untuk menyelesaikan proses.
-          </p>
-          <Link
-            href="/login"
-            className="text-orange-600 hover:underline mt-2 block"
-          >
-            Kembali ke Halaman Login
-          </Link>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-screen bg-gray-50">
+          <DotLoader dotSize="w-5 h-5" />
         </div>
-      </noscript>
-    </div>
-  );
-}
+      }
+    >
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+        <DotLoader dotSize="w-5 h-5" />
 
-function CallbackPageFallbackLoader() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
-      <DotLoader
-        dotSize="w-5 h-5"
-        dotColor="bg-gradient-to-r from-orange-500 to-amber-500"
-        textSize="text-xl"
-        textColor="text-gray-700"
-      />
-      <p className="mt-6 text-gray-600 text-center">
-        Memuat halaman autentikasi...
-      </p>
-    </div>
-  );
-}
-
-export default function AuthCallbackPage() {
-  return (
-    <Suspense fallback={<CallbackPageFallbackLoader />}>
-      <CallbackPageLogic />
+        <noscript>
+          <div className="mt-8 text-center">
+            <p className="text-red-500">
+              JavaScript dibutuhkan untuk menyelesaikan proses ini.
+            </p>
+            <Link
+              href="/login"
+              className="text-orange-600 hover:underline mt-2 block"
+            >
+              Kembali ke Halaman Login
+            </Link>
+          </div>
+        </noscript>
+      </div>
     </Suspense>
   );
-}
+};
+
+export default AuthCallbackPage;

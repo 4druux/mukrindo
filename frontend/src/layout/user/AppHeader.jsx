@@ -5,7 +5,6 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  MdPersonOutline,
   MdAccountCircle,
   MdLogout,
   MdLogin,
@@ -20,10 +19,10 @@ import SearchBar from "@/layout/user/SearchBar";
 import { useHeader } from "@/context/HeaderContext";
 import { useProducts } from "@/context/ProductContext";
 import { useAuth } from "@/context/AuthContext";
-import { Heart } from "lucide-react";
+import { Heart, User } from "lucide-react";
 
 function AppHeader() {
-  const { isSearchOpen, toggleSearch, toggleBookmarkSidebar } = useHeader();
+  const { toggleSearch, toggleBookmarkSidebar } = useHeader();
   const { bookmarkCount } = useProducts();
   const { user, logout, isAuthenticated } = useAuth();
 
@@ -135,7 +134,7 @@ function AppHeader() {
                 className="relative group focus:outline-none p-1"
                 aria-label={`Lihat ${bookmarkCount} item tersimpan`}
               >
-                <Heart className="w-5 h-5 text-gray-700 hover:text-red-500 transition-colors" />
+                <Heart className="w-5 h-5 text-gray-700 hover:text-red-500 hover:fill-red-500 cursor-pointer" />
                 {bookmarkCount > -1 && (
                   <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-[10px] text-white bg-red-500 rounded-full group-hover:animate-bounce">
                     {bookmarkCount}
@@ -157,9 +156,11 @@ function AppHeader() {
                       {user.firstName.charAt(0).toUpperCase()}
                     </div>
                   ) : (
-                    <MdPersonOutline
+                    <User
                       title="Masuk atau Daftar"
-                      className="w-6 h-6 text-gray-700 cursor-pointer hover:text-orange-500 transition-colors"
+                      className={`w-6 h-6 text-gray-700 hover:fill-gray-700 cursor-pointer transition-colors ${
+                        isDropdownOpen ? "fill-gray-700 text-gray-700" : ""
+                      }`}
                     />
                   )}
                 </button>

@@ -94,21 +94,15 @@ function HomePageLogicAndContent() {
   );
 }
 
-function PageLoader() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
-      <DotLoader
-        dotSize="w-5 h-5"
-        textSize="text-xl"
-        text="Memuat halaman..."
-      />
-    </div>
-  );
-}
-
 export default function Home() {
   return (
-    <Suspense fallback={<PageLoader />}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-screen bg-gray-50">
+          <DotLoader dotSize="w-5 h-5" />
+        </div>
+      }
+    >
       <HomePageLogicAndContent />
     </Suspense>
   );
