@@ -6,16 +6,18 @@ import AppSidebar from "@/layout/admin/AppSidebar";
 import Backdrop from "@/layout/admin/Backdrop";
 import React, { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useProducts } from "@/context/ProductContext";
 import { useRouter } from "next/navigation";
 import DotLoader from "@/components/common/DotLoader";
 
 export default function AdminLayout({ children }) {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading: authIsLoading, isAdmin } = useAuth();
+  const { loading: productsAreLoading } = useProducts();
   const router = useRouter();
 
   useEffect(() => {
-    if (loading) {
+    if (authIsLoading) {
       return;
     }
 
@@ -30,11 +32,23 @@ export default function AdminLayout({ children }) {
       );
       router.replace(`/auth/callback?${params.toString()}`);
     }
-  }, [user, loading, isAdmin, router]);
+  }, [user, authIsLoading, isAdmin, router]);
 
-  if (loading || (!loading && !user) || (!loading && user && !isAdmin)) {
+  if (
+    authIsLoading ||
+    (!authIsLoading && !user) ||
+    (!authIsLoading && user && !isAdmin)
+  ) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-100">
+        <DotLoader dotSize="w-6 h-6" />
+      </div>
+    );
+  }
+
+  if (productsAreLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
         <DotLoader dotSize="w-5 h-5" />
       </div>
     );
