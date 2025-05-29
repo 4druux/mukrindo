@@ -82,6 +82,9 @@ const CarImage = ({
     }
   }, [isAdminRoute, isStickyMobile, isSticky]);
 
+  const bounceAnimate =
+    bookmarkCount >= 1 ? "animate-bounce" : "group-hover:animate-bounce";
+
   return (
     <div className="">
       <div className="md:flex-1 relative md:min-w-0">
@@ -232,7 +235,9 @@ const CarImage = ({
                       >
                         <Heart className="w-4 h-4 text-gray-700 cursor-pointer" />
                         {bookmarkCount > -1 && (
-                          <span className="absolute -top-1 -right-1 flex items-center justify-center w-3 h-3 p-2 text-[10px] text-white bg-red-500 rounded-full group-hover:animate-bounce transition-all duration-300 ease-in-out">
+                          <span
+                            className={`absolute -top-1 -right-1 flex items-center justify-center w-3 h-3 p-2 text-[10px] text-white bg-red-500 rounded-full transition-all duration-300 ease-in-out ${bounceAnimate}`}
+                          >
                             {bookmarkCount}
                           </span>
                         )}
@@ -279,7 +284,9 @@ const CarImage = ({
                   >
                     <Heart className="w-5 h-5 text-gray-700" />
                     {bookmarkCount > -1 && (
-                      <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full">
+                      <span
+                        className={`absolute top-0 right-0 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full ${bounceAnimate}`}
+                      >
                         {bookmarkCount}
                       </span>
                     )}
