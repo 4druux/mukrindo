@@ -1,4 +1,4 @@
-// components/product/AllProducts.jsx
+// frontend/src/layout/admin/product/AllProuduct.jsx
 "use client";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -17,7 +17,6 @@ import Pagination from "@/components/global/Pagination";
 
 // Import Icons
 import { Plus } from "lucide-react";
-import DotLoader from "@/components/common/DotLoader";
 
 const AllProducts = () => {
   const {
@@ -35,13 +34,6 @@ const AllProducts = () => {
   const { searchQuery, setSearchQuery } = useSidebar();
   const [currentPage, setCurrentPage] = useState(0);
   const productsPerPage = 12;
-
-  const initialLoadCompleted = useRef(false);
-  useEffect(() => {
-    if (!swrIsLoading) {
-      initialLoadCompleted.current = true;
-    }
-  }, [swrIsLoading]);
 
   useEffect(() => {
     const urlSearchQuery = searchParams.get("search");
@@ -195,9 +187,6 @@ const AllProducts = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const isInitialLoading = swrIsLoading && !initialLoadCompleted.current;
-  const isRevalidating = swrIsLoading && initialLoadCompleted.current;
-
   let emptyMessage = "Belum ada produk mobil tersedia.";
   if (searchQuery) {
     emptyMessage = `Tidak ada produk mobil yang cocok dengan pencarian "${searchQuery}".`;
@@ -235,11 +224,11 @@ const AllProducts = () => {
           {searchQuery
             ? `Hasil pencarian untuk "${searchQuery}"`
             : "Menampilkan"}
-          {!swrIsLoading && ` ${processedProducts.length} Produk Mobil`}
+          {` ${processedProducts.length} Produk Mobil`}
         </h1>
       </div>
 
-      {!swrIsLoading && searchQuery && (
+      {searchQuery && (
         <ActiveSearchFilters
           searchParams={searchParams}
           splitResult={splitSearchFilter}
@@ -249,24 +238,19 @@ const AllProducts = () => {
           isAdminRoute={true}
         />
       )}
-      {!swrIsLoading &&
-        processedProducts.length === 0 &&
-        suggestedQuery &&
-        searchQuery && (
-          <p className="mt-1 mb-3 text-sm text-gray-600 px-3 md:px-0">
-            Mungkin maksud Anda:{" "}
-            <Link
-              href={`/admin/produk?search=${encodeURIComponent(
-                suggestedQuery
-              )}`}
-              className="text-orange-500 hover:underline font-medium"
-              onClick={() => setSearchQuery(suggestedQuery)}
-            >
-              {suggestedQuery}
-            </Link>
-            ?
-          </p>
-        )}
+      {processedProducts.length === 0 && suggestedQuery && searchQuery && (
+        <p className="mt-1 mb-3 text-sm text-gray-600 px-3 md:px-0">
+          Mungkin maksud Anda:{" "}
+          <Link
+            href={`/admin/produk?search=${encodeURIComponent(suggestedQuery)}`}
+            className="text-orange-500 hover:underline font-medium"
+            onClick={() => setSearchQuery(suggestedQuery)}
+          >
+            {suggestedQuery}
+          </Link>
+          ?
+        </p>
+      )}
 
       <div className="mt-4">
         <ShortProduct
@@ -277,32 +261,21 @@ const AllProducts = () => {
         />
       </div>
 
-      <div className="relative">
-        {isRevalidating && (
-          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-20 rounded-xl">
-            <DotLoader dotSize="w-4 h-4" />
-          </div>
-        )}
-        <div className={isRevalidating ? "opacity-60 pointer-events-none" : ""}>
-          <CarProductCard
-            products={currentProducts}
-            loading={isInitialLoading}
-            error={error}
-            isAdminRoute={true}
-            handleStatusChange={handleStatusChange}
-            handleDelete={handleDelete}
-            toggleDropdown={toggleDropdown}
-            isDropdownOpen={isDropdownOpen}
-            dropdownRefs={dropdownRefs}
-            emptyMessage={null}
-            skeletonCount={productsPerPage}
-          />
-        </div>
-      </div>
+      <CarProductCard
+        products={currentProducts}
+        loading={false}
+        error={error}
+        isAdminRoute={true}
+        handleStatusChange={handleStatusChange}
+        handleDelete={handleDelete}
+        toggleDropdown={toggleDropdown}
+        isDropdownOpen={isDropdownOpen}
+        dropdownRefs={dropdownRefs}
+        emptyMessage={null}
+        skeletonCount={productsPerPage}
+      />
 
-      {!isInitialLoading &&
-        !isRevalidating &&
-        currentProducts.length > 0 &&
+      {currentProducts.length > 0 &&
         processedProducts.length > productsPerPage && (
           <Pagination
             key={`pagination-${searchParams.toString()}-${currentPage}`}
@@ -312,26 +285,24 @@ const AllProducts = () => {
           />
         )}
 
-      {!isInitialLoading &&
-        !isRevalidating &&
-        processedProducts.length === 0 &&
-        !error && (
-          <EmptyProductDisplay
-            emptyMessage={emptyMessage}
-            suggestedQuery={suggestedQuery}
-            searchQuery={searchQuery}
-            suggestionLinkHref={
-              suggestedQuery
-                ? `/admin/produk?search=${encodeURIComponent(suggestedQuery)}`
-                : null
-            }
-            onSuggestionClick={() =>
-              suggestedQuery && setSearchQuery(suggestedQuery)
-            }
-            isAdminRoute={true}
-          />
-        )}
-      {error && !swrIsLoading && (
+      {processedProducts.length === 0 && !error && (
+        <EmptyProductDisplay
+          emptyMessage={emptyMessage}
+          suggestedQuery={suggestedQuery}
+          searchQuery={searchQuery}
+          suggestionLinkHref={
+            suggestedQuery
+              ? `/admin/produk?search=${encodeURIComponent(suggestedQuery)}`
+              : null
+          }
+          onSuggestionClick={() =>
+            suggestedQuery && setSearchQuery(suggestedQuery)
+          }
+          isAdminRoute={true}
+        />
+      )}
+
+      {error && (
         <div className="text-center p-4 text-red-500">
           Error: {error.message || "Gagal memuat data produk."}
         </div>
