@@ -53,6 +53,9 @@ function AppHeader() {
     closed: { opacity: 0, y: -10, transition: { duration: 0.2 } },
   };
 
+  const bounceAnimate =
+    bookmarkCount >= 1 ? "animate-bounce" : "group-hover:animate-bounce";
+
   const handleLogout = () => {
     logout();
     setIsDropdownOpen(false);
@@ -136,7 +139,9 @@ function AppHeader() {
               >
                 <Heart className="w-5 h-5 text-gray-700 hover:text-red-500 hover:fill-red-500 cursor-pointer" />
                 {bookmarkCount > -1 && (
-                  <span className="absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-[10px] text-white bg-red-500 rounded-full group-hover:animate-bounce">
+                  <span
+                    className={`absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 text-[10px] text-white bg-red-500 rounded-full ${bounceAnimate}`}
+                  >
                     {bookmarkCount}
                   </span>
                 )}
