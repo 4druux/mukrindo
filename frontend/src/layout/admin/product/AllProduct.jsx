@@ -14,6 +14,7 @@ import ActiveSearchFilters from "@/components/global/ActiveSearchFilter";
 import CarProductCard from "@/components/global/CarProductCard";
 import EmptyProductDisplay from "@/components/global/EmptyProductDisplay";
 import Pagination from "@/components/global/Pagination";
+import DotLoader from "@/components/common/DotLoader";
 
 // Import Icons
 import { Plus } from "lucide-react";
@@ -34,6 +35,8 @@ const AllProducts = () => {
   const { searchQuery, setSearchQuery } = useSidebar();
   const [currentPage, setCurrentPage] = useState(0);
   const productsPerPage = 12;
+
+  const [isActionLoading, setIsActionLoading] = useState(false);
 
   useEffect(() => {
     const urlSearchQuery = searchParams.get("search");
@@ -69,12 +72,16 @@ const AllProducts = () => {
 
   const handleDelete = async (productId) => {
     if (window.confirm("Apakah Anda yakin ingin menghapus produk ini?")) {
+      setIsActionLoading(true);
       await deleteProduct(productId);
+      setIsActionLoading(false);
     }
   };
 
   const handleStatusChange = async (productId, newStatus) => {
+    setIsActionLoading(true);
     await updateProductStatus(productId, newStatus);
+    setIsActionLoading(false);
     closeDropdown(productId);
   };
 
@@ -205,6 +212,22 @@ const AllProducts = () => {
     { label: "Beranda", href: "/admin" },
     { label: "Katalog Produk", href: "" },
   ];
+
+  if (swrIsLoading || isActionLoading) {
+    if (isActionLoading && !swrIsLoading) {
+      return (
+        <div className="flex items-center justify-center h-[80vh] bg-gray-50">
+          <DotLoader dotSize="w-5 h-5" text="Memproses aksi..." />
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center justify-center h-[80vh] bg-gray-50">
+        <DotLoader dotSize="w-5 h-5" text="Memproses perubahan data..." />
+      </div>
+    );
+  }
 
   return (
     <div className="my-6 md:my-0 relative">
