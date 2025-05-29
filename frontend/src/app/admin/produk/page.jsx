@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import AllProducts from "@/layout/admin/product/AllProuduct";
+import AllProducts from "@/layout/admin/product/AllProduct";
 
 export const metadata = {
   title: "Admin Mukrindo Motor",

@@ -41,7 +41,7 @@ export default function AdminLayout({ children }) {
   ) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-100">
-        <DotLoader dotSize="w-6 h-6" />
+        <DotLoader dotSize="w-5 h-5" />
       </div>
     );
   }
