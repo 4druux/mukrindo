@@ -26,10 +26,7 @@ export default function AdminLayout({ children }) {
     } else if (!isAdmin) {
       const params = new URLSearchParams();
       params.append("error", "admin_access_denied");
-      params.append(
-        "message",
-        "Anda tidak memiliki izin untuk mengakses halaman admin."
-      );
+      params.append("message", "Anda tidak memiliki akses.");
       router.replace(`/auth/callback?${params.toString()}`);
     }
   }, [user, authIsLoading, isAdmin, router]);
