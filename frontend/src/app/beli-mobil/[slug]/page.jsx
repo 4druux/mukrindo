@@ -1,10 +1,12 @@
 // app/beli-mobil/[slug]/page.jsx
 
-import React from "react";
+import React, { Suspense } from "react";
 import BuyCarDetails from "@/layout/user/beli-mobil/BuyCarDetails";
 import Testimoni from "@/components/product-user/Testimoni";
 import NotifyMeForm from "@/components/product-user/NotifyMeForm";
 import BuyCarAccordion from "@/layout/user/beli-mobil/BuyCarAccordion";
+import DotLoader from "@/components/common/DotLoader";
+import ProductRecommendations from "@/layout/user/beli-mobil/ProductRecommendations";
 
 export const metadata = {
   title: "Beli Mobil | Mukrindo Motor",
@@ -19,7 +21,17 @@ export default async function DetailCarPage({ params }) {
   return (
     <div className="container mx-auto">
       <div className="md:pt-5 lg:pt-10 md:border-t-2 md:border-gray-200 space-y-4 md:space-y-16">
-        <BuyCarDetails productId={productId} />
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center h-[50vh]">
+              <DotLoader text="Memuat detail mobil..." />
+            </div>
+          }
+        >
+          <BuyCarDetails productId={productId} />
+        </Suspense>
+
+        <ProductRecommendations currentProductId={productId} />
         <Testimoni />
         <div
           id="notify-me-form-section"
