@@ -62,6 +62,11 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    clusterId: {
+      type: Number,
+      index: true,
+      sparse: true,
+    },
   },
   { timestamps: true }
 );

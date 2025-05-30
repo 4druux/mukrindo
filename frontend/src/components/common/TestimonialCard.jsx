@@ -14,15 +14,15 @@ const renderStars = (rating) => {
   const displayEmptyStars = 5 - displayFullStars - (displayHasHalfStar ? 1 : 0);
 
   for (let i = 0; i < displayFullStars; i++) {
-    stars.push(<FaStar key={`full-${i}`} className="text-yellow-400" />);
+    stars.push(<FaStar key={`full-${i}`} className="text-orange-400" />);
   }
 
   if (displayHasHalfStar) {
-    stars.push(<FaStarHalfAlt key="half" className="text-yellow-400" />);
+    stars.push(<FaStarHalfAlt key="half" className="text-orange-400" />);
   }
 
   for (let i = 0; i < displayEmptyStars; i++) {
-    stars.push(<FaRegStar key={`empty-${i}`} className="text-yellow-400" />);
+    stars.push(<FaRegStar key={`empty-${i}`} className="text-orange-400" />);
   }
 
   return stars;

@@ -32,4 +32,7 @@ router.delete("/:id", productController.deleteProduct);
 // Route baru untuk increment view count
 router.put("/:id/increment-view", productController.incrementViewCount);
 
+// Route untuk rekomendasi
+router.get("/:id/recommendations", productController.getProductRecommendations);
+
 module.exports = router;

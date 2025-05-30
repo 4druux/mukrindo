@@ -1,5 +1,6 @@
 const Product = require("../models/productModels");
 const cloudinary = require("cloudinary").v2;
+const mongoose = require("mongoose");
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -426,5 +427,112 @@ exports.incrementViewCount = async (req, res) => {
         .json({ success: false, message: "ID Produk tidak valid" });
     }
     return handleServerError(res, error);
+  }
+};
+
+exports.getProductRecommendations = async (req, res) => {
+  try {
+    const { id: currentProductIdString } = req.params;
+    const MAX_RECOMMENDATIONS = 5; // Batasi jumlah rekomendasi, bisa juga dari config
+
+    // Validasi ObjectId produk saat ini
+    if (!mongoose.Types.ObjectId.isValid(currentProductIdString)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "ID Produk tidak valid." });
+    }
+    const currentProductId = new mongoose.Types.ObjectId(
+      currentProductIdString
+    );
+
+    // 1. Dapatkan produk saat ini untuk mengetahui clusterId-nya
+    const currentProduct = await Product.findById(currentProductId).select(
+      "clusterId carName brand model"
+    ); // Ambil field tambahan untuk logging/fallback
+    if (!currentProduct) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Produk saat ini tidak ditemukan." });
+    }
+
+    // Periksa apakah produk memiliki clusterId
+    if (
+      currentProduct.clusterId === undefined ||
+      currentProduct.clusterId === null
+    ) {
+      console.warn(
+        `Produk ${
+          currentProduct.carName || currentProductIdString
+        } tidak memiliki clusterId. Tidak dapat memberikan rekomendasi berbasis cluster.`
+      );
+      // Fallback: Anda bisa mengembalikan produk populer atau terbaru jika tidak ada clusterId
+      // Untuk sekarang, kita kembalikan array kosong
+      const fallbackRecommendations = await Product.find({
+        _id: { $ne: currentProductId }, // Kecualikan produk saat ini
+        status: "Tersedia",
+      })
+        .sort({ viewCount: -1, createdAt: -1 }) // Contoh: Populer berdasarkan viewCount, lalu terbaru
+        .limit(MAX_RECOMMENDATIONS);
+
+      return res.status(200).json({
+        success: true,
+        recommendations: fallbackRecommendations,
+        message:
+          "Menggunakan rekomendasi fallback karena produk tidak memiliki cluster.",
+      });
+    }
+
+    // 2. Cari produk lain dalam cluster yang sama
+    const recommendations = await Product.find({
+      _id: { $ne: currentProductId },
+      clusterId: currentProduct.clusterId,
+      status: "Tersedia",
+    })
+      .sort({ updatedAt: -1 })
+      .limit(MAX_RECOMMENDATIONS)
+      .lean(); // Gunakan .lean() untuk performa query yang lebih baik jika hanya membaca data
+
+    if (recommendations.length === 0) {
+      console.log(
+        `Tidak ada rekomendasi di cluster ${currentProduct.clusterId}... Mencoba fallback berdasarkan model.`
+      );
+      fallbackRecommendations = await Product.find({
+        _id: { $ne: currentProductId },
+        status: "Tersedia",
+        brand: currentProduct.brand, // Cari brand yang sama
+        model: currentProduct.model, // Cari model yang sama
+      })
+        .sort({ yearOfAssembly: -1, price: 1 }) // Prioritaskan tahun terbaru, lalu harga termurah
+        .limit(MAX_RECOMMENDATIONS)
+        .lean();
+
+      if (fallbackRecommendations.length > 0) {
+        return res.status(200).json({
+          success: true,
+          recommendations: fallbackRecommendations,
+          message:
+            "Menggunakan rekomendasi fallback berdasarkan model yang sama.",
+        });
+      } else {
+        // Fallback lebih lanjut jika model sama juga tidak ada
+        const generalFallback = await Product.find({
+          /* ... seperti sebelumnya ... */
+        });
+        return res.status(200).json({
+          success: true,
+          recommendations: generalFallback,
+          message: "Menggunakan rekomendasi fallback umum.",
+        });
+      }
+    }
+
+    res.status(200).json({ success: true, recommendations });
+  } catch (error) {
+    // Error CastError sudah ditangani di awal dengan validasi ObjectId
+    console.error("Error fetching product recommendations:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error: Gagal mengambil rekomendasi.",
+    });
   }
 };

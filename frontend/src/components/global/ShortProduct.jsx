@@ -14,7 +14,7 @@ export const SHORT_BY = {
   PRICE_OVER_300: "price_over_300",
 };
 
-const filterLabels = {
+export const filterLabels = {
   [SHORT_BY.RECOMMENDATION]: "Rekomendasi",
   [SHORT_BY.LATEST]: "Mobil Terbaru",
   [SHORT_BY.YEAR_DESC]: "Tahun Terbaru",
