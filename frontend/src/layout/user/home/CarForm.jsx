@@ -2,17 +2,19 @@
 "use client";
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import carData from "@/utils/carData";
 import {
   formatNumberPhone,
   unformatNumberPhone,
 } from "@/utils/formatNumberPhone";
+import axiosInstance from "@/utils/axiosInstance";
+import useSWR from "swr";
 
 // Import Icon
 import { FaCar, FaExchangeAlt, FaMoneyBillWave } from "react-icons/fa";
 import BuyForm from "@/components/product-user/home/BuyForm";
 import SellForm from "@/components/product-user/home/SellForm";
 import TradeInForm from "@/components/product-user/home/TradeInForm";
+import DotLoader from "@/components/common/DotLoader";
 
 export const INITIAL_PRICE_RANGE = [50000000, 1500000000];
 const PHONE_PREFIX = "(+62) ";
@@ -23,9 +25,11 @@ const INITIAL_PRODUCT_DATA = {
   priceRange: [...INITIAL_PRICE_RANGE],
   yearMin: "",
   yearMax: "",
-  year: "", // Untuk jual/tukar
-  phoneNumber: PHONE_PREFIX, // Default dengan prefix untuk jual/tukar
+  year: "",
+  phoneNumber: PHONE_PREFIX,
 };
+const fetcher = (url) =>
+  axiosInstance.get(url).then((res) => res.data?.data || []);
 
 const CarForm = () => {
   const [productData, setProductData] = useState({ ...INITIAL_PRODUCT_DATA });
@@ -38,6 +42,12 @@ const CarForm = () => {
 
   const searchParams = useSearchParams();
   const isInitialMount = useRef(true);
+
+  const {
+    data: allCarData = [],
+    error: carDataError,
+    isLoading: isLoadingCarData,
+  } = useSWR("/api/car-data/all-data", fetcher);
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
@@ -89,20 +99,32 @@ const CarForm = () => {
     setPhoneNumberError("");
   }, [activeTab]);
 
-  const brandOptionsForSelect = Object.keys(carData).map((brand) => ({
-    value: brand,
-    label: brand,
-    ImgUrl: carData[brand].ImgUrl,
-  }));
+  const brandOptionsForSelect = useMemo(
+    () =>
+      allCarData
+        .map((b) => ({
+          value: b.brandName,
+          label: b.brandName,
+          ImgUrl: b.imgUrl || "/images/Carbrand/default.png",
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    [allCarData]
+  );
 
   const modelOptionsForSelect = useMemo(() => {
-    return productData.brand && carData[productData.brand]?.Model
-      ? Object.keys(carData[productData.brand].Model).map((model) => ({
-          value: model,
-          label: model,
-        }))
+    if (!productData.brand) return [];
+    const selectedBrandData = allCarData.find(
+      (b) => b.brandName === productData.brand
+    );
+    return selectedBrandData?.models
+      ? selectedBrandData.models
+          .map((m) => ({
+            value: m.name,
+            label: m.name,
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label))
       : [];
-  }, [productData.brand]);
+  }, [productData.brand, allCarData]);
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 26 }, (_, i) => currentYear - i).map(
@@ -199,6 +221,14 @@ const CarForm = () => {
   };
 
   const renderForm = () => {
+    if (carDataError) {
+      return (
+        <div className="bg-white rounded-b-2xl rounded-tr-2xl shadow-sm h-[400px] flex items-center justify-center text-red-500">
+          Gagal memuat opsi mobil.
+        </div>
+      );
+    }
+
     const commonProps = {
       productData,
       handleFilterChange,
@@ -216,6 +246,7 @@ const CarForm = () => {
             yearMaxError={yearMaxError}
             validateYears={validateYears}
             INITIAL_PRICE_RANGE={INITIAL_PRICE_RANGE}
+            isLoadingOptions={isLoadingCarData}
           />
         );
       case "jual":
@@ -227,6 +258,7 @@ const CarForm = () => {
             phoneNumberError={phoneNumberError}
             validatePhoneNumber={validatePhoneNumber}
             PHONE_PREFIX={PHONE_PREFIX}
+            isLoadingOptions={isLoadingCarData}
           />
         );
       case "tukar":
@@ -238,6 +270,7 @@ const CarForm = () => {
             phoneNumberError={phoneNumberError}
             validatePhoneNumber={validatePhoneNumber}
             PHONE_PREFIX={PHONE_PREFIX}
+            isLoadingOptions={isLoadingCarData}
           />
         );
       default:

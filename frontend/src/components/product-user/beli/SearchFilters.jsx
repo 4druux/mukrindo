@@ -1,9 +1,10 @@
 // components/product-user/beli/SearchFilters.jsx
 import React, { useState, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import carData from "@/utils/carData";
 import Select from "@/components/common/Select";
 import RangePrice from "@/components/common/RangePrice";
+import axiosInstance from "@/utils/axiosInstance";
+import useSWR from "swr";
 
 // Import Icons
 import { ArrowRight, RefreshCw } from "lucide-react";
@@ -11,6 +12,9 @@ import InputYear from "@/components/common/InputYear";
 import toast from "react-hot-toast";
 
 export const INITIAL_PRICE_RANGE = [50000000, 1500000000];
+
+const fetcher = (url) =>
+  axiosInstance.get(url).then((res) => res.data?.data || []);
 
 const SearchFilters = ({ onActionComplete = () => {} }) => {
   const router = useRouter();
@@ -30,6 +34,12 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
     yearMax: "",
   });
 
+  const {
+    data: allCarData = [],
+    error: carDataError,
+    isLoading: isLoadingCarData,
+  } = useSWR("/api/car-data/all-data", fetcher);
+
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
     const initialFilters = {
@@ -48,20 +58,32 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
     setProductData(initialFilters);
   }, [searchParams]);
 
-  const brandOptionsForSelect = Object.keys(carData).map((brand) => ({
-    value: brand,
-    label: brand,
-    ImgUrl: carData[brand].ImgUrl,
-  }));
+  const brandOptionsForSelect = useMemo(
+    () =>
+      allCarData
+        .map((b) => ({
+          value: b.brandName,
+          label: b.brandName,
+          ImgUrl: b.imgUrl || "/images/Carbrand/default.png",
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    [allCarData]
+  );
 
   const modelOptionsForSelect = useMemo(() => {
-    return productData.brand && carData[productData.brand]?.Model
-      ? Object.keys(carData[productData.brand].Model).map((model) => ({
-          value: model,
-          label: model,
-        }))
+    if (!productData.brand) return [];
+    const selectedBrandData = allCarData.find(
+      (b) => b.brandName === productData.brand
+    );
+    return selectedBrandData?.models
+      ? selectedBrandData.models
+          .map((m) => ({
+            value: m.name,
+            label: m.name,
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label))
       : [];
-  }, [productData.brand]);
+  }, [productData.brand, allCarData]);
 
   const validateYears = (minYear, maxYear) => {
     let minError = "";
@@ -220,6 +242,12 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
       className="rounded-none 2xl:rounded-3xl pb-4 2xl:pb-0 overflow-auto bg-white shadow-none 2xl:shadow-md flex flex-col"
       style={{ scrollbarWidth: "none" }}
     >
+      {carDataError && (
+        <div className="text-center p-4 text-red-500">
+          Gagal memuat opsi mobil.
+        </div>
+      )}
+
       <div className="p-5 space-y-4">
         <div className="hidden lg:block">
           <h1 className="text-lg font-medium text-gray-700">
@@ -242,7 +270,7 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
           value={productData.brand}
           onChange={(value) => handleFilterChange("brand", value)}
           searchOption={true}
-          // options={[{ value: "", label: "Semua Merek" }, ...brandOptionsForSelect]}
+          disabled={isLoadingCarData}
         />
 
         {/* Model */}
@@ -256,7 +284,11 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
           }
           value={productData.model}
           onChange={(value) => handleFilterChange("model", value)}
-          disabled={!productData.brand}
+          disabled={
+            isLoadingCarData ||
+            !productData.brand ||
+            (productData.brand && modelOptionsForSelect.length === 0)
+          }
           options={[...modelOptionsForSelect]}
           searchOption={true}
         />
@@ -368,6 +400,7 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
 
         <button
           onClick={handleApplyFilters}
+          disabled={isLoadingCarData}
           className="flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-orange-400 to-orange-600 
           hover:bg-orange-600 hover:from-transparent hover:to-transparent text-white rounded-full
           cursor-pointer w-full"

@@ -16,6 +16,7 @@ const SellForm = ({
   phoneNumberError,
   validatePhoneNumber,
   PHONE_PREFIX,
+  isLoadingOptions,
 }) => {
   const router = useRouter();
 
@@ -115,6 +116,7 @@ const SellForm = ({
             }, 50);
           }}
           error={brandError}
+          disabled={isLoadingOptions}
         />
 
         <Select
@@ -135,7 +137,7 @@ const SellForm = ({
             }, 50);
           }}
           title="Pilih Model"
-          disabled={!productData.brand}
+          disabled={isLoadingOptions || !productData.brand}
           error={modelError}
         />
 

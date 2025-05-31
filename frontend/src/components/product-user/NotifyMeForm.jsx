@@ -7,7 +7,9 @@ import Input from "@/components/common/Input";
 import { IoMdNotifications } from "react-icons/io";
 import { FaChevronCircleDown } from "react-icons/fa";
 import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
-import carData from "@/utils/carData";
+import axiosInstance from "@/utils/axiosInstance";
+import useSWR from "swr";
+
 import {
   formatNumberPhone,
   unformatNumberPhone,
@@ -26,12 +28,20 @@ const initialFormData = {
   year: "",
   phoneNumber: PHONE_PREFIX,
 };
+const fetcher = (url) =>
+  axiosInstance.get(url).then((res) => res.data?.data || []);
 
 const NotifyMeForm = () => {
   const [formData, setFormData] = useState({ ...initialFormData });
   const [errors, setErrors] = useState({});
   const { submitNotificationRequest, isSubmitting } = useNotification();
   const [isFormExpanded, setIsFormExpanded] = useState(false);
+
+  const {
+    data: allCarData = [],
+    error: carDataError,
+    isLoading: isLoadingCarData,
+  } = useSWR("/api/car-data/all-data", fetcher);
 
   const brandSelectRef = useRef(null);
   const modelSelectRef = useRef(null);
@@ -71,18 +81,32 @@ const NotifyMeForm = () => {
   );
 
   const brandOptions = useMemo(
-    () => Object.keys(carData).map((brand) => ({ value: brand, label: brand })),
-    []
+    () =>
+      allCarData
+        .map((b) => ({
+          value: b.brandName,
+          label: b.brandName,
+          ImgUrl: b.imgUrl || "/images/Carbrand/default.png",
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    [allCarData]
   );
 
+  // Model options
   const modelOptions = useMemo(() => {
-    return formData.brand && carData[formData.brand]?.Model
-      ? Object.keys(carData[formData.brand].Model).map((model) => ({
-          value: model,
-          label: model,
-        }))
+    if (!formData.brand) return [];
+    const selectedBrandData = allCarData.find(
+      (b) => b.brandName === formData.brand
+    );
+    return selectedBrandData?.models
+      ? selectedBrandData.models
+          .map((m) => ({
+            value: m.name,
+            label: m.name,
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label))
       : [];
-  }, [formData.brand]);
+  }, [formData.brand, allCarData]);
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 26 }, (_, i) => currentYear - i).map(
@@ -307,7 +331,9 @@ const NotifyMeForm = () => {
               onChange={(value) => handleSelectChange("brand", value)}
               error={errors.brand}
               searchOption={true}
-              disabled={brandOptions.length === 0 || isSubmitting}
+              disabled={
+                isLoadingCarData || brandOptions.length === 0 || isSubmitting
+              }
             />
             <Select
               ref={modelSelectRef}
@@ -325,7 +351,12 @@ const NotifyMeForm = () => {
               options={modelOptions}
               value={formData.model}
               onChange={(value) => handleSelectChange("model", value)}
-              disabled={noBrandSelected || noModelsAvailable || isSubmitting}
+              disabled={
+                isLoadingCarData ||
+                noBrandSelected ||
+                noModelsAvailable ||
+                isSubmitting
+              }
               error={errors.model}
               searchOption={true}
             />

@@ -19,7 +19,6 @@ import CarPapers from "@/components/product-admin/CarPapers";
 import { validateProductData } from "@/utils/validateProductData";
 import { formatNumber, unformatNumber } from "@/utils/formatNumber";
 import { carColorOptions } from "@/utils/carColorOptions";
-import carData from "@/utils/carData";
 
 // Import Hooks
 import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
@@ -211,37 +210,29 @@ const AddProduct = () => {
     }));
     clearErrorOnChange(name);
 
-    if (wasPreviouslyEmpty && updatedValue) {
+    if (wasPreviouslyEmpty && updatedValue && allRefs[name]) {
       handleAutoAdvance(name, updatedValue);
     }
   };
 
-  const handleBrandChange = (field, value, modelValue, variantValue) => {
-    const wasPreviouslyEmpty = !productData[field];
-    setProductData((prev) => ({
-      ...prev,
-      brand: field === "brand" ? value : prev.brand,
-      model: field === "model" ? value : field === "brand" ? "" : modelValue,
-      variant:
-        field === "variant"
-          ? value
-          : field === "brand" || field === "model"
-          ? ""
-          : variantValue,
-    }));
+  const handleBrandModelVariantChange = (fieldName, value) => {
+    const wasPreviouslyEmpty = !productData[fieldName];
+    setProductData((prev) => {
+      const newData = { ...prev, [fieldName]: value };
+      if (fieldName === "brand") {
+        newData.model = "";
+        newData.variant = "";
+      } else if (fieldName === "model") {
+        newData.variant = "";
+      }
+      return newData;
+    });
 
-    if (errors.brand || errors.model || errors.variant) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors.brand;
-        delete newErrors.model;
-        delete newErrors.variant;
-        return newErrors;
-      });
+    if (errors[fieldName]) {
+      clearErrorOnChange(fieldName);
     }
-
-    if (wasPreviouslyEmpty && value) {
-      handleAutoAdvance(field, value);
+    if (wasPreviouslyEmpty && value && allRefs[fieldName]) {
+      handleAutoAdvance(fieldName, value);
     }
   };
 
@@ -398,12 +389,12 @@ const AddProduct = () => {
             brandRef={brandSelectRef}
             modelRef={modelSelectRef}
             variantRef={variantSelectRef}
-            carData={carData}
             brand={productData.brand}
             model={productData.model}
             variant={productData.variant}
-            onChange={handleBrandChange}
+            onChange={handleBrandModelVariantChange}
             errors={errors}
+            isAdmin={true}
           />
 
           <Select
@@ -473,7 +464,7 @@ const AddProduct = () => {
             label="Warna Mobil"
             id="carColor"
             name="carColor"
-            title=" Warna Mobil"
+            title="Warna Mobil"
             description="Pilih Warna Mobil"
             options={carColorOptions}
             value={productData.carColor}
@@ -481,6 +472,7 @@ const AddProduct = () => {
               handleChange({ target: { name: "carColor", value } })
             }
             error={errors.carColor}
+            searchOption={true}
           />
 
           <Input

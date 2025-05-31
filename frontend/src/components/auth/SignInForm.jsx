@@ -58,10 +58,7 @@ export default function SignInForm() {
       <div className="flex flex-col justify-center pt-5 w-full max-w-md mx-auto">
         <div>
           <div className="mb-2 md:mb-5 text-left">
-            <TittleText
-              text="Masuk Sekarang"
-              className="text-xl md:text-2xl"
-            />
+            <TittleText text="Masuk Sekarang" className="text-xl md:text-2xl" />
           </div>
 
           <div>

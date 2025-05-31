@@ -34,6 +34,7 @@ const Step1Form = ({
   travelDistanceRef,
   priceRef,
   isSellRoute = false,
+  isLoadingOptions,
 }) => {
   return (
     <div>
@@ -57,6 +58,7 @@ const Step1Form = ({
           onChange={(value) => handleSelectChange("brand", value)}
           error={errors.brand}
           searchOption={true}
+          disabled={isLoadingOptions}
         />
         <Select
           ref={modelRef}
@@ -72,7 +74,7 @@ const Step1Form = ({
           options={modelOptions}
           value={formData.model}
           onChange={(value) => handleSelectChange("model", value)}
-          disabled={!formData.brand}
+          disabled={isLoadingOptions || !formData.brand}
           error={errors.model}
           searchOption={true}
         />
@@ -90,7 +92,9 @@ const Step1Form = ({
           options={variantOptions}
           value={formData.variant}
           onChange={(value) => handleSelectChange("variant", value)}
-          disabled={!formData.model || variantOptions.length === 0}
+          disabled={
+            isLoadingOptions || !formData.model || variantOptions.length === 0
+          }
           error={errors.variant}
         />
 
