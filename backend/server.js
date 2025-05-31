@@ -18,6 +18,7 @@ const sellRoutes = require("./routes/sellRoutes");
 const notifStockRoutes = require("./routes/notifStockRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const visitRoutes = require("./routes/visitRoutes");
+const carDataRoutes = require("./routes/carDataRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -53,6 +54,7 @@ app.use("/api/sell-requests", apiKeyAuth, sellRoutes);
 app.use("/api/notif-stock", apiKeyAuth, notifStockRoutes);
 app.use("/api/notifications", apiKeyAuth, notificationRoutes);
 app.use("/api/visits", apiKeyAuth, visitRoutes);
+app.use("/api/car-data", apiKeyAuth, carDataRoutes);
 
 // Handler untuk rute tidak ditemukan (404)
 app.use((req, res, next) => {
