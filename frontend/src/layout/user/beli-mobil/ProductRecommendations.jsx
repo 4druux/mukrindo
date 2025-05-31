@@ -80,9 +80,9 @@ const ProductRecommendations = ({ currentProductId, currentProductForLog }) => {
         <TittleText text="Rekomendasi Mobil Serupa" className="mb-2 lg:mb-4" />
       </div>
       <CarProductCardSwipe
-        products={recommendations}
+        products={recommendations.slice(0, 8)}
         loading={false}
-        skeletonCount={4}
+        skeletonCount={8}
         isRecommendation={true}
       />
     </div>

@@ -196,21 +196,21 @@ const ProductByRecom = () => {
       </div>
 
       <CarProductCardSwipe
-        products={displayedProducts.slice(0, 9)}
+        products={displayedProducts.slice(0, 8)}
         loading={loading}
         onProductClick={handleProductClick}
         emptyMessage={emptyMessage}
       />
 
       <p className="text-xs text-center text-gray-500 block md:hidden">
-        Hanya menampilkan {displayedProducts.slice(0, 9).length} dari{" "}
+        Hanya menampilkan {displayedProducts.slice(0, 8).length} dari{" "}
         {products.length} Mobil
       </p>
 
       <div className="hidden md:block">
         <div className="flex flex-col items-center">
           <p className="text-sm text-gray-500">
-            Hanya menampilkan {displayedProducts.slice(0, 9).length} dari{" "}
+            Hanya menampilkan {displayedProducts.slice(0, 8).length} dari{" "}
             {products.length} Mobil
           </p>
           <Link href="/beli">
