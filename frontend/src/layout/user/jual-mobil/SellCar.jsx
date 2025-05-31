@@ -18,7 +18,8 @@ import {
 } from "@/utils/formatNumberPhone";
 import { carColorOptions as staticCarColorOptions } from "@/utils/carColorOptions";
 import { formatNumber, unformatNumber } from "@/utils/formatNumber";
-import carData from "@/utils/carData";
+import axiosInstance from "@/utils/axiosInstance";
+import useSWR from "swr";
 
 // Import Hooks
 import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
@@ -54,7 +55,16 @@ const initialFormData = {
   inspectionTime: "",
 };
 
+const fetcher = (url) =>
+  axiosInstance.get(url).then((res) => res.data?.data || []);
+
 const SellCar = () => {
+  const {
+    data: allCarData = [],
+    error: carDataError,
+    isLoading: isLoadingCarData,
+  } = useSWR("/api/car-data/all-data", fetcher);
+
   const searchParams = useSearchParams();
 
   // Data dari carform home
@@ -230,38 +240,53 @@ const SellCar = () => {
     }
   }, [initialBrand, initialModel, initialYear, initialPhoneNumber]);
 
+  // Brand options
   const brandOptions = useMemo(
     () =>
-      Object.keys(carData).map((brand) => ({
-        value: brand,
-        label: brand,
-      })),
-    []
+      allCarData
+        .map((b) => ({
+          value: b.brandName,
+          label: b.brandName,
+          ImgUrl: b.imgUrl || "/images/Carbrand/default.png",
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    [allCarData]
   );
 
+  // Model options
   const modelOptions = useMemo(() => {
-    return formData.brand && carData[formData.brand]?.Model
-      ? Object.keys(carData[formData.brand].Model).map((model) => ({
-          value: model,
-          label: model,
-        }))
+    if (!formData.brand) return [];
+    const selectedBrandData = allCarData.find(
+      (b) => b.brandName === formData.brand
+    );
+    return selectedBrandData?.models
+      ? selectedBrandData.models
+          .map((m) => ({
+            value: m.name,
+            label: m.name,
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label))
       : [];
-  }, [formData.brand]);
+  }, [formData.brand, allCarData]);
 
+  // Variant options
   const variantOptions = useMemo(() => {
-    const variantsArray =
-      formData.brand &&
-      formData.model &&
-      carData[formData.brand]?.Model[formData.model];
-
-    if (Array.isArray(variantsArray)) {
-      return variantsArray.map((variant) => ({
-        value: variant,
-        label: variant,
-      }));
-    }
-    return [];
-  }, [formData.brand, formData.model]);
+    if (!formData.brand || !formData.model) return [];
+    const selectedBrandData = allCarData.find(
+      (b) => b.brandName === formData.brand
+    );
+    const selectedModelData = selectedBrandData?.models?.find(
+      (m) => m.name === formData.model
+    );
+    return selectedModelData?.variants
+      ? selectedModelData.variants
+          .map((v) => ({
+            value: v.name,
+            label: v.name,
+          }))
+          .sort((a, b) => a.label.localeCompare(b.label))
+      : [];
+  }, [formData.brand, formData.model, allCarData]);
 
   // Clear Error
   const clearErrorOnChange = (name) => {
@@ -569,6 +594,12 @@ const SellCar = () => {
 
   return (
     <div className="container mx-auto -mt-6 mb-6 lg:mb-8 lg:-mt-32 relative z-20">
+      {carDataError && (
+        <div className="text-center p-4 text-red-500">
+          Gagal memuat opsi mobil.
+        </div>
+      )}
+
       <div className="bg-white p-4 md:p-8 rounded-t-3xl md:rounded-2xl border-b border-gray-300 border-t-4 border-t-orange-500 md:border-none md:shadow-md ">
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="w-full lg:w-auto lg:flex-shrink-0 lg:pr-4">
@@ -599,6 +630,7 @@ const SellCar = () => {
                 priceRef={priceInputRef}
                 currentStep={currentStep}
                 totalCarSteps={sellCarSteps}
+                isLoadingOptions={isLoadingCarData}
               />
             )}
 

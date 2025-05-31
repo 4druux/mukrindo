@@ -17,6 +17,7 @@ const BuyForm = ({
   yearMaxError,
   validateYears,
   INITIAL_PRICE_RANGE,
+  isLoadingOptions,
 }) => {
   const router = useRouter();
 
@@ -72,6 +73,7 @@ const BuyForm = ({
           options={brandOptions}
           value={productData.brand}
           onChange={(value) => handleFilterChange("brand", value)}
+          disabled={isLoadingOptions}
         />
 
         {/* Select Model */}
@@ -86,7 +88,7 @@ const BuyForm = ({
           options={modelOptions}
           value={productData.model}
           onChange={(value) => handleFilterChange("model", value)}
-          disabled={!productData.brand}
+          disabled={isLoadingOptions || !productData.brand}
         />
 
         {/* Range Harga */}
@@ -109,7 +111,7 @@ const BuyForm = ({
                 label="Min Tahun"
                 value={productData.yearMin}
                 onChange={handleChange}
-                error={yearMinError} // Pass error state down
+                error={yearMinError}
                 isHomeRoute={true}
               />
             </div>
@@ -121,7 +123,7 @@ const BuyForm = ({
                 label="Max Tahun"
                 value={productData.yearMax}
                 onChange={handleChange}
-                error={yearMaxError} // Pass error state down
+                error={yearMaxError}
                 isHomeRoute={true}
               />
             </div>
