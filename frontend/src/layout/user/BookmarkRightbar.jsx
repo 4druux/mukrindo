@@ -100,7 +100,7 @@ const BookmarkRightbar = () => {
             } bg-white shadow-xl z-50 flex flex-col pb-4`}
           >
             <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
-              <h2 className="text-lg font-normal text-gray-800">
+              <h2 className="text-md font-medium text-gray-700">
                 Daftar Simpan
               </h2>
               <button

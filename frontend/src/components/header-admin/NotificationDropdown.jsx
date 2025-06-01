@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
 import { id as localeID } from "date-fns/locale";
 import { FaUser } from "react-icons/fa";
-import { MdNotificationsActive } from "react-icons/md";
 import { useNotifications } from "@/context/NotificationContext";
+import AnimatedBell from "../animate-icon/AnimatedBell";
+import { IoMdNotifications } from "react-icons/io";
 
 export default function NotificationDropdown() {
   const router = useRouter();
@@ -63,11 +64,15 @@ export default function NotificationDropdown() {
         aria-label="Notifikasi"
         aria-expanded={isOpen}
       >
-        <MdNotificationsActive className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
-        {hasUnreadNotifications && (
-          <span className="absolute right-0 top-0 z-10 h-2 w-2 bg-orange-500 rounded-full">
-            <span className="absolute -right-0.5 -top-0.5 z-10 h-3 w-3 bg-orange-500 rounded-full opacity-75 animate-ping"></span>
-          </span>
+        {hasUnreadNotifications ? (
+          <>
+            <AnimatedBell size={20} color="#f97316" className="w-5 h-5" />
+            <span className="absolute right-0 top-0 z-10 h-2 w-2 bg-orange-500 rounded-full">
+              <span className="absolute -right-0.5 -top-0.5 z-10 h-3 w-3 bg-orange-500 rounded-full opacity-75 animate-ping"></span>
+            </span>
+          </>
+        ) : (
+          <IoMdNotifications size={20} className="w-5 h-5 text-gray-600" />
         )}
       </button>
 
@@ -179,7 +184,12 @@ export default function NotificationDropdown() {
             {notifications?.length > 0 && (
               <div className="p-3 border-t border-gray-200 flex justify-between gap-2">
                 <button
-                  onClick={markAllAsRead}
+                  onClick={() => {
+                    if (hasUnreadNotifications) {
+                      markAllAsRead();
+                    }
+                    setIsOpen(false);
+                  }}
                   disabled={!hasUnreadNotifications}
                   className={`flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
                     !hasUnreadNotifications
@@ -191,7 +201,10 @@ export default function NotificationDropdown() {
                 </button>
                 <div className="border-l border-gray-200 h-6" />
                 <button
-                  onClick={deleteAllNotifications}
+                  onClick={() => {
+                    deleteAllNotifications();
+                    setIsOpen(false);
+                  }}
                   className="flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-gray-700 hover:text-red-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
                 >
                   Hapus Semua

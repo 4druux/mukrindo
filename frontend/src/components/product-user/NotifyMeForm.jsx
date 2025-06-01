@@ -1,10 +1,11 @@
+// components/product-user/beli-mobil/NotifyMeForm.jsx
 "use client";
 
 import React, { useState, useMemo, useRef } from "react";
 import Image from "next/image";
 import Select from "@/components/common/Select";
 import Input from "@/components/common/Input";
-import { IoMdNotifications } from "react-icons/io";
+import AnimatedBell from "@/components/animate-icon/AnimatedBell";
 import { FaChevronCircleDown } from "react-icons/fa";
 import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
 import axiosInstance from "@/utils/axiosInstance";
@@ -399,7 +400,11 @@ const NotifyMeForm = () => {
               {isSubmitting ? (
                 <Loader2 className="mr-1 w-5 h-5 animate-spin" />
               ) : (
-                <IoMdNotifications className="mr-1 w-5 h-5 group-hover:animate-bounce" />
+                <AnimatedBell
+                  size={20}
+                  color="white"
+                  className="mr-1 w-5 h-5"
+                />
               )}
               <span>{isSubmitting ? "Mengirim..." : "Beritahu Saya"}</span>
             </button>
