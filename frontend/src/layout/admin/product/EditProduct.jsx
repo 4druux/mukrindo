@@ -25,6 +25,7 @@ import { carColorOptions } from "@/utils/carColorOptions";
 // Import Hooks
 import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
 import DotLoader from "@/components/common/DotLoader";
+import TittleText from "@/components/common/TittleText";
 
 const QUICK_OPEN_DELAY = 50;
 const INACTIVITY_DELAY = 10000;
@@ -542,9 +543,11 @@ const EditProduct = ({ productId }) => {
       <BreadcrumbNav items={breadcrumbItems} />
 
       <div className="p-4 md:p-6 rounded-xl shadow-lg bg-white">
-        <h1 className="text-lg lg:text-xl font-medium text-gray-700 mb-2 md:mb-4">
-          Edit Produk Mobil
-        </h1>
+        <TittleText
+          text="Edit Produk Mobil"
+          className="mb-2 md:mb-4"
+          separator={false}
+        />
 
         {submitError && <div className="text-red-500 mb-4">{submitError}</div>}
 
@@ -753,7 +756,7 @@ const EditProduct = ({ productId }) => {
               className={`text-white text-sm font-medium py-2.5 px-6 rounded-full ${
                 loadingUpdate
                   ? "bg-orange-500 opacity-55 cursor-not-allowed"
-                  : "bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 hover:from-transparent hover:to-transparent cursor-pointer"
+                  : "bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent hover:to-transparent cursor-pointer"
               }`}
               disabled={loadingUpdate}
             >

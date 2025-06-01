@@ -14,8 +14,8 @@ const Step2Form = ({
 }) => {
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-700 mb-1">
-      Informasi Kontak Kamu
+      <h2 className="text-lg font-medium text-gray-700 mb-1">
+        Informasi Kontak Kamu
       </h2>
       <p className="text-sm text-gray-700 mb-6">
         Selesaikan {currentStep} dari {totalCarSteps.length} langkah dan kami
@@ -61,7 +61,7 @@ const Step2Form = ({
         <button
           type="button"
           onClick={onNext}
-          className="cursor-pointer bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 hover:from-transparent 
+          className="cursor-pointer bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent 
           hover:to-transparent text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
         >
           Selanjutnya

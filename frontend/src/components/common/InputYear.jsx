@@ -21,7 +21,7 @@ const InputYear = ({
   };
 
   const baseInputClasses =
-    "block w-full pt-3 pb-2 px-3 text-sm border rounded-xl focus:outline-none peer";
+    "block w-full pt-3 pb-2 px-3 text-base md:text-sm border rounded-xl focus:outline-none peer";
   const errorClasses = error
     ? "border-red-500 focus:border-red-500 focus:ring-red-500"
     : "border-gray-300 focus:border-orange-300 focus:ring-orange-300";

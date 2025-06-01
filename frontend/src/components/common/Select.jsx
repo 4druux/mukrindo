@@ -223,7 +223,7 @@ const Select = forwardRef(
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
                           onClick={(e) => e.stopPropagation()}
-                          className="w-full border border-gray-300 rounded-full px-3 py-1.5 my-2 text-sm placeholder:text-xs focus:outline-none focus:ring-1 focus:ring-orange-300"
+                          className="w-full border border-gray-300 rounded-full px-3 py-1.5 my-2 text-base md:text-sm placeholder:text-xs focus:outline-none focus:ring-1 focus:ring-orange-300"
                         />
                         {searchTerm && (
                           <button

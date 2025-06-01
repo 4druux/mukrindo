@@ -392,10 +392,9 @@ const NotifyMeForm = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`cursor-pointer flex items-center justify-center w-full bg-gradient-to-r from-orange-400 to-orange-600 
-            hover:bg-orange-600 hover:from-transparent hover:to-transparent text-white text-sm font-medium py-3 rounded-full group ${
-              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+              className={`cursor-pointer flex items-center justify-center w-full bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent hover:to-transparent text-white text-sm font-medium py-3 rounded-full group ${
+                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
               {isSubmitting ? (
                 <Loader2 className="mr-1 w-5 h-5 animate-spin" />

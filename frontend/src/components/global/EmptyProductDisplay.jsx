@@ -109,7 +109,7 @@ const EmptyProductDisplay = ({
                 <button
                   onClick={handleNotifyMeClick}
                   className="flex items-center justify-center gap-2 py-2 px-6 text-white rounded-full
-                  bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 hover:from-transparent 
+                  bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent 
                   hover:to-transparent cursor-pointer text-xs"
                 >
                   <FaBell className="w-4 h-4" />

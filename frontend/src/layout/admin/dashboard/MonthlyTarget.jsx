@@ -1,7 +1,6 @@
 "use client";
 import React, { useMemo, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { RiArrowUpDownFill } from "react-icons/ri";
 import { useProducts } from "@/context/ProductContext";
 import {
   startOfMonth,
@@ -13,8 +12,8 @@ import {
   format as formatDate,
 } from "date-fns";
 import { id as localeID } from "date-fns/locale";
-import { Loader2 } from "lucide-react";
 import DotLoader from "@/components/common/DotLoader";
+import { IoIosTrendingDown, IoIosTrendingUp } from "react-icons/io";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -244,9 +243,9 @@ export default function MonthlyTarget() {
               }`}
             >
               {revenueChangeVsLastMonth >= 0 ? (
-                <RiArrowUpDownFill className="inline mr-0.5" />
+                <IoIosTrendingUp className="inline mr-0.5 w-4 h-4 -rotate-12" />
               ) : (
-                <RiArrowUpDownFill className="inline mr-0.5" />
+                <IoIosTrendingDown className="inline mr-0.5 w-4 h-4 -rotate-12" />
               )}
               {Math.abs(revenueChangeVsLastMonth).toFixed(0)}% vs Bulan Lalu
             </span>
@@ -271,15 +270,15 @@ export default function MonthlyTarget() {
             className={`flex items-center justify-center gap-1 text-sm font-semibold ${
               currentMonthRevenue >= STATIC_MONTHLY_TARGET
                 ? "text-green-600"
-                : "text-gray-700"
+                : "text-red-500"
             }`}
           >
             {currentMonthRevenue !== 0 &&
               lastMonthRevenue !== 0 &&
               (currentMonthRevenue >= lastMonthRevenue ? (
-                <RiArrowUpDownFill className="w-4 h-4 text-green-600" />
+                <IoIosTrendingUp className="w-4 h-4 -rotate-12 text-green-600" />
               ) : (
-                <RiArrowUpDownFill className="w-4 h-4 text-red-500" />
+                <IoIosTrendingDown className="w-4 h-4 -rotate-12 text-red-500" />
               ))}
             {formatCurrency(currentMonthRevenue)}
           </p>
@@ -295,10 +294,10 @@ export default function MonthlyTarget() {
             }`}
           >
             {targetDifference > 0 && (
-              <RiArrowUpDownFill className="w-4 h-4 text-green-600" />
+              <IoIosTrendingUp className="w-4 h-4 -rotate-12 text-green-600" />
             )}
             {targetDifference < 0 && (
-              <RiArrowUpDownFill className="w-4 h-4 text-red-500" />
+              <IoIosTrendingDown className="w-4 h-4 -rotate-12 text-red-500" />
             )}
             {formatCurrency(Math.abs(targetDifference))}
           </p>
