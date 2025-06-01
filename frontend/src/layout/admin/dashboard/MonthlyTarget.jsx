@@ -271,7 +271,7 @@ export default function MonthlyTarget() {
             className={`flex items-center justify-center gap-1 text-sm font-semibold ${
               currentMonthRevenue >= STATIC_MONTHLY_TARGET
                 ? "text-green-600"
-                : "text-orange-600"
+                : "text-gray-700"
             }`}
           >
             {currentMonthRevenue !== 0 &&

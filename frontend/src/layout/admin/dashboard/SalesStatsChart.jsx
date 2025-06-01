@@ -1,21 +1,19 @@
 "use client";
 import React, { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { useProducts } from "@/context/ProductContext";
+import useSWR from "swr";
+import axiosInstance from "@/utils/axiosInstance";
 import {
   format,
   startOfWeek,
   endOfWeek,
   startOfMonth,
-  endOfMonth,
   startOfYear,
   endOfYear,
-  eachWeekOfInterval,
   getYear,
-  getMonth,
-  isWithinInterval,
   parseISO,
   isValid,
+  subWeeks,
 } from "date-fns";
 import { id } from "date-fns/locale";
 import { useExportData } from "@/hooks/useExportData";
@@ -23,59 +21,119 @@ import ExportDropdown from "@/components/product-admin/Dashboard/ExportDropdown"
 import PeriodFilter from "@/components/product-admin/Dashboard/PeriodFilter";
 import { useAutoScrollToChart } from "@/hooks/useAutoScrollToChart";
 import DotLoader from "@/components/common/DotLoader";
+import toast from "react-hot-toast";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-const getValidSaleDate = (product) => {
-  const dateStr = product.soldDate || product.updatedAt;
-  if (!dateStr) return null;
+const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);
 
-  try {
-    const dateObj = parseISO(dateStr);
-    const fallbackDate = new Date(dateStr);
-    return isValid(dateObj)
-      ? dateObj
-      : isValid(fallbackDate)
-      ? fallbackDate
-      : null;
-  } catch {
-    return null;
+const safeParseISOForExport = (dateInput) => {
+  if (!dateInput) return null;
+  if (dateInput instanceof Date) return isValid(dateInput) ? dateInput : null;
+  if (typeof dateInput === "string") {
+    const parsed = parseISO(dateInput);
+    return isValid(parsed) ? parsed : null;
   }
+  if (typeof dateInput === "number") {
+    const parsed = new Date(dateInput);
+    return isValid(parsed) ? parsed : null;
+  }
+  return null;
 };
 
 const SalesStatsChart = () => {
-  const { products, loading, error } = useProducts();
   const [selectedTab, setSelectedTab] = useState("Minggu");
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
+  const apiQueryPeriodMap = {
+    Minggu: "weekly",
+    Bulan: "monthly",
+    Tahun: "yearly",
+  };
+
+  const {
+    data: salesChartApiResponse,
+    error: salesChartError,
+    isLoading: salesChartLoading,
+  } = useSWR(
+    selectedTab && currentYear
+      ? `/api/products/stats/sales?period=${apiQueryPeriodMap[selectedTab]}&year=${currentYear}`
+      : null,
+    fetcher,
+    { revalidateOnFocus: true }
+  );
+
+  const processedChartData = useMemo(() => {
+    const createDefaultCategories = (tab, year) => {
+      const now = new Date();
+      if (tab === "Minggu") {
+        const lastWeek = startOfWeek(now, { weekStartsOn: 1 });
+        return Array.from({ length: 12 }, (_, i) =>
+          format(
+            startOfWeek(subWeeks(lastWeek, 11 - i), { weekStartsOn: 1 }),
+            "dd MMM",
+            { locale: id }
+          )
+        );
+      } else if (tab === "Bulan") {
+        return Array.from({ length: 12 }, (_, i) =>
+          format(startOfMonth(new Date(year, i)), "MMM yy", { locale: id })
+        );
+      } else if (tab === "Tahun") {
+        return Array.from({ length: 5 }, (_, i) =>
+          (getYear(now) - 4 + i).toString()
+        );
+      }
+      return [];
+    };
+
+    const defaultCategories = createDefaultCategories(selectedTab, currentYear);
+    const defaultReturn = {
+      categories: defaultCategories,
+      sales: Array(defaultCategories.length).fill(0),
+      revenue: Array(defaultCategories.length).fill(0),
+    };
+
+    if (
+      salesChartLoading ||
+      salesChartError ||
+      !salesChartApiResponse?.data?.chartValues
+    ) {
+      return defaultReturn;
+    }
+    const { categories, sales, revenue } =
+      salesChartApiResponse.data.chartValues;
+    if (!categories || !sales || !revenue || categories.length === 0) {
+      return defaultReturn;
+    }
+    return { categories, sales, revenue };
+  }, [
+    salesChartApiResponse,
+    salesChartLoading,
+    salesChartError,
+    selectedTab,
+    currentYear,
+  ]);
+
   const prepareExportData = () => {
-    let soldProducts = products.filter((p) => {
-      const saleDate = getValidSaleDate(p);
-      return (
-        p.status?.toLowerCase() === "terjual" &&
-        typeof p.price === "number" &&
-        p.price > 0 &&
-        saleDate &&
-        isValid(saleDate)
-      );
-    });
-
-    if (soldProducts.length > 0) {
-      soldProducts.sort((a, b) => {
-        const dateA = getValidSaleDate(a);
-        const dateB = getValidSaleDate(b);
-
-        return dateB.getTime() - dateA.getTime();
-      });
+    if (
+      salesChartLoading ||
+      salesChartError ||
+      !salesChartApiResponse?.data?.exportableData?.items
+    ) {
+      toast.error("Data untuk ekspor tidak tersedia atau sedang dimuat.");
+      return null;
     }
 
-    const hasDataForPeriod =
-      processedChartData.sales.some((v) => v > 0) ||
-      processedChartData.revenue.some((v) => v > 0);
+    const soldProductsForExport =
+      salesChartApiResponse.data.exportableData.items;
+    const totalRevenueForExport =
+      salesChartApiResponse.data.exportableData.totalRevenue;
 
-    if (soldProducts.length === 0 || !hasDataForPeriod) {
+    if (soldProductsForExport.length === 0) {
+      toast.error("Tidak ada data penjualan untuk diekspor pada periode ini.");
       return null;
     }
 
@@ -83,54 +141,51 @@ const SalesStatsChart = () => {
     const today = new Date();
     if (selectedTab === "Minggu") {
       const endDatePeriod = endOfWeek(today, { weekStartsOn: 1 });
-      const startDatePeriod = startOfWeek(
-        new Date(
-          endDatePeriod.getFullYear(),
-          endDatePeriod.getMonth(),
-          endDatePeriod.getDate() - (12 - 1) * 7
-        ),
-        { weekStartsOn: 1 }
-      );
-      periodeText = `Periode: ${format(startDatePeriod, "dd MMM yyyy", {
+      const startDatePeriod = startOfWeek(subWeeks(endDatePeriod, 11), {
+        weekStartsOn: 1,
+      });
+      periodeText = `Periode: ${format(startDatePeriod, "dd MMM yy", {
         locale: id,
-      })} - ${format(endDatePeriod, "dd MMM yyyy", { locale: id })}`;
+      })} - ${format(endDatePeriod, "dd MMM yy", { locale: id })}`;
     } else if (selectedTab === "Bulan") {
-      const startDatePeriod = startOfMonth(new Date(currentYear, 0));
-      const endDatePeriod = endOfMonth(new Date(currentYear, 11));
-      periodeText = `Periode: ${format(startDatePeriod, "dd MMM yyyy", {
-        locale: id,
-      })} - ${format(endDatePeriod, "dd MMM yyyy", { locale: id })}`;
+      periodeText = `Periode: Tahun ${currentYear}`;
     } else if (selectedTab === "Tahun") {
-      const currentActualYear = getYear(today);
-      const endYearDate = endOfYear(new Date(currentActualYear, 11, 31));
-      const startYearForPeriod = currentActualYear - 4;
+      const endYearDate = endOfYear(today);
+      const startYearForPeriod = getYear(today) - 4;
       const startDatePeriod = startOfYear(new Date(startYearForPeriod, 0, 1));
-      periodeText = `Periode: ${format(startDatePeriod, "dd MMM yyyy", {
+      periodeText = `Periode: ${format(startDatePeriod, "dd MMM yy", {
         locale: id,
-      })} - ${format(endYearDate, "dd MMM yyyy", { locale: id })}`;
+      })} - ${format(endYearDate, "dd MMM yy", { locale: id })}`;
     }
 
-    const pdfData = soldProducts.map((product, index) => {
-      const actualSaleDate = getValidSaleDate(product);
+    const pdfData = soldProductsForExport.map((product, index) => {
+      const actualSaleDate = product.saleDate
+        ? safeParseISOForExport(product.saleDate)
+        : null;
       return [
         index + 1,
-        product.carName || `${product.brand} ${product.model}`.trim(),
-        format(actualSaleDate, "dd MMM yyyy", { locale: id }),
-        `Rp ${product.price.toLocaleString("id-ID")}`,
+        product.carName ||
+          `${product.brand || ""} ${product.model || ""}`.trim(),
+        actualSaleDate
+          ? format(actualSaleDate, "dd MMM yy", { locale: id })
+          : "-",
+        `Rp ${product.price ? product.price.toLocaleString("id-ID") : "0"}`,
       ];
     });
-
-    const csvData = soldProducts.map((product, index) => {
-      const actualSaleDate = getValidSaleDate(product);
+    const csvData = soldProductsForExport.map((product, index) => {
+      const actualSaleDate = product.saleDate
+        ? safeParseISOForExport(product.saleDate)
+        : null;
       return [
         index + 1,
-        `"${product.carName || `${product.brand} ${product.model}`.trim()}"`,
-        format(actualSaleDate, "yyyy-MM-dd"),
-        product.price,
+        `"${
+          product.carName ||
+          `${product.brand || ""} ${product.model || ""}`.trim()
+        }"`,
+        actualSaleDate ? format(actualSaleDate, "yyyy-MM-dd") : "-",
+        product.price || 0,
       ];
     });
-
-    const totalRevenue = soldProducts.reduce((sum, p) => sum + p.price, 0);
 
     return {
       pdf: {
@@ -138,8 +193,14 @@ const SalesStatsChart = () => {
         data: pdfData,
         columns: ["No", "Nama Mobil", "Tanggal Terjual", "Harga Jual (IDR)"],
         summaryData: [
-          ["Total Unit Terjual:", soldProducts.length.toLocaleString("id-ID")],
-          ["Total Pendapatan:", `Rp ${totalRevenue.toLocaleString("id-ID")}`],
+          [
+            "Total Unit Terjual:",
+            soldProductsForExport.length.toLocaleString("id-ID"),
+          ],
+          [
+            "Total Pendapatan:",
+            `Rp ${totalRevenueForExport.toLocaleString("id-ID")}`,
+          ],
         ],
         fileName: "Laporan_Penjualan_Mukrindo_Motor.pdf",
         periodeText,
@@ -153,151 +214,6 @@ const SalesStatsChart = () => {
   };
 
   const { handleExport } = useExportData(prepareExportData);
-
-  const processedChartData = useMemo(() => {
-    const createDefaultData = () => {
-      let defaultCategories = [];
-      if (selectedTab === "Minggu") {
-        const lastWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
-        defaultCategories = Array.from({ length: 12 }, (_, i) =>
-          format(
-            startOfWeek(
-              new Date(
-                lastWeek.getFullYear(),
-                lastWeek.getMonth(),
-                lastWeek.getDate() - (11 - i) * 7
-              ),
-              { weekStartsOn: 1 }
-            ),
-            "dd MMM",
-            { locale: id }
-          )
-        );
-      } else if (selectedTab === "Bulan") {
-        defaultCategories = Array.from({ length: 12 }, (_, i) =>
-          format(startOfMonth(new Date(currentYear, i)), "MMM yyyy", {
-            locale: id,
-          })
-        );
-      } else if (selectedTab === "Tahun") {
-        defaultCategories = Array.from({ length: 5 }, (_, i) =>
-          (new Date().getFullYear() - 4 + i).toString()
-        );
-      }
-      return {
-        categories: defaultCategories,
-        sales: Array(defaultCategories.length).fill(0),
-        revenue: Array(defaultCategories.length).fill(0),
-      };
-    };
-
-    if (loading || error || !products || products.length === 0) {
-      return createDefaultData();
-    }
-
-    const soldProducts = products.filter((p) => {
-      const saleDate = getValidSaleDate(p);
-      return (
-        p.status?.toLowerCase() === "terjual" &&
-        typeof p.price === "number" &&
-        p.price > 0 &&
-        saleDate
-      );
-    });
-
-    if (soldProducts.length === 0) {
-      return createDefaultData();
-    }
-
-    let categories = [];
-    let salesData = [];
-    let revenueData = [];
-
-    if (selectedTab === "Minggu") {
-      const endDate = endOfWeek(new Date(), { weekStartsOn: 1 });
-      const startDate = startOfWeek(
-        new Date(
-          endDate.getFullYear(),
-          endDate.getMonth(),
-          endDate.getDate() - 12 * 7 + 1
-        ),
-        { weekStartsOn: 1 }
-      );
-      const weeks = eachWeekOfInterval(
-        { start: startDate, end: endDate },
-        { weekStartsOn: 1 }
-      );
-
-      categories = weeks.map((weekStart) =>
-        format(weekStart, "dd MMM", { locale: id })
-      );
-      salesData = Array(weeks.length).fill(0);
-      revenueData = Array(weeks.length).fill(0);
-
-      soldProducts.forEach((p) => {
-        const saleDate = getValidSaleDate(p);
-        if (saleDate) {
-          const weekIndex = weeks.findIndex((weekStart) => {
-            const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-            return isWithinInterval(saleDate, {
-              start: weekStart,
-              end: weekEnd,
-            });
-          });
-          if (weekIndex !== -1) {
-            salesData[weekIndex] += 1;
-            revenueData[weekIndex] += p.price;
-          }
-        }
-      });
-    } else if (selectedTab === "Bulan") {
-      const months = Array.from({ length: 12 }, (_, i) =>
-        startOfMonth(new Date(currentYear, i))
-      );
-      categories = months.map((monthStart) =>
-        format(monthStart, "MMM yyyy", { locale: id })
-      );
-      salesData = Array(12).fill(0);
-      revenueData = Array(12).fill(0);
-
-      soldProducts.forEach((p) => {
-        const saleDate = getValidSaleDate(p);
-        if (saleDate && getYear(saleDate) === currentYear) {
-          const monthIndex = getMonth(saleDate);
-          salesData[monthIndex] += 1;
-          revenueData[monthIndex] += p.price;
-        }
-      });
-    } else if (selectedTab === "Tahun") {
-      const endYear = getYear(new Date());
-      const startYear = endYear - 4;
-      const years = Array.from({ length: 5 }, (_, i) =>
-        startOfYear(new Date(startYear + i, 0))
-      );
-      categories = years.map((yearStart) => format(yearStart, "yyyy"));
-      salesData = Array(5).fill(0);
-      revenueData = Array(5).fill(0);
-
-      soldProducts.forEach((p) => {
-        const saleDate = getValidSaleDate(p);
-        if (saleDate) {
-          const yearIndex = years.findIndex((yearStart) => {
-            const yearEnd = endOfYear(yearStart);
-            return isWithinInterval(saleDate, {
-              start: yearStart,
-              end: yearEnd,
-            });
-          });
-          if (yearIndex !== -1) {
-            salesData[yearIndex] += 1;
-            revenueData[yearIndex] += p.price;
-          }
-        }
-      });
-    }
-
-    return { categories, sales: salesData, revenue: revenueData };
-  }, [products, loading, error, selectedTab, currentYear]);
 
   const chartOptions = useMemo(
     () => ({
@@ -326,10 +242,7 @@ const SalesStatsChart = () => {
         zoom: { enabled: false },
         animations: { enabled: true, easing: "easeinout", speed: 800 },
       },
-      stroke: {
-        curve: "smooth",
-        width: [2.5, 2.5],
-      },
+      stroke: { curve: "smooth", width: [2.5, 2.5] },
       fill: {
         type: "gradient",
         gradient: {
@@ -357,17 +270,16 @@ const SalesStatsChart = () => {
       tooltip: {
         theme: "light",
         x: {
-          formatter: function (val, { dataPointIndex, w }) {
-            return w.globals.labels[dataPointIndex] || val;
-          },
+          formatter: (val, { dataPointIndex, w }) =>
+            w.globals.labels[dataPointIndex] || val,
         },
         y: [
           {
-            title: { formatter: (seriesName) => seriesName + ": " },
+            title: { formatter: (seriesName) => `${seriesName}: ` },
             formatter: (val) => `${val ? val.toLocaleString("id-ID") : 0} unit`,
           },
           {
-            title: { formatter: (seriesName) => seriesName + ": " },
+            title: { formatter: (seriesName) => `${seriesName}: ` },
             formatter: (val) => `Rp ${val ? val.toLocaleString("id-ID") : 0}`,
           },
         ],
@@ -380,16 +292,12 @@ const SalesStatsChart = () => {
         tooltip: { enabled: false },
         labels: {
           style: { colors: "#6b7280", fontSize: "11px" },
-          formatter: function (val) {
-            if (
-              typeof val === "string" &&
-              val.length > 7 &&
-              selectedTab === "Minggu"
-            ) {
-              return val.substring(0, 6) + ".";
-            }
-            return val;
-          },
+          formatter: (val) =>
+            typeof val === "string" &&
+            val.length > 7 &&
+            selectedTab === "Minggu"
+              ? `${val.substring(0, 6)}.`
+              : val,
         },
       },
       yaxis: [
@@ -404,6 +312,8 @@ const SalesStatsChart = () => {
             formatter: (val) => val.toFixed(0),
           },
           min: 0,
+          forceNiceScale: true,
+          tickAmount: 5,
         },
         {
           seriesName: "Pendapatan",
@@ -417,27 +327,21 @@ const SalesStatsChart = () => {
             formatter: (val) => {
               if (val == null || isNaN(parseFloat(val))) return "Rp 0";
               const num = parseFloat(val);
-              if (num >= 1000000000) {
-                const result = num / 1000000000;
-                return `Rp ${result.toLocaleString("id-ID", {
+              if (num >= 1000000000)
+                return `Rp ${(num / 1000000000).toLocaleString("id-ID", {
                   minimumFractionDigits: 0,
-                  maximumFractionDigits: result % 1 === 0 ? 0 : 1,
+                  maximumFractionDigits: num % 1000000000 === 0 ? 0 : 1,
                 })}M`;
-              }
-              if (num >= 1000000) {
-                const result = num / 1000000;
-                return `Rp ${result.toLocaleString("id-ID", {
+              if (num >= 1000000)
+                return `Rp ${(num / 1000000).toLocaleString("id-ID", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
                 })}Jt`;
-              }
-              if (num >= 1000) {
-                const result = num / 1000;
-                return `Rp ${result.toLocaleString("id-ID", {
+              if (num >= 1000)
+                return `Rp ${(num / 1000).toLocaleString("id-ID", {
                   minimumFractionDigits: 0,
                   maximumFractionDigits: 0,
-                })}K`;
-              }
+                })}Rb`;
               return `Rp ${num.toLocaleString("id-ID", {
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,
@@ -445,6 +349,8 @@ const SalesStatsChart = () => {
             },
           },
           min: 0,
+          forceNiceScale: true,
+          tickAmount: 5,
         },
       ],
     }),
@@ -456,17 +362,13 @@ const SalesStatsChart = () => {
     { name: "Pendapatan", data: processedChartData.revenue },
   ];
 
-  const hasActualData =
-    processedChartData.sales.some((v) => v > 0) ||
-    processedChartData.revenue.some((v) => v > 0);
-
   const chartContainerRef = useAutoScrollToChart(
     { sales: processedChartData.sales, revenue: processedChartData.revenue },
     selectedTab,
     currentYear
   );
 
-  if (loading) {
+  if (salesChartLoading) {
     return (
       <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white px-4 pb-5 pt-5 sm:px-6 sm:pt-6">
         <div className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between">
@@ -475,7 +377,6 @@ const SalesStatsChart = () => {
               Memuat Statistik Penjualan...
             </h3>
           </div>
-
           <div className="flex gap-4 items-center">
             <div className="flex items-start w-full gap-3 bg-gray-200 p-1 animate-pulse rounded-full sm:w-auto sm:justify-end">
               <div className="w-1/3 md:w-20 h-5 bg-white animate-pulse rounded-full" />
@@ -485,7 +386,6 @@ const SalesStatsChart = () => {
             <div className="w-9 h-6 bg-gray-200 rounded-full animate-pulse" />
           </div>
         </div>
-
         <div
           className="flex flex-col gap-3 justify-center items-center w-full h-full text-gray-500"
           style={{ height: 310 }}
@@ -500,7 +400,7 @@ const SalesStatsChart = () => {
     );
   }
 
-  if (error) {
+  if (salesChartError) {
     return (
       <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white px-4 pb-5 pt-5 sm:px-6 sm:pt-6">
         <div className="flex items-center justify-between mb-6">
@@ -517,11 +417,15 @@ const SalesStatsChart = () => {
             justifyContent: "center",
           }}
         >
-          Gagal memuat data statistik. Error: {error.message}
+          Gagal memuat data statistik. Error: {salesChartError.message}
         </div>
       </div>
     );
   }
+
+  const hasActualData =
+    processedChartData.sales.some((v) => v > 0) ||
+    processedChartData.revenue.some((v) => v > 0);
 
   return (
     <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white px-4 pb-5 pt-5 sm:px-6 sm:pt-6">
@@ -529,11 +433,10 @@ const SalesStatsChart = () => {
         <div className="w-full">
           <h3 className="text-md lg:text-lg font-medium text-gray-700">
             {selectedTab === "Minggu" &&
-              "Statistik Penjualan Minggu 12 Minggu Terakhir"}
+              "Statistik Penjualan 12 Minggu Terakhir"}
             {selectedTab === "Bulan" &&
               `Statistik Penjualan Bulan (${currentYear})`}
-            {selectedTab === "Tahun" &&
-              "Statistik Penjualan Tahun 5 Tahun Terakhir"}
+            {selectedTab === "Tahun" && "Statistik Penjualan 5 Tahun Terakhir"}
           </h3>
         </div>
         <div className="flex items-start w-full gap-3 sm:w-auto sm:justify-end">
