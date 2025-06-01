@@ -1,7 +1,19 @@
 // backend/controllers/carDataController.js
 const CarData = require("../models/carDataModels");
 
-// --- Create Operations ---
+exports.getAllCarData = async (req, res) => {
+  try {
+    const allData = await CarData.find().sort({ brandName: 1 });
+
+    res.status(200).json({ success: true, data: allData });
+  } catch (error) {
+    console.error("Error fetching all master data:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Gagal mengambil data master." });
+  }
+};
+
 exports.addBrand = async (req, res) => {
   try {
     const { name, imgUrl } = req.body;
@@ -46,12 +58,10 @@ exports.addModelToBrand = async (req, res) => {
       });
     }
 
-    // Pastikan brandName yang dicari sudah di-trim dan mungkin di-normalize
     const searchBrandName = brandName.trim();
     const searchModelName = modelName.trim();
 
     const brandEntry = await CarData.findOne({
-      // Menggunakan regex untuk pencarian case-insensitive dan pencocokan penuh
       brandName: { $regex: new RegExp(`^${searchBrandName}$`, "i") },
     });
 
@@ -59,7 +69,7 @@ exports.addModelToBrand = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: `Merek '${searchBrandName}' tidak ditemukan.`,
-      }); // Pesan error lebih spesifik
+      });
     }
 
     const modelExists = brandEntry.models.some(
@@ -97,9 +107,9 @@ exports.addVariantToModel = async (req, res) => {
       });
     }
 
-    const searchBrandName = brandName.trim(); // Pastikan di-trim
-    const searchModelName = modelName.trim(); // Pastikan di-trim
-    const searchVariantName = variantName.trim(); // Pastikan di-trim
+    const searchBrandName = brandName.trim();
+    const searchModelName = modelName.trim();
+    const searchVariantName = variantName.trim();
 
     const brandEntry = await CarData.findOne({
       brandName: { $regex: new RegExp(`^${searchBrandName}$`, "i") },
@@ -109,10 +119,9 @@ exports.addVariantToModel = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: `Merek '${searchBrandName}' tidak ditemukan.`,
-      }); // Pesan error lebih spesifik
+      });
     }
 
-    // ... (sisa kode untuk mencari model dan menambah varian) ...
     const modelEntry = brandEntry.models.find(
       (m) => m.name.toLowerCase() === searchModelName.toLowerCase()
     );
@@ -148,28 +157,44 @@ exports.addVariantToModel = async (req, res) => {
   }
 };
 
-// --- Read Operations ---
-// Endpoint ini akan mengambil semua data master (semua merek beserta model dan variannya)
-// Frontend kemudian bisa memproses data ini untuk dropdown.
-exports.getAllCarData = async (req, res) => {
+exports.deleteBrand = async (req, res) => {
   try {
-    const allData = await CarData.find().sort({ brandName: 1 });
-    // Transformasi data agar sesuai dengan format yang mungkin diharapkan frontend
-    // (misalnya, array objek brand, di mana setiap brand memiliki array model, dst.)
-    // Untuk saat ini, kita kirim apa adanya dari MongoDB.
-    res.status(200).json({ success: true, data: allData });
+    const { brandName } = req.body;
+
+    if (!brandName) {
+      return res.status(400).json({
+        success: false,
+        message: "Nama merek wajib diisi untuk penghapusan.",
+      });
+    }
+
+    const brandToDelete = await CarData.findOneAndDelete({
+      brandName: { $regex: new RegExp(`^${brandName}$`, "i") },
+    });
+
+    if (!brandToDelete) {
+      return res.status(404).json({
+        success: false,
+        message: `Merek '${brandName}' tidak ditemukan.`,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Merek '${brandName}' dan semua model serta variannya berhasil dihapus.`,
+    });
   } catch (error) {
-    console.error("Error fetching all master data:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Gagal mengambil data master." });
+    console.error("Error deleting brand:", error);
+    res.status(500).json({
+      success: false,
+      message: "Gagal menghapus merek karena kesalahan server.",
+    });
   }
 };
 
-// --- Delete Operations ---
 exports.deleteModelFromBrand = async (req, res) => {
   try {
-    const { brandName, modelName } = req.body; // Atau bisa juga dari req.params jika rutenya /brands/:brandName/models/:modelName
+    const { brandName, modelName } = req.body;
 
     if (!brandName || !modelName) {
       return res.status(400).json({
@@ -183,39 +208,37 @@ exports.deleteModelFromBrand = async (req, res) => {
     });
 
     if (!brandEntry) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: `Merek '${brandName}' tidak ditemukan.`,
-        });
+      return res.status(404).json({
+        success: false,
+        message: `Merek '${brandName}' tidak ditemukan.`,
+      });
     }
 
-    const modelExists = brandEntry.models.some(
+    const modelIndex = brandEntry.models.findIndex(
       (m) => m.name.toLowerCase() === modelName.toLowerCase()
     );
 
-    if (!modelExists) {
+    if (modelIndex === -1) {
       return res.status(404).json({
         success: false,
         message: `Model '${modelName}' tidak ditemukan pada merek '${brandName}'.`,
       });
     }
 
-    // Hapus model dari array models
-    brandEntry.models = brandEntry.models.filter(
-      (m) => m.name.toLowerCase() !== modelName.toLowerCase()
-    );
+    brandEntry.models.splice(modelIndex, 1);
 
     await brandEntry.save();
     res.status(200).json({
       success: true,
       message: `Model '${modelName}' berhasil dihapus dari merek '${brandName}'.`,
-      data: brandEntry, // Mengembalikan data merek yang sudah diperbarui
+      data: brandEntry,
     });
   } catch (error) {
     console.error("Error deleting model from brand:", error);
-    res.status(500).json({ success: false, message: "Gagal menghapus model." });
+    res.status(500).json({
+      success: false,
+      message: "Gagal menghapus model karena kesalahan server.",
+    });
   }
 };
 
@@ -235,12 +258,10 @@ exports.deleteVariantFromModel = async (req, res) => {
       brandName: { $regex: new RegExp(`^${brandName}$`, "i") },
     });
     if (!brandEntry) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: `Merek '${brandName}' tidak ditemukan.`,
-        });
+      return res.status(404).json({
+        success: false,
+        message: `Merek '${brandName}' tidak ditemukan.`,
+      });
     }
 
     const modelEntry = brandEntry.models.find(
@@ -264,19 +285,19 @@ exports.deleteVariantFromModel = async (req, res) => {
       });
     }
 
-    // Hapus varian dari array variants
     modelEntry.variants.splice(variantIndex, 1);
 
-    await brandEntry.save(); // Menyimpan perubahan pada dokumen brand utama
+    await brandEntry.save();
     res.status(200).json({
       success: true,
       message: `Varian '${variantName}' berhasil dihapus dari model '${modelName}'.`,
-      data: brandEntry, // Mengembalikan data merek yang sudah diperbarui
+      data: brandEntry,
     });
   } catch (error) {
     console.error("Error deleting variant from model:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Gagal menghapus varian." });
+    res.status(500).json({
+      success: false,
+      message: "Gagal menghapus varian karena kesalahan server.",
+    });
   }
 };

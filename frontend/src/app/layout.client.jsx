@@ -11,6 +11,7 @@ import { BuySellProvider } from "@/context/BuySellContext";
 import { NotifStockProvider } from "@/context/NotifStockContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { TrafficProvider } from "@/context/TrafficContext";
+import { CarDataProvider } from "@/context/CarDataContext";
 import { Toaster } from "react-hot-toast";
 
 export default function RootLayoutClient({ children }) {
@@ -25,22 +26,24 @@ export default function RootLayoutClient({ children }) {
       <AuthProvider>
         <ProductProvider>
           <NotificationProvider>
-            <TradeInProvider>
-              <BuySellProvider>
-                <NotifStockProvider>
-                  <SidebarProvider>
-                    <HeaderProvider>
-                      <Toaster position="top-right" reverseOrder={true} />
-                      {isAdminPage ? (
-                        children
-                      ) : (
-                        <ClientLayout>{children}</ClientLayout>
-                      )}
-                    </HeaderProvider>
-                  </SidebarProvider>
-                </NotifStockProvider>
-              </BuySellProvider>
-            </TradeInProvider>
+            <CarDataProvider>
+              <TradeInProvider>
+                <BuySellProvider>
+                  <NotifStockProvider>
+                    <SidebarProvider>
+                      <HeaderProvider>
+                        <Toaster position="top-right" reverseOrder={true} />
+                        {isAdminPage ? (
+                          children
+                        ) : (
+                          <ClientLayout>{children}</ClientLayout>
+                        )}
+                      </HeaderProvider>
+                    </SidebarProvider>
+                  </NotifStockProvider>
+                </BuySellProvider>
+              </TradeInProvider>
+            </CarDataProvider>
           </NotificationProvider>
         </ProductProvider>
       </AuthProvider>
