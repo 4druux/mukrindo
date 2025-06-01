@@ -141,7 +141,7 @@ const CarPricingInfo = ({ product }) => {
         className="p-4 md:p-8 rounded-t-3xl md:rounded-3xl border-t-4 border-t-orange-500 border-b border-gray-300 md:border-none md:shadow-md bg-white"
       >
         <div className="flex justify-between w-full gap-10 mb-4">
-          <h1 className="text-lg font-semibold text-gray-700">
+          <h1 className="text-lg font-semibold text-gray-600">
             {product.carName}
           </h1>
           <div
@@ -208,7 +208,7 @@ const CarPricingInfo = ({ product }) => {
               <button
                 onClick={handleNotifyMeClick}
                 className="flex items-center justify-center gap-2 py-4 text-white rounded-full
-                bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 hover:from-transparent 
+                bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent 
                 hover:to-transparent cursor-pointer w-full text-sm"
               >
                 <FaBell className="w-4 h-4" />
@@ -284,7 +284,7 @@ const CarPricingInfo = ({ product }) => {
               <button
                 onClick={handleEstimasiPembiayaanClick}
                 className="flex items-center justify-center gap-2 py-3 text-white rounded-full
-               bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 hover:from-transparent 
+               bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent 
                hover:to-transparent cursor-pointer w-3/4 md:w-3/5 mb-1 mx-auto"
               >
                 <Calculator className="w-5 h-5" />
@@ -303,7 +303,7 @@ const CarPricingInfo = ({ product }) => {
               <button
                 onClick={handleCekSekarangClick}
                 className="flex items-center justify-center gap-2 py-4 text-white rounded-full
-               bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 hover:from-transparent 
+               bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent 
                 hover:to-transparent cursor-pointer w-full"
               >
                 <span className="text-sm">Cek Sekarang</span>

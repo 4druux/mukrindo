@@ -9,6 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { useRequestContact } from "@/hooks/useRequestContact";
 import { NOTIFY_STATUS_FILTER } from "../BuySell-TradeIn/RequestFilter";
+import DotLoader from "@/components/common/DotLoader";
 
 const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);
 
@@ -134,7 +135,7 @@ const ModalNotifyDetail = ({
   if (isLoading && !response) {
     return (
       <div className="flex-grow flex items-center justify-center p-10">
-        Memuat detail permintaan...
+        <DotLoader dotSize="w-5 h-5" text="Memuat detail permintaan..." />
       </div>
     );
   }

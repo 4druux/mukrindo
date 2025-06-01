@@ -1,4 +1,4 @@
-// frontend/src/layout/admin/product/AllProuduct.jsx
+// frontend/src/layout/admin/product/AllProduct.jsx
 "use client";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";

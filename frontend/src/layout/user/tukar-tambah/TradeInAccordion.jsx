@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Accordion from "@/components/common/Accordion";
+import TittleText from "@/components/common/TittleText";
 
 const TradeInAccordion = () => {
   const [openIndex, setOpenIndex] = useState(0);
@@ -182,9 +183,10 @@ const TradeInAccordion = () => {
 
   return (
     <div className="container mx-auto">
-      <h1 className="text-md lg:text-xl font-medium mb-2 lg:mb-4 text-center text-gray-700">
-        FAQ Seputar Tukar Tambah Mobil
-      </h1>
+      <TittleText
+        text="FAQ Seputar Tukar Tambah Mobil"
+        className="mb-2 lg:mb-4 text-center"
+      />
 
       {accordionItems.map((item, index) => (
         <Accordion

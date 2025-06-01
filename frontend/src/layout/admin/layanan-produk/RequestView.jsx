@@ -108,7 +108,7 @@ const modalVariants = {
 };
 
 const RequestView = () => {
-  const [activeTab, setActiveTab] = useState("tradeIn");
+  const [activeTab, setActiveTab] = useState("buySell");
   const [currentPage, setCurrentPage] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState(null);
@@ -130,7 +130,7 @@ const RequestView = () => {
 
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab && ["tradeIn", "buySell", "notifyMe"].includes(tab)) {
+    if (tab && ["buySell", "tradeIn", "notifyMe"].includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);

@@ -58,10 +58,7 @@ export default function SignInForm() {
       <div className="flex flex-col justify-center pt-5 w-full max-w-md mx-auto">
         <div>
           <div className="mb-2 md:mb-5 text-left">
-            <TittleText
-              text="Masuk Sekarang"
-              className="text-xl md:text-2xl"
-            />
+            <TittleText text="Masuk Sekarang" className="text-xl md:text-2xl" />
           </div>
 
           <div>
@@ -109,7 +106,7 @@ export default function SignInForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="block w-full px-4 py-2 text-base text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
+                    className="block w-full px-4 py-2 text-base lg:text-sm text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
                   />
                 </div>
                 <div>
@@ -128,7 +125,7 @@ export default function SignInForm() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="block w-full px-4 py-2 text-base text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
+                      className="block w-full px-4 py-2 text-base lg:text-sm text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -170,7 +167,7 @@ export default function SignInForm() {
                   <button
                     type="submit"
                     disabled={authLoading}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white transition cursor-pointer bg-gradient-to-r from-orange-400 to-orange-600 hover:bg-orange-600 hover:from-transparent hover:to-transparent rounded-full disabled:opacity-70"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white transition cursor-pointer bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent hover:to-transparent rounded-full disabled:opacity-70"
                   >
                     {authLoading ? (
                       <Loader2 className="w-5 h-5 animate-spin" />

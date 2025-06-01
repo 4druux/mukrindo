@@ -1,4 +1,4 @@
-// export in AllProuduct, CarShop, useFilterAndSuggest
+// export in AllProduct, CarShop, useFilterAndSuggest
 
 // components/global/ShortProduct.jsx
 import { useRef, useEffect } from "react";
