@@ -297,7 +297,7 @@ const Select = forwardRef(
                           </label>
 
                           {itemActions && option.canDelete && (
-                            <div className="pr-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="pr-2 opacity-100 xl:opacity-0 xl:group-hover:opacity-100 transition-opacity">
                               {itemActions(option.value, option.label)}
                             </div>
                           )}

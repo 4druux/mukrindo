@@ -14,25 +14,31 @@ const upload = multer({
 router.post("/", upload.array("images", 10), productController.createProduct);
 router.put("/:id", upload.array("images", 10), productController.updateProduct);
 
-// Route untuk membuat produk baru
+// Create Product
 router.post("/", productController.createProduct);
 
-// Route untuk mendapatkan semua produk
+// Get All
 router.get("/", productController.getAllProducts);
 
-// Route untuk mendapatkan produk berdasarkan ID
+// Get Id
 router.get("/:id", productController.getProductById);
 
-// Route untuk memperbarui produk berdasarkan ID
+// Update Id
 router.put("/:id", productController.updateProduct);
 
-// Route untuk menghapus produk berdasarkan ID
+// Delete Id
 router.delete("/:id", productController.deleteProduct);
 
-// Route baru untuk increment view count
+//  View count
 router.put("/:id/increment-view", productController.incrementViewCount);
 
-// Route untuk rekomendasi
+// Rekomendasi
 router.get("/:id/recommendations", productController.getProductRecommendations);
+
+// Stats Sales
+router.get("/stats/sales", productController.getProductSalesStats);
+
+// Product Report
+router.get("/stats/report", productController.getProductReportStats);
 
 module.exports = router;

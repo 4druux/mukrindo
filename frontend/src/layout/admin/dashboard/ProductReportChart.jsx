@@ -1,21 +1,20 @@
 "use client";
 import React, { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { useProducts } from "@/context/ProductContext";
+import useSWR from "swr";
+import axiosInstance from "@/utils/axiosInstance";
 import { FaCar, FaBoxOpen } from "react-icons/fa";
 import {
   format,
   startOfWeek,
   endOfWeek,
   startOfMonth,
-  endOfMonth,
   startOfYear,
   endOfYear,
-  eachWeekOfInterval,
-  isWithinInterval,
   parseISO,
   isValid,
   getYear,
+  subWeeks,
 } from "date-fns";
 import { id } from "date-fns/locale";
 import { useExportData } from "@/hooks/useExportData";
@@ -23,113 +22,189 @@ import ExportDropdown from "@/components/product-admin/Dashboard/ExportDropdown"
 import PeriodFilter from "@/components/product-admin/Dashboard/PeriodFilter";
 import { useAutoScrollToChart } from "@/hooks/useAutoScrollToChart";
 import DotLoader from "@/components/common/DotLoader";
+import toast from "react-hot-toast";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
-const getValidDate = (dateStr) => {
-  if (!dateStr) return null;
-  try {
-    const dateObj = parseISO(dateStr);
-    return isValid(dateObj) ? dateObj : new Date(dateStr);
-  } catch {
-    return null;
+const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);
+
+const safeParseISOForExport = (dateInput) => {
+  if (!dateInput) return null;
+  if (dateInput instanceof Date) return isValid(dateInput) ? dateInput : null;
+  if (typeof dateInput === "string") {
+    const parsed = parseISO(dateInput);
+    return isValid(parsed) ? parsed : null;
   }
+  if (typeof dateInput === "number") {
+    const parsed = new Date(dateInput);
+    return isValid(parsed) ? parsed : null;
+  }
+  return null;
 };
 
 const ProductReportChart = () => {
-  const { products, loading, error } = useProducts();
   const [selectedTab, setSelectedTab] = useState("Minggu");
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
+  const apiQueryPeriodMap = {
+    Minggu: "weekly",
+    Bulan: "monthly",
+    Tahun: "yearly",
+  };
+
+  const {
+    data: reportChartApiResponse,
+    error: reportChartError,
+    isLoading: reportChartLoading,
+  } = useSWR(
+    selectedTab && currentYear
+      ? `/api/products/stats/report?period=${apiQueryPeriodMap[selectedTab]}&year=${currentYear}`
+      : null,
+    fetcher,
+    { revalidateOnFocus: true }
+  );
+
+  const processedData = useMemo(() => {
+    const createDefaultCategories = (tab, year) => {
+      const now = new Date();
+      if (tab === "Minggu") {
+        const lastWeek = startOfWeek(now, { weekStartsOn: 1 });
+        return Array.from({ length: 12 }, (_, i) =>
+          format(
+            startOfWeek(subWeeks(lastWeek, 11 - i), { weekStartsOn: 1 }),
+            "dd MMM",
+            { locale: id }
+          )
+        );
+      } else if (tab === "Bulan") {
+        return Array.from({ length: 12 }, (_, i) =>
+          format(startOfMonth(new Date(year, i)), "MMM yy", { locale: id })
+        );
+      } else if (tab === "Tahun") {
+        return Array.from({ length: 5 }, (_, i) =>
+          (getYear(now) - 4 + i).toString()
+        );
+      }
+      return [];
+    };
+
+    const defaultCategories = createDefaultCategories(selectedTab, currentYear);
+    const defaultReturn = {
+      categories: defaultCategories,
+      masuk: Array(defaultCategories.length).fill(0),
+      terjual: Array(defaultCategories.length).fill(0),
+    };
+
+    if (
+      reportChartLoading ||
+      reportChartError ||
+      !reportChartApiResponse?.data?.chartValues
+    ) {
+      return defaultReturn;
+    }
+    const { categories, masuk, terjual } =
+      reportChartApiResponse.data.chartValues;
+    if (!categories || !masuk || !terjual || categories.length === 0) {
+      return defaultReturn;
+    }
+    return { categories, masuk, terjual };
+  }, [
+    reportChartApiResponse,
+    reportChartLoading,
+    reportChartError,
+    selectedTab,
+    currentYear,
+  ]);
+
   const prepareExportData = () => {
-    const validProducts = products.filter((p) => getValidDate(p.createdAt));
+    if (
+      reportChartLoading ||
+      reportChartError ||
+      !reportChartApiResponse?.data?.exportableData?.items
+    ) {
+      toast.error("Data untuk ekspor tidak tersedia atau sedang dimuat.", {
+        className: "custom-toast",
+      });
+      return null;
+    }
 
-    const hasDataForPeriod =
-      processedData.masuk.some((v) => v > 0) ||
-      processedData.terjual.some((v) => v > 0);
-
-    if (validProducts.length === 0 || !hasDataForPeriod) {
+    const productsForExport = reportChartApiResponse.data.exportableData.items;
+    if (productsForExport.length === 0) {
+      toast.error("Tidak ada data produk untuk diekspor pada periode ini.", {
+        className: "custom-toast",
+      });
       return null;
     }
 
     let periodeText = "";
     const today = new Date();
-
     if (selectedTab === "Minggu") {
       const endDatePeriod = endOfWeek(today, { weekStartsOn: 1 });
-      const startDatePeriod = startOfWeek(
-        new Date(
-          endDatePeriod.getFullYear(),
-          endDatePeriod.getMonth(),
-          endDatePeriod.getDate() - (12 - 1) * 7
-        ),
-        { weekStartsOn: 1 }
-      );
-      periodeText = `Periode: ${format(startDatePeriod, "dd MMM yyyy", {
+      const startDatePeriod = startOfWeek(subWeeks(endDatePeriod, 11), {
+        weekStartsOn: 1,
+      });
+      periodeText = `Periode: ${format(startDatePeriod, "dd MMM yy", {
         locale: id,
-      })} - ${format(endDatePeriod, "dd MMM yyyy", { locale: id })}`;
+      })} - ${format(endDatePeriod, "dd MMM yy", { locale: id })}`;
     } else if (selectedTab === "Bulan") {
-      const startDatePeriod = startOfMonth(new Date(currentYear, 0));
-      const endDatePeriod = endOfMonth(new Date(currentYear, 11));
-      periodeText = `Periode: ${format(startDatePeriod, "dd MMM yyyy", {
-        locale: id,
-      })} - ${format(endDatePeriod, "dd MMM yyyy", { locale: id })}`;
+      periodeText = `Periode: Tahun ${currentYear}`;
     } else if (selectedTab === "Tahun") {
-      const currentActualYear = getYear(today);
-      const endYearDate = endOfYear(new Date(currentActualYear, 11, 31));
-      const startYearForPeriod = currentActualYear - 4;
+      const endYearDate = endOfYear(today);
+      const startYearForPeriod = getYear(today) - 4;
       const startDatePeriod = startOfYear(new Date(startYearForPeriod, 0, 1));
-      periodeText = `Periode: ${format(startDatePeriod, "dd MMM yyyy", {
+      periodeText = `Periode: ${format(startDatePeriod, "dd MMM yy", {
         locale: id,
-      })} - ${format(endYearDate, "dd MMM yyyy", { locale: id })}`;
+      })} - ${format(endYearDate, "dd MMM yy", { locale: id })}`;
     }
 
-    const pdfData = validProducts.map((product, index) => [
-      index + 1,
-      product.carName ||
-        `${product.brand || ""} ${product.model || ""}`.trim() ||
-        "N/A",
-      `Rp ${product.price?.toLocaleString("id-ID") || "0"}`,
-      getValidDate(product.createdAt)
-        ? format(getValidDate(product.createdAt), "dd MMM yyyy", { locale: id })
-        : "-",
-      product.status?.toLowerCase() === "terjual" &&
-      getValidDate(product.soldDate || product.updatedAt)
-        ? format(
-            getValidDate(product.soldDate || product.updatedAt),
-            "dd MMM yyyy",
-            { locale: id }
-          )
-        : "-",
-      product.status || "N/A",
-    ]);
-
-    const csvData = validProducts.map((product, index) => [
-      index + 1,
-      `"${
+    const pdfData = productsForExport.map((product, index) => {
+      const entryDate = product.createdAt
+        ? safeParseISOForExport(product.createdAt)
+        : null;
+      const saleDate = product.effectiveSaleDate
+        ? safeParseISOForExport(product.effectiveSaleDate)
+        : null;
+      return [
+        index + 1,
         product.carName ||
-        `${product.brand || ""} ${product.model || ""}`.trim() ||
-        "N/A"
-      }"`,
-      product.price || 0,
-      getValidDate(product.createdAt)
-        ? format(getValidDate(product.createdAt), "yyyy-MM-dd")
-        : "-",
-      product.status?.toLowerCase() === "terjual" &&
-      getValidDate(product.soldDate || product.updatedAt)
-        ? format(
-            getValidDate(product.soldDate || product.updatedAt),
-            "yyyy-MM-dd"
-          )
-        : "-",
-      product.status || "N/A",
-    ]);
+          `${product.brand || ""} ${product.model || ""}`.trim() ||
+          "N/A",
+        `Rp ${product.price ? product.price.toLocaleString("id-ID") : "0"}`,
+        entryDate ? format(entryDate, "dd MMM yy", { locale: id }) : "-",
+        saleDate ? format(saleDate, "dd MMM yy", { locale: id }) : "-",
+        product.status || "N/A",
+      ];
+    });
+    const csvData = productsForExport.map((product, index) => {
+      const entryDate = product.createdAt
+        ? safeParseISOForExport(product.createdAt)
+        : null;
+      const saleDate = product.effectiveSaleDate
+        ? safeParseISOForExport(product.effectiveSaleDate)
+        : null;
+      return [
+        index + 1,
+        `"${
+          product.carName ||
+          `${product.brand || ""} ${product.model || ""}`.trim() ||
+          "N/A"
+        }"`,
+        product.price || 0,
+        entryDate ? format(entryDate, "yyyy-MM-dd") : "-",
+        saleDate ? format(saleDate, "yyyy-MM-dd") : "-",
+        product.status || "N/A",
+      ];
+    });
 
-    const totalMasuk = validProducts.length;
-    const totalTerjual = validProducts.filter(
-      (p) => p.status?.toLowerCase() === "terjual"
+    const totalMasuk = productsForExport.filter((p) =>
+      safeParseISOForExport(p.createdAt)
+    ).length;
+    const totalTerjual = productsForExport.filter(
+      (p) =>
+        p.status?.toLowerCase() === "terjual" &&
+        safeParseISOForExport(p.effectiveSaleDate)
     ).length;
 
     return {
@@ -145,8 +220,14 @@ const ProductReportChart = () => {
           "Status",
         ],
         summaryData: [
-          ["Total Produk Masuk:", totalMasuk.toLocaleString("id-ID")],
-          ["Total Produk Terjual:", totalTerjual.toLocaleString("id-ID")],
+          [
+            "Total Produk Masuk (dalam periode):",
+            totalMasuk.toLocaleString("id-ID"),
+          ],
+          [
+            "Total Produk Terjual (dalam periode):",
+            totalTerjual.toLocaleString("id-ID"),
+          ],
         ],
         fileName: "Laporan_Produk_Mobil_Mukrindo.pdf",
         periodeText,
@@ -167,169 +248,6 @@ const ProductReportChart = () => {
   };
 
   const { handleExport } = useExportData(prepareExportData);
-
-  const processedData = useMemo(() => {
-    const createDefaultData = () => {
-      let defaultCategories = [];
-      if (selectedTab === "Minggu") {
-        const lastWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
-        defaultCategories = Array.from({ length: 12 }, (_, i) =>
-          format(
-            startOfWeek(
-              new Date(
-                lastWeek.getFullYear(),
-                lastWeek.getMonth(),
-                lastWeek.getDate() - (11 - i) * 7
-              ),
-              { weekStartsOn: 1 }
-            ),
-            "dd MMM",
-            { locale: id }
-          )
-        );
-      } else if (selectedTab === "Bulan") {
-        defaultCategories = Array.from({ length: 12 }, (_, i) =>
-          format(startOfMonth(new Date(currentYear, i)), "MMM yyyy", {
-            locale: id,
-          })
-        );
-      } else if (selectedTab === "Tahun") {
-        defaultCategories = Array.from({ length: 5 }, (_, i) =>
-          (new Date().getFullYear() - 4 + i).toString()
-        );
-      }
-      return {
-        categories: defaultCategories,
-        masuk: Array(defaultCategories.length).fill(0),
-        terjual: Array(defaultCategories.length).fill(0),
-      };
-    };
-
-    if (loading || error || !products || products.length === 0) {
-      return createDefaultData();
-    }
-
-    const validProducts = products.filter((p) => getValidDate(p.createdAt));
-    if (validProducts.length === 0) {
-      return createDefaultData();
-    }
-
-    let categories = [];
-    let masukData = [];
-    let terjualData = [];
-
-    if (selectedTab === "Minggu") {
-      const endDate = endOfWeek(new Date(), { weekStartsOn: 1 });
-      const startDate = startOfWeek(
-        new Date(
-          endDate.getFullYear(),
-          endDate.getMonth(),
-          endDate.getDate() - 12 * 7 + 1
-        ),
-        { weekStartsOn: 1 }
-      );
-      const weeks = eachWeekOfInterval(
-        { start: startDate, end: endDate },
-        { weekStartsOn: 1 }
-      );
-
-      categories = weeks.map((weekStart) =>
-        format(weekStart, "dd MMM", { locale: id })
-      );
-      masukData = Array(weeks.length).fill(0);
-      terjualData = Array(weeks.length).fill(0);
-
-      validProducts.forEach((product) => {
-        const entryDate = getValidDate(product.createdAt);
-        if (entryDate) {
-          const weekIndex = weeks.findIndex((weekStart) => {
-            const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-            return isWithinInterval(entryDate, {
-              start: weekStart,
-              end: weekEnd,
-            });
-          });
-          if (weekIndex !== -1) masukData[weekIndex] += 1;
-        }
-
-        if (product.status?.toLowerCase() === "terjual") {
-          const saleDate = getValidDate(product.soldDate || product.updatedAt);
-          if (saleDate) {
-            const weekIndex = weeks.findIndex((weekStart) => {
-              const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 });
-              return isWithinInterval(saleDate, {
-                start: weekStart,
-                end: weekEnd,
-              });
-            });
-            if (weekIndex !== -1) terjualData[weekIndex] += 1;
-          }
-        }
-      });
-    } else if (selectedTab === "Bulan") {
-      const months = Array.from({ length: 12 }, (_, i) =>
-        startOfMonth(new Date(currentYear, i))
-      );
-      categories = months.map((monthStart) =>
-        format(monthStart, "MMM yyyy", { locale: id })
-      );
-      masukData = Array(12).fill(0);
-      terjualData = Array(12).fill(0);
-
-      validProducts.forEach((product) => {
-        const entryDate = getValidDate(product.createdAt);
-        if (entryDate && getYear(entryDate) === currentYear) {
-          masukData[entryDate.getMonth()] += 1;
-        }
-
-        if (product.status?.toLowerCase() === "terjual") {
-          const saleDate = getValidDate(product.soldDate || product.updatedAt);
-          if (saleDate && getYear(saleDate) === currentYear) {
-            terjualData[saleDate.getMonth()] += 1;
-          }
-        }
-      });
-    } else if (selectedTab === "Tahun") {
-      const endYear = getYear(new Date());
-      const startYear = endYear - 4;
-      const years = Array.from({ length: 5 }, (_, i) =>
-        startOfYear(new Date(startYear + i, 0))
-      );
-      categories = years.map((yearStart) => format(yearStart, "yyyy"));
-      masukData = Array(5).fill(0);
-      terjualData = Array(5).fill(0);
-
-      validProducts.forEach((product) => {
-        const entryDate = getValidDate(product.createdAt);
-        if (entryDate) {
-          const yearIndex = years.findIndex((yearStart) => {
-            const yearEnd = endOfYear(yearStart);
-            return isWithinInterval(entryDate, {
-              start: yearStart,
-              end: yearEnd,
-            });
-          });
-          if (yearIndex !== -1) masukData[yearIndex] += 1;
-        }
-
-        if (product.status?.toLowerCase() === "terjual") {
-          const saleDate = getValidDate(product.soldDate || product.updatedAt);
-          if (saleDate) {
-            const yearIndex = years.findIndex((yearStart) => {
-              const yearEnd = endOfYear(yearStart);
-              return isWithinInterval(saleDate, {
-                start: yearStart,
-                end: yearEnd,
-              });
-            });
-            if (yearIndex !== -1) terjualData[yearIndex] += 1;
-          }
-        }
-      });
-    }
-
-    return { categories, masuk: masukData, terjual: terjualData };
-  }, [products, loading, error, selectedTab, currentYear]);
 
   const options = useMemo(
     () => ({
@@ -359,7 +277,7 @@ const ProductReportChart = () => {
         labels: {
           style: { colors: "#6b7280", fontSize: "11px" },
           formatter: (val) =>
-            selectedTab === "Minggu" && val.length > 7
+            selectedTab === "Minggu" && val && val.length > 7
               ? `${val.substring(0, 6)}.`
               : val,
         },
@@ -374,6 +292,8 @@ const ProductReportChart = () => {
           formatter: (val) => val.toFixed(0),
         },
         min: 0,
+        forceNiceScale: true,
+        tickAmount: 5,
       },
       grid: { borderColor: "#e5e7eb", strokeDashArray: 4 },
       states: {
@@ -412,19 +332,13 @@ const ProductReportChart = () => {
     { name: "Produk Terjual", data: processedData.terjual },
   ];
 
-  const hasActualData =
-    processedData.masuk.some((v) => v > 0) ||
-    processedData.terjual.some((v) => v > 0);
-  const totalMasuk = processedData.masuk.reduce((a, b) => a + b, 0);
-  const totalTerjual = processedData.terjual.reduce((a, b) => a + b, 0);
-
   const chartContainerRef = useAutoScrollToChart(
     { masuk: processedData.masuk, terjual: processedData.terjual },
     selectedTab,
     currentYear
   );
 
-  if (loading) {
+  if (reportChartLoading) {
     return (
       <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-4 sm:p-6">
         <div className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between">
@@ -433,7 +347,6 @@ const ProductReportChart = () => {
               Memuat Laporan Produk...
             </h3>
           </div>
-
           <div className="flex gap-4 items-center">
             <div className="flex items-start w-full gap-3 bg-gray-200 p-1 animate-pulse rounded-full sm:w-auto sm:justify-end">
               <div className="w-1/3 md:w-20 h-5 bg-white animate-pulse rounded-full" />
@@ -443,7 +356,6 @@ const ProductReportChart = () => {
             <div className="w-9 h-6 bg-gray-200 rounded-full animate-pulse" />
           </div>
         </div>
-
         <div
           className="flex flex-col gap-3 justify-center items-center w-full h-full text-gray-500"
           style={{ height: 350 }}
@@ -458,15 +370,13 @@ const ProductReportChart = () => {
     );
   }
 
-  if (error) {
+  if (reportChartError) {
     return (
       <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-4 sm:p-6">
         <div className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="w-full">
-            <h3 className="text-md lg:text-lg font-medium text-gray-700">
-              Laporan Produk Mobil
-            </h3>
-          </div>
+          <h3 className="text-md lg:text-lg font-medium text-gray-700">
+            Laporan Produk Mobil
+          </h3>
         </div>
         <div
           className="text-center py-10 text-red-500"
@@ -477,11 +387,17 @@ const ProductReportChart = () => {
             justifyContent: "center",
           }}
         >
-          Gagal memuat data produk. Error: {error.message}
+          Gagal memuat data produk. Error: {reportChartError.message}
         </div>
       </div>
     );
   }
+
+  const hasActualData =
+    processedData.masuk.some((v) => v > 0) ||
+    processedData.terjual.some((v) => v > 0);
+  const totalMasukSummary = processedData.masuk.reduce((a, b) => a + b, 0);
+  const totalTerjualSummary = processedData.terjual.reduce((a, b) => a + b, 0);
 
   return (
     <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-4 sm:p-6">
@@ -553,7 +469,7 @@ const ProductReportChart = () => {
               Total Produk Masuk
             </h4>
             <p className="text-lg font-semibold text-gray-600">
-              {totalMasuk.toLocaleString("id-ID")}
+              {totalMasukSummary.toLocaleString("id-ID")}
             </p>
           </div>
         </div>
@@ -566,7 +482,7 @@ const ProductReportChart = () => {
               Total Produk Terjual
             </h4>
             <p className="text-lg font-semibold text-gray-600">
-              {totalTerjual.toLocaleString("id-ID")}
+              {totalTerjualSummary.toLocaleString("id-ID")}
             </p>
           </div>
         </div>
