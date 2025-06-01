@@ -75,10 +75,9 @@ export const CarDataProvider = ({ children }) => {
           formOnChange("brand", normalizedNewBrandLabel);
           formOnChange("model", "");
           formOnChange("variant", "");
-          toast.success(
-            `Merek "${normalizedNewBrandLabel}" berhasil ditambahkan.`,
-            { className: "custom-toast" }
-          );
+          toast.success(`Merek ${normalizedNewBrandLabel} ditambahkan.`, {
+            className: "custom-toast",
+          });
         } else {
           showToastError("Gagal menambahkan merek.", response);
         }
@@ -106,6 +105,7 @@ export const CarDataProvider = ({ children }) => {
       ) {
         formOnChange("model", normalizedNewModelLabel);
         formOnChange("variant", "");
+
         return;
       }
 
@@ -122,10 +122,9 @@ export const CarDataProvider = ({ children }) => {
           await mutateCarData();
           formOnChange("model", normalizedNewModelLabel);
           formOnChange("variant", "");
-          toast.success(
-            `Model "${normalizedNewModelLabel}" berhasil ditambahkan ke merek "${currentBrand}".`,
-            { className: "custom-toast" }
-          );
+          toast.success(`Model ${normalizedNewModelLabel} ditambahkan.`, {
+            className: "custom-toast",
+          });
         } else {
           showToastError("Gagal menambahkan model.", response);
         }
@@ -172,10 +171,9 @@ export const CarDataProvider = ({ children }) => {
         if (response.data?.success) {
           await mutateCarData();
           formOnChange("variant", normalizedNewVariantLabel);
-          toast.success(
-            `Varian "${normalizedNewVariantLabel}" berhasil ditambahkan ke model "${currentModel}".`,
-            { className: "custom-toast" }
-          );
+          toast.success(`Varian ${normalizedNewVariantLabel} ditambahkan.`, {
+            className: "custom-toast",
+          });
         } else {
           showToastError("Gagal menambahkan varian.", response);
         }
@@ -206,8 +204,7 @@ export const CarDataProvider = ({ children }) => {
           );
           if (response.data?.success) {
             toast.success(
-              response.data.message ||
-                `Merek "${brandNameToDelete}" berhasil dihapus.`,
+              response.data.message || `Merek ${brandNameToDelete} dihapus.`,
               { className: "custom-toast" }
             );
             await mutateCarData();
@@ -246,7 +243,7 @@ export const CarDataProvider = ({ children }) => {
             }
           );
           if (response.data?.success) {
-            toast.success(response.data.message || "Model berhasil dihapus.", {
+            toast.success(`Model ${modelToDelete} dihapus.`, {
               className: "custom-toast",
             });
             await mutateCarData();
@@ -297,7 +294,7 @@ export const CarDataProvider = ({ children }) => {
             }
           );
           if (response.data?.success) {
-            toast.success(response.data.message || "Varian berhasil dihapus.", {
+            toast.success(`Varian ${variantToDelete} dihapus.`, {
               className: "custom-toast",
             });
             await mutateCarData();

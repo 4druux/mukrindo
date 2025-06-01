@@ -84,12 +84,17 @@ const Select = forwardRef(
       setSearchTerm("");
     };
 
-    const handleAddNewOption = (e) => {
+    const handleAddNewOption = async (e) => {
       e.stopPropagation();
+      if (isActionInProgress) return;
       if (searchTerm.trim() && onAddOption) {
-        onAddOption(searchTerm.trim());
-        setIsDropdownOpen(false);
-        setSearchTerm("");
+        try {
+          await onAddOption(searchTerm.trim());
+          setIsDropdownOpen(false);
+          setSearchTerm("");
+        } catch (err) {
+          console.error("Error during onAddOption in Select:", err);
+        }
       }
     };
 
