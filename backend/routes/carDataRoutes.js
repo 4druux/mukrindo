@@ -26,20 +26,28 @@ router.post(
   carDataController.addModelToBrand
 );
 
-router.delete(
-  "/models",
-  apiKeyAuth,
-  authenticateToken,
-  authorizeAdmin,
-  carDataController.deleteModelFromBrand
-);
-
 router.post(
   "/variants",
   apiKeyAuth,
   authenticateToken,
   authorizeAdmin,
   carDataController.addVariantToModel
+);
+
+router.delete(
+  "/brands",
+  apiKeyAuth,
+  authenticateToken,
+  authorizeAdmin,
+  carDataController.deleteBrand
+);
+
+router.delete(
+  "/models",
+  apiKeyAuth,
+  authenticateToken,
+  authorizeAdmin,
+  carDataController.deleteModelFromBrand
 );
 
 router.delete(

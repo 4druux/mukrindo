@@ -14,7 +14,6 @@ import { FaCar, FaExchangeAlt, FaMoneyBillWave } from "react-icons/fa";
 import BuyForm from "@/components/product-user/home/BuyForm";
 import SellForm from "@/components/product-user/home/SellForm";
 import TradeInForm from "@/components/product-user/home/TradeInForm";
-import DotLoader from "@/components/common/DotLoader";
 
 export const INITIAL_PRICE_RANGE = [50000000, 1500000000];
 const PHONE_PREFIX = "(+62) ";

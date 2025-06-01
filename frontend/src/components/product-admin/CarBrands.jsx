@@ -2,34 +2,37 @@
 "use client";
 import { useMemo } from "react";
 import Select from "../common/Select";
-import axiosInstance from "@/utils/axiosInstance";
-import useSWR from "swr";
-import Image from "next/image";
 import { Trash2 } from "lucide-react";
-import toast from "react-hot-toast";
-
-const fetcher = (url) =>
-  axiosInstance.get(url).then((res) => res.data?.data || []);
+import { useCarData } from "@/context/CarDataContext";
 
 const CarBrands = ({
   brand,
   model,
   variant,
   onChange,
-  errors, // Prop errors dari form utama, mungkin tidak lagi terlalu relevan di sini jika validasi utama di parent
+  errors,
   brandRef,
   modelRef,
   variantRef,
   isAdmin = false,
 }) => {
   const {
-    data: allCarData = [],
-    error: carDataError,
-    isLoading: isLoadingAllCarData,
-    mutate: mutateCarData,
-  } = useSWR(isAdmin ? "/api/car-data/all-data" : null, fetcher, {
-    revalidateOnFocus: true,
-  });
+    allCarData,
+    carDataError,
+    isLoadingAllCarData,
+    isMutatingCarData,
+    handleAddBrand,
+    handleAddModel,
+    handleAddVariant,
+    handleDeleteBrand,
+    handleDeleteModel,
+    handleDeleteVariant,
+  } = useCarData();
+
+  const currentFormData = useMemo(
+    () => ({ brand, model, variant }),
+    [brand, model, variant]
+  );
 
   const brandOptions = useMemo(
     () =>
@@ -38,9 +41,10 @@ const CarBrands = ({
           value: b.brandName,
           label: b.brandName,
           ImgUrl: b.imgUrl || "/images/Carbrand/default.png",
+          canDelete: isAdmin,
         }))
         .sort((a, b) => a.label.localeCompare(b.label)),
-    [allCarData]
+    [allCarData, isAdmin]
   );
 
   const modelOptions = useMemo(() => {
@@ -74,219 +78,6 @@ const CarBrands = ({
       : [];
   }, [brand, model, allCarData, isAdmin]);
 
-  const handleAddBrand = async (newBrandLabel) => {
-    const normalizedNewBrandLabel = newBrandLabel.trim();
-    if (
-      isAdmin &&
-      normalizedNewBrandLabel &&
-      !allCarData.find(
-        (b) =>
-          b.brandName.toLowerCase() === normalizedNewBrandLabel.toLowerCase()
-      )
-    ) {
-      try {
-        const response = await axiosInstance.post("/api/car-data/brands", {
-          name: normalizedNewBrandLabel,
-          imgUrl: "/images/Carbrand/default.png",
-        });
-        if (response.data && response.data.success) {
-          await mutateCarData();
-          onChange("brand", normalizedNewBrandLabel);
-          onChange("model", "");
-          onChange("variant", "");
-          // toast.success(`Merek "${normalizedNewBrandLabel}" berhasil ditambahkan.`, { className: "custom-toast" }); // Opsional
-        } else {
-          toast.error(
-            `Gagal menambahkan merek: ${
-              response.data?.message || "Error tidak diketahui"
-            }`,
-            { className: "custom-toast" }
-          );
-        }
-      } catch (apiError) {
-        toast.error(
-          `Error API saat menambahkan merek: ${
-            apiError.response?.data?.message || apiError.message
-          }`,
-          { className: "custom-toast" }
-        );
-      }
-    }
-  };
-
-  const handleAddModel = async (newModelLabel) => {
-    const normalizedNewModelLabel = newModelLabel.trim();
-    if (isAdmin && brand && normalizedNewModelLabel) {
-      const currentBrandData = allCarData.find((b) => b.brandName === brand);
-      if (
-        currentBrandData &&
-        currentBrandData.models?.find(
-          (m) => m.name.toLowerCase() === normalizedNewModelLabel.toLowerCase()
-        )
-      ) {
-        onChange("model", normalizedNewModelLabel);
-        onChange("variant", "");
-        return;
-      }
-      try {
-        const response = await axiosInstance.post("/api/car-data/models", {
-          brandName: brand,
-          modelName: normalizedNewModelLabel,
-        });
-        if (response.data && response.data.success) {
-          await mutateCarData();
-          onChange("model", normalizedNewModelLabel);
-          onChange("variant", "");
-        } else {
-          toast.error(
-            `Gagal menambahkan model: ${
-              response.data?.message || "Error tidak diketahui"
-            }`,
-            { className: "custom-toast" }
-          );
-        }
-      } catch (apiError) {
-        toast.error(
-          `Error API saat menambahkan model: ${
-            apiError.response?.data?.message || apiError.message
-          }`,
-          { className: "custom-toast" }
-        );
-      }
-    } else if (isAdmin && !brand) {
-      toast.error("Pilih merek terlebih dahulu sebelum menambahkan model.", {
-        className: "custom-toast",
-      });
-    }
-  };
-
-  const handleAddVariant = async (newVariantLabel) => {
-    const normalizedNewVariantLabel = newVariantLabel.trim();
-    if (isAdmin && brand && model && normalizedNewVariantLabel) {
-      const currentBrandData = allCarData.find((b) => b.brandName === brand);
-      const currentModelData = currentBrandData?.models?.find(
-        (m) => m.name === model
-      );
-      if (
-        currentModelData &&
-        currentModelData.variants?.find(
-          (v) =>
-            v.name.toLowerCase() === normalizedNewVariantLabel.toLowerCase()
-        )
-      ) {
-        onChange("variant", normalizedNewVariantLabel);
-        return;
-      }
-      try {
-        const response = await axiosInstance.post("/api/car-data/variants", {
-          brandName: brand,
-          modelName: model,
-          variantName: normalizedNewVariantLabel,
-        });
-        if (response.data && response.data.success) {
-          await mutateCarData();
-          onChange("variant", normalizedNewVariantLabel);
-        } else {
-          toast.error(
-            `Gagal menambahkan varian: ${
-              response.data?.message || "Error tidak diketahui"
-            }`,
-            { className: "custom-toast" }
-          );
-        }
-      } catch (apiError) {
-        toast.error(
-          `Error API saat menambahkan varian: ${
-            apiError.response?.data?.message || apiError.message
-          }`,
-          { className: "custom-toast" }
-        );
-      }
-    } else if (isAdmin && (!brand || !model)) {
-      toast.error(
-        "Pilih merek dan model terlebih dahulu sebelum menambahkan varian.",
-        { className: "custom-toast" }
-      );
-    }
-  };
-
-  const handleDeleteModel = async (modelNameToDelete) => {
-    if (!isAdmin || !brand || !modelNameToDelete) return;
-    if (
-      window.confirm(
-        `Anda yakin ingin menghapus model "${modelNameToDelete}" dari merek "${brand}"? Ini juga akan menghapus semua variannya.`
-      )
-    ) {
-      try {
-        const response = await axiosInstance.delete("/api/car-data/models", {
-          data: { brandName: brand, modelName: modelNameToDelete },
-        });
-        if (response.data && response.data.success) {
-          toast.success(response.data.message || "Model berhasil dihapus.", {
-            className: "custom-toast",
-          });
-          await mutateCarData();
-          if (model === modelNameToDelete) {
-            onChange("model", "");
-            onChange("variant", "");
-          }
-        } else {
-          toast.error(
-            `Gagal menghapus model: ${response.data?.message || "Error"}`,
-            { className: "custom-toast" }
-          );
-        }
-      } catch (apiError) {
-        toast.error(
-          `Error API saat menghapus model: ${
-            apiError.response?.data?.message || apiError.message
-          }`,
-          { className: "custom-toast" }
-        );
-      }
-    }
-  };
-
-  const handleDeleteVariant = async (variantNameToDelete) => {
-    if (!isAdmin || !brand || !model || !variantNameToDelete) return;
-    if (
-      window.confirm(
-        `Anda yakin ingin menghapus varian "${variantNameToDelete}" dari model "${model}"?`
-      )
-    ) {
-      try {
-        const response = await axiosInstance.delete("/api/car-data/variants", {
-          data: {
-            brandName: brand,
-            modelName: model,
-            variantName: variantNameToDelete,
-          },
-        });
-        if (response.data && response.data.success) {
-          toast.success(response.data.message || "Varian berhasil dihapus.", {
-            className: "custom-toast",
-          });
-          await mutateCarData();
-          if (variant === variantNameToDelete) {
-            onChange("variant", "");
-          }
-        } else {
-          toast.error(
-            `Gagal menghapus varian: ${response.data?.message || "Error"}`,
-            { className: "custom-toast" }
-          );
-        }
-      } catch (apiError) {
-        toast.error(
-          `Error API saat menghapus varian: ${
-            apiError.response?.data?.message || apiError.message
-          }`,
-          { className: "custom-toast" }
-        );
-      }
-    }
-  };
-
   if (isAdmin && carDataError) {
     return (
       <div className="text-red-500 col-span-3 p-4 border border-red-300 rounded-md bg-red-50">
@@ -301,7 +92,11 @@ const CarBrands = ({
     );
   }
 
-  const isLoadingOptions = isAdmin && isLoadingAllCarData;
+  const commonSelectProps = {
+    searchOption: true,
+    isActionInProgress: isMutatingCarData,
+    disabled: isLoadingAllCarData || isMutatingCarData,
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -320,14 +115,33 @@ const CarBrands = ({
           onChange("model", "");
           onChange("variant", "");
         }}
-        searchOption={true}
         allowAdd={isAdmin}
-        onAddOption={handleAddBrand}
+        onAddOption={(newLabel) => handleAddBrand(newLabel, onChange)}
+        itemActions={
+          isAdmin
+            ? (optionValue, optionLabel) => (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteBrand(optionValue, currentFormData, onChange);
+                  }}
+                  className="p-1 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full cursor-pointer"
+                  title={`Hapus merek ${optionLabel}`}
+                  disabled={isMutatingCarData}
+                >
+                  <Trash2 size={14} />
+                </button>
+              )
+            : undefined
+        }
+        {...commonSelectProps}
         disabled={
-          isLoadingOptions ||
+          commonSelectProps.disabled ||
           (brandOptions.length === 0 && !isAdmin && !carDataError)
         }
       />
+
       <Select
         ref={modelRef}
         label="Model Mobil"
@@ -344,14 +158,8 @@ const CarBrands = ({
           onChange("model", value);
           onChange("variant", "");
         }}
-        searchOption={true}
-        disabled={
-          isLoadingOptions ||
-          !brand ||
-          (modelOptions.length === 0 && !isAdmin && !!brand)
-        }
         allowAdd={isAdmin && !!brand}
-        onAddOption={handleAddModel}
+        onAddOption={(newLabel) => handleAddModel(brand, newLabel, onChange)}
         itemActions={
           isAdmin && !!brand
             ? (optionValue, optionLabel) => (
@@ -359,17 +167,30 @@ const CarBrands = ({
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleDeleteModel(optionValue);
+                    handleDeleteModel(
+                      brand,
+                      optionValue,
+                      currentFormData,
+                      onChange
+                    );
                   }}
                   className="p-1 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full cursor-pointer"
                   title={`Hapus model ${optionLabel}`}
+                  disabled={isMutatingCarData}
                 >
                   <Trash2 size={14} />
                 </button>
               )
             : undefined
         }
+        {...commonSelectProps}
+        disabled={
+          commonSelectProps.disabled ||
+          !brand ||
+          (modelOptions.length === 0 && !isAdmin && !!brand)
+        }
       />
+
       <Select
         ref={variantRef}
         label="Varian Mobil"
@@ -383,14 +204,10 @@ const CarBrands = ({
         }
         options={variantOptions}
         onChange={(value) => onChange("variant", value)}
-        searchOption={true}
-        disabled={
-          isLoadingOptions ||
-          !model ||
-          (variantOptions.length === 0 && !isAdmin && !!model)
-        }
         allowAdd={isAdmin && !!brand && !!model}
-        onAddOption={handleAddVariant}
+        onAddOption={(newLabel) =>
+          handleAddVariant(brand, model, newLabel, onChange)
+        }
         itemActions={
           isAdmin && !!brand && !!model
             ? (optionValue, optionLabel) => (
@@ -398,15 +215,28 @@ const CarBrands = ({
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleDeleteVariant(optionValue);
+                    handleDeleteVariant(
+                      brand,
+                      model,
+                      optionValue,
+                      currentFormData,
+                      onChange
+                    );
                   }}
                   className="p-1 text-red-500 hover:text-red-700 hover:bg-red-100 rounded-full cursor-pointer"
                   title={`Hapus varian ${optionLabel}`}
+                  disabled={isMutatingCarData}
                 >
                   <Trash2 size={14} />
                 </button>
               )
             : undefined
+        }
+        {...commonSelectProps}
+        disabled={
+          commonSelectProps.disabled ||
+          !model ||
+          (variantOptions.length === 0 && !isAdmin && !!model)
         }
       />
     </div>
