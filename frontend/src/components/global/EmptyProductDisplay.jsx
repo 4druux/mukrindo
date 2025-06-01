@@ -2,9 +2,9 @@
 import Link from "next/link";
 import { FaBoxOpen } from "react-icons/fa";
 import Image from "next/image";
-import CarProductCard from "@/components/global/CarProductCard";
-import { FaWhatsapp, FaBell } from "react-icons/fa6";
-import CarProductCardSwipe from "../product-user/home/CarProductCardSwipe";
+import { FaWhatsapp } from "react-icons/fa6";
+import AnimatedBell from "@/components/animate-icon/AnimatedBell";
+import CarProductCard from "./CarProductCard";
 
 const EmptyProductDisplay = ({
   emptyMessage,
@@ -112,7 +112,7 @@ const EmptyProductDisplay = ({
                   bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent 
                   hover:to-transparent cursor-pointer text-xs"
                 >
-                  <FaBell className="w-4 h-4" />
+                  <AnimatedBell size={20} color="white" className="w-5 h-5" />
                   <span>Beritahu Saya</span>
                 </button>
               </div>
@@ -125,11 +125,11 @@ const EmptyProductDisplay = ({
         filterRecommendations &&
         filterRecommendations.length > 0 && (
           <div>
-            <h1 className="text-md lg:text-xl font-medium text-gray-700 px-3 md:px-0">
+            <h1 className="text-md lg:text-lg font-medium text-gray-700 px-3 md:px-0">
               Rekomendasi serupa
             </h1>
             <div className="">
-              <CarProductCardSwipe
+              <CarProductCard
                 products={filterRecommendations}
                 loading={false}
                 error={null}

@@ -7,7 +7,8 @@ import axiosInstance from "@/utils/axiosInstance";
 import useSWR from "swr";
 
 // Import Icons
-import { ArrowRight, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
+import AnimatedArrowRight from "@/components/animate-icon/AnimatedArrowRight";
 import InputYear from "@/components/common/InputYear";
 import toast from "react-hot-toast";
 
@@ -391,9 +392,9 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
           <button
             onClick={handleReset}
             className="flex items-center justify-center gap-2 py-2 border border-orange-600 text-orange-600
-            rounded-full hover:bg-orange-50 transition duration-200 cursor-pointer w-full"
+            rounded-full hover:bg-orange-50 transition duration-200 cursor-pointer w-full group"
           >
-            <RefreshCw className="w-5 h-5" />
+            <RefreshCw className="w-5 h-5 group-hover:animate-spin" />
             <span className="text-sm">Reset Filter</span>
           </button>
         )}
@@ -406,7 +407,7 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
           cursor-pointer w-full"
         >
           <span className="text-sm">Tampilkan Mobil</span>
-          <ArrowRight className="w-5 h-5" />
+          <AnimatedArrowRight className="w-5 h-5" color="white" />
         </button>
       </div>
     </div>

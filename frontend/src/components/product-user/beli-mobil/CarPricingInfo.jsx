@@ -10,6 +10,8 @@ import {
   FaBell,
 } from "react-icons/fa";
 import toast from "react-hot-toast";
+import AnimatedArrowRight from "@/components/animate-icon/AnimatedArrowRight";
+import AnimatedBell from "@/components/animate-icon/AnimatedBell";
 
 const CarPricingInfo = ({ product }) => {
   if (!product) {
@@ -211,7 +213,7 @@ const CarPricingInfo = ({ product }) => {
                 bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent 
                 hover:to-transparent cursor-pointer w-full text-sm"
               >
-                <FaBell className="w-4 h-4" />
+                <AnimatedBell size={20} color="white" className="w-5 h-5" />
                 <span>Beritahu Saya</span>
               </button>
             </div>
@@ -307,7 +309,7 @@ const CarPricingInfo = ({ product }) => {
                 hover:to-transparent cursor-pointer w-full"
               >
                 <span className="text-sm">Cek Sekarang</span>
-                <ArrowRight className="w-5 h-5" />
+                <AnimatedArrowRight className="w-5 h-5" color="white" />
               </button>
             </div>
           </>
@@ -339,7 +341,8 @@ const CarPricingInfo = ({ product }) => {
               bg-gradient-to-r from-orange-400 to-orange-600 
           hover:bg-orange-600 hover:from-transparent hover:to-transparent cursor-pointer text-sm"
             >
-              <FaBell className="w-3.5 h-3.5" />
+              <AnimatedBell size={20} color="white" className="w-5 h-5" />
+
               <span>Beritahu Saya</span>
             </button>
           </div>
@@ -385,7 +388,7 @@ const CarPricingInfo = ({ product }) => {
           hover:bg-orange-600 hover:from-transparent hover:to-transparent text-sm"
                 >
                   <span>Cek Sekarang</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <AnimatedArrowRight className="w-4 h-4" color="white" />
                 </button>
               )}
             </div>
