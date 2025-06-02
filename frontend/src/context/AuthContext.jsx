@@ -52,7 +52,6 @@ export const AuthProvider = ({ children }) => {
         error.message ||
         "Sesi Anda mungkin telah berakhir. Silakan login kembali.";
       console.error("Fetch Profile Error:", message);
-      // Hanya set authError jika ini bukan error karena token tidak valid/kadaluwarsa yang sudah dihandle
       if (error.response?.status !== 401) {
         setAuthError(message);
       }
@@ -68,7 +67,7 @@ export const AuthProvider = ({ children }) => {
       fetchUserProfile(token);
     } else {
       setLoading(false);
-      setUser(null); // Pastikan user null jika tidak ada token
+      setUser(null);
     }
   }, [fetchUserProfile]);
 
@@ -167,9 +166,6 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       setAuthError(null);
       setLoading(false);
-      toast.success(oauthData.message || "Login berhasil!", {
-        className: "custom-toast",
-      });
 
       if (oauthData.role === "admin") {
         router.push("/admin");
@@ -198,11 +194,11 @@ export const AuthProvider = ({ children }) => {
       );
 
       setUser((prevUser) => ({
-        ...(prevUser || {}), // Handle prevUser null case
+        ...(prevUser || {}),
         _id: data._id,
         firstName: data.firstName || "",
         lastName: data.lastName || "",
-        email: data.email, // Email tidak diubah, jadi bisa ambil dari prevUser jika backend tidak kirim
+        email: data.email,
         role: data.role,
         avatar: data.avatar || null,
         hasPassword: data.hasPassword,

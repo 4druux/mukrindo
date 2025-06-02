@@ -61,12 +61,11 @@ function AppHeader() {
     setIsDropdownOpen(false);
   };
 
-  // Fungsi untuk merender ikon pengguna atau avatar
   const renderUserIconOrAvatar = () => {
     if (isAuthenticated && user) {
       if (user.avatar) {
         return (
-          <div className="w-7 h-7 rounded-full overflow-hidden relative border border-gray-200">
+          <div className="w-7 h-7 rounded-full overflow-hidden relative border border-gray-200 cursor-pointer">
             <Image
               src={user.avatar}
               alt={user.firstName ? `${user.firstName}'s Avatar` : "Avatar"}
@@ -88,7 +87,6 @@ function AppHeader() {
         );
       }
     }
-    // Fallback jika tidak ada user atau avatar/firstName
     return (
       <User
         title="Masuk atau Daftar"

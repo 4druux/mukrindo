@@ -7,9 +7,10 @@ import { useAuth } from "@/context/AuthContext";
 import TittleText from "@/components/common/TittleText";
 import Input from "@/components/common/Input";
 import InputPassword from "@/components/common/InputPassword";
-import { Loader2, Save, UploadCloud, Trash2 } from "lucide-react";
+import { Loader2, Save, UploadCloud, Trash2, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import DotLoader from "@/components/common/DotLoader";
+import { useRouter } from "next/navigation";
 
 export default function EditProfileForm({ isUserPage = false }) {
   const {
@@ -19,7 +20,9 @@ export default function EditProfileForm({ isUserPage = false }) {
     authError,
     setAuthError,
   } = useAuth();
+  const router = useRouter();
 
+  const [initialUserData, setInitialUserData] = useState(null);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -35,25 +38,24 @@ export default function EditProfileForm({ isUserPage = false }) {
   const [removeAvatarFlag, setRemoveAvatarFlag] = useState(false);
 
   const fileInputRef = useRef(null);
-  const componentMounted = useRef(false);
 
   useEffect(() => {
-    componentMounted.current = true;
-    return () => {
-      componentMounted.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (user && componentMounted.current) {
-      setFormData({
+    if (user) {
+      const userData = {
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         email: user.email || "",
+        avatar: user.avatar || null,
+      };
+      setInitialUserData(userData);
+      setFormData({
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
         newPassword: "",
         confirmNewPassword: "",
       });
-      setAvatarPreview(user.avatar || null);
+      setAvatarPreview(userData.avatar);
       setAvatarFile(null);
       setRemoveAvatarFlag(false);
       setImageLoadError(false);
@@ -62,6 +64,20 @@ export default function EditProfileForm({ isUserPage = false }) {
       }
       setErrors({});
       if (authError) setAuthError(null);
+    } else {
+      setInitialUserData(null);
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
+      setAvatarPreview(null);
+      setAvatarFile(null);
+      setRemoveAvatarFlag(false);
+      setImageLoadError(false);
+      setErrors({});
     }
   }, [user, authError, setAuthError]);
 
@@ -115,11 +131,9 @@ export default function EditProfileForm({ isUserPage = false }) {
       setAvatarFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        if (componentMounted.current) {
-          setAvatarPreview(reader.result);
-          setImageLoadError(false);
-          setRemoveAvatarFlag(false);
-        }
+        setAvatarPreview(reader.result);
+        setImageLoadError(false);
+        setRemoveAvatarFlag(false);
       };
       reader.readAsDataURL(file);
       if (errors.avatar) {
@@ -163,9 +177,30 @@ export default function EditProfileForm({ isUserPage = false }) {
     return Object.keys(newErrors).length === 0;
   };
 
+  const checkForChanges = () => {
+    if (!initialUserData) return true;
+
+    const firstNameChanged =
+      formData.firstName.trim() !== initialUserData.firstName;
+    const lastNameChanged =
+      formData.lastName.trim() !== initialUserData.lastName;
+    const passwordChanged = !!formData.newPassword;
+    const avatarChanged = !!avatarFile;
+    const avatarRemoved = removeAvatarFlag && initialUserData.avatar;
+
+    return (
+      firstNameChanged ||
+      lastNameChanged ||
+      passwordChanged ||
+      avatarChanged ||
+      avatarRemoved
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (authError) setAuthError(null);
+    setIsSubmitting(true);
 
     if (!validateForm()) {
       toast.error("Harap perbaiki eror pada form.", {
@@ -174,57 +209,48 @@ export default function EditProfileForm({ isUserPage = false }) {
       setIsSubmitting(false);
       return;
     }
-    setIsSubmitting(true);
 
-    const submissionFormData = new FormData();
-    let hasChanges = false;
-
-    if (formData.firstName.trim() !== (user?.firstName || "")) {
-      submissionFormData.append("firstName", formData.firstName.trim());
-      hasChanges = true;
-    }
-    if (formData.lastName.trim() !== (user?.lastName || "")) {
-      submissionFormData.append("lastName", formData.lastName.trim());
-      hasChanges = true;
-    }
-
-    if (avatarFile) {
-      submissionFormData.append("avatar", avatarFile);
-      hasChanges = true;
-    } else if (removeAvatarFlag && user?.avatar) {
-      submissionFormData.append("removeAvatarFlag", "true");
-      hasChanges = true;
-    }
-
-    if (formData.newPassword) {
-      submissionFormData.append("newPassword", formData.newPassword);
-      hasChanges = true;
-    }
-
-    if (!hasChanges) {
-      toast.info("Tidak ada perubahan untuk disimpan.", {
+    if (!checkForChanges()) {
+      toast.error("Tidak ada perubahan untuk disimpan.", {
         className: "custom-toast",
       });
       setIsSubmitting(false);
       return;
     }
 
+    const submissionFormData = new FormData();
+
+    if (formData.firstName.trim() !== (initialUserData?.firstName || "")) {
+      submissionFormData.append("firstName", formData.firstName.trim());
+    }
+    if (formData.lastName.trim() !== (initialUserData?.lastName || "")) {
+      submissionFormData.append("lastName", formData.lastName.trim());
+    }
+
+    if (avatarFile) {
+      submissionFormData.append("avatar", avatarFile);
+    } else if (removeAvatarFlag && initialUserData?.avatar) {
+      submissionFormData.append("removeAvatarFlag", "true");
+    }
+
+    if (formData.newPassword) {
+      submissionFormData.append("newPassword", formData.newPassword);
+    }
+
     const result = await updateUser(submissionFormData);
 
-    if (componentMounted.current) {
-      if (result.success) {
-        setFormData((prev) => ({
-          ...prev,
-          newPassword: "",
-          confirmNewPassword: "",
-        }));
-        setAvatarFile(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-        setRemoveAvatarFlag(false);
-        setErrors({});
-      }
-      setIsSubmitting(false);
+    if (result.success) {
+      setFormData((prev) => ({
+        ...prev,
+        newPassword: "",
+        confirmNewPassword: "",
+      }));
+      setAvatarFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setRemoveAvatarFlag(false);
+      setErrors({});
     }
+    setIsSubmitting(false);
   };
 
   if (authLoading && !user) {
@@ -269,9 +295,7 @@ export default function EditProfileForm({ isUserPage = false }) {
               sizes="(max-width: 768px) 96px, 128px"
               style={{ objectFit: "cover" }}
               onError={() => {
-                if (componentMounted.current) {
-                  setImageLoadError(true);
-                }
+                setImageLoadError(true);
               }}
               priority={true}
               key={avatarPreview || user?.avatar}
@@ -376,11 +400,20 @@ export default function EditProfileForm({ isUserPage = false }) {
           </div>
         </div>
 
-        <div className="flex justify-end pt-2">
+        <div className="flex justify-end items-center pt-2 gap-3">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="cursor-pointer border text-orange-600 border-orange-500 hover:bg-orange-100 hover:border-orange-500 
+            hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full"
+            disabled={isSubmitting || authLoading}
+          >
+            Kembali
+          </button>
           <button
             type="submit"
             disabled={isSubmitting || authLoading}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white transition-colors duration-200 transform bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-red-500 hover:to-orange-500 rounded-full focus:outline-none  disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white transition-colors duration-200 transform bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-red-500 hover:to-orange-500 rounded-full focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isSubmitting || authLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />

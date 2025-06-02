@@ -30,7 +30,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           let user = await User.findOne({ googleId: profile.id });
 
           if (user) {
-            // Jika user ditemukan via googleId, pastikan avatar mungkin perlu diupdate
             const googleAvatar =
               (profile.photos &&
                 profile.photos[0] &&
@@ -38,12 +37,9 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
               null;
             if (googleAvatar && user.avatar !== googleAvatar) {
               user.avatar = googleAvatar;
-              // tidak perlu save di sini jika tidak ada perubahan signifikan lain,
-              // atau jika Anda ingin selalu update avatar saat login via Google
             }
-            // lastName juga bisa diupdate jika perlu, tapi hati-hati menimpa data yang diinput manual
-            // user.lastName = profile.name.familyName || user.lastName || "";
-            await user.save(); // Simpan jika ada perubahan
+
+            await user.save();
             return done(null, user);
           } else {
             const emailFromProfile =

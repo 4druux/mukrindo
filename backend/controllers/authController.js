@@ -83,12 +83,10 @@ exports.registerUser = async (req, res) => {
         .json({ message: "Kata sandi minimal 6 karakter." });
     }
     const user = new User({
-      // Gunakan new User agar pre-save hook jalan
       firstName,
       lastName,
       email,
       password,
-      // hasPassword akan di-set oleh pre-save hook
     });
     await user.save();
 
@@ -127,7 +125,6 @@ exports.loginUser = async (req, res) => {
     }
     const user = await User.findOne({ email });
     if (user && user.password && (await user.matchPassword(password))) {
-      // Pastikan user.password ada
       res.json({
         _id: user._id,
         firstName: user.firstName,
@@ -262,7 +259,6 @@ exports.updateUserProfile = async (req, res) => {
           .json({ message: "Kata sandi baru minimal 6 karakter." });
       }
       user.password = newPassword;
-      // hasPassword akan di-set true oleh pre-save hook jika password di-set
     }
 
     const updatedUser = await user.save();
