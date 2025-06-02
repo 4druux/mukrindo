@@ -1,8 +1,7 @@
 // backend/config/passport-setup.js
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-
-const User = require("../models/userModel"); // Pastikan path ini benar
+const User = require("../models/userModel");
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -17,32 +16,41 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// Strategi Google OAuth
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   passport.use(
     new GoogleStrategy(
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "/api/auth/google/callback", // Path relatif terhadap base URL backend Anda
-        proxy: true, // Penting jika aplikasi di belakang proxy seperti Vercel/Heroku
+        callbackURL: "/api/auth/google/callback",
+        proxy: true,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
           let user = await User.findOne({ googleId: profile.id });
 
           if (user) {
+            // Jika user ditemukan via googleId, pastikan avatar mungkin perlu diupdate
+            const googleAvatar =
+              (profile.photos &&
+                profile.photos[0] &&
+                profile.photos[0].value) ||
+              null;
+            if (googleAvatar && user.avatar !== googleAvatar) {
+              user.avatar = googleAvatar;
+              // tidak perlu save di sini jika tidak ada perubahan signifikan lain,
+              // atau jika Anda ingin selalu update avatar saat login via Google
+            }
+            // lastName juga bisa diupdate jika perlu, tapi hati-hati menimpa data yang diinput manual
+            // user.lastName = profile.name.familyName || user.lastName || "";
+            await user.save(); // Simpan jika ada perubahan
             return done(null, user);
           } else {
-            // Cek jika email sudah ada (mungkin dari registrasi manual atau OAuth lain)
             const emailFromProfile =
               profile.emails && profile.emails[0]
                 ? profile.emails[0].value
                 : null;
             if (!emailFromProfile) {
-              // Jika Google tidak memberikan email, ini masalah.
-              // Anda bisa mengarahkan pengguna untuk menambahkan email ke akun Google mereka
-              // atau menolak autentikasi.
               return done(
                 new Error("Email tidak diterima dari profil Google."),
                 null
@@ -51,22 +59,31 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
             user = await User.findOne({ email: emailFromProfile });
             if (user) {
-              // Email sudah ada, tautkan akun Google ini
               user.googleId = profile.id;
-              // Anda bisa memilih untuk update nama jika berbeda, atau tidak
-              // user.firstName = profile.name.givenName || user.firstName;
-              // user.lastName = profile.name.familyName || user.lastName;
+              user.avatar =
+                (profile.photos &&
+                  profile.photos[0] &&
+                  profile.photos[0].value) ||
+                user.avatar ||
+                null;
+              if (!user.firstName && profile.name.givenName)
+                user.firstName = profile.name.givenName;
+              if (!user.lastName && profile.name.familyName)
+                user.lastName = profile.name.familyName;
               await user.save();
               return done(null, user);
             } else {
-              // Buat pengguna baru
               const newUser = new User({
                 googleId: profile.id,
-                firstName: profile.name.givenName,
-                lastName: profile.name.familyName || "", // Handle jika familyName tidak ada
+                firstName: profile.name.givenName || "User",
+                lastName: profile.name.familyName || "",
                 email: emailFromProfile,
-                // role default 'user'
-                // password tidak diset untuk pengguna OAuth
+                avatar:
+                  (profile.photos &&
+                    profile.photos[0] &&
+                    profile.photos[0].value) ||
+                  null,
+                hasPassword: false,
               });
               await newUser.save();
               return done(null, newUser);

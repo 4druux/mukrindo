@@ -13,7 +13,7 @@ import DotLoader from "@/components/common/DotLoader";
 
 export default function EditProfileForm({ isUserPage = false }) {
   const {
-    user, // user sekarang seharusnya memiliki properti 'hasPassword'
+    user,
     updateUser,
     loading: authLoading,
     authError,
@@ -24,7 +24,6 @@ export default function EditProfileForm({ isUserPage = false }) {
     firstName: "",
     lastName: "",
     email: "",
-    currentPassword: "",
     newPassword: "",
     confirmNewPassword: "",
   });
@@ -46,12 +45,11 @@ export default function EditProfileForm({ isUserPage = false }) {
   }, []);
 
   useEffect(() => {
-    if (user) {
+    if (user && componentMounted.current) {
       setFormData({
         firstName: user.firstName || "",
         lastName: user.lastName || "",
         email: user.email || "",
-        currentPassword: "",
         newPassword: "",
         confirmNewPassword: "",
       });
@@ -63,17 +61,17 @@ export default function EditProfileForm({ isUserPage = false }) {
         fileInputRef.current.value = "";
       }
       setErrors({});
-      if (authError) setAuthError(null); // Bersihkan authError saat user data berubah
+      if (authError) setAuthError(null);
     }
-  }, [user, setAuthError]); // authError ditambahkan sebagai dependency jika setAuthError dipanggil
+  }, [user, authError, setAuthError]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: null }));
+      setErrors((prevErrors) => ({ ...prevErrors, [name]: null }));
     }
-    if (authError) setAuthError(null); // Bersihkan authError saat user mulai mengetik
+    if (authError) setAuthError(null);
 
     if (name === "newPassword" && formData.confirmNewPassword) {
       if (value === formData.confirmNewPassword) {
@@ -98,7 +96,6 @@ export default function EditProfileForm({ isUserPage = false }) {
   };
 
   const handleAvatarChange = (e) => {
-    // ... (sama seperti sebelumnya)
     const file = e.target.files[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
@@ -133,7 +130,6 @@ export default function EditProfileForm({ isUserPage = false }) {
   };
 
   const removeAvatar = () => {
-    // ... (sama seperti sebelumnya)
     setAvatarFile(null);
     setAvatarPreview(null);
     setImageLoadError(false);
@@ -143,8 +139,6 @@ export default function EditProfileForm({ isUserPage = false }) {
     }
     if (authError) setAuthError(null);
   };
-
-  const isManualUser = user && user.hasPassword; // Menggunakan user.hasPassword
 
   const validateForm = () => {
     const newErrors = {};
@@ -157,11 +151,6 @@ export default function EditProfileForm({ isUserPage = false }) {
       formData.newPassword || formData.confirmNewPassword;
 
     if (isAttemptingPasswordChange) {
-      if (isManualUser && !formData.currentPassword) {
-        // Validasi hanya jika pengguna manual dan ingin ganti sandi
-        newErrors.currentPassword =
-          "Kata sandi saat ini wajib diisi untuk mengubah kata sandi.";
-      }
       if (formData.newPassword.length < 6) {
         newErrors.newPassword = "Kata sandi baru minimal 6 karakter.";
       }
@@ -169,28 +158,20 @@ export default function EditProfileForm({ isUserPage = false }) {
         newErrors.confirmNewPassword =
           "Konfirmasi kata sandi baru tidak cocok.";
       }
-    } else if (
-      formData.currentPassword &&
-      isManualUser &&
-      !isAttemptingPasswordChange
-    ) {
-      newErrors.newPassword =
-        "Kata sandi baru wajib diisi jika Anda ingin mengubah kata sandi.";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (authError) setAuthError(null); // Bersihkan authError sebelum submit baru
+    if (authError) setAuthError(null);
 
     if (!validateForm()) {
       toast.error("Harap perbaiki eror pada form.", {
         className: "custom-toast",
       });
-      setIsSubmitting(false); // Pastikan setIsSubmitting di-set false jika validasi gagal
+      setIsSubmitting(false);
       return;
     }
     setIsSubmitting(true);
@@ -215,15 +196,7 @@ export default function EditProfileForm({ isUserPage = false }) {
       hasChanges = true;
     }
 
-    const isAttemptingPasswordChange =
-      formData.newPassword || formData.confirmNewPassword;
-
-    if (isAttemptingPasswordChange) {
-      if (isManualUser) {
-        // Hanya kirim currentPassword jika pengguna manual
-        // Validasi sudah memastikan currentPassword diisi jika diperlukan
-        submissionFormData.append("currentPassword", formData.currentPassword);
-      }
+    if (formData.newPassword) {
       submissionFormData.append("newPassword", formData.newPassword);
       hasChanges = true;
     }
@@ -242,30 +215,28 @@ export default function EditProfileForm({ isUserPage = false }) {
       if (result.success) {
         setFormData((prev) => ({
           ...prev,
-          currentPassword: "",
           newPassword: "",
           confirmNewPassword: "",
         }));
         setAvatarFile(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
         setRemoveAvatarFlag(false);
-        setErrors({}); // Bersihkan error sisi klien setelah sukses
+        setErrors({});
       }
-      // authError akan di-set oleh updateUser jika gagal, dan akan ditampilkan
       setIsSubmitting(false);
     }
   };
 
-  if (authLoading && !user && !componentMounted.current) {
+  if (authLoading && !user) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-100px)]">
+      <div className="flex items-center justify-center h-[calc(100vh-200px)] md:h-[calc(100vh-100px)]">
         <DotLoader />
       </div>
     );
   }
   if (!user && !authLoading) {
     return (
-      <div className="text-center py-10">
+      <div className="text-center py-10 text-gray-600">
         Gagal memuat data pengguna atau Anda belum login.
       </div>
     );
@@ -276,10 +247,6 @@ export default function EditProfileForm({ isUserPage = false }) {
       ? "/images/placeholder-avatar.png"
       : avatarPreview;
 
-  const isTryingToSetNewPassword =
-    formData.newPassword || formData.confirmNewPassword;
-  const currentPasswordDisabledCond = isManualUser && !isTryingToSetNewPassword;
-
   return (
     <div
       className={`bg-white p-4 md:p-6 rounded-xl ${
@@ -287,14 +254,12 @@ export default function EditProfileForm({ isUserPage = false }) {
       }`}
     >
       <TittleText text="Profil Saya" className="mb-6" />
-      {/* Menampilkan authError dari context jika ada dan bukan dari submit yang sedang berjalan */}
       {authError && !isSubmitting && (
         <p className="text-red-500 mb-4 text-xs p-2 bg-red-50 border border-red-200 rounded">
           Error: {authError}
         </p>
       )}
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Avatar Section */}
         <div className="flex flex-col items-center space-y-3">
           <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-100">
             <Image
@@ -345,7 +310,6 @@ export default function EditProfileForm({ isUserPage = false }) {
           <p className="text-xs text-gray-500">JPG, PNG, WEBP. Maks 2MB.</p>
         </div>
 
-        {/* Name Inputs */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           <Input
             label="Nama Depan"
@@ -356,6 +320,7 @@ export default function EditProfileForm({ isUserPage = false }) {
             error={errors.firstName}
             placeholder="Masukkan nama depan"
             maxLength={50}
+            disabled={isSubmitting}
           />
           <Input
             label="Nama Belakang"
@@ -366,55 +331,25 @@ export default function EditProfileForm({ isUserPage = false }) {
             error={errors.lastName}
             placeholder="Masukkan nama belakang"
             maxLength={50}
+            disabled={isSubmitting}
           />
         </div>
 
-        {/* Email Input */}
         <Input
           label="Email"
           id="email"
           name="email"
           type="email"
           value={formData.email}
-          error={errors.email} // Meskipun disabled, mungkin ada error dari server terkait email?
+          error={errors.email}
           disabled={true}
           readOnly
         />
 
-        {/* Password Section */}
         <div className="border-t border-gray-200 pt-4 md:pt-6">
           <h3 className="text-md font-medium text-gray-700 mb-4 md:mb-6">
             Ubah Kata Sandi
           </h3>
-
-          {isManualUser && ( // Tampilkan field ini HANYA jika user manual (punya password)
-            <div className="mb-4 md:mb-6">
-              {" "}
-              {/* Tambah margin bottom jika field ini tampil */}
-              <InputPassword
-                label="Kata Sandi Saat Ini"
-                id="currentPassword"
-                name="currentPassword"
-                value={formData.currentPassword}
-                onChange={handleChange}
-                error={errors.currentPassword}
-                placeholder={
-                  currentPasswordDisabledCond
-                    ? "••••••••"
-                    : "Masukkan kata sandi saat ini"
-                }
-                autoComplete="current-password"
-                disabled={currentPasswordDisabledCond}
-                inputClassName={
-                  currentPasswordDisabledCond
-                    ? "bg-gray-50 placeholder-gray-400"
-                    : ""
-                }
-              />
-            </div>
-          )}
-          {/* Jika bukan user manual (misal OAuth), field di atas tidak akan tampil sama sekali */}
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <InputPassword
               label="Kata Sandi Baru"
@@ -425,6 +360,7 @@ export default function EditProfileForm({ isUserPage = false }) {
               error={errors.newPassword}
               placeholder="Min. 6 karakter"
               autoComplete="new-password"
+              disabled={isSubmitting}
             />
             <InputPassword
               label="Konfirmasi Kata Sandi Baru"
@@ -435,16 +371,16 @@ export default function EditProfileForm({ isUserPage = false }) {
               error={errors.confirmNewPassword}
               placeholder="Ulangi kata sandi baru"
               autoComplete="new-password"
+              disabled={isSubmitting}
             />
           </div>
         </div>
 
-        {/* Submit Button */}
         <div className="flex justify-end pt-2">
           <button
             type="submit"
             disabled={isSubmitting || authLoading}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white transition-colors duration-200 transform bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-red-500 hover:to-orange-500 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white transition-colors duration-200 transform bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-red-500 hover:to-orange-500 rounded-full focus:outline-none  disabled:cursor-not-allowed"
           >
             {isSubmitting || authLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />

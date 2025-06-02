@@ -32,19 +32,32 @@ const userSchema = new mongoose.Schema(
       sparse: true,
     },
     avatar: {
-      type: String, // URL ke gambar avatar di Cloudinary
+      type: String,
       default: null,
+    },
+    hasPassword: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
 );
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password") || !this.password) {
-    return next();
+  if (this.isModified("password")) {
+    if (!this.password) {
+      this.password = undefined;
+      this.hasPassword = false;
+    } else {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+      this.hasPassword = true;
+    }
+  } else {
+    if (this.googleId && !this.password && this.isNew) {
+      this.hasPassword = false;
+    }
   }
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 

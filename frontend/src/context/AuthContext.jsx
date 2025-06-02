@@ -33,15 +33,14 @@ export const AuthProvider = ({ children }) => {
         `${AUTH_API_PATH}/profile`,
         config
       );
-      // PASTIKAN BACKEND MENGIRIMKAN 'hasPassword'
       setUser({
         _id: data._id,
-        firstName: data.firstName,
-        lastName: data.lastName,
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
         email: data.email,
         role: data.role,
-        avatar: data.avatar,
-        hasPassword: data.hasPassword || false, // TAMBAHKAN INI
+        avatar: data.avatar || null,
+        hasPassword: data.hasPassword || false,
       });
       setAuthError(null);
       return data;
@@ -51,8 +50,12 @@ export const AuthProvider = ({ children }) => {
       const message =
         error.response?.data?.message ||
         error.message ||
-        "Gagal mengambil profil.";
+        "Sesi Anda mungkin telah berakhir. Silakan login kembali.";
       console.error("Fetch Profile Error:", message);
+      // Hanya set authError jika ini bukan error karena token tidak valid/kadaluwarsa yang sudah dihandle
+      if (error.response?.status !== 401) {
+        setAuthError(message);
+      }
       return null;
     } finally {
       setLoading(false);
@@ -65,6 +68,7 @@ export const AuthProvider = ({ children }) => {
       fetchUserProfile(token);
     } else {
       setLoading(false);
+      setUser(null); // Pastikan user null jika tidak ada token
     }
   }, [fetchUserProfile]);
 
@@ -82,13 +86,13 @@ export const AuthProvider = ({ children }) => {
       params.append("role", data.role);
       params.append("userId", data._id);
       params.append("firstName", data.firstName || "");
+      params.append("lastName", data.lastName || "");
       params.append("email", data.email);
+      params.append("hasPassword", String(data.hasPassword || true));
+      params.append("loginType", "manual");
       if (data.avatar) {
         params.append("avatar", data.avatar);
       }
-      // loginType akan digunakan di callback untuk menentukan hasPassword
-      params.append("loginType", "manual");
-
       router.push(`/auth/callback?${params.toString()}`);
       return { success: true, redirectedToCallback: true };
     } catch (error) {
@@ -113,19 +117,19 @@ export const AuthProvider = ({ children }) => {
         password,
       });
       localStorage.setItem("mukrindoAuthToken", data.token);
-      // Saat registrasi, pengguna pasti punya password manual
       setUser({
         _id: data._id,
-        firstName: data.firstName,
-        lastName: data.lastName,
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
         email: data.email,
         role: data.role,
-        avatar: data.avatar,
-        hasPassword: true, // TAMBAHKAN INI
+        avatar: data.avatar || null,
+        hasPassword: data.hasPassword,
       });
       toast.success(data.message || "Registrasi berhasil!", {
         className: "custom-toast",
       });
+      setLoading(false);
       router.push("/");
       return { success: true, user: data };
     } catch (error) {
@@ -134,9 +138,8 @@ export const AuthProvider = ({ children }) => {
       setAuthError(message);
       toast.error(message, { className: "custom-toast" });
       setUser(null);
-      return { success: false, error: message };
-    } finally {
       setLoading(false);
+      return { success: false, error: message };
     }
   };
 
@@ -151,22 +154,22 @@ export const AuthProvider = ({ children }) => {
 
   const handleOAuthSuccess = useCallback(
     (oauthData) => {
-      // oauthData dari query params di halaman /auth/callback
       localStorage.setItem("mukrindoAuthToken", oauthData.token);
       const userData = {
         _id: oauthData.userId,
-        firstName: oauthData.firstName,
+        firstName: oauthData.firstName || "",
         lastName: oauthData.lastName || "",
         email: oauthData.email,
         role: oauthData.role,
         avatar: oauthData.avatar || null,
-        // Tentukan hasPassword berdasarkan loginType yang diterima dari callback
-        // loginType bisa 'manual', 'google', dll.
-        hasPassword: oauthData.loginType === "manual", // TAMBAHKAN INI
+        hasPassword: oauthData.hasPassword === "true",
       };
       setUser(userData);
       setAuthError(null);
       setLoading(false);
+      toast.success(oauthData.message || "Login berhasil!", {
+        className: "custom-toast",
+      });
 
       if (oauthData.role === "admin") {
         router.push("/admin");
@@ -178,7 +181,6 @@ export const AuthProvider = ({ children }) => {
   );
 
   const updateUser = async (formDataToSubmit) => {
-    // Ganti nama parameter
     setLoading(true);
     setAuthError(null);
     try {
@@ -191,20 +193,20 @@ export const AuthProvider = ({ children }) => {
       };
       const { data } = await axiosInstance.put(
         `${AUTH_API_PATH}/profile`,
-        formDataToSubmit, // Gunakan parameter yang diganti namanya
+        formDataToSubmit,
         config
       );
 
-      // PASTIKAN BACKEND MENGIRIMKAN 'hasPassword' setelah update juga
-      setUser({
+      setUser((prevUser) => ({
+        ...(prevUser || {}), // Handle prevUser null case
         _id: data._id,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
+        email: data.email, // Email tidak diubah, jadi bisa ambil dari prevUser jika backend tidak kirim
         role: data.role,
-        avatar: data.avatar,
-        hasPassword: data.hasPassword || user?.hasPassword || false, // Pertahankan atau update hasPassword
-      });
+        avatar: data.avatar || null,
+        hasPassword: data.hasPassword,
+      }));
       toast.success(data.message || "Profil berhasil diperbarui!", {
         className: "custom-toast",
       });

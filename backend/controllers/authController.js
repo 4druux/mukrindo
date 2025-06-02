@@ -2,7 +2,6 @@
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const cloudinary = require("cloudinary").v2;
-const bcrypt = require("bcryptjs");
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -51,7 +50,6 @@ const deleteFromCloudinary = async (imageUrl) => {
     const parts = imageUrl.split("/");
     const folderIndex = parts.findIndex((part) => part === "mukrindo_avatars");
     if (folderIndex > -1 && folderIndex + 1 < parts.length) {
-      // public_id is everything after the folder name, including subfolders within mukrindo_avatars
       const publicIdWithExtension = parts.slice(folderIndex + 1).join("/");
       const publicId = publicIdWithExtension.substring(
         0,
@@ -84,28 +82,37 @@ exports.registerUser = async (req, res) => {
         .status(400)
         .json({ message: "Kata sandi minimal 6 karakter." });
     }
-    const user = await User.create({
+    const user = new User({
+      // Gunakan new User agar pre-save hook jalan
       firstName,
       lastName,
       email,
       password,
+      // hasPassword akan di-set oleh pre-save hook
     });
-    if (user) {
-      res.status(201).json({
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar,
-        token: generateToken(user._id, user.role),
-        message: "Registrasi berhasil.",
-      });
-    } else {
-      res.status(400).json({ message: "Data pengguna tidak valid." });
-    }
+    await user.save();
+
+    res.status(201).json({
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName || "",
+      email: user.email,
+      role: user.role,
+      avatar: user.avatar || null,
+      hasPassword: user.hasPassword,
+      token: generateToken(user._id, user.role),
+      message: "Registrasi berhasil.",
+    });
   } catch (error) {
     console.error("Register Error:", error);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({
+        success: false,
+        message: "Data tidak valid.",
+        errors: messages,
+      });
+    }
     res.status(500).json({ message: "Server Error saat registrasi." });
   }
 };
@@ -119,16 +126,25 @@ exports.loginUser = async (req, res) => {
         .json({ message: "Email dan kata sandi wajib diisi." });
     }
     const user = await User.findOne({ email });
-    if (user && (await user.matchPassword(password))) {
+    if (user && user.password && (await user.matchPassword(password))) {
+      // Pastikan user.password ada
       res.json({
         _id: user._id,
         firstName: user.firstName,
-        lastName: user.lastName,
+        lastName: user.lastName || "",
         email: user.email,
         role: user.role,
-        avatar: user.avatar,
+        avatar: user.avatar || null,
+        hasPassword: user.hasPassword,
         token: generateToken(user._id, user.role),
       });
+    } else if (user && !user.password && user.googleId) {
+      return res
+        .status(401)
+        .json({
+          message:
+            "Akun ini terdaftar melalui Google. Silakan login dengan Google.",
+        });
     } else {
       res.status(401).json({ message: "Email atau kata sandi salah." });
     }
@@ -139,18 +155,24 @@ exports.loginUser = async (req, res) => {
 };
 
 exports.getUserProfile = async (req, res) => {
-  const user = await User.findById(req.user.id).select("-password");
-  if (user) {
-    res.json({
-      _id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar,
-    });
-  } else {
-    res.status(404).json({ message: "Pengguna tidak ditemukan." });
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (user) {
+      res.json({
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName || "",
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar || null,
+        hasPassword: user.hasPassword,
+      });
+    } else {
+      res.status(404).json({ message: "Pengguna tidak ditemukan." });
+    }
+  } catch (error) {
+    console.error("Get User Profile Error:", error);
+    res.status(500).json({ message: "Server Error saat mengambil profil." });
   }
 };
 
@@ -171,11 +193,8 @@ exports.googleCallback = (req, res) => {
   }
 
   const token = generateToken(req.user._id, req.user.role);
-  const role = req.user.role;
-  const userId = req.user._id;
-  const firstName = req.user.firstName || "";
-  const email = req.user.email || "";
-  const avatar = req.user.avatar || "";
+  const { _id, role, firstName, lastName, email, avatar, hasPassword } =
+    req.user;
 
   const baseFrontendUrl =
     process.env.FRONTEND_URL_FOR_OAUTH_REDIRECT || process.env.FRONTEND_URL;
@@ -190,16 +209,22 @@ exports.googleCallback = (req, res) => {
   const redirectUrl = new URL("/auth/callback", baseFrontendUrl);
   redirectUrl.searchParams.append("token", token);
   redirectUrl.searchParams.append("role", role);
-  redirectUrl.searchParams.append("userId", userId.toString());
-  redirectUrl.searchParams.append("firstName", encodeURIComponent(firstName));
+  redirectUrl.searchParams.append("userId", _id.toString());
+  redirectUrl.searchParams.append(
+    "firstName",
+    encodeURIComponent(firstName || "")
+  );
+  redirectUrl.searchParams.append(
+    "lastName",
+    encodeURIComponent(lastName || "")
+  );
   redirectUrl.searchParams.append("email", encodeURIComponent(email));
+  redirectUrl.searchParams.append("hasPassword", String(hasPassword || false));
+  redirectUrl.searchParams.append("loginType", "google");
   if (avatar) {
     redirectUrl.searchParams.append("avatar", encodeURIComponent(avatar));
   }
 
-  console.log(
-    `Google OAuth Berhasil. Redirecting ke frontend /auth/callback dengan data: ${redirectUrl.toString()}`
-  );
   res.redirect(redirectUrl.toString());
 };
 
@@ -210,52 +235,34 @@ exports.updateUserProfile = async (req, res) => {
       return res.status(404).json({ message: "Pengguna tidak ditemukan." });
     }
 
-    const {
-      firstName,
-      lastName,
-      currentPassword,
-      newPassword,
-      removeAvatarFlag,
-    } = req.body;
+    const { firstName, lastName, newPassword, removeAvatarFlag } = req.body;
 
     if (firstName !== undefined)
       user.firstName = firstName.trim() || user.firstName;
     if (lastName !== undefined)
       user.lastName = lastName.trim() || user.lastName;
 
-    let avatarUrl = user.avatar;
-
     if (req.file) {
       if (user.avatar) {
         await deleteFromCloudinary(user.avatar);
       }
-      avatarUrl = await uploadToCloudinary(
+      user.avatar = await uploadToCloudinary(
         req.file.buffer,
         req.file.originalname
       );
-      user.avatar = avatarUrl;
     } else if (removeAvatarFlag === "true" && user.avatar) {
       await deleteFromCloudinary(user.avatar);
       user.avatar = null;
-      avatarUrl = null;
     }
 
     if (newPassword) {
-      if (!currentPassword) {
-        return res.status(400).json({
-          message: "Kata sandi saat ini diperlukan untuk mengubah kata sandi.",
-        });
-      }
-      const isMatch = await user.matchPassword(currentPassword);
-      if (!isMatch) {
-        return res.status(401).json({ message: "Kata sandi saat ini salah." });
-      }
       if (newPassword.length < 6) {
         return res
           .status(400)
           .json({ message: "Kata sandi baru minimal 6 karakter." });
       }
-      user.password = newPassword; // Pre-save hook akan hash password
+      user.password = newPassword;
+      // hasPassword akan di-set true oleh pre-save hook jika password di-set
     }
 
     const updatedUser = await user.save();
@@ -263,11 +270,12 @@ exports.updateUserProfile = async (req, res) => {
     res.json({
       _id: updatedUser._id,
       firstName: updatedUser.firstName,
-      lastName: updatedUser.lastName,
+      lastName: updatedUser.lastName || "",
       email: updatedUser.email,
       role: updatedUser.role,
-      avatar: updatedUser.avatar,
+      avatar: updatedUser.avatar || null,
       token: generateToken(updatedUser._id, updatedUser.role),
+      hasPassword: updatedUser.hasPassword,
       message: "Profil berhasil diperbarui.",
     });
   } catch (error) {
