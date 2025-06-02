@@ -6,8 +6,10 @@ const {
   loginUser,
   getUserProfile,
   googleCallback,
+  updateUserProfile, // Tambahkan ini
 } = require("../controllers/authController");
 const { authenticateToken } = require("../middleware/authenticateToken");
+const multer = require("multer"); // Tambahkan ini
 
 const passport = require("passport");
 try {
@@ -19,10 +21,31 @@ try {
   );
 }
 
-// ... rute lainnya tetap sama ...
+// Konfigurasi Multer untuk avatar
+const storage = multer.memoryStorage();
+const uploadAvatar = multer({
+  storage: storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Hanya file gambar yang diizinkan!"), false);
+    }
+  },
+});
+
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/profile", authenticateToken, getUserProfile);
+
+// Tambahkan route PUT untuk update profil
+router.put(
+  "/profile",
+  authenticateToken,
+  uploadAvatar.single("avatar"), // Middleware Multer untuk satu file bernama 'avatar'
+  updateUserProfile
+);
 
 router.get("/google", (req, res, next) => {
   if (passport._strategy("google")) {
@@ -38,10 +61,8 @@ router.get("/google", (req, res, next) => {
   }
 });
 
-// Rute callback dari Google
 router.get(
   "/google/callback",
-  // Middleware 1: Periksa pembatalan oleh pengguna (access_denied)
   (req, res, next) => {
     if (req.query.error === "access_denied") {
       console.log(
@@ -54,13 +75,11 @@ router.get(
         );
         return res.status(500).send("Konfigurasi URL Frontend bermasalah.");
       }
-      // Menggunakan new URL untuk konstruksi yang lebih aman
       const registerRedirectUrl = new URL("/register", frontendUrl);
       return res.redirect(registerRedirectUrl.toString());
     }
-    next(); // Lanjutkan jika bukan access_denied
+    next();
   },
-  // Middleware 2: Otentikasi Passport
   (req, res, next) => {
     if (passport._strategy("google")) {
       passport.authenticate("google", {

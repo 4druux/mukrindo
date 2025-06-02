@@ -1,4 +1,4 @@
-// layout/user/AppHeader.jsx
+// frontend/src/layout/user/AppHeader.jsx
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -59,6 +59,42 @@ function AppHeader() {
   const handleLogout = () => {
     logout();
     setIsDropdownOpen(false);
+  };
+
+  const renderUserIconOrAvatar = () => {
+    if (isAuthenticated && user) {
+      if (user.avatar) {
+        return (
+          <div className="w-7 h-7 rounded-full overflow-hidden relative border border-gray-200 cursor-pointer">
+            <Image
+              src={user.avatar}
+              alt={user.firstName ? `${user.firstName}'s Avatar` : "Avatar"}
+              fill
+              style={{ objectFit: "cover" }}
+              sizes="(max-width: 768px) 28px, 28px"
+              priority
+            />
+          </div>
+        );
+      } else if (user.firstName) {
+        return (
+          <div
+            title={user.firstName}
+            className="w-7 h-7 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-semibold cursor-pointer hover:bg-orange-600 transition-colors"
+          >
+            {user.firstName.charAt(0).toUpperCase()}
+          </div>
+        );
+      }
+    }
+    return (
+      <User
+        title="Masuk atau Daftar"
+        className={`w-6 h-6 text-gray-700 hover:fill-gray-700 cursor-pointer transition-colors ${
+          isDropdownOpen ? "fill-gray-700 text-gray-700" : ""
+        }`}
+      />
+    );
   };
 
   return (
@@ -153,21 +189,7 @@ function AppHeader() {
                   className="flex items-center justify-center rounded-full focus:outline-none"
                   aria-label="User menu"
                 >
-                  {isAuthenticated && user?.firstName ? (
-                    <div
-                      title={user.firstName}
-                      className="w-7 h-7 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-semibold cursor-pointer hover:bg-orange-600 transition-colors"
-                    >
-                      {user.firstName.charAt(0).toUpperCase()}
-                    </div>
-                  ) : (
-                    <User
-                      title="Masuk atau Daftar"
-                      className={`w-6 h-6 text-gray-700 hover:fill-gray-700 cursor-pointer transition-colors ${
-                        isDropdownOpen ? "fill-gray-700 text-gray-700" : ""
-                      }`}
-                    />
-                  )}
+                  {renderUserIconOrAvatar()}
                 </button>
 
                 <AnimatePresence>
@@ -249,7 +271,6 @@ function AppHeader() {
         </div>
       </header>
       <SearchBar />
-
       {/* Mobile */}
       <div
         className="fixed bottom-0 left-0 right-0 z-40 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] p-4 
