@@ -40,12 +40,25 @@ export default function AdminDropdown() {
     if (isAuthenticated && user) {
       return (
         <>
-          <div
-            title={user.firstName || "Admin"}
-            className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center text-sm font-semibold select-none cursor-pointer transition-colors"
-          >
-            {user.firstName ? user.firstName.charAt(0).toUpperCase() : "A"}
-          </div>
+          {user.avatar ? (
+            <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-full overflow-hidden relative border border-gray-200">
+              <Image
+                src={user.avatar}
+                alt={user.firstName || "Admin Avatar"}
+                fill
+                style={{ objectFit: "cover" }}
+                sizes="(max-width: 768px) 32px, 36px"
+                priority
+              />
+            </div>
+          ) : (
+            <div
+              title={user.firstName || "Admin"}
+              className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center text-sm font-semibold select-none cursor-pointer transition-colors"
+            >
+              {user.firstName ? user.firstName.charAt(0).toUpperCase() : "A"}
+            </div>
+          )}
           <span className="ml-2 mr-1 font-medium text-sm hidden lg:block text-gray-700">
             {user.firstName || "Admin"}
           </span>
@@ -60,6 +73,7 @@ export default function AdminDropdown() {
             height={44}
             src="/images/placeholder-avatar.png"
             alt="User"
+            priority
           />
         </span>
         <span className="mr-1 font-medium text-sm hidden lg:block text-gray-700">
@@ -145,12 +159,12 @@ export default function AdminDropdown() {
                 </>
               ) : (
                 <Link
-                  href="/admin/login"
+                  href="/login"
                   className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-gray-700 hover:text-orange-600 hover:bg-orange-50 cursor-pointer transition-colors"
                   onClick={() => setIsDropdownOpen(false)}
                 >
                   <MdLogout className="w-4 h-4" />
-                  Masuk Admin
+                  Masuk
                 </Link>
               )}
             </div>

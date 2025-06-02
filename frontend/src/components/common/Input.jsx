@@ -37,10 +37,14 @@ const Input = forwardRef(
             name={name}
             value={formattedValue ?? ""}
             onChange={onChange}
-            className={`mt-1 block w-full border focus:outline-none focus:border-orange-300 rounded-xl text-base lg:text-sm py-2 px-3 ${
+            className={`mt-1 block w-full border focus:outline-none focus:border-orange-300 rounded-xl placeholder-gray-400/70 text-base lg:text-sm py-2 px-3 ${
               error ? "border-red-500 focus:border-red-500" : "border-gray-300"
             }
-              ${disabled ? "bg-gray-100 cursor-not-allowed text-gray-500" : ""}
+              ${
+                disabled
+                  ? "bg-gray-100 cursor-not-allowed text-gray-500 focus:!border-gray-300"
+                  : ""
+              }
             `}
             {...props}
           />

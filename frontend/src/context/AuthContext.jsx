@@ -24,6 +24,7 @@ export const AuthProvider = ({ children }) => {
   const router = useRouter();
 
   const fetchUserProfile = useCallback(async (token) => {
+    setLoading(true);
     try {
       const config = {
         headers: { Authorization: `Bearer ${token}` },
@@ -32,7 +33,16 @@ export const AuthProvider = ({ children }) => {
         `${AUTH_API_PATH}/profile`,
         config
       );
-      setUser(data);
+      // PASTIKAN BACKEND MENGIRIMKAN 'hasPassword'
+      setUser({
+        _id: data._id,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        role: data.role,
+        avatar: data.avatar,
+        hasPassword: data.hasPassword || false, // TAMBAHKAN INI
+      });
       setAuthError(null);
       return data;
     } catch (error) {
@@ -44,13 +54,15 @@ export const AuthProvider = ({ children }) => {
         "Gagal mengambil profil.";
       console.error("Fetch Profile Error:", message);
       return null;
+    } finally {
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("mukrindoAuthToken");
     if (token) {
-      fetchUserProfile(token).finally(() => setLoading(false));
+      fetchUserProfile(token);
     } else {
       setLoading(false);
     }
@@ -71,6 +83,10 @@ export const AuthProvider = ({ children }) => {
       params.append("userId", data._id);
       params.append("firstName", data.firstName || "");
       params.append("email", data.email);
+      if (data.avatar) {
+        params.append("avatar", data.avatar);
+      }
+      // loginType akan digunakan di callback untuk menentukan hasPassword
       params.append("loginType", "manual");
 
       router.push(`/auth/callback?${params.toString()}`);
@@ -79,7 +95,7 @@ export const AuthProvider = ({ children }) => {
       const message =
         error.response?.data?.message || error.message || "Login gagal.";
       setAuthError(message);
-      toast.error(message, { className: "custom-toast" }); 
+      toast.error(message, { className: "custom-toast" });
       setUser(null);
       setLoading(false);
       return { success: false, error: message };
@@ -97,12 +113,15 @@ export const AuthProvider = ({ children }) => {
         password,
       });
       localStorage.setItem("mukrindoAuthToken", data.token);
+      // Saat registrasi, pengguna pasti punya password manual
       setUser({
         _id: data._id,
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
         role: data.role,
+        avatar: data.avatar,
+        hasPassword: true, // TAMBAHKAN INI
       });
       toast.success(data.message || "Registrasi berhasil!", {
         className: "custom-toast",
@@ -113,7 +132,7 @@ export const AuthProvider = ({ children }) => {
       const message =
         error.response?.data?.message || error.message || "Registrasi gagal.";
       setAuthError(message);
-      toast.error(message, { className: "custom-toast" }); 
+      toast.error(message, { className: "custom-toast" });
       setUser(null);
       return { success: false, error: message };
     } finally {
@@ -131,19 +150,25 @@ export const AuthProvider = ({ children }) => {
   };
 
   const handleOAuthSuccess = useCallback(
-    (authData) => {
-      localStorage.setItem("mukrindoAuthToken", authData.token);
+    (oauthData) => {
+      // oauthData dari query params di halaman /auth/callback
+      localStorage.setItem("mukrindoAuthToken", oauthData.token);
       const userData = {
-        _id: authData._id,
-        firstName: authData.firstName,
-        email: authData.email,
-        role: authData.role,
+        _id: oauthData.userId,
+        firstName: oauthData.firstName,
+        lastName: oauthData.lastName || "",
+        email: oauthData.email,
+        role: oauthData.role,
+        avatar: oauthData.avatar || null,
+        // Tentukan hasPassword berdasarkan loginType yang diterima dari callback
+        // loginType bisa 'manual', 'google', dll.
+        hasPassword: oauthData.loginType === "manual", // TAMBAHKAN INI
       };
       setUser(userData);
       setAuthError(null);
       setLoading(false);
 
-      if (authData.role === "admin") {
+      if (oauthData.role === "admin") {
         router.push("/admin");
       } else {
         router.push("/");
@@ -152,15 +177,62 @@ export const AuthProvider = ({ children }) => {
     [router]
   );
 
+  const updateUser = async (formDataToSubmit) => {
+    // Ganti nama parameter
+    setLoading(true);
+    setAuthError(null);
+    try {
+      const token = localStorage.getItem("mukrindoAuthToken");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      };
+      const { data } = await axiosInstance.put(
+        `${AUTH_API_PATH}/profile`,
+        formDataToSubmit, // Gunakan parameter yang diganti namanya
+        config
+      );
+
+      // PASTIKAN BACKEND MENGIRIMKAN 'hasPassword' setelah update juga
+      setUser({
+        _id: data._id,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        role: data.role,
+        avatar: data.avatar,
+        hasPassword: data.hasPassword || user?.hasPassword || false, // Pertahankan atau update hasPassword
+      });
+      toast.success(data.message || "Profil berhasil diperbarui!", {
+        className: "custom-toast",
+      });
+      setLoading(false);
+      return { success: true, user: data };
+    } catch (error) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        "Gagal memperbarui profil.";
+      setAuthError(message);
+      toast.error(message, { className: "custom-toast" });
+      setLoading(false);
+      return { success: false, error: message };
+    }
+  };
+
   const contextValue = {
     user,
     loading,
     authError,
+    setAuthError,
     login,
     register,
     logout,
     fetchUserProfile,
     handleOAuthSuccess,
+    updateUser,
     isAdmin: user?.role === "admin",
     isUser: user?.role === "user",
     isAuthenticated: !!user,

@@ -1,7 +1,6 @@
 // frontend/src/components/auth/SignInForm.jsx
 "use client";
 
-import { IoEye, IoEyeOff } from "react-icons/io5";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, Loader2 } from "lucide-react";
@@ -9,12 +8,12 @@ import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
-import TittleText from "../common/TittleText";
+import TittleText from "@/components/common/TittleText";
+import InputPassword from "@/components/common/InputPassword";
 
 export default function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const { login, loading: authLoading, authError } = useAuth();
 
@@ -106,39 +105,19 @@ export default function SignInForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="block w-full px-4 py-2 text-base lg:text-sm text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
+                    className="block w-full px-4 py-2 text-base lg:text-sm text-gray-700 bg-white border border-gray-300 rounded-lg placeholder-gray-400/70 focus:border-orange-300 focus:outline-none"
                   />
                 </div>
-                <div>
-                  <label
-                    htmlFor="password-signin"
-                    className="block mb-2 text-sm font-medium text-gray-700"
-                  >
-                    Kata Sandi <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Masukkan kata sandi anda"
-                      id="password-signin"
-                      name="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      className="block w-full px-4 py-2 text-base lg:text-sm text-gray-700 bg-white border border-gray-200 rounded-lg placeholder-gray-400/70 focus:border-orange-400 focus:outline-none focus:ring focus:ring-orange-300 focus:ring-opacity-40"
-                    />
-                    <span
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
-                    >
-                      {showPassword ? (
-                        <IoEye className="fill-gray-500" />
-                      ) : (
-                        <IoEyeOff className="fill-gray-500" />
-                      )}
-                    </span>
-                  </div>
-                </div>
+                <InputPassword
+                  label="Kata Sandi"
+                  id="password-signin"
+                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Masukkan kata sandi anda"
+                  autoComplete="current-password"
+                  required
+                />
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1">
@@ -150,13 +129,11 @@ export default function SignInForm() {
                       className="rounded border-gray-300 accent-orange-600 focus:outline-none w-3.5 h-3.5 cursor-pointer"
                     />
                     <label htmlFor="remember" className="text-gray-600 text-sm">
-                      {" "}
-                      Ingat saya{" "}
+                      Ingat saya
                     </label>
                   </div>
-                  <div />
                   <Link
-                    href="/reset-password"
+                    href="/reset-password" // Pastikan path ini ada
                     className="text-sm text-orange-600 hover:underline"
                   >
                     Lupa kata sandi?
