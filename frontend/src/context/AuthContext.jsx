@@ -80,20 +80,26 @@ export const AuthProvider = ({ children }) => {
         password,
       });
 
-      const params = new URLSearchParams();
-      params.append("token", data.token);
-      params.append("role", data.role);
-      params.append("userId", data._id);
-      params.append("firstName", data.firstName || "");
-      params.append("lastName", data.lastName || "");
-      params.append("email", data.email);
-      params.append("hasPassword", String(data.hasPassword || true));
-      params.append("loginType", "manual");
-      if (data.avatar) {
-        params.append("avatar", data.avatar);
+      localStorage.setItem("mukrindoAuthToken", data.token);
+      const userData = {
+        _id: data._id,
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
+        email: data.email,
+        role: data.role,
+        avatar: data.avatar || null,
+        hasPassword: data.hasPassword || true,
+      };
+      setUser(userData);
+      setAuthError(null);
+      setLoading(false);
+
+      if (data.role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/");
       }
-      router.push(`/auth/callback?${params.toString()}`);
-      return { success: true, redirectedToCallback: true };
+      return { success: true, user: userData };
     } catch (error) {
       const message =
         error.response?.data?.message || error.message || "Login gagal.";

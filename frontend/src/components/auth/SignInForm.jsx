@@ -15,10 +15,11 @@ export default function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isChecked, setIsChecked] = useState(false);
-  const { login, loading: authLoading, authError } = useAuth();
+  const { login, loading: authLoading, authError, setAuthError } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (authError) setAuthError(null);
     if (!email || !password) {
       toast.error("Email dan kata sandi wajib diisi.", {
         className: "custom-toast",
@@ -28,12 +29,21 @@ export default function SignInForm() {
     await login(email, password);
   };
 
+  const handleInputChange = (setter) => (e) => {
+    setter(e.target.value);
+    if (authError) {
+      setAuthError(null);
+    }
+  };
+
   const handleGoogleLogin = () => {
     if (process.env.NEXT_PUBLIC_API_URL) {
       window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`;
     } else {
       console.error("NEXT_PUBLIC_API_URL is not defined");
-      toast.error("Konfigurasi error, tidak bisa login dengan Google.");
+      toast.error("Konfigurasi error, tidak bisa login dengan Google.", {
+        className: "custom-toast",
+      });
     }
   };
 
@@ -64,6 +74,7 @@ export default function SignInForm() {
             <div className="grid grid-cols-1">
               <button
                 onClick={handleGoogleLogin}
+                type="button"
                 className="inline-flex items-center justify-center gap-3 py-3 text-sm font-medium text-gray-600 transition-colors bg-gray-50 rounded-lg px-7 hover:bg-gray-100 hover:text-gray-800 cursor-pointer"
               >
                 <FcGoogle className="w-8 h-8" />
@@ -83,7 +94,7 @@ export default function SignInForm() {
             </div>
 
             {authError && !authLoading && (
-              <p className="text-xs text-red-500 text-center mb-4">
+              <p className="text-xs text-red-500 text-center mb-4 p-2 bg-red-50 border border-red-200 rounded">
                 {authError}
               </p>
             )}
@@ -103,7 +114,7 @@ export default function SignInForm() {
                     id="email-signin"
                     name="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleInputChange(setEmail)}
                     required
                     className="block w-full px-4 py-2 text-base lg:text-sm text-gray-700 bg-white border border-gray-300 rounded-lg placeholder-gray-400/70 focus:border-orange-300 focus:outline-none"
                   />
@@ -113,7 +124,7 @@ export default function SignInForm() {
                   id="password-signin"
                   name="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={handleInputChange(setPassword)}
                   placeholder="Masukkan kata sandi anda"
                   autoComplete="current-password"
                   required
@@ -133,7 +144,7 @@ export default function SignInForm() {
                     </label>
                   </div>
                   <Link
-                    href="/reset-password" // Pastikan path ini ada
+                    href="/reset-password"
                     className="text-sm text-orange-600 hover:underline"
                   >
                     Lupa kata sandi?

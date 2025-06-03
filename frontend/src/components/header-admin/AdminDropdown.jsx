@@ -54,13 +54,15 @@ export default function AdminDropdown() {
           ) : (
             <div
               title={user.firstName || "Admin"}
-              className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center text-sm font-semibold select-none cursor-pointer transition-colors"
+              className="w-8 h-8 lg:w-9 lg:h-9 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center text-xs font-semibold select-none cursor-pointer transition-colors"
             >
-              {user.firstName ? user.firstName.charAt(0).toUpperCase() : "A"}
+              {user.firstName.charAt(0).toUpperCase()}
+              {user.lastName ? user.lastName.charAt(0).toUpperCase() : ""}
             </div>
           )}
           <span className="ml-2 mr-1 font-medium text-sm hidden lg:block text-gray-700">
-            {user.firstName || "Admin"}
+            {user.firstName.charAt(0).toUpperCase()}
+            {user.lastName ? user.lastName.charAt(0).toUpperCase() : ""}
           </span>
         </>
       );
@@ -113,15 +115,10 @@ export default function AdminDropdown() {
               {isAuthenticated && user ? (
                 <>
                   <div className="px-4 py-2.5 text-xs text-gray-800 border-b border-gray-200">
-                    Halo!,{" "}
+                    Halo,{" "}
                     <span className="font-semibold">
-                      {user.firstName || "Admin"}
+                      {user.firstName} {user.lastName}!
                     </span>
-                    {user.email && (
-                      <span className="block text-xs text-gray-500 mt-0.5">
-                        {user.email}
-                      </span>
-                    )}
                   </div>
 
                   <ul className="flex flex-col gap-0 px-1 py-1">

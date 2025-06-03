@@ -1,3 +1,4 @@
+// frontend/src/layout/user/jual-mobil/SellCar.jsx
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
@@ -10,6 +11,7 @@ import Step2Form from "@/components/product-user/Step2Form";
 import Step3Form from "@/components/product-user/Step3Form";
 import Stepper from "@/components/global/Stepper";
 import { useBuySell } from "@/context/BuySellContext";
+import { useAuth } from "@/context/AuthContext";
 
 // Import Utils
 import {
@@ -77,6 +79,7 @@ const SellCar = () => {
   const [errors, setErrors] = useState({});
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState("");
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const { isSubmitting, submitSellRequest } = useBuySell();
 
   const sellCarSteps = [
@@ -94,6 +97,25 @@ const SellCar = () => {
       ? formatNumberPhone(initialPhoneNumber, PHONE_PREFIX)
       : initialFormData.phoneNumber,
   });
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && user) {
+      setFormData((prevData) => {
+        const updates = {};
+        if (!prevData.name && (user.firstName || user.lastName)) {
+          updates.name = `${user.firstName || ""} ${
+            user.lastName || ""
+          }`.trim();
+        }
+        if (!prevData.email && user.email) {
+          updates.email = user.email;
+        }
+        return Object.keys(updates).length > 0
+          ? { ...prevData, ...updates }
+          : prevData;
+      });
+    }
+  }, [user, isAuthenticated, authLoading]);
 
   // Step 1 Refs
   const brandSelectRef = useRef(null);

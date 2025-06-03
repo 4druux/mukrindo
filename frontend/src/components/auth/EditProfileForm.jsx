@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import TittleText from "@/components/common/TittleText";
 import Input from "@/components/common/Input";
 import InputPassword from "@/components/common/InputPassword";
-import { Loader2, Save, UploadCloud, Trash2, ArrowLeft } from "lucide-react";
+import { Loader2, Save, UploadCloud, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import DotLoader from "@/components/common/DotLoader";
 import { useRouter } from "next/navigation";
@@ -62,9 +62,8 @@ export default function EditProfileForm({ isUserPage = false }) {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      setErrors({});
       if (authError) setAuthError(null);
-    } else {
+    } else if (!authLoading) {
       setInitialUserData(null);
       setFormData({
         firstName: "",
@@ -77,9 +76,8 @@ export default function EditProfileForm({ isUserPage = false }) {
       setAvatarFile(null);
       setRemoveAvatarFlag(false);
       setImageLoadError(false);
-      setErrors({});
     }
-  }, [user, authError, setAuthError]);
+  }, [user, authLoading, authError, setAuthError]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -244,11 +242,19 @@ export default function EditProfileForm({ isUserPage = false }) {
         ...prev,
         newPassword: "",
         confirmNewPassword: "",
+        firstName: result.user?.firstName || prev.firstName,
+        lastName: result.user?.lastName || prev.lastName,
       }));
       setAvatarFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       setRemoveAvatarFlag(false);
       setErrors({});
+
+      if (result.user?.role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
     }
     setIsSubmitting(false);
   };
@@ -305,7 +311,7 @@ export default function EditProfileForm({ isUserPage = false }) {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-orange-600 bg-orange-100 border border-orange-200 rounded-full hover:bg-orange-200 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-orange-600 bg-orange-100 border border-orange-200 rounded-full hover:bg-orange-200 transition-colors cursor-pointer"
             >
               <UploadCloud size={14} /> Unggah Foto
             </button>
@@ -313,7 +319,7 @@ export default function EditProfileForm({ isUserPage = false }) {
               <button
                 type="button"
                 onClick={removeAvatar}
-                className="p-1.5 text-red-500 bg-red-100 border border-red-200 rounded-full hover:bg-red-200 transition-colors"
+                className="p-1.5 text-red-500 bg-red-100 border border-red-200 rounded-full hover:bg-red-200 transition-colors cursor-pointer"
                 aria-label="Hapus foto profil"
               >
                 <Trash2 size={14} />
@@ -404,7 +410,7 @@ export default function EditProfileForm({ isUserPage = false }) {
           <button
             type="button"
             onClick={() => router.back()}
-            className="cursor-pointer border text-orange-600 border-orange-500 hover:bg-orange-100 hover:border-orange-500 
+            className="cursor-pointer border text-orange-600 border-orange-500 hover:bg-orange-100 hover:border-orange-500
             hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full"
             disabled={isSubmitting || authLoading}
           >
@@ -413,7 +419,7 @@ export default function EditProfileForm({ isUserPage = false }) {
           <button
             type="submit"
             disabled={isSubmitting || authLoading}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white transition-colors duration-200 transform bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-red-500 hover:to-orange-500 rounded-full focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white transition-colors duration-200 transform bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent hover:to-transparent rounded-full focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
           >
             {isSubmitting || authLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
