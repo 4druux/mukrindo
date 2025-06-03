@@ -12,6 +12,7 @@ import Step4Form from "@/components/product-user/Step4Form";
 import Stepper from "@/components/global/Stepper";
 import { useProducts } from "@/context/ProductContext";
 import { useTradeIn } from "@/context/TradeInContext";
+import { useAuth } from "@/context/AuthContext";
 
 // Import Utils
 import {
@@ -87,11 +88,13 @@ const TradeInCar = () => {
   const initialNewCarColor = searchParams.get("newCarColor") || "";
 
   const { products, loading: productsLoading } = useProducts();
+  const { isSubmitting, submitTradeInRequest } = useTradeIn();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
+
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState({});
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [termsError, setTermsError] = useState("");
-  const { isSubmitting, submitTradeInRequest } = useTradeIn();
 
   const TradeInCarSteps = [
     { id: 1, label: "Info Mobil" },
@@ -99,6 +102,131 @@ const TradeInCar = () => {
     { id: 3, label: "Lokasi Inspeksi" },
     { id: 4, label: "Mobil Baru" },
   ];
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && user) {
+      setFormData((prevData) => {
+        const updates = {};
+        if (!prevData.name && (user.firstName || user.lastName)) {
+          updates.name = `${user.firstName || ""} ${
+            user.lastName || ""
+          }`.trim();
+        }
+        if (!prevData.email && user.email) {
+          updates.email = user.email;
+        }
+
+        const paramsUpdates = {};
+        if (initialBrand && initialBrand !== prevData.brand)
+          paramsUpdates.brand = initialBrand;
+        if (initialModel && initialModel !== prevData.model)
+          paramsUpdates.model = initialModel;
+        if (initialYear && initialYear !== prevData.year)
+          paramsUpdates.year = initialYear;
+        if (
+          initialPhoneNumber &&
+          formatNumberPhone(initialPhoneNumber, PHONE_PREFIX) !==
+            prevData.phoneNumber
+        ) {
+          paramsUpdates.phoneNumber = formatNumberPhone(
+            initialPhoneNumber,
+            PHONE_PREFIX
+          );
+        }
+        if (initialNewBrand && initialNewBrand !== prevData.newCarBrand)
+          paramsUpdates.newCarBrand = initialNewBrand;
+        if (initialNewModel && initialNewModel !== prevData.newCarModel)
+          paramsUpdates.newCarModel = initialNewModel;
+        if (initialNewVariant && initialNewVariant !== prevData.newCarVariant)
+          paramsUpdates.newCarVariant = initialNewVariant;
+        if (
+          initialNewTransmission &&
+          initialNewTransmission !== prevData.newCarTransmission
+        )
+          paramsUpdates.newCarTransmission = initialNewTransmission;
+        if (initialNewCarColor && initialNewCarColor !== prevData.newCarColor)
+          paramsUpdates.newCarColor = initialNewCarColor;
+
+        const combinedUpdates = { ...paramsUpdates, ...updates };
+
+        if (initialBrand && combinedUpdates.brand !== prevData.brand) {
+          combinedUpdates.model = initialModel || "";
+          combinedUpdates.variant = "";
+        } else if (
+          initialModel &&
+          combinedUpdates.model !== prevData.model &&
+          (combinedUpdates.brand === prevData.brand || !combinedUpdates.brand)
+        ) {
+          combinedUpdates.variant = "";
+        }
+
+        return Object.keys(combinedUpdates).length > 0
+          ? { ...prevData, ...combinedUpdates }
+          : prevData;
+      });
+    } else if (!authLoading && !isAuthenticated) {
+      setFormData((prevData) => {
+        const paramsUpdates = {};
+        if (initialBrand && initialBrand !== prevData.brand)
+          paramsUpdates.brand = initialBrand;
+        if (initialModel && initialModel !== prevData.model)
+          paramsUpdates.model = initialModel;
+        if (initialYear && initialYear !== prevData.year)
+          paramsUpdates.year = initialYear;
+        if (
+          initialPhoneNumber &&
+          formatNumberPhone(initialPhoneNumber, PHONE_PREFIX) !==
+            prevData.phoneNumber
+        ) {
+          paramsUpdates.phoneNumber = formatNumberPhone(
+            initialPhoneNumber,
+            PHONE_PREFIX
+          );
+        }
+        if (initialNewBrand && initialNewBrand !== prevData.newCarBrand)
+          paramsUpdates.newCarBrand = initialNewBrand;
+        if (initialNewModel && initialNewModel !== prevData.newCarModel)
+          paramsUpdates.newCarModel = initialNewModel;
+        if (initialNewVariant && initialNewVariant !== prevData.newCarVariant)
+          paramsUpdates.newCarVariant = initialNewVariant;
+        if (
+          initialNewTransmission &&
+          initialNewTransmission !== prevData.newCarTransmission
+        )
+          paramsUpdates.newCarTransmission = initialNewTransmission;
+        if (initialNewCarColor && initialNewCarColor !== prevData.newCarColor)
+          paramsUpdates.newCarColor = initialNewCarColor;
+
+        if (initialBrand && paramsUpdates.brand !== prevData.brand) {
+          paramsUpdates.model = initialModel || "";
+          paramsUpdates.variant = "";
+        } else if (
+          initialModel &&
+          paramsUpdates.model !== prevData.model &&
+          (paramsUpdates.brand === prevData.brand || !paramsUpdates.brand)
+        ) {
+          paramsUpdates.variant = "";
+        }
+
+        return Object.keys(paramsUpdates).length > 0
+          ? { ...prevData, ...paramsUpdates }
+          : prevData;
+      });
+    }
+  }, [
+    user,
+    isAuthenticated,
+    authLoading,
+    initialBrand,
+    initialModel,
+    initialYear,
+    initialPhoneNumber,
+    initialNewBrand,
+    initialNewModel,
+    initialNewVariant,
+    initialNewTransmission,
+    initialNewCarColor,
+  ]);
 
   // Step 1 Refs
   const brandSelectRef = useRef(null);

@@ -22,23 +22,16 @@ export default function AuthCallbackClient() {
     const loginType = searchParams.get("loginType");
     const messageFromParams = searchParams.get("message");
     const errorType = searchParams.get("error");
+    const hasPasswordParam = searchParams.get("hasPassword");
 
     if (errorType === "admin_access_denied") {
-      const displayMessage =
-        messageFromParams || "Anda tidak memiliki akses.";
+      const displayMessage = messageFromParams || "Anda tidak memiliki akses.";
       toast.error(displayMessage, { className: "custom-toast" });
       router.replace("/");
       return;
     }
 
     if (token && role && userId && email) {
-      let dynamicMessage = messageFromParams;
-      if (!dynamicMessage) {
-        dynamicMessage = `Login dengan ${
-          role === "admin" ? "akun admin " : ""
-        }${loginType === "manual" ? "email" : "Google"} berhasil!`;
-      }
-
       const authData = {
         token,
         role,
@@ -46,8 +39,18 @@ export default function AuthCallbackClient() {
         firstName: firstNameFromParams
           ? decodeURIComponent(firstNameFromParams)
           : "",
+        lastName: searchParams.get("lastName")
+          ? decodeURIComponent(searchParams.get("lastName"))
+          : "",
         email: email ? decodeURIComponent(email) : "",
-        message: dynamicMessage,
+        avatar: searchParams.get("avatar")
+          ? decodeURIComponent(searchParams.get("avatar"))
+          : null,
+        hasPassword: hasPasswordParam === "true",
+        loginType: loginType || "unknown",
+        message: messageFromParams
+          ? decodeURIComponent(messageFromParams)
+          : null,
       };
       handleOAuthSuccess(authData);
     } else if (!errorType) {
@@ -55,13 +58,16 @@ export default function AuthCallbackClient() {
         "Auth callback: Parameter login tidak lengkap atau tidak valid.",
         Object.fromEntries(searchParams)
       );
-      toast.error(
-        "Login gagal atau tidak valid.",
-        {
-          className: "custom-toast",
-        }
-      );
-      router.replace("/login?error=incomplete_params");
+      toast.error("Login gagal atau tidak valid. Silakan coba lagi.", {
+        className: "custom-toast",
+      });
+      router.replace("/login?error=callback_error");
+    } else if (errorType && !token) {
+      const decodedError = messageFromParams
+        ? decodeURIComponent(messageFromParams)
+        : "Terjadi kesalahan saat login dengan Google.";
+      toast.error(decodedError, { className: "custom-toast" });
+      router.replace("/login");
     }
   }, [searchParams, router, handleOAuthSuccess]);
 

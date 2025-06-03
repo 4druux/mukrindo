@@ -80,9 +80,10 @@ function AppHeader() {
         return (
           <div
             title={user.firstName}
-            className="w-7 h-7 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-semibold cursor-pointer hover:bg-orange-600 transition-colors"
+            className="w-7 h-7 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-semibold cursor-pointer hover:bg-orange-600 transition-colors"
           >
             {user.firstName.charAt(0).toUpperCase()}
+            {user.lastName ? user.lastName.charAt(0).toUpperCase() : ""}
           </div>
         );
       }
@@ -207,9 +208,9 @@ function AppHeader() {
                         {isAuthenticated && user ? (
                           <>
                             <div className="px-4 py-2.5 text-xs text-gray-800 border-b border-gray-200">
-                              Halo!{" "}
+                              Halo,{" "}
                               <span className="font-semibold">
-                                {user.firstName}
+                                {user.firstName} {user.lastName}!
                               </span>
                             </div>
                             <ul className="flex flex-col gap-0 px-1 py-1">
