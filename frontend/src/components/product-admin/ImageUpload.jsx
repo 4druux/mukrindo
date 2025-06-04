@@ -86,29 +86,27 @@ export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
   const handleImageChange = (index, event) => {
     const file = event.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setShowUploadPlaceholder(false);
-      toast.error("Hanya file gambar atau GIF yang diperbolehkan.", {
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Ukuran gambar maksimal 2MB per file.", {
         className: "custom-toast",
       });
-      event.target.value = null;
+      if (event.target) event.target.value = null;
+      setShowUploadPlaceholder(false);
       return;
     }
     const reader = new FileReader();
     reader.onload = () => {
       const updatedFiles = [...internalMediaFiles];
       if (file.type === "image/gif") {
-        // Langsung update karena GIF tidak di-crop
         updatedFiles[index] = { original: file, cropped: file };
         setInternalMediaFiles(updatedFiles);
-        setMediaFiles(updatedFiles); // <-- TAMBAHKAN BARIS INI (untuk GIF)
+        setMediaFiles(updatedFiles);
       } else {
-        // Untuk non-GIF, update internal dulu, lalu trigger crop
         updatedFiles[index] = { original: file, cropped: null };
         setInternalMediaFiles(updatedFiles);
         setCropSource(reader.result);
         setCroppingIndex(index);
-        // Jangan panggil setMediaFiles di sini, tunggu handleCropComplete
       }
     };
     reader.onerror = (error) => {

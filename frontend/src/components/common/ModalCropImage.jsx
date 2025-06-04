@@ -14,8 +14,29 @@ export default function ModalCropImage({ mediaSrc, onCropComplete, onClose }) {
   };
 
   const handleSave = async () => {
-    const croppedImage = await getCroppedImg(mediaSrc, croppedAreaPixels);
-    onCropComplete(croppedImage);
+    if (!mediaSrc || !croppedAreaPixels) {
+      toast.error("Tidak dapat memotong gambar, data tidak lengkap.");
+      return;
+    }
+    try {
+      let fileType = "image/jpeg";
+      if (mediaSrc.startsWith("data:image/webp")) {
+        fileType = "image/webp";
+      } else if (mediaSrc.startsWith("data:image/png")) {
+        fileType = "image/png";
+      }
+
+      const croppedImageFile = await getCroppedImg(
+        mediaSrc,
+        croppedAreaPixels,
+        fileType,
+        0.85
+      );
+      onCropComplete(croppedImageFile);
+    } catch (error) {
+      console.error("Error cropping image:", error);
+      toast.error("Gagal memotong gambar.");
+    }
   };
 
   useEffect(() => {
