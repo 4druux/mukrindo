@@ -1,18 +1,17 @@
 // frontend/src/utils/cropImage.js
 /**
  * getCroppedImg
- * @param {string} imageSrc - Base64 encoded image source
- * @param {object} pixelCrop - Cropped area in pixels {x, y, width, height}
- * @param {string} fileType - The desired output file type (e.g., 'image/jpeg', 'image/webp')
- * @param {number} quality - The desired image quality (0.0 to 1.0)
+ * @param {string} imageSrc
+ * @param {object} pixelCrop
+ * @param {string} fileType
+ * @param {number} quality
  */
 export const getCroppedImg = async (
   imageSrc,
   pixelCrop,
   fileType = "image/jpeg",
-  quality = 0.85
+  quality = 0.75
 ) => {
-  // Tambahkan fileType dan quality
   const image = new Image();
   image.src = imageSrc;
 
@@ -35,11 +34,12 @@ export const getCroppedImg = async (
         pixelCrop.height
       );
 
+      const originalFileName =
+        imageSrc.name || `cropped-image.${fileType.split("/")[1] || "jpg"}`;
+
       canvas.toBlob(
         (blob) => {
           if (blob) {
-            const originalFileName =
-              imageSrc.name || `cropped-image.${fileType.split("/")[1]}`;
             const file = new File([blob], originalFileName, {
               type: fileType,
             });
