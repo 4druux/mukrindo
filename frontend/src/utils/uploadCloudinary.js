@@ -1,12 +1,4 @@
 // frontend/src/utils/uploadCloudinary.js
-
-/**
- * Mengunggah satu file gambar ke Cloudinary.
- * @param {File} file - File gambar yang akan diunggah.
- * @param {string} folder - Nama folder di Cloudinary tempat gambar akan disimpan (opsional, default: 'mukrindo_products').
- * @returns {Promise<string>} URL gambar yang aman dari Cloudinary.
- * @throws {Error} Jika upload gagal atau variabel lingkungan tidak diset.
- */
 export async function uploadCloudinary(file, folder = "mukrindo_products") {
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
@@ -48,19 +40,10 @@ export async function uploadCloudinary(file, folder = "mukrindo_products") {
     }
   } catch (error) {
     console.error("Error uploading to Cloudinary:", error);
-    // Melempar kembali error agar bisa ditangani di komponen pemanggil
     throw error;
   }
 }
 
-/**
- * Mengunggah beberapa file gambar ke Cloudinary secara sekuensial.
- * @param {File[]} files - Array file gambar yang akan diunggah (objek File hasil cropping).
- * @param {string} folder - Nama folder di Cloudinary (opsional, default: 'mukrindo_products').
- * @param {function} [onProgress] - Callback untuk update progress (opsional), menerima (currentIndex, totalFiles).
- * @returns {Promise<string[]>} Array URL gambar yang aman dari Cloudinary.
- * @throws {Error} Jika salah satu upload gagal.
- */
 export async function uploadMultipleImagesToCloudinary(
   files,
   folder = "mukrindo_products",
@@ -68,7 +51,7 @@ export async function uploadMultipleImagesToCloudinary(
 ) {
   const uploadedUrls = [];
   if (!Array.isArray(files) || files.length === 0) {
-    return uploadedUrls; // Kembalikan array kosong jika tidak ada file
+    return uploadedUrls;
   }
 
   for (let i = 0; i < files.length; i++) {
@@ -78,16 +61,13 @@ export async function uploadMultipleImagesToCloudinary(
         `Item ke-${i} bukan File atau Blob, dilewati:`,
         fileToUpload
       );
-      // Anda bisa memilih untuk melempar error atau melanjutkan
-      // throw new Error(`Item ke-${i} tidak valid untuk diunggah.`);
-      continue; // Lewati item yang tidak valid
+      continue;
     }
 
     if (onProgress) {
-      onProgress(i, files.length); // Memberikan info progress: file ke-i dari total files
+      onProgress(i, files.length);
     }
     try {
-      // Pastikan fileToUpload adalah objek File yang benar (hasil dari cropping)
       const url = await uploadCloudinary(fileToUpload, folder);
       uploadedUrls.push(url);
     } catch (error) {

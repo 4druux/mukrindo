@@ -76,7 +76,7 @@ export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
     setShowUploadPlaceholder(false);
   };
 
-  const handleRemoveImage = (index) => {
+  const handleRemoveImage = (indexToRemove) => {
     const updatedFiles = internalMediaFiles.filter(
       (_, i) => i !== indexToRemove
     );
@@ -232,12 +232,12 @@ export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
               <div
                 onClick={() => handleClick(index)}
                 className={`mobile-image-container relative h-[200px] rounded-lg bg-gray-100 flex justify-center items-center ${
-                  fileObj.cropped || fileObj.originalBase64
+                  previewURLs[index]
                     ? "border-0"
                     : "border-2 border-dashed border-gray-400 hover:border-gray-800"
                 }`}
               >
-                {fileObj.cropped || fileObj.originalBase64 ? (
+                {previewURLs[index] ? (
                   <>
                     <img
                       src={
@@ -340,12 +340,12 @@ export default function ImageUpload({ mediaFiles, setMediaFiles, error }) {
               fileObj.original?.name || fileObj.originalBase64
             }`}
             className={`relative w-[200px] h-[120px] bg-gray-100 rounded-lg flex justify-center items-center group ${
-              fileObj.cropped || fileObj.originalBase64
+              previewURLs[index]
                 ? "border-0"
                 : "border-2 border-dashed border-gray-400 hover:border-gray-800"
             }`}
           >
-            {fileObj.cropped || fileObj.originalBase64 ? (
+            {previewURLs[index] ? (
               <>
                 <img
                   src={previewURLs[index] || "/images/placeholder-image.png"}
