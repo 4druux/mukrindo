@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import axios from "axios";
 import axiosInstance from "@/utils/axiosInstance";
 
 // Import Components
@@ -21,6 +20,7 @@ import SkeletonEditProduct from "@/components/skeleton/skeleton-admin/SkeletonEd
 import { validateProductData } from "@/utils/validateProductData";
 import { formatNumber, unformatNumber } from "@/utils/formatNumber";
 import { carColorOptions } from "@/utils/carColorOptions";
+import { uploadMultipleImagesToCloudinary } from "@/utils/uploadCloudinary";
 
 // Import Hooks
 import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
@@ -72,6 +72,10 @@ const EditProduct = ({ productId }) => {
   const [mediaFiles, setMediaFiles] = useState([]);
   const [loadingFetch, setLoadingFetch] = useState(true);
   const [loadingUpdate, setLoadingUpdate] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({
+    current: 0,
+    total: 0,
+  });
   const [submitError, setSubmitError] = useState(null);
   const [errors, setErrors] = useState({});
   const router = useRouter();
@@ -284,63 +288,11 @@ const EditProduct = ({ productId }) => {
           };
           setProductData(fetchedData);
 
-          const initialFilesPromises = (data.images || []).map(
-            async (imageUrl, index) => {
-              if (
-                typeof imageUrl !== "string" ||
-                !imageUrl.trim().startsWith("http")
-              ) {
-                console.warn(
-                  `Invalid image URL at index ${index} for product ${productId}:`,
-                  imageUrl
-                );
-                return null;
-              }
-              try {
-                const response = await fetch(imageUrl);
-                if (!response.ok) {
-                  console.error(
-                    `Failed to fetch image ${imageUrl} for product ${productId}: ${response.status} ${response.statusText}`
-                  );
-                  return null;
-                }
-                const blob = await response.blob();
-                if (!blob || blob.size === 0) {
-                  console.warn(
-                    `Fetched empty or invalid blob for image ${imageUrl} (product ${productId}). Blob type: ${blob?.type}, size: ${blob?.size}`
-                  );
-                  return null;
-                }
-
-                const originalNameFromServer = imageUrl.substring(
-                  imageUrl.lastIndexOf("/") + 1
-                );
-                const safeOriginalName =
-                  originalNameFromServer.replace(/[^\w.-]/g, "_") ||
-                  `image${index}.jpg`;
-
-                const file = new File([blob], safeOriginalName, {
-                  type: blob.type || "image/jpeg",
-                });
-
-                return {
-                  original: file,
-                  cropped: file,
-                  originalBase64: imageUrl,
-                };
-              } catch (fetchError) {
-                console.error(
-                  `Error processing image URL ${imageUrl} for product ${productId}:`,
-                  fetchError
-                );
-                return null;
-              }
-            }
-          );
-
-          const processedInitialFiles = (
-            await Promise.all(initialFilesPromises)
-          ).filter((file) => file !== null);
+          const processedInitialFiles = (data.images || []).map((imageUrl) => ({
+            original: null,
+            cropped: imageUrl,
+            originalBase64: imageUrl,
+          }));
 
           setMediaFiles(processedInitialFiles);
           initialProductData.current = { ...fetchedData };
@@ -421,56 +373,56 @@ const EditProduct = ({ productId }) => {
     }
 
     setLoadingUpdate(true);
-
-    const formDataToSend = new FormData();
-    Object.keys(productData).forEach((key) => {
-      if (productData[key] !== undefined && productData[key] !== null) {
-        formDataToSend.append(key, productData[key]);
-      }
-    });
-
-    const newFilesToUpload = [];
-    const retainedImageUrls = [];
-
-    mediaFiles.forEach((fileObj) => {
-      if (fileObj.cropped instanceof File || fileObj.cropped instanceof Blob) {
-        newFilesToUpload.push({
-          file: fileObj.cropped,
-          name: fileObj.original?.name || `image-edited-${Date.now()}.jpg`,
-        });
-      } else if (
-        typeof fileObj.cropped === "string" &&
-        fileObj.cropped.startsWith("http")
-      ) {
-        retainedImageUrls.push(fileObj.cropped);
-      } else if (
-        fileObj.originalBase64 &&
-        typeof fileObj.originalBase64 === "string" &&
-        fileObj.originalBase64.startsWith("http")
-      ) {
-        retainedImageUrls.push(fileObj.originalBase64);
-      }
-    });
-
-    if (retainedImageUrls.length > 0) {
-      retainedImageUrls.forEach((url) =>
-        formDataToSend.append("existingImages", url)
-      );
-    } else {
-      formDataToSend.append("existingImages", JSON.stringify([]));
-    }
-
-    newFilesToUpload.forEach((fileData) => {
-      formDataToSend.append("images", fileData.file, fileData.name);
-    });
+    const filesToUploadToServer = mediaFiles.filter(
+      (mf) => mf.cropped instanceof File || mf.cropped instanceof Blob
+    );
+    setUploadProgress({ current: 0, total: filesToUploadToServer.length });
+    let finalImageUrls = [];
 
     try {
+      const existingCloudinaryUrls = mediaFiles
+        .filter(
+          (mf) =>
+            typeof mf.cropped === "string" && mf.cropped.startsWith("http")
+        )
+        .map((mf) => mf.cropped);
+
+      finalImageUrls.push(...existingCloudinaryUrls);
+
+      const filesToUpload = mediaFiles
+        .map((fileObj) => fileObj.cropped)
+        .filter(
+          (croppedFile) =>
+            croppedFile instanceof File || croppedFile instanceof Blob
+        );
+
+      if (filesToUpload.length > 0) {
+        const newUploadedUrls = await uploadMultipleImagesToCloudinary(
+          filesToUpload,
+          "mukrindo_products",
+          (currentIndex, totalFiles) => {
+            setUploadProgress({ current: currentIndex, total: totalFiles });
+          }
+        );
+        finalImageUrls.push(...newUploadedUrls);
+      }
+
+      if (finalImageUrls.length === 0 && mediaFiles.length > 0) {
+        if (validationErrors.mediaFiles) {
+          throw new Error(validationErrors.mediaFiles);
+        }
+      }
+
+      const productPayload = {
+        ...productData,
+        imageUrls: finalImageUrls,
+      };
+
+      delete productPayload.existingImages;
+
       const response = await axiosInstance.put(
         `${API_ENDPOINT}/${productId}`,
-        formDataToSend,
-        {
-          headers: {},
-        }
+        productPayload
       );
 
       toast.success("Produk berhasil diperbarui.", {
@@ -509,6 +461,7 @@ const EditProduct = ({ productId }) => {
         className: "custom-toast",
       });
       setLoadingUpdate(false);
+      setUploadProgress({ current: 0, total: 0 });
     }
   };
 
@@ -516,10 +469,28 @@ const EditProduct = ({ productId }) => {
     return <SkeletonEditProduct />;
   }
 
-  if (loadingUpdate) {
+  if (
+    loadingUpdate &&
+    uploadProgress.total > 0 &&
+    uploadProgress.current < uploadProgress.total
+  ) {
     return (
       <div className="flex items-center justify-center h-[80vh] bg-gray-50">
-        <DotLoader dotSize="w-5 h-5" />
+        <DotLoader
+          dotSize="w-5 h-5"
+          text={`Mengunggah gambar ${uploadProgress.current} dari ${uploadProgress.total}...`}
+        />
+      </div>
+    );
+  }
+
+  if (
+    loadingUpdate &&
+    (!uploadProgress.total || uploadProgress.current === uploadProgress.total)
+  ) {
+    return (
+      <div className="flex items-center justify-center h-[80vh] bg-gray-50">
+        <DotLoader dotSize="w-5 h-5" text="Menyimpan perubahan..." />
       </div>
     );
   }
@@ -760,7 +731,12 @@ const EditProduct = ({ productId }) => {
               }`}
               disabled={loadingUpdate}
             >
-              {loadingUpdate ? "Memperbarui..." : "Perbarui Produk"}
+              {loadingUpdate
+                ? uploadProgress.total > 0 &&
+                  uploadProgress.current < uploadProgress.total
+                  ? `Mengunggah ${uploadProgress.current}/${uploadProgress.total}...`
+                  : "Menyimpan..."
+                : "Perbarui Produk"}
             </button>
           </div>
         </form>

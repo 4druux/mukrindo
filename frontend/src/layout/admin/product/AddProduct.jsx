@@ -19,6 +19,7 @@ import CarPapers from "@/components/product-admin/CarPapers";
 import { validateProductData } from "@/utils/validateProductData";
 import { formatNumber, unformatNumber } from "@/utils/formatNumber";
 import { carColorOptions } from "@/utils/carColorOptions";
+import { uploadMultipleImagesToCloudinary } from "@/utils/uploadCloudinary";
 
 // Import Hooks
 import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
@@ -69,6 +70,10 @@ const AddProduct = () => {
 
   const [mediaFiles, setMediaFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({
+    current: 0,
+    total: 0,
+  });
   const [submitError, setSubmitError] = useState(null);
   const [errors, setErrors] = useState({});
   const router = useRouter();
@@ -263,31 +268,35 @@ const AddProduct = () => {
     }
 
     setLoading(true);
-
-    const formDataToSend = new FormData();
-    Object.keys(productData).forEach((key) => {
-      if (productData[key] !== undefined && productData[key] !== null) {
-        formDataToSend.append(key, productData[key]);
-      }
+    setUploadProgress({
+      current: 0,
+      total: mediaFiles.filter(
+        (mf) => mf.cropped instanceof File || mf.cropped instanceof Blob
+      ).length,
     });
 
-    mediaFiles.forEach((fileObj, index) => {
-      if (
-        fileObj.cropped &&
-        (fileObj.cropped instanceof File || fileObj.cropped instanceof Blob)
-      ) {
-        formDataToSend.append(
-          "images",
-          fileObj.cropped,
-          fileObj.original?.name || `image-${index}.jpg`
+    let uploadedImageUrls = [];
+    try {
+      const filesToUpload = mediaFiles
+        .map((fileObj) => fileObj.cropped)
+        .filter((file) => file instanceof File || file instanceof Blob);
+
+      if (filesToUpload.length > 0) {
+        uploadedImageUrls = await uploadMultipleImagesToCloudinary(
+          filesToUpload,
+          "mukrindo_products",
+          (currentIndex, totalFiles) => {
+            setUploadProgress({ current: currentIndex, total: totalFiles });
+          }
         );
       }
-    });
 
-    try {
-      const response = await axiosInstance.post(API_ENDPOINT, formDataToSend, {
-        headers: {},
-      });
+      const productPayload = {
+        ...productData,
+        imageUrls: uploadedImageUrls,
+      };
+
+      const response = await axiosInstance.post(API_ENDPOINT, productPayload);
       toast.success("Produk berhasil ditambahkan.", {
         className: "custom-toast",
       });
@@ -332,13 +341,32 @@ const AddProduct = () => {
         className: "custom-toast",
       });
       setLoading(false);
+      setUploadProgress({ current: 0, total: 0 });
     }
   };
 
-  if (loading) {
+  if (
+    loading &&
+    uploadProgress.total > 0 &&
+    uploadProgress.current < uploadProgress.total
+  ) {
     return (
       <div className="flex items-center justify-center h-[80vh] bg-gray-50">
-        <DotLoader dotSize="w-5 h-5" />
+        <DotLoader
+          dotSize="w-5 h-5"
+          text={`Mengunggah gambar ${uploadProgress.current} dari ${uploadProgress.total}...`}
+        />
+      </div>
+    );
+  }
+
+  if (
+    loading &&
+    (!uploadProgress.total || uploadProgress.current === uploadProgress.total)
+  ) {
+    return (
+      <div className="flex items-center justify-center h-[80vh] bg-gray-50">
+        <DotLoader dotSize="w-5 h-5" text="Menyimpan produk..." />
       </div>
     );
   }
@@ -360,7 +388,6 @@ const AddProduct = () => {
           separator={false}
         />
         {submitError && <div className="text-red-500 mb-4">{submitError}</div>}
-        {loading && <div className="text-orange-500 mb-4">Menambahkan...</div>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm mb-2 font-medium text-gray-700">
@@ -580,7 +607,12 @@ const AddProduct = () => {
               hover:from-transparent hover:to-transparent text-white text-sm font-medium py-2.5 px-6 rounded-full"
               disabled={loading}
             >
-              Tambah Produk
+              {loading
+                ? uploadProgress.total > 0 &&
+                  uploadProgress.current < uploadProgress.total
+                  ? `Mengunggah ${uploadProgress.current}/${uploadProgress.total}...`
+                  : "Menyimpan..."
+                : "Tambah Produk"}
             </button>
           </div>
         </form>
