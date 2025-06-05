@@ -49,30 +49,30 @@ const safeParseISO = (dateInput) => {
 };
 
 // Upload To Cloudinary
-const uploadToCloudinary = (fileBuffer, originalFilename) => {
-  return new Promise((resolve, reject) => {
-    const baseFilename = originalFilename
-      .split(".")[0]
-      .replace(/\s+/g, "_")
-      .replace(/[^\w-]/g, "");
-    const uniquePublicId = `${Date.now()}-${baseFilename}`;
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: "mukrindo_products",
-        public_id: uniquePublicId,
-        transformation: [{ quality: "auto:good" }, { fetch_format: "auto" }],
-        resource_type: "image",
-      },
-      (error, result) => {
-        if (error) return reject(error);
-        if (!result || !result.secure_url)
-          return reject(new Error("Cloudinary upload failed, no secure_url."));
-        resolve(result.secure_url);
-      }
-    );
-    uploadStream.end(fileBuffer);
-  });
-};
+// const uploadToCloudinary = (fileBuffer, originalFilename) => {
+//   return new Promise((resolve, reject) => {
+//     const baseFilename = originalFilename
+//       .split(".")[0]
+//       .replace(/\s+/g, "_")
+//       .replace(/[^\w-]/g, "");
+//     const uniquePublicId = `${Date.now()}-${baseFilename}`;
+//     const uploadStream = cloudinary.uploader.upload_stream(
+//       {
+//         folder: "mukrindo_products",
+//         public_id: uniquePublicId,
+//         transformation: [{ quality: "auto:good" }, { fetch_format: "auto" }],
+//         resource_type: "image",
+//       },
+//       (error, result) => {
+//         if (error) return reject(error);
+//         if (!result || !result.secure_url)
+//           return reject(new Error("Cloudinary upload failed, no secure_url."));
+//         resolve(result.secure_url);
+//       }
+//     );
+//     uploadStream.end(fileBuffer);
+//   });
+// };
 
 // Delete From Cloudinary
 const deleteFromCloudinary = async (imageUrl) => {
@@ -119,6 +119,7 @@ exports.createProduct = async (req, res) => {
       yearOfAssembly,
       price,
       status,
+      imageUrls,
     } = req.body;
 
     const requiredFields = [
@@ -146,33 +147,10 @@ exports.createProduct = async (req, res) => {
       });
     }
 
-    if (!req.files || req.files.length === 0) {
+    if (!imageUrls || !Array.isArray(imageUrls) || imageUrls.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Minimal satu gambar harus diunggah",
-      });
-    }
-
-    const imageUrls = [];
-    for (const file of req.files) {
-      try {
-        const imageUrl = await uploadToCloudinary(
-          file.buffer,
-          file.originalname
-        );
-        imageUrls.push(imageUrl);
-      } catch (uploadError) {
-        return res.status(500).json({
-          success: false,
-          message: "Gagal mengunggah salah satu gambar ke cloud.",
-        });
-      }
-    }
-
-    if (imageUrls.length === 0 && req.files.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Gagal memproses gambar yang diunggah.",
+        message: "Minimal satu URL gambar produk harus disertakan",
       });
     }
 
@@ -220,7 +198,7 @@ exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const {
-      existingImages,
+      imageUrls,
       carName,
       brand,
       model,
@@ -286,54 +264,28 @@ exports.updateProduct = async (req, res) => {
 
     const updatePayload = { ...productDataFields };
 
-    const intendsToUpdateImages =
-      (req.body &&
-        typeof req.body === "object" &&
-        Object.prototype.hasOwnProperty.call(req.body, "existingImages")) ||
-      (req.files && req.files.length > 0);
-
-    if (intendsToUpdateImages) {
-      let finalImageUrls = [];
-      const retainedImageUrls = Array.isArray(existingImages)
-        ? existingImages
-        : existingImages
-        ? [existingImages]
-        : [];
-
-      finalImageUrls.push(...retainedImageUrls);
-
+    if (imageUrls && Array.isArray(imageUrls)) {
       const imagesToDeleteFromCloud = productToUpdate.images.filter(
-        (imgUrl) => !retainedImageUrls.includes(imgUrl)
+        (imgUrl) => !imageUrls.includes(imgUrl)
       );
       for (const imgUrl of imagesToDeleteFromCloud) {
         await deleteFromCloudinary(imgUrl);
       }
 
-      if (req.files && req.files.length > 0) {
-        for (const file of req.files) {
-          try {
-            const newImageUrl = await uploadToCloudinary(
-              file.buffer,
-              file.originalname
-            );
-            finalImageUrls.push(newImageUrl);
-          } catch (uploadError) {
-            console.error(
-              "Cloudinary upload error during update:",
-              uploadError
-            );
-          }
-        }
-      }
+      updatePayload.images = imageUrls;
 
-      if (finalImageUrls.length === 0) {
+      if (imageUrls.length === 0) {
         return res.status(400).json({
           success: false,
           message:
             "Minimal satu gambar harus dipertahankan atau diunggah saat memperbarui gambar.",
         });
       }
-      updatePayload.images = finalImageUrls;
+    } else if (req.body.hasOwnProperty("imageUrls") && imageUrls === null) {
+      for (const imgUrl of productToUpdate.images) {
+        await deleteFromCloudinary(imgUrl);
+      }
+      updatePayload.images = [];
     }
 
     if (

@@ -1,10 +1,17 @@
-// utils/cropImage.js
+// frontend/src/utils/cropImage.js
 /**
  * getCroppedImg
- * @param {string} imageSrc - Base64 encoded image source
- * @param {object} pixelCrop - Cropped area in pixels {x, y, width, height}
+ * @param {string} imageSrc
+ * @param {object} pixelCrop
+ * @param {string} fileType
+ * @param {number} quality
  */
-export const getCroppedImg = async (imageSrc, pixelCrop) => {
+export const getCroppedImg = async (
+  imageSrc,
+  pixelCrop,
+  fileType = "image/jpeg",
+  quality = 0.75
+) => {
   const image = new Image();
   image.src = imageSrc;
 
@@ -27,16 +34,23 @@ export const getCroppedImg = async (imageSrc, pixelCrop) => {
         pixelCrop.height
       );
 
-      canvas.toBlob(async (blob) => {
-        if (blob) {
-          const file = new File([blob], "cropped-image.jpeg", {
-            type: "image/jpeg",
-          }); // Use a consistent file type
-          resolve(file);
-        } else {
-          reject(new Error("Failed to create blob from canvas."));
-        }
-      }, "image/jpeg"); // Use a consistent MIME type
+      const originalFileName =
+        imageSrc.name || `cropped-image.${fileType.split("/")[1] || "jpg"}`;
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            const file = new File([blob], originalFileName, {
+              type: fileType,
+            });
+            resolve(file);
+          } else {
+            reject(new Error("Failed to create blob from canvas."));
+          }
+        },
+        fileType,
+        quality
+      );
     };
 
     image.onerror = (error) => {

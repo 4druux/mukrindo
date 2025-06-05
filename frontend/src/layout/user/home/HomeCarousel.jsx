@@ -77,7 +77,7 @@ const HomeCarousel = ({
 
   return (
     <div
-      className="relative w-full overflow-hidden aspect-[2/1] lg:aspect-[3/1] rounded-none md:rounded-2xl cursor-pointer"
+      className="relative w-full max-h-[50vh] md:max-h-[60vh] aspect-[16/9]"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -103,12 +103,12 @@ const HomeCarousel = ({
               blurDataURL={image}
               priority={index === 0}
               fetchPriority={index === 0 ? "high" : "auto"}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              sizes="(max-width: 768px) 100vw, 100vw"
             />
           </SwiperSlide>
         ))}
       </Swiper>
-      {/* Centered Custom Dot Pagination with Progress Animation */}
+
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
         <div className="flex items-center px-2 py-1 space-x-1 bg-neutral-900/50 rounded-full">
           {images.map((_, index) => (

@@ -72,10 +72,9 @@ function HomePageLogicAndContent() {
   }, [searchParams, router, pathname, handleOAuthSuccess]);
 
   return (
-    <div className="container mx-auto">
-      <p className="md:pt-5 lg:pt-10 border-t-2 border-gray-200"></p>
+    <div>
       <HomeCarousel images={bannerImages} />
-      <div className="space-y-4 md:space-y-16 mt-4 md:mt-10">
+      <div className="container mx-auto space-y-4 md:space-y-16 mt-4 md:mt-10">
         <Suspense
           fallback={
             <div className="text-center py-10">Memuat form mobil...</div>

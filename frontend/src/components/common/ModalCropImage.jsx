@@ -1,8 +1,9 @@
-//components/common/ModalCropImage.jsx
+// frontend/src/components/common/ModalCropImage.jsx
 import { getCroppedImg } from "@/utils/cropImage";
 import { XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import Cropper from "react-easy-crop";
+import toast from "react-hot-toast"; 
 
 export default function ModalCropImage({ mediaSrc, onCropComplete, onClose }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -14,8 +15,38 @@ export default function ModalCropImage({ mediaSrc, onCropComplete, onClose }) {
   };
 
   const handleSave = async () => {
-    const croppedImage = await getCroppedImg(mediaSrc, croppedAreaPixels);
-    onCropComplete(croppedImage);
+    if (!mediaSrc || !croppedAreaPixels) {
+      toast.error("Tidak dapat memotong gambar, data tidak lengkap.");
+      return;
+    }
+    try {
+      let fileType = "image/jpeg";
+      let quality = 0.75;
+
+      if (mediaSrc.startsWith("data:image/")) {
+        const match = mediaSrc.match(/^data:(image\/(.+));base64,/);
+        if (match && match[1]) {
+          const detectedType = match[1].toLowerCase();
+          if (detectedType === "image/png") {
+            fileType = "image/png";
+            quality = 1;
+          } else if (detectedType === "image/webp") {
+            fileType = "image/webp";
+          }
+        }
+      }
+
+      const croppedImageFile = await getCroppedImg(
+        mediaSrc,
+        croppedAreaPixels,
+        fileType,
+        quality
+      );
+      onCropComplete(croppedImageFile);
+    } catch (error) {
+      console.error("Error cropping image:", error);
+      toast.error("Gagal memotong gambar.");
+    }
   };
 
   useEffect(() => {
@@ -24,10 +55,10 @@ export default function ModalCropImage({ mediaSrc, onCropComplete, onClose }) {
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = "100%";
     return () => {
-      const scrollY = parseInt(document.body.style.top || "0", 10) * -1;
+      const scrollYValue = parseInt(document.body.style.top || "0", 10) * -1;
       document.body.style.position = "";
       document.body.style.top = "";
-      window.scrollTo(0, scrollY);
+      window.scrollTo(0, scrollYValue);
     };
   }, []);
 
