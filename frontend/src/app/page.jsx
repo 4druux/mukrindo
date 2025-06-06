@@ -1,4 +1,4 @@
-// frontend/src/app/page.js (atau file Home.js Anda)
+// frontend/src/app/page.js
 "use client";
 
 import React, { useEffect, Suspense } from "react";

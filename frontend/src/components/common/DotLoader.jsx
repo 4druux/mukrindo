@@ -9,7 +9,7 @@ const DotLoader = ({
   dotColorClassName = "bg-gradient-to-r from-orange-500 to-amber-500",
   text = "",
   textSizeClassName = "text-sm",
-  textColorClassName = "text-gray-700 animate-pulse",
+  textColorClassName = "text-gray-700",
 }) => {
   const animationBaseClass =
     "animate-[bounce-delay_1.4s_infinite_ease-in-out_both]";

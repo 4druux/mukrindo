@@ -48,32 +48,6 @@ const safeParseISO = (dateInput) => {
   return null;
 };
 
-// Upload To Cloudinary
-// const uploadToCloudinary = (fileBuffer, originalFilename) => {
-//   return new Promise((resolve, reject) => {
-//     const baseFilename = originalFilename
-//       .split(".")[0]
-//       .replace(/\s+/g, "_")
-//       .replace(/[^\w-]/g, "");
-//     const uniquePublicId = `${Date.now()}-${baseFilename}`;
-//     const uploadStream = cloudinary.uploader.upload_stream(
-//       {
-//         folder: "mukrindo_products",
-//         public_id: uniquePublicId,
-//         transformation: [{ quality: "auto:good" }, { fetch_format: "auto" }],
-//         resource_type: "image",
-//       },
-//       (error, result) => {
-//         if (error) return reject(error);
-//         if (!result || !result.secure_url)
-//           return reject(new Error("Cloudinary upload failed, no secure_url."));
-//         resolve(result.secure_url);
-//       }
-//     );
-//     uploadStream.end(fileBuffer);
-//   });
-// };
-
 // Delete From Cloudinary
 const deleteFromCloudinary = async (imageUrl) => {
   if (!imageUrl || !imageUrl.includes("cloudinary.com")) return;

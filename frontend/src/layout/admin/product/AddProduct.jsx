@@ -354,7 +354,7 @@ const AddProduct = () => {
       <div className="flex items-center justify-center h-[80vh] bg-gray-50">
         <DotLoader
           dotSize="w-5 h-5"
-          text={`Mengunggah gambar ${uploadProgress.current} dari ${uploadProgress.total}...`}
+          text={`Mengunggah gambar ${uploadProgress.current} dari ${uploadProgress.total}`}
         />
       </div>
     );
