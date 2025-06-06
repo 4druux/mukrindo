@@ -15,7 +15,6 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    // 1. Tambahkan X-API-Key
     const apiKey = process.env.NEXT_PUBLIC_BACKEND_API_KEY;
     if (apiKey) {
       config.headers["X-API-Key"] = apiKey;
@@ -23,9 +22,11 @@ axiosInstance.interceptors.request.use(
       console.warn("Frontend: NEXT_PUBLIC_BACKEND_API_KEY is not set.");
     }
 
-    const token = localStorage.getItem("mukrindoAuthToken");
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("mukrindoAuthToken");
+      if (token) {
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
     }
 
     return config;

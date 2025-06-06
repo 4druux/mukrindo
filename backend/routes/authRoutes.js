@@ -6,10 +6,10 @@ const {
   loginUser,
   getUserProfile,
   googleCallback,
-  updateUserProfile, // Tambahkan ini
+  updateUserProfile,
 } = require("../controllers/authController");
 const { authenticateToken } = require("../middleware/authenticateToken");
-const multer = require("multer"); // Tambahkan ini
+const multer = require("multer");
 
 const passport = require("passport");
 try {
@@ -21,11 +21,10 @@ try {
   );
 }
 
-// Konfigurasi Multer untuk avatar
 const storage = multer.memoryStorage();
 const uploadAvatar = multer({
   storage: storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
+  limits: { fileSize: 2 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith("image/")) {
       cb(null, true);
@@ -39,11 +38,10 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/profile", authenticateToken, getUserProfile);
 
-// Tambahkan route PUT untuk update profil
 router.put(
   "/profile",
   authenticateToken,
-  uploadAvatar.single("avatar"), // Middleware Multer untuk satu file bernama 'avatar'
+  uploadAvatar.single("avatar"),
   updateUserProfile
 );
 
