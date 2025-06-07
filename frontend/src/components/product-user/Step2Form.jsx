@@ -1,6 +1,7 @@
 // components/sell-car/Step2Form.jsx
 import React from "react";
 import Input from "@/components/common/Input";
+import MagneticButton from "../common/MagneticButton";
 
 const Step2Form = ({
   formData,
@@ -49,15 +50,11 @@ const Step2Form = ({
           error={errors.email}
         />
       </div>
-      <div className="flex justify-end space-x-2 sm:space-x-4 mt-4">
-        <button
-          type="button"
-          onClick={onBack}
-          className="cursor-pointer border text-orange-600 border-orange-500 hover:bg-orange-100 hover:border-orange-500 
-                hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
-        >
+      <div className="flex justify-end gap-x-2 sm:gap-x-4 mt-4">
+        <MagneticButton type="button" onClick={onBack} className="!py-2.5 !m-0">
           Kembali
-        </button>
+        </MagneticButton>
+
         <button
           type="button"
           onClick={onNext}

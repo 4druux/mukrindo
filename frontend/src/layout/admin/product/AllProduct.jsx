@@ -15,9 +15,10 @@ import CarProductCard from "@/components/global/CarProductCard";
 import EmptyProductDisplay from "@/components/global/EmptyProductDisplay";
 import Pagination from "@/components/global/Pagination";
 import DotLoader from "@/components/common/DotLoader";
+import MagneticButton from "@/components/common/MagneticButton";
 
 // Import Icons
-import { Plus } from "lucide-react";
+import { Plus, PlusCircleIcon } from "lucide-react";
 
 const AllProducts = () => {
   const {
@@ -232,14 +233,14 @@ const AllProducts = () => {
   return (
     <div className="my-6 md:my-0 relative">
       <BreadcrumbNav items={breadcrumbItems} />
-      <div className="flex items-end justify-end px-3 md:px-0">
-        <Link
-          href="/admin/produk/tambah-produk"
-          className="flex items-start space-x-1 px-3 py-1 lg:px-4 lg:py-2 rounded-full border border-orange-500 bg-orange-100 hover:bg-gradient-to-r from-orange-400 to-orange-600 hover:text-white text-orange-500 font-medium cursor-pointer transition-colors mb-4 lg:mb-0"
+      <div className="flex items-end justify-end px-3 md:px-0 mb-4">
+        <MagneticButton
+          onClick={() => router.push("produk/tambah-produk")}
+          icon={<Plus className="w-4 h-4 md:w-5 md:h-5 !-mr-1" />}
+          className="!py-2 md:!py-3 !m-0 !px-5"
         >
-          <Plus className="w-4 md:w-5" />
-          <span className="text-xs md:text-sm mt-1">Tambah Produk</span>
-        </Link>
+          Tambah Produk
+        </MagneticButton>
       </div>
 
       <div className="mb-4">

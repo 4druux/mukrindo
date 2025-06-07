@@ -15,6 +15,7 @@ import CarBrands from "@/components/product-admin/CarBrands";
 import CarSystems from "@/components/product-admin/CarSystems";
 import CarPapers from "@/components/product-admin/CarPapers";
 import SkeletonEditProduct from "@/components/skeleton/skeleton-admin/SkeletonEditProduct";
+import MagneticButton from "@/components/common/MagneticButton";
 
 // Import Utils
 import { validateProductData } from "@/utils/validateProductData";
@@ -712,16 +713,15 @@ const EditProduct = ({ productId }) => {
           />
 
           {/* Buttons */}
-          <div className="col-span-2 flex justify-end space-x-2 sm:space-x-4 mt-4">
-            <button
+          <div className="col-span-2 flex justify-end gap-4 mt-4">
+            <MagneticButton
               type="button"
-              onClick={() => router.back()}
-              className="cursor-pointer border text-orange-600 border-orange-500 hover:bg-orange-100 hover:border-orange-500 
-              hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full"
-              disabled={loadingUpdate}
+              onClick={() => router.back("/")}
+              className="!py-2.5 !m-0"
             >
               Kembali
-            </button>
+            </MagneticButton>
+
             <button
               type="submit"
               className={`text-white text-sm font-medium py-2.5 px-6 rounded-full ${

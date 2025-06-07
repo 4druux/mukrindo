@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useProducts } from "@/context/ProductContext";
-import { RefreshCw, ArrowRight, Heart, Calculator } from "lucide-react";
+import { RefreshCw, Heart, Calculator } from "lucide-react";
 import {
   FaMapMarkerAlt,
   FaShoppingBag,
@@ -12,6 +12,7 @@ import {
 import toast from "react-hot-toast";
 import AnimatedArrowRight from "@/components/animate-icon/AnimatedArrowRight";
 import AnimatedBell from "@/components/animate-icon/AnimatedBell";
+import MagneticButton from "@/components/common/MagneticButton";
 
 const CarPricingInfo = ({ product }) => {
   if (!product) {
@@ -294,14 +295,13 @@ const CarPricingInfo = ({ product }) => {
               </button>
             </div>
             <div className="mt-4 flex flex-col lg:flex-row gap-3 w-full">
-              <button
+              <MagneticButton
                 onClick={handleTradeInClick}
-                className="flex items-center justify-center gap-2 py-3.5 border border-orange-600 text-orange-600 
-                rounded-full hover:bg-orange-50 transition duration-200 cursor-pointer w-full"
+                icon={<RefreshCw className="w-5 h-5" />}
+                className="w-full py-3.5 !m-0"
               >
-                <RefreshCw className="w-5 h-5" />
-                <span className="text-sm">Tukar Tambah</span>
-              </button>
+                Tukar Tambah
+              </MagneticButton>
               <button
                 onClick={handleCekSekarangClick}
                 className="flex items-center justify-center gap-2 py-4 text-white rounded-full
