@@ -14,6 +14,7 @@ import ImageUpload from "@/components/product-admin/ImageUpload";
 import CarBrands from "@/components/product-admin/CarBrands";
 import CarSystems from "@/components/product-admin/CarSystems";
 import CarPapers from "@/components/product-admin/CarPapers";
+import MagneticButton from "@/components/common/MagneticButton";
 
 // Import Utils
 import { validateProductData } from "@/utils/validateProductData";
@@ -592,15 +593,15 @@ const AddProduct = () => {
           />
 
           {/* Submit Button */}
-          <div className="col-span-2 flex justify-end space-x-2 sm:space-x-4 mt-4">
-            <button
+          <div className="col-span-2 flex justify-end gap-4 mt-4">
+            <MagneticButton
               type="button"
               onClick={() => router.back("/admin")}
-              className="cursor-pointer border text-orange-600 border-orange-500 hover:bg-orange-100 hover:border-orange-500 
-            hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full"
+              className="!py-2.5 !m-0"
             >
               Kembali
-            </button>
+            </MagneticButton>
+
             <button
               type="submit"
               className="cursor-pointer bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600

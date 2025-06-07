@@ -69,7 +69,7 @@ const DetailPageClient = ({ productId }) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[90vh] bg-gray-50">
-        <DotLoader text="Memuat detail mobil..." />
+        <DotLoader />
       </div>
     );
   }

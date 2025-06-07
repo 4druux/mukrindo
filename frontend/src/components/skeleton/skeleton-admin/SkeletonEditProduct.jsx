@@ -12,15 +12,17 @@ const SkeletonEditProduct = () => {
             Gambar Mobil
           </label>
           <div className="flex items-center gap-4">
-            <div className="w-[200px] h-[120px] bg-gray-300 rounded-md animate-pulse"></div>
-            <div className="w-[200px] h-[120px] bg-gray-300 rounded-md animate-pulse"></div>
-            <div className="w-[200px] h-[120px] bg-gray-300 rounded-md animate-pulse"></div>
+            <div className="w-full h-[200px] bg-gray-300 rounded-md animate-pulse block md:hidden"></div>
+            <div className="w-[200px] h-[120px] bg-gray-300 rounded-md animate-pulse hidden md:block"></div>
+            <div className="w-[200px] h-[120px] bg-gray-300 rounded-md animate-pulse hidden md:block"></div>
+            <div className="w-[200px] h-[120px] bg-gray-300 rounded-md animate-pulse hidden md:block"></div>
+            <div className="w-[200px] h-[120px] bg-gray-300 rounded-md animate-pulse hidden md:block"></div>
           </div>
         </div>
 
         {/* Input Placeholders (repeated for multiple inputs) */}
         <div className="mb-4">
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Nama Mobil
             </div>
@@ -29,21 +31,21 @@ const SkeletonEditProduct = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 mb-4 gap-4">
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Merek Mobil
             </div>
             <div className="h-8 bg-gray-300 rounded-xl animate-pulse"></div>
           </label>
 
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Model Mobil
             </div>
             <div className="h-8 bg-gray-300 rounded-xl animate-pulse"></div>
           </label>
 
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Varian Mobil
             </div>
@@ -52,7 +54,7 @@ const SkeletonEditProduct = () => {
         </div>
 
         <div className="mb-4">
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Tipe Mobil
             </div>
@@ -61,7 +63,7 @@ const SkeletonEditProduct = () => {
         </div>
 
         <div className="mb-4">
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Warna Mobil
             </div>
@@ -70,7 +72,7 @@ const SkeletonEditProduct = () => {
         </div>
 
         <div className="mb-4">
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Kapasitas Mesin (CC)
             </div>
@@ -79,7 +81,7 @@ const SkeletonEditProduct = () => {
         </div>
 
         <div className="mb-4">
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Jarak Tempuh (KM)
             </div>
@@ -88,21 +90,21 @@ const SkeletonEditProduct = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 mb-4 gap-4">
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Sistem Penggerak
             </div>
             <div className="h-8 bg-gray-300 rounded-xl animate-pulse"></div>
           </label>
 
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Tranmisi
             </div>
             <div className="h-8 bg-gray-300 rounded-xl animate-pulse"></div>
           </label>
 
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Bahan Bakar
             </div>
@@ -111,21 +113,21 @@ const SkeletonEditProduct = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 mb-4 gap-4">
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Masa Berlaku STNK
             </div>
             <div className="h-8 bg-gray-300 rounded-xl animate-pulse"></div>
           </label>
 
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Plat Nomor
             </div>
             <div className="h-8 bg-gray-300 rounded-xl animate-pulse"></div>
           </label>
 
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Tahun Perakitan
             </div>
@@ -134,7 +136,7 @@ const SkeletonEditProduct = () => {
         </div>
 
         <div className="mb-4">
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Harga Mobil
             </div>
@@ -143,7 +145,7 @@ const SkeletonEditProduct = () => {
         </div>
 
         <div className="mb-4">
-          <label >
+          <label>
             <div className="block text-sm font-medium text-gray-700">
               Status
             </div>
