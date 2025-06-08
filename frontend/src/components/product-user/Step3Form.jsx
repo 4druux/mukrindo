@@ -9,7 +9,8 @@ import {
   getCityOptions,
 } from "@/utils/locationData";
 import { MapPin } from "lucide-react";
-import MagneticButton from "../common/MagneticButton";
+import ButtonMagnetic from "../common/ButtonMagnetic";
+import ButtonAction from "../common/ButtonAction";
 
 const Step3Form = ({
   formData,
@@ -302,22 +303,17 @@ const Step3Form = ({
 
         {/* Tombol Navigasi */}
         <div className="flex justify-end gap-x-2 sm:gap-x-4 mt-4">
-          <MagneticButton
+          <ButtonMagnetic
             type="button"
             onClick={onBack}
             className="!py-2.5 !m-0"
           >
             Kembali
-          </MagneticButton>
+          </ButtonMagnetic>
 
-          <button
-            type="button"
-            onClick={isSellRoute ? onSubmit : onNext}
-            className="cursor-pointer bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent 
-            hover:to-transparent text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
-          >
+          <ButtonAction type="button" onClick={isSellRoute ? onSubmit : onNext}>
             {isSellRoute ? "Jual Sekarang" : "Selanjutnya"}
-          </button>
+          </ButtonAction>
         </div>
       </div>
     </div>

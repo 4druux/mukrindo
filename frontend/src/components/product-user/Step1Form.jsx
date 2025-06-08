@@ -2,6 +2,7 @@
 import React from "react";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
+import ButtonAction from "../common/ButtonAction";
 
 const currentYear = new Date().getFullYear();
 const years = Array.from({ length: 26 }, (_, i) => currentYear - i).map(
@@ -184,14 +185,9 @@ const Step1Form = ({
         )}
       </div>
       <div className="flex justify-end mt-4">
-        <button
-          type="button"
-          onClick={onNext}
-          className="cursor-pointer bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent 
-          hover:to-transparent text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline"
-        >
+        <ButtonAction type="button" onClick={onNext}>
           Selanjutnya
-        </button>
+        </ButtonAction>
       </div>
     </div>
   );

@@ -1,6 +1,8 @@
 import React from "react";
 import Select from "@/components/common/Select";
-import MagneticButton from "../common/MagneticButton";
+import ButtonMagnetic from "../common/ButtonMagnetic";
+import ButtonAction from "../common/ButtonAction";
+import DotLoader from "../common/DotLoader";
 
 const priceRangeOptions = [
   { value: "0-100", label: "Rp 0 - 100 Juta" },
@@ -56,9 +58,8 @@ const Step4Form = ({
       </p>
 
       {isLoading && (
-        <div className="flex justify-center items-center my-10">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-orange-500"></div>
-          <p className="ml-3 text-gray-600">Memuat opsi mobil...</p>
+        <div className="flex justify-center items-center h-[250px]">
+          <DotLoader />
         </div>
       )}
 
@@ -230,25 +231,17 @@ const Step4Form = ({
         </div>
 
         <div className="flex justify-end gap-x-2 sm:gap-x-4 mt-4">
-          <MagneticButton
+          <ButtonMagnetic
             type="button"
             onClick={onBack}
             className="!py-2.5 !m-0"
           >
             Kembali
-          </MagneticButton>
+          </ButtonMagnetic>
 
-          <button
-            type="button"
-            onClick={onSubmit}
-            disabled={isLoading}
-            className={`cursor-pointer bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent 
-              hover:to-transparent text-white text-sm font-medium py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline ${
-                isLoading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-          >
+          <ButtonAction type="button" onClick={onSubmit} disabled={isLoading}>
             Tukar Sekarang
-          </button>
+          </ButtonAction>
         </div>
       </div>
     </div>

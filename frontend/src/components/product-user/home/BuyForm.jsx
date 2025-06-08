@@ -6,6 +6,7 @@ import Select from "@/components/common/Select";
 import RangePrice from "@/components/common/RangePrice";
 import InputYear from "@/components/common/InputYear";
 import toast from "react-hot-toast";
+import ButtonAction from "@/components/common/ButtonAction";
 
 const BuyForm = ({
   productData,
@@ -136,13 +137,14 @@ const BuyForm = ({
           Dapatkan mobil terbaik untuk kebutuhanmu dengan harga terbaik di
           Mukrindo.id
         </p>
-        <button
-          className="w-full md:flex-1 rounded-full py-3 text-sm text-white font-medium bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent hover:to-transparent cursor-pointer"
+
+        <ButtonAction
+          onClick={handleSearchCar}
           type="button"
-          onClick={handleSearchCar} // Use the local handler
+          className="w-full md:flex-1 !px-0 py-3"
         >
           Temukan Mobil
-        </button>
+        </ButtonAction>
       </div>
     </div>
   );

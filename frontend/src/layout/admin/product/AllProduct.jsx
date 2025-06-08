@@ -15,7 +15,7 @@ import CarProductCard from "@/components/global/CarProductCard";
 import EmptyProductDisplay from "@/components/global/EmptyProductDisplay";
 import Pagination from "@/components/global/Pagination";
 import DotLoader from "@/components/common/DotLoader";
-import MagneticButton from "@/components/common/MagneticButton";
+import ButtonMagnetic from "@/components/common/ButtonMagnetic";
 
 // Import Icons
 import { Plus, PlusCircleIcon } from "lucide-react";
@@ -234,13 +234,13 @@ const AllProducts = () => {
     <div className="my-6 md:my-0 relative">
       <BreadcrumbNav items={breadcrumbItems} />
       <div className="flex items-end justify-end px-3 md:px-0 mb-4">
-        <MagneticButton
+        <ButtonMagnetic
           onClick={() => router.push("produk/tambah-produk")}
           icon={<Plus className="w-4 h-4 md:w-5 md:h-5 !-mr-1" />}
           className="!py-2 md:!py-3 !m-0 !px-5"
         >
           Tambah Produk
-        </MagneticButton>
+        </ButtonMagnetic>
       </div>
 
       <div className="mb-4">

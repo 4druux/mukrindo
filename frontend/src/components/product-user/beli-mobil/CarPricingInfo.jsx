@@ -3,16 +3,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useProducts } from "@/context/ProductContext";
 import { RefreshCw, Heart, Calculator } from "lucide-react";
-import {
-  FaMapMarkerAlt,
-  FaShoppingBag,
-  FaWhatsapp,
-  FaBell,
-} from "react-icons/fa";
+import { FaMapMarkerAlt, FaShoppingBag, FaWhatsapp } from "react-icons/fa";
 import toast from "react-hot-toast";
 import AnimatedArrowRight from "@/components/animate-icon/AnimatedArrowRight";
 import AnimatedBell from "@/components/animate-icon/AnimatedBell";
-import MagneticButton from "@/components/common/MagneticButton";
+import ButtonMagnetic from "@/components/common/ButtonMagnetic";
+import ButtonAction from "@/components/common/ButtonAction";
 
 const CarPricingInfo = ({ product }) => {
   if (!product) {
@@ -200,23 +196,30 @@ const CarPricingInfo = ({ product }) => {
               </p>
             </div>
             <div className="mt-6 flex flex-col md:flex-row gap-3 w-full mx-auto">
-              <button
+              <ButtonMagnetic
+                type="button"
                 onClick={handleChatAdminForSoldUnit}
-                className="flex items-center justify-center gap-2 py-3.5 border border-green-600 text-green-600 
-                rounded-full hover:bg-green-50 transition duration-200 cursor-pointer w-full text-sm"
+                className="w-full !py-3.5 !m-0 hover:!shadow-[0_0_20px_rgba(7,94,84,0.4)]"
+                icon={
+                  <FaWhatsapp className="w-5 h-5 text-green-600 group-hover:text-white" />
+                }
+                textColor="#16a34a"
+                borderColor="#16a34a"
+                gradientFrom="#d3f5e8"
+                gradientVia="#34c89a"
+                gradientTo="#075E54"
               >
-                <FaWhatsapp className="w-5 h-5" />
-                <span>Chat Admin</span>
-              </button>
-              <button
+                Chat Admin
+              </ButtonMagnetic>
+
+              <ButtonAction
                 onClick={handleNotifyMeClick}
-                className="flex items-center justify-center gap-2 py-4 text-white rounded-full
-                bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent 
-                hover:to-transparent cursor-pointer w-full text-sm"
+                type="button"
+                className="w-full"
               >
                 <AnimatedBell size={20} color="white" className="w-5 h-5" />
-                <span>Beritahu Saya</span>
-              </button>
+                Beritahu Saya
+              </ButtonAction>
             </div>
           </div>
         ) : (
@@ -280,37 +283,36 @@ const CarPricingInfo = ({ product }) => {
                   </div>
                 ))}
               </div>
+
               <p className="text-xs text-gray-500 mb-4">
                 *Hitung estimasi pembiayaan dengan memilih tenor yang anda
                 inginkan lalu klik tombol dibawah ini untuk melakukan peritungan
               </p>
-              <button
-                onClick={handleEstimasiPembiayaanClick}
-                className="flex items-center justify-center gap-2 py-3 text-white rounded-full
-               bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent 
-               hover:to-transparent cursor-pointer w-3/4 md:w-3/5 mb-1 mx-auto"
-              >
-                <Calculator className="w-5 h-5" />
-                <span className="text-sm">Estimasi Pembiayaan</span>
-              </button>
+
+              <div className="flex items-center justify-center">
+                <ButtonAction onClick={handleEstimasiPembiayaanClick}>
+                  <Calculator className="w-5 h-5" />
+                  Estimasi Pembiayaan
+                </ButtonAction>
+              </div>
             </div>
+
             <div className="mt-4 flex flex-col lg:flex-row gap-3 w-full">
-              <MagneticButton
+              <ButtonMagnetic
                 onClick={handleTradeInClick}
                 icon={<RefreshCw className="w-5 h-5" />}
-                className="w-full py-3.5 !m-0"
+                className="w-full !py-3 !m-0"
               >
                 Tukar Tambah
-              </MagneticButton>
-              <button
+              </ButtonMagnetic>
+
+              <ButtonAction
                 onClick={handleCekSekarangClick}
-                className="flex items-center justify-center gap-2 py-4 text-white rounded-full
-               bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent 
-                hover:to-transparent cursor-pointer w-full"
+                className="w-full py-3.5"
               >
-                <span className="text-sm">Cek Sekarang</span>
+                Cek Sekarang
                 <AnimatedArrowRight className="w-5 h-5" color="white" />
-              </button>
+              </ButtonAction>
             </div>
           </>
         )}
@@ -327,24 +329,30 @@ const CarPricingInfo = ({ product }) => {
       >
         {product.status === "Terjual" ? (
           <div className="flex gap-3 w-full">
-            <button
+            <ButtonMagnetic
+              type="button"
               onClick={handleChatAdminForSoldUnit}
-              className="flex-1 flex items-center justify-center gap-2 py-3 border border-green-600 text-green-600 
-              rounded-full hover:bg-green-50 transition duration-200 cursor-pointer text-sm"
+              className="!m-0 w-1/2"
+              icon={
+                <FaWhatsapp className="w-5 h-5 text-green-600 group-hover:text-white" />
+              }
+              textColor="#16a34a"
+              borderColor="#16a34a"
+              gradientFrom="#d3f5e8"
+              gradientVia="#34c89a"
+              gradientTo="#075E54"
             >
-              <FaWhatsapp className="w-4 h-4" />
-              <span>Chat Admin</span>
-            </button>
-            <button
+              Chat Admin
+            </ButtonMagnetic>
+
+            <ButtonAction
               onClick={handleNotifyMeClick}
-              className="flex-1 flex items-center justify-center gap-2 py-3 text-white rounded-full
-              bg-gradient-to-r from-orange-400 to-orange-600 
-          hover:bg-orange-600 hover:from-transparent hover:to-transparent cursor-pointer text-sm"
+              type="button"
+              className="w-1/2"
             >
               <AnimatedBell size={20} color="white" className="w-5 h-5" />
-
-              <span>Beritahu Saya</span>
-            </button>
+              Beritahu Saya
+            </ButtonAction>
           </div>
         ) : (
           <div className="flex items-center gap-3 w-full">
@@ -373,23 +381,18 @@ const CarPricingInfo = ({ product }) => {
               </button>
 
               {selectedTenor ? (
-                <button
+                <ButtonAction
                   onClick={handleEstimasiPembiayaanClick}
-                  className="flex items-center justify-center gap-2 py-3 px-4 text-white rounded-full bg-gradient-to-r from-orange-400 to-orange-600 
-          hover:bg-orange-600 hover:from-transparent hover:to-transparent text-sm"
+                  className="py-3"
                 >
                   <Calculator className="w-4 h-4" />
-                  <span>Estimasi</span>
-                </button>
+                  Estimasi
+                </ButtonAction>
               ) : (
-                <button
-                  onClick={handleCekSekarangClick}
-                  className="flex items-center justify-center gap-2 py-3 px-4 text-white rounded-full bg-gradient-to-r from-orange-400 to-orange-600 
-          hover:bg-orange-600 hover:from-transparent hover:to-transparent text-sm"
-                >
-                  <span>Cek Sekarang</span>
+                <ButtonAction onClick={handleCekSekarangClick} className="py-3">
+                  Cek Sekarang
                   <AnimatedArrowRight className="w-4 h-4" color="white" />
-                </button>
+                </ButtonAction>
               )}
             </div>
           </div>

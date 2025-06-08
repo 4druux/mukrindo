@@ -14,6 +14,7 @@ import DotLoader from "@/components/common/DotLoader";
 import { X, Heart } from "lucide-react";
 import { FaRoad, FaRegCalendarAlt, FaBoxOpen } from "react-icons/fa";
 import { GiGearStickPattern } from "react-icons/gi";
+import ButtonAction from "@/components/common/ButtonAction";
 
 const BookmarkRightbar = () => {
   const { bookmarks, products, toggleBookmark, loading } = useProducts();
@@ -195,12 +196,14 @@ const BookmarkRightbar = () => {
                             <p className="text-sm font-semibold text-orange-500">
                               Rp {product.price.toLocaleString("id-ID")}
                             </p>
+
                             <Link
                               href={detailUrl}
                               onClick={toggleBookmarkSidebar}
-                              className="bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-white text-center text-xs font-medium px-2 py-1 lg:px-3 lg:py-2 rounded-full flex-shrink-0"
                             >
-                              Cek Sekarang
+                              <ButtonAction className="w-full !text-xs !font-medium !px-2 !py-1 lg:!px-3 lg:!py-2 !rounded-full !flex-shrink-0">
+                                Cek Sekarang
+                              </ButtonAction>
                             </Link>
                           </div>
                         </div>

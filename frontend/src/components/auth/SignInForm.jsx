@@ -3,13 +3,15 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 import TittleText from "@/components/common/TittleText";
 import InputPassword from "@/components/common/InputPassword";
+import ButtonAction from "../common/ButtonAction";
+import AnimatedArrowRight from "../animate-icon/AnimatedArrowRight";
 
 export default function SignInForm() {
   const [email, setEmail] = useState("");
@@ -152,18 +154,20 @@ export default function SignInForm() {
                 </div>
 
                 <div>
-                  <button
+                  <ButtonAction
                     type="submit"
                     disabled={authLoading}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white transition cursor-pointer bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent hover:to-transparent rounded-full disabled:opacity-70"
+                    className="w-full"
                   >
                     {authLoading ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                       "Masuk"
                     )}
-                    {!authLoading && <ArrowRight className="w-5 h-5" />}
-                  </button>
+                    {!authLoading && (
+                      <AnimatedArrowRight className="w-5 h-5" color="white" />
+                    )}
+                  </ButtonAction>
                 </div>
               </div>
             </form>
