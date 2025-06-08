@@ -10,6 +10,8 @@ import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import CarImage from "@/components/global/CarImage";
 import CarProduct from "@/components/global/CarProduct";
 import CarImageModal from "@/components/global/CarImageModal";
+import ButtonMagnetic from "@/components/common/ButtonMagnetic";
+import { IoArrowBack } from "react-icons/io5";
 
 const CarDetails = ({ productId }) => {
   const [loading, setLoading] = useState(true);
@@ -82,12 +84,12 @@ const CarDetails = ({ productId }) => {
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
           <p className="text-red-500 text-lg mb-4">{error}</p>
-          <button
+          <ButtonMagnetic
             onClick={() => router.back("/admin")}
-            className="bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-white font-bold py-2 px-4 rounded"
+            icon={<IoArrowBack className="w-5 h-5" />}
           >
-            Go Back
-          </button>
+            Kembali
+          </ButtonMagnetic>
         </div>
       </div>
     );
@@ -97,13 +99,13 @@ const CarDetails = ({ productId }) => {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <p className="text-gray-500 text-lg mb-4">Product not found.</p>
-          <button
+          <p className="text-gray-500 text-lg mb-4">Produk tidak ditemukan.</p>
+          <ButtonMagnetic
             onClick={() => router.back("/admin")}
-            className="bg-orange-500 hover:bg-orange-600 transition duration-300 ease-in-out text-white font-bold py-2 px-4 rounded"
+            icon={<IoArrowBack className="w-5 h-5" />}
           >
-            Go Back
-          </button>
+            Kembali
+          </ButtonMagnetic>
         </div>
       </div>
     );

@@ -11,6 +11,8 @@ import { Loader2, Save, UploadCloud, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import DotLoader from "@/components/common/DotLoader";
 import { useRouter } from "next/navigation";
+import ButtonMagnetic from "../common/ButtonMagnetic";
+import ButtonAction from "../common/ButtonAction";
 
 export default function EditProfileForm({ isUserPage = false }) {
   const {
@@ -406,28 +408,24 @@ export default function EditProfileForm({ isUserPage = false }) {
           </div>
         </div>
 
-        <div className="flex justify-end items-center pt-2 gap-3">
-          <button
+        <div className="flex justify-end items-center pt-2 gap-2 md:gap-4">
+          <ButtonMagnetic
             type="button"
             onClick={() => router.back()}
-            className="cursor-pointer border text-orange-600 border-orange-500 hover:bg-orange-100 hover:border-orange-500
-            hover:text-orange-600 text-sm font-medium py-2.5 px-6 rounded-full"
             disabled={isSubmitting || authLoading}
+            className="!py-2 !m-0"
           >
             Kembali
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting || authLoading}
-            className="flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white transition-colors duration-200 transform bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent hover:to-transparent rounded-full focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
-          >
+          </ButtonMagnetic>
+
+          <ButtonAction type="submit" disabled={isSubmitting || authLoading}>
             {isSubmitting || authLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <Save className="w-5 h-5" />
             )}
-            Simpan Perubahan
-          </button>
+            <span>Simpan Perubahan</span>
+          </ButtonAction>
         </div>
       </form>
     </div>

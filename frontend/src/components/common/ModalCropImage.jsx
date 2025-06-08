@@ -3,7 +3,9 @@ import { getCroppedImg } from "@/utils/cropImage";
 import { XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import Cropper from "react-easy-crop";
-import toast from "react-hot-toast"; 
+import toast from "react-hot-toast";
+import ButtonMagnetic from "./ButtonMagnetic";
+import ButtonAction from "./ButtonAction";
 
 export default function ModalCropImage({ mediaSrc, onCropComplete, onClose }) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -93,21 +95,17 @@ export default function ModalCropImage({ mediaSrc, onCropComplete, onClose }) {
           />
         </div>
         <div className="p-4 border-t border-gray-700 flex justify-end gap-2">
-          <button
+          <ButtonMagnetic
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm border border-gray-500 text-gray-600 hover:text-orange-600 hover:bg-orange-100 
-            hover:border-orange-600 rounded-full cursor-pointer"
+            className="!py-2 !px-5 !m-0"
           >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            className="px-6 py-2 text-sm bg-orange-500  text-white hover:bg-orange-600 rounded-full cursor-pointer"
-          >
+            Batal
+          </ButtonMagnetic>
+
+          <ButtonAction type="button" onClick={handleSave}>
             Crop
-          </button>
+          </ButtonAction>
         </div>
       </div>
     </div>

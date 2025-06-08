@@ -11,6 +11,8 @@ import { RefreshCw } from "lucide-react";
 import AnimatedArrowRight from "@/components/animate-icon/AnimatedArrowRight";
 import InputYear from "@/components/common/InputYear";
 import toast from "react-hot-toast";
+import ButtonAction from "@/components/common/ButtonAction";
+import ButtonMagnetic from "@/components/common/ButtonMagnetic";
 
 export const INITIAL_PRICE_RANGE = [50000000, 1500000000];
 
@@ -389,26 +391,24 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
       {/* Tombol */}
       <div className="flex flex-col items-center gap-2 p-5">
         {isFilterActive && (
-          <button
+          <ButtonMagnetic
+            type="button"
             onClick={handleReset}
-            className="flex items-center justify-center gap-2 py-2 border border-orange-600 text-orange-600
-            rounded-full hover:bg-orange-50 transition duration-200 cursor-pointer w-full group"
+            className="!py-2 w-full !m-0"
+            icon={<RefreshCw className="w-4 h-4 group-hover:animate-spin" />}
           >
-            <RefreshCw className="w-5 h-5 group-hover:animate-spin" />
-            <span className="text-sm">Reset Filter</span>
-          </button>
+            Reset Filter
+          </ButtonMagnetic>
         )}
 
-        <button
+        <ButtonAction
           onClick={handleApplyFilters}
           disabled={isLoadingCarData}
-          className="flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-orange-400 to-orange-600 
-          hover:bg-orange-600 hover:from-transparent hover:to-transparent text-white rounded-full
-          cursor-pointer w-full"
+          className="w-full"
         >
           <span className="text-sm">Tampilkan Mobil</span>
           <AnimatedArrowRight className="w-5 h-5" color="white" />
-        </button>
+        </ButtonAction>
       </div>
     </div>
   );

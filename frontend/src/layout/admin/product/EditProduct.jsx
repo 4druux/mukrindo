@@ -15,7 +15,7 @@ import CarBrands from "@/components/product-admin/CarBrands";
 import CarSystems from "@/components/product-admin/CarSystems";
 import CarPapers from "@/components/product-admin/CarPapers";
 import SkeletonEditProduct from "@/components/skeleton/skeleton-admin/SkeletonEditProduct";
-import MagneticButton from "@/components/common/MagneticButton";
+import ButtonMagnetic from "@/components/common/ButtonMagnetic";
 
 // Import Utils
 import { validateProductData } from "@/utils/validateProductData";
@@ -27,6 +27,7 @@ import { uploadMultipleImagesToCloudinary } from "@/utils/uploadCloudinary";
 import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
 import DotLoader from "@/components/common/DotLoader";
 import TittleText from "@/components/common/TittleText";
+import ButtonAction from "@/components/common/ButtonAction";
 
 const QUICK_OPEN_DELAY = 50;
 const INACTIVITY_DELAY = 10000;
@@ -713,31 +714,23 @@ const EditProduct = ({ productId }) => {
           />
 
           {/* Buttons */}
-          <div className="col-span-2 flex justify-end gap-4 mt-4">
-            <MagneticButton
+          <div className="col-span-2 flex justify-end gap-2 md:gap-4 mt-4">
+            <ButtonMagnetic
               type="button"
               onClick={() => router.back("/")}
               className="!py-2.5 !m-0"
             >
               Kembali
-            </MagneticButton>
+            </ButtonMagnetic>
 
-            <button
-              type="submit"
-              className={`text-white text-sm font-medium py-2.5 px-6 rounded-full ${
-                loadingUpdate
-                  ? "bg-orange-500 opacity-55 cursor-not-allowed"
-                  : "bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent hover:to-transparent cursor-pointer"
-              }`}
-              disabled={loadingUpdate}
-            >
+            <ButtonAction type="submit" disabled={loadingUpdate}>
               {loadingUpdate
                 ? uploadProgress.total > 0 &&
                   uploadProgress.current < uploadProgress.total
                   ? `Mengunggah ${uploadProgress.current}/${uploadProgress.total}...`
                   : "Menyimpan..."
                 : "Perbarui Produk"}
-            </button>
+            </ButtonAction>
           </div>
         </form>
       </div>

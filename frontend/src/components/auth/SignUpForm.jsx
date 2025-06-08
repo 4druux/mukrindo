@@ -10,6 +10,8 @@ import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 import TittleText from "@/components/common/TittleText";
 import InputPassword from "@/components/common/InputPassword";
+import ButtonAction from "../common/ButtonAction";
+import AnimatedArrowRight from "../animate-icon/AnimatedArrowRight";
 
 export default function SignUpForm() {
   const [firstName, setFirstName] = useState("");
@@ -94,7 +96,7 @@ export default function SignUpForm() {
             </div>
 
             {authError && !authLoading && (
-              <p className="text-xs text-red-500 text-center mt-4 mb-2">
+              <p className="text-xs text-red-500 text-center mb-4 p-2 bg-red-50 border border-red-200 rounded">
                 {authError}
               </p>
             )}
@@ -200,18 +202,20 @@ export default function SignUpForm() {
                   </label>
                 </div>
                 <div>
-                  <button
+                  <ButtonAction
                     type="submit"
                     disabled={authLoading}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-white transition cursor-pointer bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent hover:to-transparent rounded-full disabled:opacity-70"
+                    className="w-full"
                   >
                     {authLoading ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                       "Daftar"
                     )}
-                    {!authLoading && <ArrowRight className="w-5 h-5" />}
-                  </button>
+                    {!authLoading && (
+                      <AnimatedArrowRight className="w-5 h-5" color="white" />
+                    )}
+                  </ButtonAction>
                 </div>
               </div>
             </form>

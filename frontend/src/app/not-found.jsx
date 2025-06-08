@@ -1,5 +1,5 @@
 "use client";
-import MagneticButton from "@/components/common/MagneticButton";
+import ButtonMagnetic from "@/components/common/ButtonMagnetic";
 import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { IoArrowBack } from "react-icons/io5";
@@ -57,12 +57,12 @@ export default function NotFound() {
           }}
           className="mt-6"
         >
-          <MagneticButton
+          <ButtonMagnetic
             onClick={() => router.back("/")}
             icon={<IoArrowBack className="w-5 h-5" />}
           >
             Kembali
-          </MagneticButton>
+          </ButtonMagnetic>
         </motion.div>
       </motion.div>
 

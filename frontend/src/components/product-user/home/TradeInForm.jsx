@@ -5,6 +5,7 @@ import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
 import toast from "react-hot-toast";
 import { unformatNumberPhone } from "@/utils/formatNumberPhone";
+import ButtonAction from "@/components/common/ButtonAction";
 
 const TradeInForm = ({
   productData,
@@ -179,13 +180,14 @@ const TradeInForm = ({
           Dapatkan penawaran terbaik untuk tukar tambah mobil lama Anda dengan
           yang baru di Mukrindo.id
         </p>
-        <button
-          className="w-full md:flex-1 rounded-full py-3 text-sm text-white font-medium bg-gradient-to-br from-red-500 via-orange-400 to-yellow-400 hover:bg-orange-600 hover:from-transparent hover:to-transparent cursor-pointer"
-          type="button"
+
+        <ButtonAction
           onClick={handleSubmit}
+          type="button"
+          className="w-full md:flex-1 !px-0 py-3"
         >
           Tukar Sekarang
-        </button>
+        </ButtonAction>
       </div>
     </div>
   );
