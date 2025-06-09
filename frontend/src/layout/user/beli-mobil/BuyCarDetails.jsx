@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import BreadcrumbNav from "@/components/common/BreadcrumbNav";
 import CarImage from "@/components/global/CarImage";
 import CarProduct from "@/components/global/CarProduct";
@@ -54,13 +55,33 @@ const BuyCarDetails = ({ product }) => {
     { label: product.carName, href: "" },
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.15 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 15 },
+    },
+  };
+
   return (
-    <div>
-      <BreadcrumbNav items={breadcrumbItems} />
+    <motion.div variants={containerVariants} initial="hidden" animate="visible">
+      <motion.div variants={itemVariants}>
+        <BreadcrumbNav items={breadcrumbItems} />
+      </motion.div>
 
       <div className="flex flex-col xl:flex-row gap-4">
         <div className="xl:w-3/5">
           <CarImage
+            variants={itemVariants}
             productId={product._id}
             product={product}
             images={product.images}
@@ -69,14 +90,15 @@ const BuyCarDetails = ({ product }) => {
             isAdminRoute={false}
           />
         </div>
+
         <div className="w-full xl:w-1/2">
-          <CarPricingInfo product={product} />
+          <CarPricingInfo product={product} variants={itemVariants} />
         </div>
       </div>
 
-      <div className="mt-4 xl:mt-8">
+      <motion.div variants={itemVariants} className="mt-4 xl:mt-8">
         <CarProduct product={product} isAdminRoute={false} />
-      </div>
+      </motion.div>
 
       <CarImageModal
         show={showModal}
@@ -86,7 +108,7 @@ const BuyCarDetails = ({ product }) => {
         isMobile={isMobile}
         onClose={closeModal}
       />
-    </div>
+    </motion.div>
   );
 };
 

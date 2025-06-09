@@ -2,6 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import generateSlug from "@/utils/generateSlug";
+import { motion } from "framer-motion";
 
 // Import Components
 import { useProducts } from "@/context/ProductContext";
@@ -29,8 +30,45 @@ const CarProductCardSwipe = ({
 
   const { isBookmarked, toggleBookmark } = useProducts();
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08,
+      },
+    },
+    exit: {
+      opacity: 0,
+      transition: {
+        staggerChildren: 0.05,
+        staggerDirection: -1,
+      },
+    },
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 30, scale: 0.98 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { type: "spring", stiffness: 120, damping: 18 },
+    },
+    exit: {
+      opacity: 0,
+      y: -20,
+      scale: 0.98,
+      transition: { duration: 0.2 },
+    },
+  };
+
   return (
-    <div
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
       className={`flex space-x-4 overflow-x-auto md:grid md:gap-4 md:space-x-0 mt-4 md:pb-6 px-3 md:px-2 ${
         isRecommendation
           ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-2"
@@ -53,8 +91,9 @@ const CarProductCardSwipe = ({
             const liked = isBookmarked(product._id);
 
             return (
-              <div
+              <motion.div
                 key={product._id}
+                variants={cardVariants}
                 className="w-72 md:w-auto flex-shrink-0 md:flex-shrink rounded-2xl bg-white overflow-hidden transition-shadow duration-200 relative shadow-md lg:hover:shadow-xl flex flex-col"
                 onClick={() => onProductClick(product)}
               >
@@ -153,7 +192,7 @@ const CarProductCardSwipe = ({
                     </span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
 
@@ -163,7 +202,7 @@ const CarProductCardSwipe = ({
           {emptyMessage}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

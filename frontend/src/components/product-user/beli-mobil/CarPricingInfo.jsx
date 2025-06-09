@@ -1,6 +1,7 @@
 // components/product-user/beli-mobil/CarPricingInfo.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { useProducts } from "@/context/ProductContext";
 import { RefreshCw, Heart, Calculator } from "lucide-react";
 import { FaMapMarkerAlt, FaShoppingBag, FaWhatsapp } from "react-icons/fa";
@@ -10,7 +11,7 @@ import AnimatedBell from "@/components/animate-icon/AnimatedBell";
 import ButtonMagnetic from "@/components/common/ButtonMagnetic";
 import ButtonAction from "@/components/common/ButtonAction";
 
-const CarPricingInfo = ({ product }) => {
+const CarPricingInfo = ({ product, variants }) => {
   if (!product) {
     return null;
   }
@@ -133,13 +134,26 @@ const CarPricingInfo = ({ product }) => {
     { id: "3y", label: "3 Tahun", value: 3 },
   ];
 
+  const contentVariants = {
+    hidden: { opacity: 0, y: 15 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 120, damping: 15 },
+    },
+  };
+
   return (
     <>
-      <div
+      <motion.div
+        variants={variants}
         ref={pricingInfoRef}
         className="p-4 md:p-8 rounded-t-3xl md:rounded-3xl border-t-4 border-t-orange-500 border-b border-gray-300 md:border-none md:shadow-md bg-white"
       >
-        <div className="flex justify-between w-full gap-10 mb-4">
+        <motion.div
+          variants={contentVariants}
+          className="flex justify-between w-full gap-10 mb-4"
+        >
           <h1 className="text-lg font-semibold text-gray-600">
             {product.carName}
           </h1>
@@ -156,9 +170,12 @@ const CarPricingInfo = ({ product }) => {
               } ${product.status === "Terjual" ? "hidden" : ""}`}
             />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="flex items-center text-xs md:text-sm text-gray-600 space-x-2 border-b border-gray-300 pb-4">
+        <motion.div
+          variants={contentVariants}
+          className="flex items-center text-xs md:text-sm text-gray-600 space-x-2 border-b border-gray-300 pb-4"
+        >
           <span> {product.travelDistance.toLocaleString("id-ID")} KM</span>
           <span className="text-gray-300">|</span>
           <span>{product.transmission}</span>
@@ -169,9 +186,9 @@ const CarPricingInfo = ({ product }) => {
             <FaMapMarkerAlt className="mr-1 md:mr-2 w-4 h-4 text-gray-500" />{" "}
             Tangerang Selatan
           </div>
-        </div>
+        </motion.div>
 
-        <div className="mt-2">
+        <motion.div variants={contentVariants} className="mt-2">
           <p className="text-xl font-semibold text-orange-600">
             Rp {product.price.toLocaleString("id-ID")}
           </p>
@@ -180,10 +197,10 @@ const CarPricingInfo = ({ product }) => {
             {product.status !== "Terjual" &&
               " Untuk perhitungan kredit dapat menghubungi kami melalui estimasi pembiayaan."}
           </p>
-        </div>
+        </motion.div>
 
         {product.status === "Terjual" ? (
-          <div>
+          <motion.div variants={contentVariants}>
             <div className="mt-6 mb-2 flex flex-col items-center justify-center text-center p-8 bg-gray-100 rounded-xl">
               <FaShoppingBag className="w-10 h-10 text-gray-500 mb-3" />
               <p className="text-lg font-semibold text-gray-600">
@@ -221,10 +238,11 @@ const CarPricingInfo = ({ product }) => {
                 Beritahu Saya
               </ButtonAction>
             </div>
-          </div>
+          </motion.div>
         ) : (
           <>
-            <div
+            <motion.div
+              variants={contentVariants}
               id="estimasi-pembiayaan-section"
               className="mt-4 p-4 bg-orange-50 rounded-xl"
             >
@@ -295,9 +313,12 @@ const CarPricingInfo = ({ product }) => {
                   Estimasi Pembiayaan
                 </ButtonAction>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="mt-4 flex flex-col lg:flex-row gap-3 w-full">
+            <motion.div
+              variants={contentVariants}
+              className="mt-4 flex flex-col lg:flex-row gap-3 w-full"
+            >
               <ButtonMagnetic
                 onClick={handleTradeInClick}
                 icon={<RefreshCw className="w-5 h-5" />}
@@ -313,13 +334,14 @@ const CarPricingInfo = ({ product }) => {
                 Cek Sekarang
                 <AnimatedArrowRight className="w-5 h-5" color="white" />
               </ButtonAction>
-            </div>
+            </motion.div>
           </>
         )}
-      </div>
+      </motion.div>
 
       {/* Sticky Bottom Bar for Mobile */}
-      <div
+      <motion.div
+        variants={contentVariants}
         className={`
           fixed bottom-0 left-0 right-0 z-30 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] px-4 py-5 rounded-t-3xl
           flex items-center justify-between md:hidden
@@ -328,11 +350,11 @@ const CarPricingInfo = ({ product }) => {
         `}
       >
         {product.status === "Terjual" ? (
-          <div className="flex gap-3 w-full">
+          <motion.div variants={contentVariants} className="flex gap-3 w-full">
             <ButtonMagnetic
               type="button"
               onClick={handleChatAdminForSoldUnit}
-              className="!m-0 w-1/2"
+              className="!m-0 w-1/2 !px-4"
               icon={
                 <FaWhatsapp className="w-5 h-5 text-green-600 group-hover:text-white" />
               }
@@ -353,9 +375,12 @@ const CarPricingInfo = ({ product }) => {
               <AnimatedBell size={20} color="white" className="w-5 h-5" />
               Beritahu Saya
             </ButtonAction>
-          </div>
+          </motion.div>
         ) : (
-          <div className="flex items-center gap-3 w-full">
+          <motion.div
+            variants={contentVariants}
+            className="flex items-center gap-3 w-full"
+          >
             <div className="flex-1">
               <p className="text-md font-semibold text-orange-600 truncate">
                 Rp {product.price.toLocaleString("id-ID")}
@@ -395,9 +420,9 @@ const CarPricingInfo = ({ product }) => {
                 </ButtonAction>
               )}
             </div>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </>
   );
 };

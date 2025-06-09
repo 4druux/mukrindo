@@ -1,6 +1,7 @@
 // layout/admin/product/CarDetails.jsx
 "use client";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useProducts } from "@/context/ProductContext";
 
@@ -117,12 +118,32 @@ const CarDetails = ({ productId }) => {
     { label: product.carName, href: "" },
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.15 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 15 },
+    },
+  };
+
   return (
-    <div className="">
-      <BreadcrumbNav items={breadcrumbItems} />
+    <motion.div variants={containerVariants} initial="hidden" animate="visible">
+      <motion.div variants={itemVariants}>
+        <BreadcrumbNav items={breadcrumbItems} />
+      </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         <CarImage
+          variants={itemVariants}
           product={product}
           isMobile={isMobile}
           onImageClick={openModal}
@@ -130,7 +151,9 @@ const CarDetails = ({ productId }) => {
         />
 
         {/* Product Details*/}
-        <CarProduct product={product} isAdminRoute={true} />
+        <motion.div variants={itemVariants}>
+          <CarProduct product={product} isAdminRoute={true} />
+        </motion.div>
       </div>
 
       {/* Modal */}
@@ -142,7 +165,7 @@ const CarDetails = ({ productId }) => {
         isMobile={isMobile}
         onClose={closeModal}
       />
-    </div>
+    </motion.div>
   );
 };
 

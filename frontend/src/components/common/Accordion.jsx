@@ -58,13 +58,13 @@ const Accordion = ({ title, description, isOpen, onToggle }) => {
       opacity: 1,
       height: "auto",
       y: 0,
-      transition: { duration: 0.3, ease: "easeInOut" },
+      transition: { duration: 0.7, ease: "easeInOut" },
     },
     closed: {
       opacity: 0,
       height: 0,
       y: -10,
-      transition: { duration: 0.3, ease: "easeInOut" },
+      transition: { duration: 0.7, ease: "easeInOut" },
     },
   };
 

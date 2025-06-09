@@ -418,6 +418,25 @@ const BuyCar = () => {
     };
   }, [isMobileSearchFiltersOpen]);
 
+  const pageVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 15 },
+    },
+  };
+
   const mobileFilterPanelVariants = {
     hidden: { x: "100%" },
     visible: {
@@ -444,24 +463,37 @@ const BuyCar = () => {
           <SearchFilters />
         </div>
 
-        <div className="xl:w-3/4 w-full">
-          <BreadcrumbNav items={breadcrumbItems} />
-          <h1 className="text-md lg:text-lg font-medium text-gray-700 mb-2 lg:mb-4 px-3 md:px-0">
+        <motion.div
+          variants={pageVariants}
+          initial="hidden"
+          animate="visible"
+          className="xl:w-3/4 w-full"
+        >
+          <motion.div variants={itemVariants}>
+            <BreadcrumbNav items={breadcrumbItems} />
+          </motion.div>
+
+          <motion.h1
+            variants={itemVariants}
+            className="text-md lg:text-lg font-medium text-gray-700 mb-2 lg:mb-4 px-3 md:px-0"
+          >
             {searchQuery
               ? `Hasil pencarian untuk "${searchQuery}"`
               : "Menampilkan"}
             {!loading && ` ${processedProducts.length} Mobil`}
-          </h1>
+          </motion.h1>
 
           {!loading && searchParams.toString().length > 0 && (
-            <ActiveSearchFilters
-              searchParams={searchParams}
-              splitResult={splitSearchFilter}
-              onClearAll={handleClearAllFilters}
-              onRemoveSearchPart={handleRemoveSearchPart}
-              onRemoveFilterParam={handleRemoveFilterParam}
-              isAdminRoute={false}
-            />
+            <motion.div variants={itemVariants}>
+              <ActiveSearchFilters
+                searchParams={searchParams}
+                splitResult={splitSearchFilter}
+                onClearAll={handleClearAllFilters}
+                onRemoveSearchPart={handleRemoveSearchPart}
+                onRemoveFilterParam={handleRemoveFilterParam}
+                isAdminRoute={false}
+              />
+            </motion.div>
           )}
 
           {!loading &&
@@ -481,45 +513,54 @@ const BuyCar = () => {
             )}
 
           {!loading && (
-            <div className="mt-4">
+            <motion.div variants={itemVariants} className="mt-4">
               <ShortProduct
                 activeFilter={activeFilter}
                 onSortChange={handleSortChange}
               />
-            </div>
+            </motion.div>
           )}
 
-          <CarProductCard
-            products={currentProducts}
-            loading={loading}
-            error={error}
-            onProductClick={handleProductClick}
-            emptyMessage={null}
-            BuyCarRoute={true}
-            skeletonCount={PRODUCTS_PER_PAGE}
-          />
+          <AnimatePresence mode="wait">
+            <CarProductCard
+              key={`${activeFilter}-${searchQuery}-${currentPage}`}
+              products={currentProducts}
+              loading={loading}
+              error={error}
+              onProductClick={handleProductClick}
+              emptyMessage={null}
+              BuyCarRoute={true}
+              skeletonCount={PRODUCTS_PER_PAGE}
+            />
+          </AnimatePresence>
+
           {!loading &&
             currentProducts.length > 0 &&
             processedProducts.length > PRODUCTS_PER_PAGE && (
-              <Pagination
-                key={`pagination-${activeFilter}-${searchQuery}`}
-                pageCount={Math.ceil(
-                  processedProducts.length / PRODUCTS_PER_PAGE
-                )}
-                forcePage={currentPage}
-                onPageChange={handlePageChange}
-              />
+              <motion.div variants={itemVariants}>
+                <Pagination
+                  key={`pagination-${activeFilter}-${searchQuery}`}
+                  pageCount={Math.ceil(
+                    processedProducts.length / PRODUCTS_PER_PAGE
+                  )}
+                  forcePage={currentPage}
+                  onPageChange={handlePageChange}
+                />
+              </motion.div>
             )}
+
           {processedProducts.length === 0 && !loading && (
-            <EmptyProductDisplay
-              emptyMessage={emptyMessage}
-              showFilterRecommendations={shouldShowFilterRecsProp}
-              filterRecommendations={filterBasedRecommendations}
-              onProductClick={handleProductClick}
-              isAdminRoute={false}
-            />
+            <motion.div variants={itemVariants}>
+              <EmptyProductDisplay
+                emptyMessage={emptyMessage}
+                showFilterRecommendations={shouldShowFilterRecsProp}
+                filterRecommendations={filterBasedRecommendations}
+                onProductClick={handleProductClick}
+                isAdminRoute={false}
+              />
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       </div>
 
       {!isMobileSearchFiltersOpen && (

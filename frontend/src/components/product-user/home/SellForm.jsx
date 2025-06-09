@@ -1,6 +1,7 @@
 // layout/user/product/SellForm.jsx
 import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
 import toast from "react-hot-toast";
@@ -96,98 +97,115 @@ const SellForm = ({
 
   return (
     <div className="bg-white rounded-b-2xl lg:rounded-tr-2xl shadow-md p-4 md:p-6 w-full mx-auto">
-      <h1 className="text-md font-medium text-gray-700 mb-4">
-        Informasi Mobil Kamu
-      </h1>
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+      >
+        <h1 className="text-md font-medium text-gray-700 mb-4">
+          Informasi Mobil Kamu
+        </h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Select
+            label="Merek"
+            title="Pilih Merek"
+            description="Pilih Merek Mobil Anda"
+            searchOption={true}
+            options={brandOptions}
+            value={productData.brand}
+            onChange={(value) => {
+              handleFilterChange("brand", value);
+              setBrandError("");
+              setModelError("");
+              setTimeout(() => {
+                modelSelectRef.current?.openDropdown();
+              }, 50);
+            }}
+            error={brandError}
+            disabled={isLoadingOptions}
+          />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Select
-          label="Merek"
-          title="Pilih Merek"
-          description="Pilih Merek Mobil Anda"
-          searchOption={true}
-          options={brandOptions}
-          value={productData.brand}
-          onChange={(value) => {
-            handleFilterChange("brand", value);
-            setBrandError("");
-            setModelError("");
-            setTimeout(() => {
-              modelSelectRef.current?.openDropdown();
-            }, 50);
-          }}
-          error={brandError}
-          disabled={isLoadingOptions}
-        />
+          <Select
+            ref={modelSelectRef}
+            label="Model"
+            description={
+              productData.brand
+                ? "Pilih Model Mobil Anda"
+                : "Pilih Merek Mobil Anda Terlebih Dahulu!"
+            }
+            options={modelOptions}
+            value={productData.model}
+            onChange={(value) => {
+              handleFilterChange("model", value);
+              setModelError("");
+              setTimeout(() => {
+                yearSelectRef.current?.openDropdown();
+              }, 50);
+            }}
+            title="Pilih Model"
+            disabled={isLoadingOptions || !productData.brand}
+            error={modelError}
+          />
 
-        <Select
-          ref={modelSelectRef}
-          label="Model"
-          description={
-            productData.brand
-              ? "Pilih Model Mobil Anda"
-              : "Pilih Merek Mobil Anda Terlebih Dahulu!"
-          }
-          options={modelOptions}
-          value={productData.model}
-          onChange={(value) => {
-            handleFilterChange("model", value);
-            setModelError("");
-            setTimeout(() => {
-              yearSelectRef.current?.openDropdown();
-            }, 50);
-          }}
-          title="Pilih Model"
-          disabled={isLoadingOptions || !productData.brand}
-          error={modelError}
-        />
+          <Select
+            ref={yearSelectRef}
+            label="Tahun"
+            title="Pilih Tahun"
+            description="Pilih Tahun Mobil Anda"
+            value={productData.year}
+            onChange={(value) => {
+              handleFilterChange("year", value);
+              setYearError("");
+              setTimeout(() => {
+                phoneNumberInputRef.current?.focus();
+              }, 50);
+            }}
+            options={yearOptions}
+            error={yearError}
+          />
 
-        <Select
-          ref={yearSelectRef}
-          label="Tahun"
-          title="Pilih Tahun"
-          description="Pilih Tahun Mobil Anda"
-          value={productData.year}
-          onChange={(value) => {
-            handleFilterChange("year", value);
-            setYearError("");
-            setTimeout(() => {
-              phoneNumberInputRef.current?.focus();
-            }, 50);
-          }}
-          options={yearOptions}
-          error={yearError}
-        />
-
-        <Input
-          ref={phoneNumberInputRef}
-          label="No Handphone"
-          id="phoneNumber"
-          name="phoneNumber"
-          value={productData.phoneNumber}
-          onChange={(e) => {
-            handleChange(e);
-            setPhoneRequiredError("");
-          }}
-          prefix={PHONE_PREFIX}
-          type="tel"
-          error={phoneRequiredError || phoneNumberError}
-        />
-      </div>
+          <Input
+            ref={phoneNumberInputRef}
+            label="No Handphone"
+            id="phoneNumber"
+            name="phoneNumber"
+            value={productData.phoneNumber}
+            onChange={(e) => {
+              handleChange(e);
+              setPhoneRequiredError("");
+            }}
+            prefix={PHONE_PREFIX}
+            type="tel"
+            error={phoneRequiredError || phoneNumberError}
+          />
+        </div>
+      </motion.div>
 
       <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-4">
-        <p className="text-xs lg:text-sm text-gray-500 md:flex-2 xl:flex-4">
+        <motion.p
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut", delay: 0.1 }}
+          className="text-xs lg:text-sm text-gray-500 md:flex-2 xl:flex-4"
+        >
           Dapatkan estimasi harga dari mobil kamu dengan proses yang cepat dan
           mudah di Mukrindo.id
-        </p>
+        </motion.p>
 
-        <ButtonAction
-          onClick={handleSubmit}
-          type="button"
-          className="w-full md:flex-1 !px-0 py-3"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut", delay: 0.2 }}
+          className="w-full md:flex-1"
         >
-          Jual Sekarang
-        </ButtonAction>
+          <ButtonAction
+            onClick={handleSubmit}
+            type="button"
+            className="w-full md:flex-1 !px-0 py-3"
+          >
+            Jual Sekarang
+          </ButtonAction>
+        </motion.div>
       </div>
     </div>
   );

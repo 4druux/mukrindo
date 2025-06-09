@@ -65,7 +65,9 @@ const ShortProduct = ({
       <div className="mb-4">
         <ScrollHorizontal
           ref={scrollContainerRef}
-          className={`space-x-2 ${isAdminRoute ? "px-3 md:px-2" : "px-3 md:px-2"}`}
+          className={`space-x-2 ${
+            isAdminRoute ? "px-3 md:px-2" : "px-3 md:px-2"
+          }`}
           buttonVerticalAlign="top"
         >
           {filtersToShow.map(([key, filterType]) => (

@@ -8,6 +8,7 @@ import {
 } from "@/utils/formatNumberPhone";
 import axiosInstance from "@/utils/axiosInstance";
 import useSWR from "swr";
+import { motion, useInView } from "framer-motion";
 
 // Import Icon
 import { FaCar, FaExchangeAlt, FaMoneyBillWave } from "react-icons/fa";
@@ -31,6 +32,8 @@ const fetcher = (url) =>
   axiosInstance.get(url).then((res) => res.data?.data || []);
 
 const CarForm = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
   const [productData, setProductData] = useState({ ...INITIAL_PRODUCT_DATA });
   const [activeTab, setActiveTab] = useState("beli");
 
@@ -277,7 +280,6 @@ const CarForm = () => {
     }
   };
 
-  // --- Fungsi klik tab ---
   const handleTabClick = (tabName) => {
     if (tabName === activeTab) {
       return;
@@ -286,7 +288,12 @@ const CarForm = () => {
   };
 
   return (
-    <div>
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 50 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
+    >
       <div className="flex w-full bg-gray-200 lg:w-fit rounded-t-3xl border-t-4 border-t-orange-500 md:border-none shadow-md">
         {/* Tab Beli Mobil */}
         <button
@@ -351,8 +358,9 @@ const CarForm = () => {
           </div>
         </button>
       </div>
+
       {renderForm()}
-    </div>
+    </motion.div>
   );
 };
 

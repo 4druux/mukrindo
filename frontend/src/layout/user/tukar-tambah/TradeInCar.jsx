@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import toast from "react-hot-toast";
 import { useSearchParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Import Components
 import Step1Form from "@/components/product-user/Step1Form";
@@ -996,100 +997,108 @@ const TradeInCar = () => {
         </div>
       )}
 
-      <div className="bg-white p-4 md:p-8 rounded-t-3xl md:rounded-2xl border-b border-gray-300 border-t-4 border-t-orange-500 md:border-none md:shadow-md ">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="bg-white p-4 md:p-8 rounded-t-3xl md:rounded-2xl border-b border-gray-300 border-t-4 border-t-orange-500 md:border-none md:shadow-md "
+      >
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="w-full lg:w-auto lg:flex-shrink-0 lg:pr-4">
             <Stepper currentStep={currentStep} steps={TradeInCarSteps} />
           </div>
+
           <div className="flex-1 min-w-0">
-            {currentStep === 1 && (
-              <Step1Form
-                currentStep={currentStep}
-                totalCarSteps={TradeInCarSteps}
-                formData={formData}
-                handleChange={handleChange}
-                handleSelectChange={handleSelectChange}
-                errors={errors}
-                onNext={handleNextStep}
-                brandOptions={brandOptions}
-                modelOptions={modelOptions}
-                variantOptions={variantOptions}
-                formatNumber={formatNumber}
-                colorOptions={staticCarColorOptions}
-                brandRef={brandSelectRef}
-                modelRef={modelSelectRef}
-                variantRef={variantSelectRef}
-                yearRef={yearSelectRef}
-                transmissionRef={transmissionSelectRef}
-                stnkExpiryRef={stnkExpiryInputRef}
-                colorRef={colorSelectRef}
-                travelDistanceRef={travelDistanceInputRef}
-                isLoadingOptions={isLoadingCarData}
-              />
-            )}
+            <AnimatePresence initial={false} mode="wait">
+              {currentStep === 1 && (
+                <Step1Form
+                  currentStep={currentStep}
+                  totalCarSteps={TradeInCarSteps}
+                  formData={formData}
+                  handleChange={handleChange}
+                  handleSelectChange={handleSelectChange}
+                  errors={errors}
+                  onNext={handleNextStep}
+                  brandOptions={brandOptions}
+                  modelOptions={modelOptions}
+                  variantOptions={variantOptions}
+                  formatNumber={formatNumber}
+                  colorOptions={staticCarColorOptions}
+                  brandRef={brandSelectRef}
+                  modelRef={modelSelectRef}
+                  variantRef={variantSelectRef}
+                  yearRef={yearSelectRef}
+                  transmissionRef={transmissionSelectRef}
+                  stnkExpiryRef={stnkExpiryInputRef}
+                  colorRef={colorSelectRef}
+                  travelDistanceRef={travelDistanceInputRef}
+                  isLoadingOptions={isLoadingCarData}
+                />
+              )}
 
-            {currentStep === 2 && (
-              <Step2Form
-                currentStep={currentStep}
-                totalCarSteps={TradeInCarSteps}
-                formData={formData}
-                handleChange={handleChange}
-                errors={errors}
-                onNext={handleNextStep}
-                onBack={handlePreviousStep}
-                PHONE_PREFIX={PHONE_PREFIX}
-              />
-            )}
+              {currentStep === 2 && (
+                <Step2Form
+                  currentStep={currentStep}
+                  totalCarSteps={TradeInCarSteps}
+                  formData={formData}
+                  handleChange={handleChange}
+                  errors={errors}
+                  onNext={handleNextStep}
+                  onBack={handlePreviousStep}
+                  PHONE_PREFIX={PHONE_PREFIX}
+                />
+              )}
 
-            {currentStep === 3 && (
-              <Step3Form
-                currentStep={currentStep}
-                totalCarSteps={TradeInCarSteps}
-                formData={formData}
-                handleChange={handleChange}
-                handleSelectChange={handleSelectChange}
-                errors={errors}
-                onNext={handleNextStep}
-                onBack={handlePreviousStep}
-                isSellRoute={false}
-                showroomAddressRef={showroomAddressInputRef}
-                provinceRef={provinceSelectRef}
-                cityRef={citySelectRef}
-                fullAddressRef={fullAddressInputRef}
-                inspectionDateRef={inspectionDateInputRef}
-                inspectionTimeRef={inspectionTimeInputRef}
-              />
-            )}
+              {currentStep === 3 && (
+                <Step3Form
+                  currentStep={currentStep}
+                  totalCarSteps={TradeInCarSteps}
+                  formData={formData}
+                  handleChange={handleChange}
+                  handleSelectChange={handleSelectChange}
+                  errors={errors}
+                  onNext={handleNextStep}
+                  onBack={handlePreviousStep}
+                  isSellRoute={false}
+                  showroomAddressRef={showroomAddressInputRef}
+                  provinceRef={provinceSelectRef}
+                  cityRef={citySelectRef}
+                  fullAddressRef={fullAddressInputRef}
+                  inspectionDateRef={inspectionDateInputRef}
+                  inspectionTimeRef={inspectionTimeInputRef}
+                />
+              )}
 
-            {currentStep === 4 && (
-              <Step4Form
-                currentStep={currentStep}
-                totalCarSteps={TradeInCarSteps}
-                formData={formData}
-                handleSelectChange={handleSelectChange}
-                errors={errors}
-                onSubmit={handleSubmit}
-                onBack={handlePreviousStep}
-                termsAccepted={termsAccepted}
-                termsError={termsError}
-                onTermsChange={handleTermsChange}
-                brandOptions={availableNewCarBrands}
-                modelOptions={availableNewCarModels}
-                variantOptions={availableNewCarVariants}
-                transmissionOptions={availableNewCarTransmissions}
-                colorOptions={availableNewCarColors}
-                brandRef={newCarBrandRef}
-                modelRef={newCarModelRef}
-                variantRef={newCarVariantRef}
-                transmissionRef={newCarTransmissionRef}
-                colorRef={newCarColorRef}
-                priceRangeRef={newCarPriceRangeRef}
-                isLoading={productsLoading || isSubmitting}
-              />
-            )}
+              {currentStep === 4 && (
+                <Step4Form
+                  currentStep={currentStep}
+                  totalCarSteps={TradeInCarSteps}
+                  formData={formData}
+                  handleSelectChange={handleSelectChange}
+                  errors={errors}
+                  onSubmit={handleSubmit}
+                  onBack={handlePreviousStep}
+                  termsAccepted={termsAccepted}
+                  termsError={termsError}
+                  onTermsChange={handleTermsChange}
+                  brandOptions={availableNewCarBrands}
+                  modelOptions={availableNewCarModels}
+                  variantOptions={availableNewCarVariants}
+                  transmissionOptions={availableNewCarTransmissions}
+                  colorOptions={availableNewCarColors}
+                  brandRef={newCarBrandRef}
+                  modelRef={newCarModelRef}
+                  variantRef={newCarVariantRef}
+                  transmissionRef={newCarTransmissionRef}
+                  colorRef={newCarColorRef}
+                  priceRangeRef={newCarPriceRangeRef}
+                  isLoading={productsLoading || isSubmitting}
+                />
+              )}
+            </AnimatePresence>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

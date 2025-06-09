@@ -1,10 +1,13 @@
 // components/product-user/beli/SearchFilters.jsx
 import React, { useState, useMemo, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import useSWR from "swr";
+import { motion } from "framer-motion";
+
+// // Import Components
 import Select from "@/components/common/Select";
 import RangePrice from "@/components/common/RangePrice";
 import axiosInstance from "@/utils/axiosInstance";
-import useSWR from "swr";
 
 // Import Icons
 import { RefreshCw } from "lucide-react";
@@ -240,6 +243,24 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
     onActionComplete();
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.07,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+    },
+  };
+
   return (
     <div
       className="rounded-none 2xl:rounded-3xl pb-4 2xl:pb-0 overflow-auto bg-white shadow-none 2xl:shadow-md flex flex-col"
@@ -251,145 +272,169 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
         </div>
       )}
 
-      <div className="p-5 space-y-4">
-        <div className="hidden lg:block">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="p-5 space-y-4"
+      >
+        <motion.div variants={itemVariants} className="hidden lg:block">
           <h1 className="text-lg font-medium text-gray-700">
             Filter Pencarian
           </h1>
-        </div>
+        </motion.div>
         {/* Harga */}
-        <RangePrice
-          value={productData.priceRange}
-          onChange={(range) => handleFilterChange("priceRange", range)}
-          initialRange={INITIAL_PRICE_RANGE}
-        />
-
+        <motion.div variants={itemVariants}>
+          <RangePrice
+            value={productData.priceRange}
+            onChange={(range) => handleFilterChange("priceRange", range)}
+            initialRange={INITIAL_PRICE_RANGE}
+          />
+        </motion.div>
         {/* Merek */}
-        <Select
-          label="Merek"
-          title="Pilih Merek"
-          description="Pilih Merek Mobil"
-          options={brandOptionsForSelect}
-          value={productData.brand}
-          onChange={(value) => handleFilterChange("brand", value)}
-          searchOption={true}
-          disabled={isLoadingCarData}
-        />
-
+        <motion.div variants={itemVariants}>
+          <Select
+            label="Merek"
+            title="Pilih Merek"
+            description="Pilih Merek Mobil"
+            options={brandOptionsForSelect}
+            value={productData.brand}
+            onChange={(value) => handleFilterChange("brand", value)}
+            searchOption={true}
+            disabled={isLoadingCarData}
+          />
+        </motion.div>
         {/* Model */}
-        <Select
-          label="Model"
-          title="Pilih Model"
-          description={
-            productData.brand
-              ? "Pilih Model Mobil"
-              : "Pilih Merek Mobil Terlebih Dahulu!"
-          }
-          value={productData.model}
-          onChange={(value) => handleFilterChange("model", value)}
-          disabled={
-            isLoadingCarData ||
-            !productData.brand ||
-            (productData.brand && modelOptionsForSelect.length === 0)
-          }
-          options={[...modelOptionsForSelect]}
-          searchOption={true}
-        />
-
+        <motion.div variants={itemVariants}>
+          <Select
+            label="Model"
+            title="Pilih Model"
+            description={
+              productData.brand
+                ? "Pilih Model Mobil"
+                : "Pilih Merek Mobil Terlebih Dahulu!"
+            }
+            value={productData.model}
+            onChange={(value) => handleFilterChange("model", value)}
+            disabled={
+              isLoadingCarData ||
+              !productData.brand ||
+              (productData.brand && modelOptionsForSelect.length === 0)
+            }
+            options={[...modelOptionsForSelect]}
+            searchOption={true}
+          />
+        </motion.div>
         {/* Tipe Mobil */}
-        <Select
-          label="Tipe Mobil"
-          id="type"
-          name="type"
-          value={productData.type}
-          title="Tipe Mobil"
-          description="Jenis Tipe Mobil"
-          onChange={(value) => handleFilterChange("type", value)}
-          options={[
-            {
-              value: "sedan",
-              label: "Sedan",
-              ImgUrl: "/images/CarType/sedan.png",
-            },
-            {
-              value: "hatchback",
-              label: "Hatchback",
-              ImgUrl: "/images/CarType/hatchback.png",
-            },
-            { value: "suv", label: "SUV", ImgUrl: "/images/CarType/suv.png" },
-            { value: "mpv", label: "MPV", ImgUrl: "/images/CarType/mpv.png" },
-            {
-              value: "minibus",
-              label: "Minibus",
-              ImgUrl: "/images/CarType/minibus.png",
-            },
-          ]}
-        />
-
+        <motion.div variants={itemVariants}>
+          <Select
+            label="Tipe Mobil"
+            id="type"
+            name="type"
+            value={productData.type}
+            title="Tipe Mobil"
+            description="Jenis Tipe Mobil"
+            onChange={(value) => handleFilterChange("type", value)}
+            options={[
+              {
+                value: "sedan",
+                label: "Sedan",
+                ImgUrl: "/images/CarType/sedan.png",
+              },
+              {
+                value: "hatchback",
+                label: "Hatchback",
+                ImgUrl: "/images/CarType/hatchback.png",
+              },
+              { value: "suv", label: "SUV", ImgUrl: "/images/CarType/suv.png" },
+              { value: "mpv", label: "MPV", ImgUrl: "/images/CarType/mpv.png" },
+              {
+                value: "minibus",
+                label: "Minibus",
+                ImgUrl: "/images/CarType/minibus.png",
+              },
+            ]}
+          />
+        </motion.div>
         {/* Transmisi */}
-        <Select
-          label="Transmisi"
-          id="transmission"
-          name="transmission"
-          value={productData.transmission}
-          title="Transmisi"
-          description="Jenis Transmisi"
-          onChange={(value) => handleFilterChange("transmission", value)}
-          options={[
-            { value: "manual", label: "Manual" },
-            { value: "automatic", label: "Automatic" },
-            { value: "cvt", label: "CVT" },
-          ]}
-        />
+        <motion.div variants={itemVariants}>
+          <Select
+            label="Transmisi"
+            id="transmission"
+            name="transmission"
+            value={productData.transmission}
+            title="Transmisi"
+            description="Jenis Transmisi"
+            onChange={(value) => handleFilterChange("transmission", value)}
+            options={[
+              { value: "manual", label: "Manual" },
+              { value: "automatic", label: "Automatic" },
+              { value: "cvt", label: "CVT" },
+            ]}
+          />
+        </motion.div>
 
         {/* Bahan Bakar */}
-        <Select
-          label="Bahan Bakar"
-          id="fuelType"
-          name="fuelType"
-          value={productData.fuelType}
-          title="Bahan Bakar"
-          description="Jenis Bahan Bakar"
-          onChange={(value) => handleFilterChange("fuelType", value)}
-          options={[
-            { value: "bensin", label: "Bensin" },
-            { value: "solar", label: "Solar" },
-            { value: "hybrid", label: "Hybrid" },
-            { value: "electric", label: "Electric" },
-          ]}
-        />
+        <motion.div variants={itemVariants}>
+          <Select
+            label="Bahan Bakar"
+            id="fuelType"
+            name="fuelType"
+            value={productData.fuelType}
+            title="Bahan Bakar"
+            description="Jenis Bahan Bakar"
+            onChange={(value) => handleFilterChange("fuelType", value)}
+            options={[
+              { value: "bensin", label: "Bensin" },
+              { value: "solar", label: "Solar" },
+              { value: "hybrid", label: "Hybrid" },
+              { value: "electric", label: "Electric" },
+            ]}
+          />
+        </motion.div>
 
         {/* Tahun */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 mb-3">
-            Tahun
-          </label>
-          <div className="flex gap-2 items-start">
-            <InputYear
-              id="yearMin"
-              name="yearMin"
-              label="Min Tahun"
-              value={productData.yearMin}
-              onChange={handleChange}
-              error={yearMinError}
-            />
+        <motion.div variants={itemVariants}>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 mb-3">
+              Tahun
+            </label>
+            <div className="flex gap-2 items-start">
+              <InputYear
+                id="yearMin"
+                name="yearMin"
+                label="Min Tahun"
+                value={productData.yearMin}
+                onChange={handleChange}
+                error={yearMinError}
+              />
 
-            <InputYear
-              id="yearMax"
-              name="yearMax"
-              label="Max Tahun"
-              value={productData.yearMax}
-              onChange={handleChange}
-              error={yearMaxError}
-            />
+              <InputYear
+                id="yearMax"
+                name="yearMax"
+                label="Max Tahun"
+                value={productData.yearMax}
+                onChange={handleChange}
+                error={yearMaxError}
+              />
+            </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       <div className="border-b border-gray-200" />
 
       {/* Tombol */}
-      <div className="flex flex-col items-center gap-2 p-5">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          duration: 0.5,
+          ease: "easeOut",
+          delay: 0.6,
+        }}
+        className="flex flex-col items-center gap-2 p-5"
+      >
         {isFilterActive && (
           <ButtonMagnetic
             type="button"
@@ -409,7 +454,7 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
           <span className="text-sm">Tampilkan Mobil</span>
           <AnimatedArrowRight className="w-5 h-5" color="white" />
         </ButtonAction>
-      </div>
+      </motion.div>
     </div>
   );
 };

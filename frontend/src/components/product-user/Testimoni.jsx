@@ -1,8 +1,9 @@
 // src/components/Testimoni.jsx
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import TestimonialCard from "@/components/common/TestimonialCard";
+import { motion, useInView } from "framer-motion";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, A11y } from "swiper/modules";
@@ -17,6 +18,26 @@ import { BsChevronLeft, BsChevronRight } from "react-icons/bs";
 import TittleText from "../common/TittleText";
 
 function Testimoni() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
+
+  const sectionVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.15, delayChildren: 0.1 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 15 },
+    },
+  };
+
   const testimonials = [
     {
       imgSrc: "/images/carousel/1.jpg",
@@ -92,17 +113,25 @@ function Testimoni() {
   ];
 
   return (
-    <div>
-      <div className="px-3 md:px-0">
+    <motion.div
+      ref={ref}
+      variants={sectionVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+    >
+      <motion.div variants={itemVariants} className="px-3 md:px-0">
         <TittleText text="Cerita Mereka Bersama Kami" className="mt-6 mb-1" />
         <p className="text-xs lg:text-sm text-gray-500 mb-2 lg:mb-4">
           Lihat pengalaman pelanggan yang puas dengan layanan dan kualitas mobil
           dari Mukrindo Motor.
         </p>
-      </div>
+      </motion.div>
 
       {/* Versi Mobile - Scroll Horizontal */}
-      <div className="lg:hidden horizontal-gradient-fade">
+      <motion.div
+        variants={itemVariants}
+        className="lg:hidden horizontal-gradient-fade"
+      >
         <div
           className="flex overflow-x-auto gap-4 pl-3 pb-4"
           style={{ scrollbarWidth: "none" }}
@@ -114,6 +143,7 @@ function Testimoni() {
               style={{ width: "300px" }}
             >
               <TestimonialCard
+                isMobile={true}
                 imgSrc={testimonial.imgSrc}
                 rating={testimonial.rating}
                 title={testimonial.title}
@@ -122,10 +152,13 @@ function Testimoni() {
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Versi Desktop - Swiper */}
-      <div className="hidden lg:block w-full relative group horizontal-gradient-fade">
+      <motion.div
+        variants={itemVariants}
+        className="hidden lg:block w-full relative group horizontal-gradient-fade"
+      >
         <Swiper
           modules={[Navigation, A11y]}
           spaceBetween={16}
@@ -144,6 +177,7 @@ function Testimoni() {
             >
               <div className="h-full cursor-grab">
                 <TestimonialCard
+                  isMobile={false}
                   imgSrc={testimonial.imgSrc}
                   rating={testimonial.rating}
                   title={testimonial.title}
@@ -169,8 +203,8 @@ function Testimoni() {
             <BsChevronRight className="w-5 h-5 text-gray-700" />
           </button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

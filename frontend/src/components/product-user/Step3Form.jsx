@@ -1,5 +1,6 @@
 // components/sell-car/Step3Form.jsx
 import React, { useMemo } from "react";
+import { motion } from "framer-motion";
 import Input from "@/components/common/Input";
 import Select from "@/components/common/Select";
 import {
@@ -64,18 +65,33 @@ const Step3Form = ({
     return getCityOptions(formData.province);
   }, [formData.province]);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+    },
+  };
+
   return (
-    <div>
-      <h2 className="text-lg font-medium text-gray-700 mb-1">
-        Lokasi & Jadwal Inspeksi
-      </h2>
-      <p className="text-sm text-gray-700 mb-6">
-        Selesaikan {currentStep} dari {totalCarSteps.length} langkah dan pilih
-        lokasi dan jadwal yang paling nyaman untukmu.
-      </p>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible">
+      <motion.div variants={itemVariants}>
+        <h2 className="text-lg font-medium text-gray-700 mb-1">
+          Lokasi & Jadwal Inspeksi
+        </h2>
+        <p className="text-sm text-gray-700 mb-6">
+          Selesaikan {currentStep} dari {totalCarSteps.length} langkah dan pilih
+          lokasi dan jadwal yang paling nyaman untukmu.
+        </p>
+      </motion.div>
 
       {/* Pilihan Lokasi Inspeksi */}
-      <div className="mb-4">
+      <motion.div variants={itemVariants} className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Lokasi Inspeksi
         </label>
@@ -131,129 +147,152 @@ const Step3Form = ({
             {errors.inspectionLocationType}
           </p>
         )}
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {formData.inspectionLocationType === "showroom" && (
           <>
-            <Select
-              ref={showroomAddressRef}
-              label="Alamat Showroom"
-              id="showroomAddress"
-              name="showroomAddress"
-              title="Alamat Showroom"
-              description="showroom Mukrindo Motor"
-              options={showroomOptions}
-              value={formData.showroomAddress}
-              onChange={(value) => handleSelectChange("showroomAddress", value)}
-              error={errors.showroomAddress}
-            />
+            <motion.div variants={itemVariants}>
+              <Select
+                ref={showroomAddressRef}
+                label="Alamat Showroom"
+                id="showroomAddress"
+                name="showroomAddress"
+                title="Alamat Showroom"
+                description="showroom Mukrindo Motor"
+                options={showroomOptions}
+                value={formData.showroomAddress}
+                onChange={(value) =>
+                  handleSelectChange("showroomAddress", value)
+                }
+                error={errors.showroomAddress}
+              />
+            </motion.div>
 
-            <Input
-              ref={inspectionDateRef}
-              label="Tanggal Inspeksi"
-              id="inspectionDate"
-              type="date"
-              name="inspectionDate"
-              value={formData.inspectionDate}
-              onChange={handleChange}
-              error={errors.inspectionDate}
-              min={new Date().toISOString().split("T")[0]}
-            />
+            <motion.div variants={itemVariants}>
+              <Input
+                ref={inspectionDateRef}
+                label="Tanggal Inspeksi"
+                id="inspectionDate"
+                type="date"
+                name="inspectionDate"
+                value={formData.inspectionDate}
+                onChange={handleChange}
+                error={errors.inspectionDate}
+                min={new Date().toISOString().split("T")[0]}
+              />
+            </motion.div>
 
-            <Select
-              ref={inspectionTimeRef}
-              label="Jam Inspeksi"
-              id="inspectionTime"
-              name="inspectionTime"
-              title="Pilih Jam Inspeksi"
-              description="Pilih slot waktu inspeksi"
-              options={timeSlotOptions}
-              value={formData.inspectionTime}
-              onChange={(value) => handleSelectChange("inspectionTime", value)}
-              error={errors.inspectionTime}
-            />
+            <motion.div variants={itemVariants}>
+              <Select
+                ref={inspectionTimeRef}
+                label="Jam Inspeksi"
+                id="inspectionTime"
+                name="inspectionTime"
+                title="Pilih Jam Inspeksi"
+                description="Pilih slot waktu inspeksi"
+                options={timeSlotOptions}
+                value={formData.inspectionTime}
+                onChange={(value) =>
+                  handleSelectChange("inspectionTime", value)
+                }
+                error={errors.inspectionTime}
+              />
+            </motion.div>
           </>
         )}
 
         {formData.inspectionLocationType === "rumah" && (
           <>
-            <Select
-              ref={provinceRef}
-              label="Provinsi"
-              id="province"
-              name="province"
-              title="Pilih Provinsi"
-              description="Pilih provinsi alamat Anda"
-              options={provinceOptions}
-              value={formData.province}
-              onChange={(value) => {
-                handleSelectChange("province", value);
-                handleSelectChange("city", "");
-              }}
-              error={errors.province}
-            />
+            <motion.div variants={itemVariants}>
+              <Select
+                ref={provinceRef}
+                label="Provinsi"
+                id="province"
+                name="province"
+                title="Pilih Provinsi"
+                description="Pilih provinsi alamat Anda"
+                options={provinceOptions}
+                value={formData.province}
+                onChange={(value) => {
+                  handleSelectChange("province", value);
+                  handleSelectChange("city", "");
+                }}
+                error={errors.province}
+              />
+            </motion.div>
 
-            <Select
-              ref={cityRef}
-              label="Kota/Kabupaten"
-              id="city"
-              name="city"
-              title="Pilih Kota/Kabupaten"
-              description={
-                formData.province
-                  ? "Pilih kota/kabupaten Anda"
-                  : "Pilih provinsi terlebih dahulu"
-              }
-              options={cityOptions}
-              value={formData.city}
-              onChange={(value) => handleSelectChange("city", value)}
-              disabled={!formData.province || cityOptions.length === 0}
-              error={errors.city}
-            />
+            <motion.div variants={itemVariants}>
+              <Select
+                ref={cityRef}
+                label="Kota/Kabupaten"
+                id="city"
+                name="city"
+                title="Pilih Kota/Kabupaten"
+                description={
+                  formData.province
+                    ? "Pilih kota/kabupaten Anda"
+                    : "Pilih provinsi terlebih dahulu"
+                }
+                options={cityOptions}
+                value={formData.city}
+                onChange={(value) => handleSelectChange("city", value)}
+                disabled={!formData.province || cityOptions.length === 0}
+                error={errors.city}
+              />
+            </motion.div>
 
-            <Input
-              ref={inspectionDateRef}
-              label="Tanggal Inspeksi"
-              id="inspectionDate"
-              type="date"
-              name="inspectionDate"
-              value={formData.inspectionDate}
-              onChange={handleChange}
-              error={errors.inspectionDate}
-              min={new Date().toISOString().split("T")[0]}
-            />
+            <motion.div variants={itemVariants}>
+              <Input
+                ref={inspectionDateRef}
+                label="Tanggal Inspeksi"
+                id="inspectionDate"
+                type="date"
+                name="inspectionDate"
+                value={formData.inspectionDate}
+                onChange={handleChange}
+                error={errors.inspectionDate}
+                min={new Date().toISOString().split("T")[0]}
+              />
+            </motion.div>
 
-            <Select
-              ref={inspectionTimeRef}
-              label="Jam Inspeksi"
-              id="inspectionTime"
-              name="inspectionTime"
-              title="Pilih Jam Inspeksi"
-              description="Pilih slot waktu inspeksi"
-              options={timeSlotOptions}
-              value={formData.inspectionTime}
-              onChange={(value) => handleSelectChange("inspectionTime", value)}
-              error={errors.inspectionTime}
-            />
+            <motion.div variants={itemVariants}>
+              <Select
+                ref={inspectionTimeRef}
+                label="Jam Inspeksi"
+                id="inspectionTime"
+                name="inspectionTime"
+                title="Pilih Jam Inspeksi"
+                description="Pilih slot waktu inspeksi"
+                options={timeSlotOptions}
+                value={formData.inspectionTime}
+                onChange={(value) =>
+                  handleSelectChange("inspectionTime", value)
+                }
+                error={errors.inspectionTime}
+              />
+            </motion.div>
 
             <div className="md:col-span-2">
-              <Input
-                ref={fullAddressRef}
-                label="Alamat Lengkap Rumah"
-                id="fullAddress"
-                name="fullAddress"
-                value={formData.fullAddress}
-                onChange={handleChange}
-                placeholder="Contoh: Jl. Merdeka No. 10, RT 01/RW 02, Kelurahan, Kecamatan"
-                error={errors.fullAddress}
-              />
+              <motion.div variants={itemVariants}>
+                <Input
+                  ref={fullAddressRef}
+                  label="Alamat Lengkap Rumah"
+                  id="fullAddress"
+                  name="fullAddress"
+                  value={formData.fullAddress}
+                  onChange={handleChange}
+                  placeholder="Contoh: Jl. Merdeka No. 10, RT 01/RW 02, Kelurahan, Kecamatan"
+                  error={errors.fullAddress}
+                />
+              </motion.div>
             </div>
           </>
         )}
       </div>
 
-      <div
+      <motion.div
+        variants={itemVariants}
         className={` mt-4 ${
           isSellRoute
             ? "flex flex-col lg:flex-row lg:justify-between gap-6 lg:gap-0 lg:items-center"
@@ -300,9 +339,17 @@ const Step3Form = ({
             )}
           </div>
         )}
-
         {/* Tombol Navigasi */}
-        <div className="flex justify-end gap-x-2 sm:gap-x-4 mt-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.5,
+            ease: "easeOut",
+            delay: 0.6,
+          }}
+          className="flex justify-end gap-x-2 sm:gap-x-4 mt-4"
+        >
           <ButtonMagnetic
             type="button"
             onClick={onBack}
@@ -310,13 +357,12 @@ const Step3Form = ({
           >
             Kembali
           </ButtonMagnetic>
-
           <ButtonAction type="button" onClick={isSellRoute ? onSubmit : onNext}>
             {isSellRoute ? "Jual Sekarang" : "Selanjutnya"}
           </ButtonAction>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 

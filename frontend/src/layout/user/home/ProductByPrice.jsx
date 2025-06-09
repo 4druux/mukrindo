@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useProducts } from "@/context/ProductContext";
 import CarProductCardSwipe from "@/components/product-user/home/CarProductCardSwipe";
 import TittleText from "@/components/common/TittleText";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 
 const VIEWED_PRODUCTS_KEY = "viewedCarProducts";
 const MAX_VIEWED_ITEMS = 10;
@@ -46,6 +47,8 @@ const ProductByPrice = () => {
   const [recentlyViewed, setRecentlyViewed] = useState([]);
   const buttonRefs = useRef({});
   const scrollContainerRef = useRef(null);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
 
   useEffect(() => {
     const scrollToActiveButton = () => {
@@ -106,9 +109,34 @@ const ProductByPrice = () => {
     activeFilter !== PRICE_FILTER_TYPES.ALL ? `untuk rentang harga ini` : ""
   }.`;
 
+  const sectionVariants = {
+    hidden: { opacity: 0 },
+    visible: (i = 1) => ({
+      opacity: 1,
+      transition: { staggerChildren: 0.15, delayChildren: i * 0.1 },
+    }),
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 15 },
+    },
+  };
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-2 lg:mb-4 px-3 md:px-0">
+    <motion.div
+      ref={ref}
+      variants={sectionVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+    >
+      <motion.div
+        variants={itemVariants}
+        className="flex justify-between items-center mb-2 lg:mb-4 px-3 md:px-0"
+      >
         <TittleText text="Mobil Sesuai Budget" />
         <div className="block md:hidden">
           <Link href="/beli">
@@ -117,9 +145,10 @@ const ProductByPrice = () => {
             </p>
           </Link>
         </div>
-      </div>
+      </motion.div>
 
-      <div
+      <motion.div
+        variants={itemVariants}
         className="flex space-x-2 mb-4 overflow-x-auto lg:pb-2 px-3 md:px-0"
         style={{ scrollbarWidth: "none" }}
         ref={scrollContainerRef}
@@ -170,14 +199,19 @@ const ProductByPrice = () => {
         >
           Diatas 300 Juta
         </button>
-      </div>
+      </motion.div>
 
-      <CarProductCardSwipe
-        products={displayedProducts.slice(0, 8)}
-        loading={loading}
-        onProductClick={handleProductClick}
-        emptyMessage={emptyMessage}
-      />
+      <motion.div variants={itemVariants}>
+        <AnimatePresence mode="wait">
+          <CarProductCardSwipe
+            key={activeFilter}
+            products={displayedProducts.slice(0, 8)}
+            loading={loading}
+            onProductClick={handleProductClick}
+            emptyMessage={emptyMessage}
+          />
+        </AnimatePresence>
+      </motion.div>
 
       <p className="text-xs text-center text-gray-500 block md:hidden">
         Hanya menampilkan {displayedProducts.slice(0, 8).length} dari{" "}
@@ -197,7 +231,7 @@ const ProductByPrice = () => {
           </Link>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
