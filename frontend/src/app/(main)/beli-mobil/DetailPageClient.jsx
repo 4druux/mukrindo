@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useProducts } from "@/context/ProductContext";
 import axiosInstance from "@/utils/axiosInstance";
+import { motion } from "framer-motion";
 
 import BuyCarDetails from "@/layout/user/beli-mobil/BuyCarDetails";
 import ProductRecommendations from "@/layout/user/beli-mobil/ProductRecommendations";
@@ -10,11 +11,13 @@ import Testimoni from "@/components/product-user/Testimoni";
 import NotifyMeForm from "@/components/product-user/NotifyMeForm";
 import BuyCarAccordion from "@/layout/user/beli-mobil/BuyCarAccordion";
 import DotLoader from "@/components/common/DotLoader";
-import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import ButtonMagnetic from "@/components/common/ButtonMagnetic";
+import { IoArrowBack } from "react-icons/io5";
 
 const DetailPageClient = ({ productId }) => {
   const router = useRouter();
+
   const { fetchProductById, incrementProductView } = useProducts();
   const [product, setProduct] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
@@ -76,17 +79,50 @@ const DetailPageClient = ({ productId }) => {
 
   if (error || !product) {
     return (
-      <div className="p-6 md:p-10 text-center text-red-600 h-[80vh] bg-gray-50 flex flex-col justify-center items-center">
-        <p className="text-xl mb-4">
-          {error || "Produk tidak ditemukan atau gagal dimuat."}
-        </p>
-        <button
-          onClick={() => router.back()}
-          className="flex items-center bg-orange-400 hover:bg-orange-500 text-white py-2 px-4 rounded-full cursor-pointer"
+      <div className="p-6 md:p-10 text-center min-h-screen bg-gray-50 flex flex-col justify-center items-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.7 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="text-center"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          <span className="text-sm">Kembali</span>
-        </button>
+          <motion.h1
+            initial={{ opacity: 0, y: -30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-6xl font-extrabold text-orange-500"
+          >
+            404
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: -30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="mt-2 text-xl font-medium text-gray-500"
+          >
+            Mobil yang Anda cari tidak ditemukan.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{
+              duration: 0.6,
+              delay: 0.9,
+              type: "spring",
+              stiffness: 120,
+            }}
+            className="mt-6"
+          >
+            <ButtonMagnetic
+              onClick={() => router.back("/")}
+              icon={<IoArrowBack className="w-5 h-5" />}
+            >
+              Kembali
+            </ButtonMagnetic>
+          </motion.div>
+        </motion.div>
       </div>
     );
   }

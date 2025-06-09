@@ -1,12 +1,13 @@
-// frontend/src/app/client-layout.jsx
+// File: frontend/src/app/(user)/layout.jsx
 "use client";
+
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import AppHeader from "@/layout/user/AppHeader";
 import AppFooter from "@/layout/user/AppFooter";
 import BookmarkRightbar from "@/layout/user/BookmarkRightbar";
 
-export default function ClientLayout({ children }) {
+export default function MainLayout({ children }) {
   const pathname = usePathname();
   const [isMobile, setIsMobile] = useState(false);
   const [hasMounted, setHasMounted] = useState(false);
@@ -79,21 +80,10 @@ export default function ClientLayout({ children }) {
     }
   }, [hasMounted]);
 
-  const isAuthFlowPage =
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/register") ||
-    pathname.startsWith("/auth/callback");
-
   const hideHeaderOnBeliMobilMobile =
     hasMounted && isMobile && pathname.startsWith("/beli-mobil");
 
-  const showHeaderAndStandardLayout =
-    !isAuthFlowPage && !hideHeaderOnBeliMobilMobile;
-
-  if (pathname.startsWith("/auth/callback")) {
-    return <>{children}</>;
-  }
+  const showHeaderAndStandardLayout = !hideHeaderOnBeliMobilMobile;
 
   return (
     <div className="min-h-screen bg-gray-50 mb-18 md:mb-0">

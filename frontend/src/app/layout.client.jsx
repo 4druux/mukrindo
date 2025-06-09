@@ -1,7 +1,6 @@
-//app/layout.client.jsx (admin)
+// frontend/src/app/layout.client.jsx
 "use client";
-import { usePathname } from "next/navigation";
-import ClientLayout from "./client-layout";
+
 import { SidebarProvider } from "@/context/SidebarContext";
 import { HeaderProvider } from "@/context/HeaderContext";
 import { AuthProvider } from "@/context/AuthContext";
@@ -15,12 +14,6 @@ import { CarDataProvider } from "@/context/CarDataContext";
 import { Toaster } from "react-hot-toast";
 
 export default function RootLayoutClient({ children }) {
-  const pathname = usePathname();
-  const isAdminPage =
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/register");
-
   return (
     <TrafficProvider>
       <AuthProvider>
@@ -33,11 +26,7 @@ export default function RootLayoutClient({ children }) {
                     <SidebarProvider>
                       <HeaderProvider>
                         <Toaster position="top-right" reverseOrder={true} />
-                        {isAdminPage ? (
-                          children
-                        ) : (
-                          <ClientLayout>{children}</ClientLayout>
-                        )}
+                        {children}
                       </HeaderProvider>
                     </SidebarProvider>
                   </NotifStockProvider>
