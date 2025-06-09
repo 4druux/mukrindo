@@ -4,6 +4,7 @@ import React, { useState, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import axiosInstance from "@/utils/axiosInstance";
+import { motion } from "framer-motion";
 
 // Import Components
 import { useProducts } from "@/context/ProductContext";
@@ -379,8 +380,30 @@ const AddProduct = () => {
     { label: "Tambah Produk", href: "" },
   ];
 
+  const formContainerVariants = {
+    hidden: { opacity: 1 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.07,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -30 },
+    visible: {
+      opacity: 1,
+      x: 0,
+    },
+  };
+
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <BreadcrumbNav items={breadcrumbItems} />
 
       <div className="p-4 md:p-6 rounded-xl shadow-lg bg-white">
@@ -390,8 +413,14 @@ const AddProduct = () => {
           separator={false}
         />
         {submitError && <div className="text-red-500 mb-4">{submitError}</div>}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+        <motion.form
+          onSubmit={handleSubmit}
+          variants={formContainerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-4"
+        >
+          <motion.div variants={itemVariants}>
             <label className="block text-sm mb-2 font-medium text-gray-700">
               Gambar Mobil
             </label>
@@ -400,201 +429,232 @@ const AddProduct = () => {
               setMediaFiles={handleMediaFilesChange}
               error={errors.mediaFiles}
             />
-          </div>
+          </motion.div>
 
-          <Input
-            ref={carNameInputRef}
-            label="Nama Mobil"
-            id="carName"
-            name="carName"
-            placeholderTexts={[
-              "Contoh: Toyota Avanza G 2021 Bekas",
-              "Contoh: Honda Brio Satya E CVT 2022",
-              "Contoh: Mitsubishi Xpander Ultimate 2019",
-            ]}
-            value={productData.carName}
-            onChange={handleChange}
-            error={errors.carName}
-          />
+          <motion.div variants={itemVariants}>
+            <Input
+              ref={carNameInputRef}
+              label="Nama Mobil"
+              id="carName"
+              name="carName"
+              placeholderTexts={[
+                "Contoh: Toyota Avanza G 2021 Bekas",
+                "Contoh: Honda Brio Satya E CVT 2022",
+                "Contoh: Mitsubishi Xpander Ultimate 2019",
+              ]}
+              value={productData.carName}
+              onChange={handleChange}
+              error={errors.carName}
+            />
+          </motion.div>
 
-          <CarBrands
-            brandRef={brandSelectRef}
-            modelRef={modelSelectRef}
-            variantRef={variantSelectRef}
-            brand={productData.brand}
-            model={productData.model}
-            variant={productData.variant}
-            onChange={handleBrandModelVariantChange}
-            errors={errors}
-            isAdmin={true}
-          />
+          <motion.div variants={itemVariants}>
+            <CarBrands
+              brandRef={brandSelectRef}
+              modelRef={modelSelectRef}
+              variantRef={variantSelectRef}
+              brand={productData.brand}
+              model={productData.model}
+              variant={productData.variant}
+              onChange={handleBrandModelVariantChange}
+              errors={errors}
+              isAdmin={true}
+            />
+          </motion.div>
 
-          <Select
-            ref={typeSelectRef}
-            label="Tipe Mobil"
-            id="type"
-            name="type"
-            value={productData.type}
-            title="Tipe Mobil"
-            description="Jenis Tipe Mobil"
-            error={errors.type}
-            onChange={(value) =>
-              handleChange({ target: { name: "type", value } })
-            }
-            options={[
-              {
-                value: "sedan",
-                label: "Sedan",
-                ImgUrl: "/images/CarType/sedan.png",
-              },
-              {
-                value: "hatchback",
-                label: "Hatchback",
-                ImgUrl: "/images/CarType/hatchback.png",
-              },
-              {
-                value: "suv",
-                label: "SUV",
-                ImgUrl: "/images/CarType/suv.png",
-              },
-              {
-                value: "mpv",
-                label: "MPV",
-                ImgUrl: "/images/CarType/mpv.png",
-              },
-              {
-                value: "minibus",
-                label: "Minibus",
-                ImgUrl: "/images/CarType/minibus.png",
-              },
-            ]}
-          />
+          <motion.div variants={itemVariants}>
+            <Select
+              ref={typeSelectRef}
+              label="Tipe Mobil"
+              id="type"
+              name="type"
+              value={productData.type}
+              title="Tipe Mobil"
+              description="Jenis Tipe Mobil"
+              error={errors.type}
+              onChange={(value) =>
+                handleChange({ target: { name: "type", value } })
+              }
+              options={[
+                {
+                  value: "sedan",
+                  label: "Sedan",
+                  ImgUrl: "/images/CarType/sedan.png",
+                },
+                {
+                  value: "hatchback",
+                  label: "Hatchback",
+                  ImgUrl: "/images/CarType/hatchback.png",
+                },
+                {
+                  value: "suv",
+                  label: "SUV",
+                  ImgUrl: "/images/CarType/suv.png",
+                },
+                {
+                  value: "mpv",
+                  label: "MPV",
+                  ImgUrl: "/images/CarType/mpv.png",
+                },
+                {
+                  value: "minibus",
+                  label: "Minibus",
+                  ImgUrl: "/images/CarType/minibus.png",
+                },
+              ]}
+            />
+          </motion.div>
 
-          <Select
-            ref={numberOfSeatsSelectRef}
-            label="Kapasitas Tempat Duduk"
-            id="numberOfSeats"
-            name="numberOfSeats"
-            title="Kapasitas Tempat Duduk"
-            description="Kapasitas Tempat Duduk Mobil"
-            value={productData.numberOfSeats}
-            onChange={(value) =>
-              handleChange({ target: { name: "numberOfSeats", value } })
-            }
-            error={errors.numberOfSeats}
-            options={[
-              { value: "4", label: "4 Kursi" },
-              { value: "5", label: "5 Kursi" },
-              { value: "6", label: "6 Kursi" },
-              { value: "7", label: "7 Kursi" },
-              { value: "8", label: "8 Kursi" },
-            ]}
-          />
+          <motion.div variants={itemVariants}>
+            <Select
+              ref={numberOfSeatsSelectRef}
+              label="Kapasitas Tempat Duduk"
+              id="numberOfSeats"
+              name="numberOfSeats"
+              title="Kapasitas Tempat Duduk"
+              description="Kapasitas Tempat Duduk Mobil"
+              value={productData.numberOfSeats}
+              onChange={(value) =>
+                handleChange({ target: { name: "numberOfSeats", value } })
+              }
+              error={errors.numberOfSeats}
+              options={[
+                { value: "4", label: "4 Kursi" },
+                { value: "5", label: "5 Kursi" },
+                { value: "6", label: "6 Kursi" },
+                { value: "7", label: "7 Kursi" },
+                { value: "8", label: "8 Kursi" },
+              ]}
+            />
+          </motion.div>
 
-          <Select
-            ref={carColorSelectRef}
-            label="Warna Mobil"
-            id="carColor"
-            name="carColor"
-            title="Warna Mobil"
-            description="Pilih Warna Mobil"
-            options={carColorOptions}
-            value={productData.carColor}
-            onChange={(value) =>
-              handleChange({ target: { name: "carColor", value } })
-            }
-            error={errors.carColor}
-            searchOption={true}
-          />
+          <motion.div variants={itemVariants}>
+            <Select
+              ref={carColorSelectRef}
+              label="Warna Mobil"
+              id="carColor"
+              name="carColor"
+              title="Warna Mobil"
+              description="Pilih Warna Mobil"
+              options={carColorOptions}
+              value={productData.carColor}
+              onChange={(value) =>
+                handleChange({ target: { name: "carColor", value } })
+              }
+              error={errors.carColor}
+              searchOption={true}
+            />
+          </motion.div>
 
-          <Input
-            ref={ccInputRef}
-            label="Kapasitas Mesin (CC)"
-            id="cc"
-            name="cc"
-            placeholderTexts={[
-              "Kapasitas mesin mobil anda",
-              "Kapasitas mesin mobil anda",
-              "Kapasitas mesin mobil anda",
-            ]}
-            value={productData.cc}
-            onChange={handleChange}
-            formatter={formatNumber}
-            error={errors.cc}
-          />
+          <motion.div variants={itemVariants}>
+            <Input
+              ref={ccInputRef}
+              label="Kapasitas Mesin (CC)"
+              id="cc"
+              name="cc"
+              placeholderTexts={[
+                "Kapasitas mesin mobil anda",
+                "Kapasitas mesin mobil anda",
+                "Kapasitas mesin mobil anda",
+              ]}
+              value={productData.cc}
+              onChange={handleChange}
+              formatter={formatNumber}
+              error={errors.cc}
+            />
+          </motion.div>
 
-          <Input
-            ref={travelDistanceInputRef}
-            label="Jarak Tempuh (KM)"
-            id="travelDistance"
-            name="travelDistance"
-            inputMode="numeric"
-            placeholderTexts={[
-              "Jarak tempuh mobil anda",
-              "Jarak tempuh mobil anda",
-              "Jarak tempuh mobil anda",
-            ]}
-            value={productData.travelDistance}
-            onChange={handleChange}
-            formatter={formatNumber}
-            error={errors.travelDistance}
-          />
+          <motion.div variants={itemVariants}>
+            <Input
+              ref={travelDistanceInputRef}
+              label="Jarak Tempuh (KM)"
+              id="travelDistance"
+              name="travelDistance"
+              inputMode="numeric"
+              placeholderTexts={[
+                "Jarak tempuh mobil anda",
+                "Jarak tempuh mobil anda",
+                "Jarak tempuh mobil anda",
+              ]}
+              value={productData.travelDistance}
+              onChange={handleChange}
+              formatter={formatNumber}
+              error={errors.travelDistance}
+            />
+          </motion.div>
 
-          <CarSystems
-            driveSystemRef={driveSystemSelectRef}
-            transmissionRef={transmissionSelectRef}
-            fuelTypeRef={fuelTypeSelectRef}
-            data={{
-              driveSystem: productData.driveSystem,
-              transmission: productData.transmission,
-              fuelType: productData.fuelType,
-            }}
-            onChange={handleChange}
-            errors={errors}
-          />
+          <motion.div variants={itemVariants}>
+            <CarSystems
+              driveSystemRef={driveSystemSelectRef}
+              transmissionRef={transmissionSelectRef}
+              fuelTypeRef={fuelTypeSelectRef}
+              data={{
+                driveSystem: productData.driveSystem,
+                transmission: productData.transmission,
+                fuelType: productData.fuelType,
+              }}
+              onChange={handleChange}
+              errors={errors}
+            />
+          </motion.div>
 
-          <CarPapers
-            stnkExpiryRef={stnkExpiryInputRef}
-            plateNumberRef={plateNumberSelectRef}
-            yearOfAssemblyRef={yearOfAssemblySelectRef}
-            data={{
-              stnkExpiry: productData.stnkExpiry,
-              plateNumber: productData.plateNumber,
-              yearOfAssembly: productData.yearOfAssembly,
-            }}
-            onChange={handleChange}
-            errors={errors}
-          />
+          <motion.div variants={itemVariants}>
+            <CarPapers
+              stnkExpiryRef={stnkExpiryInputRef}
+              plateNumberRef={plateNumberSelectRef}
+              yearOfAssemblyRef={yearOfAssemblySelectRef}
+              data={{
+                stnkExpiry: productData.stnkExpiry,
+                plateNumber: productData.plateNumber,
+                yearOfAssembly: productData.yearOfAssembly,
+              }}
+              onChange={handleChange}
+              errors={errors}
+            />
+          </motion.div>
 
-          <Input
-            ref={priceInputRef}
-            label="Harga Mobil"
-            id="price"
-            name="price"
-            inputMode="numeric"
-            value={productData.price}
-            onChange={handleChange}
-            formatter={formatNumber}
-            error={errors.price}
-            prefix="Rp "
-          />
+          <motion.div variants={itemVariants}>
+            <Input
+              ref={priceInputRef}
+              label="Harga Mobil"
+              id="price"
+              name="price"
+              inputMode="numeric"
+              value={productData.price}
+              onChange={handleChange}
+              formatter={formatNumber}
+              error={errors.price}
+              prefix="Rp "
+            />
+          </motion.div>
 
-          <Select
-            label="Status"
-            id="status"
-            name="status"
-            value={productData.status}
-            onChange={(value) =>
-              handleChange({ target: { name: "status", value } })
-            }
-            options={[
-              { value: "Tersedia", label: "Tersedia" },
-              { value: "Terjual", label: "Terjual" },
-            ]}
-          />
+          <motion.div variants={itemVariants}>
+            <Select
+              label="Status"
+              id="status"
+              name="status"
+              value={productData.status}
+              onChange={(value) =>
+                handleChange({ target: { name: "status", value } })
+              }
+              options={[
+                { value: "Tersedia", label: "Tersedia" },
+                { value: "Terjual", label: "Terjual" },
+              ]}
+            />
+          </motion.div>
 
           {/* Submit Button */}
-          <div className="col-span-2 flex justify-end gap-2 md:gap-4 mt-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.5,
+              ease: "easeOut",
+              delay: 0.6,
+            }}
+            className="col-span-2 flex justify-end gap-2 md:gap-4 mt-4"
+          >
             <ButtonMagnetic
               type="button"
               onClick={() => router.back("/admin")}
@@ -611,10 +671,10 @@ const AddProduct = () => {
                   : "Menyimpan..."
                 : "Tambah Produk"}
             </ButtonAction>
-          </div>
-        </form>
+          </motion.div>
+        </motion.form>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

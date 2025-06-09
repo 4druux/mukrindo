@@ -10,6 +10,7 @@ import { FaChevronCircleDown } from "react-icons/fa";
 import useAutoAdvanceFocus from "@/hooks/useAutoAdvanceFocus";
 import axiosInstance from "@/utils/axiosInstance";
 import useSWR from "swr";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 
 import {
   formatNumberPhone,
@@ -38,6 +39,8 @@ const NotifyMeForm = () => {
   const [errors, setErrors] = useState({});
   const { submitNotificationRequest, isSubmitting } = useNotification();
   const [isFormExpanded, setIsFormExpanded] = useState(false);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   const {
     data: allCarData = [],
@@ -282,136 +285,215 @@ const NotifyMeForm = () => {
   const noBrandSelected = !formData.brand;
   const noModelsAvailable = formData.brand && modelOptions.length === 0;
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.15 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 15 },
+    },
+  };
+
+  const imageVariants = {
+    hidden: { opacity: 0, scale: 0.8, y: 20 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 15, delay: 0.2 },
+    },
+  };
+
   return (
-    <div className="bg-white px-6 pb-6 lg:py-4 xl:py-0 border-y border-gray-200 md:border-none md:rounded-2xl md:shadow-md flex flex-col-reverse lg:flex-row items-center justify-between">
-      <div className="w-full lg:w-3/4">
+    <motion.div
+      ref={ref}
+      variants={containerVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      className="bg-white px-6 pb-6 lg:py-4 xl:py-0 border-y border-gray-200 md:border-none md:rounded-2xl md:shadow-md flex flex-col-reverse lg:flex-row items-center justify-between"
+    >
+      <motion.div variants={itemVariants} className="w-full lg:w-3/4">
         <div className="flex items-start gap-3">
           <TittleText
             text="Tidak Menemukan Mobil yang Dicari?"
             className="-mt-1"
             separator={false}
           />
-          {!isFormExpanded && (
-            <div className="lg:hidden text-center">
-              <button
-                type="button"
-                onClick={expandForm}
-                className="text-gray-500 hover:text-orange-600 focus:outline-none"
-                aria-expanded={isFormExpanded}
-                aria-controls="notify-me-collapsible-form"
-                aria-label="Tampilkan formulir"
+
+          <div className="lg:hidden text-center">
+            <button
+              type="button"
+              onClick={() => setIsFormExpanded(!isFormExpanded)}
+              className="text-gray-500 hover:text-orange-600 focus:outline-none"
+              aria-expanded={isFormExpanded}
+              aria-controls="notify-me-collapsible-form"
+              aria-label={
+                isFormExpanded ? "Sembunyikan formulir" : "Tampilkan formulir"
+              }
+            >
+              <motion.div
+                animate={{ rotate: isFormExpanded ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
               >
-                <FaChevronCircleDown className="w-4 h-4 mx-auto animate-bounce" />
-              </button>
-            </div>
-          )}
+                <FaChevronCircleDown
+                  className={`w-4 h-4 mx-auto ${
+                    !isFormExpanded ? "animate-bounce" : ""
+                  }`}
+                />
+              </motion.div>
+            </button>
+          </div>
         </div>
+
         <p className="text-xs lg:text-sm text-gray-500 mb-4">
           Beri tahu kami preferensi Anda. Kami akan menghubungi Anda jika mobil
           yang sesuai tersedia.
         </p>
-        <form
-          id="notify-me-collapsible-form"
-          onSubmit={handleSubmit}
-          noValidate
-          className={`${isFormExpanded ? "block" : "hidden"} lg:block`}
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-            <Select
-              ref={brandSelectRef}
-              label="Merek Mobil"
-              id="notifyBrand"
-              name="brand"
-              title="Pilih Merek"
-              description={
-                brandOptions.length === 0
-                  ? "Tidak ada merek tersedia"
-                  : "Pilih Merek yang Dicari"
-              }
-              options={brandOptions}
-              value={formData.brand}
-              onChange={(value) => handleSelectChange("brand", value)}
-              error={errors.brand}
-              searchOption={true}
-              disabled={
-                isLoadingCarData || brandOptions.length === 0 || isSubmitting
-              }
-            />
-            <Select
-              ref={modelSelectRef}
-              label="Model Mobil"
-              id="notifyModel"
-              name="model"
-              title="Pilih Model"
-              description={
-                noBrandSelected
-                  ? "Pilih Merek Terlebih Dahulu!"
-                  : noModelsAvailable
-                  ? "Tidak ada model tersedia untuk merek ini"
-                  : "Pilih Model yang Dicari"
-              }
-              options={modelOptions}
-              value={formData.model}
-              onChange={(value) => handleSelectChange("model", value)}
-              disabled={
-                isLoadingCarData ||
-                noBrandSelected ||
-                noModelsAvailable ||
-                isSubmitting
-              }
-              error={errors.model}
-              searchOption={true}
-            />
-            <Select
-              ref={yearSelectRef}
-              label="Tahun"
-              id="notifyYear"
-              name="year"
-              options={years}
-              value={formData.year}
-              onChange={(value) => handleSelectChange("year", value)}
-              title="Pilih Tahun"
-              description="Pilih Tahun Mobil"
-              error={errors.year}
-              disabled={isSubmitting}
-            />
-            <Input
-              ref={phoneNumberInputRef}
-              label="No Handphone"
-              id="notifyPhoneNumber"
-              name="phoneNumber"
-              type="tel"
-              value={formData.phoneNumber}
-              onChange={handleInputChange}
-              placeholder={PHONE_PREFIX}
-              error={errors.phoneNumber || errors.phoneFormat}
-              inputMode="numeric"
-              disabled={isSubmitting}
-            />
-          </div>
 
-          <div>
-            <ButtonAction
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full"
+        <AnimatePresence>
+          <motion.form
+            key="notify-form"
+            id="notify-me-collapsible-form"
+            onSubmit={handleSubmit}
+            noValidate
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className={`${isFormExpanded ? "block" : "hidden"} lg:block`}
+          >
+            <motion.div
+              variants={{
+                hidden: { opacity: 0 },
+                visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+              }}
+              initial="hidden"
+              animate="visible"
             >
-              {isSubmitting ? (
-                <Loader2 className="mr-1 w-5 h-5 animate-spin" />
-              ) : (
-                <AnimatedBell
-                  size={20}
-                  color="white"
-                  className="mr-1 w-5 h-5"
-                />
-              )}
-              <span>{isSubmitting ? "Mengirim..." : "Beritahu Saya"}</span>
-            </ButtonAction>
-          </div>
-        </form>
-      </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                <motion.div variants={itemVariants}>
+                  <Select
+                    ref={brandSelectRef}
+                    label="Merek Mobil"
+                    id="notifyBrand"
+                    name="brand"
+                    title="Pilih Merek"
+                    description={
+                      brandOptions.length === 0
+                        ? "Tidak ada merek tersedia"
+                        : "Pilih Merek yang Dicari"
+                    }
+                    options={brandOptions}
+                    value={formData.brand}
+                    onChange={(value) => handleSelectChange("brand", value)}
+                    error={errors.brand}
+                    searchOption={true}
+                    disabled={
+                      isLoadingCarData ||
+                      brandOptions.length === 0 ||
+                      isSubmitting
+                    }
+                  />
+                </motion.div>
 
-      <div className="w-full lg:w-1/3 flex justify-center items-center mb-4 lg:mb-0">
+                <motion.div variants={itemVariants}>
+                  <Select
+                    ref={modelSelectRef}
+                    label="Model Mobil"
+                    id="notifyModel"
+                    name="model"
+                    title="Pilih Model"
+                    description={
+                      noBrandSelected
+                        ? "Pilih Merek Terlebih Dahulu!"
+                        : noModelsAvailable
+                        ? "Tidak ada model tersedia untuk merek ini"
+                        : "Pilih Model yang Dicari"
+                    }
+                    options={modelOptions}
+                    value={formData.model}
+                    onChange={(value) => handleSelectChange("model", value)}
+                    disabled={
+                      isLoadingCarData ||
+                      noBrandSelected ||
+                      noModelsAvailable ||
+                      isSubmitting
+                    }
+                    error={errors.model}
+                    searchOption={true}
+                  />
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                  <Select
+                    ref={yearSelectRef}
+                    label="Tahun"
+                    id="notifyYear"
+                    name="year"
+                    options={years}
+                    value={formData.year}
+                    onChange={(value) => handleSelectChange("year", value)}
+                    title="Pilih Tahun"
+                    description="Pilih Tahun Mobil"
+                    error={errors.year}
+                    disabled={isSubmitting}
+                  />
+                </motion.div>
+
+                <motion.div variants={itemVariants}>
+                  <Input
+                    ref={phoneNumberInputRef}
+                    label="No Handphone"
+                    id="notifyPhoneNumber"
+                    name="phoneNumber"
+                    type="tel"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
+                    placeholder={PHONE_PREFIX}
+                    error={errors.phoneNumber || errors.phoneFormat}
+                    inputMode="numeric"
+                    disabled={isSubmitting}
+                  />
+                </motion.div>
+              </div>
+
+              <motion.div variants={itemVariants}>
+                <ButtonAction
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="mr-1 w-5 h-5 animate-spin" />
+                  ) : (
+                    <AnimatedBell
+                      size={20}
+                      color="white"
+                      className="mr-1 w-5 h-5"
+                    />
+                  )}
+                  <span>{isSubmitting ? "Mengirim..." : "Beritahu Saya"}</span>
+                </ButtonAction>
+              </motion.div>
+            </motion.div>
+          </motion.form>
+        </AnimatePresence>
+      </motion.div>
+
+      <motion.div
+        variants={imageVariants}
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        className="w-full lg:w-1/3 flex justify-center items-center mb-4 lg:mb-0"
+      >
         <Image
           src="/images/Badge/customer.png"
           alt="Ilustrasi Kontak - Beritahu Saya"
@@ -420,8 +502,8 @@ const NotifyMeForm = () => {
           className="rounded-lg object-cover max-w-[250px] lg:max-w-full"
           priority
         />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

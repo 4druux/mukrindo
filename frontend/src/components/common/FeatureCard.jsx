@@ -1,6 +1,7 @@
 // components/common/FeatureCard.jsx
 import React from "react";
 import { FaArrowRight } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 const FeatureCard = ({
   icon: IconComponent,
@@ -12,13 +13,27 @@ const FeatureCard = ({
   iconColor = "text-white",
   iconSize = "w-10 h-10",
   iconContainerSize = "w-20 h-20",
+  variants,
 }) => {
   const hasImage = !!imgSrc;
 
+  const imageVariants = {
+    initial: { scale: 1 },
+    hover: { scale: 1.05, transition: { duration: 0.3 } },
+  };
+
+  const arrowVariants = {
+    initial: { x: 0 },
+    hover: { x: 4, transition: { duration: 0.2 } },
+  };
+
   return linkUrl ? (
-    <a
+    <motion.a
       href={linkUrl}
       rel="noopener noreferrer"
+      variants={variants}
+      initial="initial"
+      whileHover="hover"
       className={`bg-white border-y border-gray-200 md:rounded-2xl md:shadow-md lg:hover:shadow-lg transition-shadow duration-200 h-full flex overflow-hidden group ${
         hasImage
           ? "flex-col lg:flex-row lg:items-center lg:p-5"
@@ -32,17 +47,20 @@ const FeatureCard = ({
           <IconComponent className={`${iconSize} ${iconColor}`} />
         </div>
       )}
+
       {hasImage && (
         <div
           className={`flex-shrink-0 w-full aspect-[16/9] lg:w-32 lg:aspect-square`}
         >
-          <img
+          <motion.img
+            variants={imageVariants}
             src={imgSrc}
             alt={`${title} image`}
             className="w-full h-full object-cover"
           />
         </div>
       )}
+
       <div
         className={`flex-grow flex flex-col ${
           hasImage ? "px-4 text-left" : ""
@@ -55,19 +73,18 @@ const FeatureCard = ({
           </p>
         </div>
 
-        <div className="py-4 text-right">
-          <span
+        <div className="pt-4 text-right">
+          <motion.span
+            variants={arrowVariants}
             className="text-xs font-semibold text-orange-500 group-hover:text-orange-600 group-hover:underline inline-flex items-center gap-1"
             aria-hidden="true"
           >
             Selengkapnya
-            <span>
-              <FaArrowRight />
-            </span>
-          </span>
+            <FaArrowRight />
+          </motion.span>
         </div>
       </div>
-    </a>
+    </motion.a>
   ) : (
     <div
       className={`bg-white border border-gray-100 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 h-full flex overflow-hidden ${

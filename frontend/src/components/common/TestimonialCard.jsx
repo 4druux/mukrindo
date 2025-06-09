@@ -1,6 +1,7 @@
 // src/components/common/TestimonialCard.jsx
-import React from "react";
+import React, { useRef } from "react";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 const renderStars = (rating) => {
   const stars = [];
@@ -28,12 +29,60 @@ const renderStars = (rating) => {
   return stars;
 };
 
-const TestimonialCard = ({ imgSrc, rating, title, description }) => {
+const TestimonialCard = ({ imgSrc, rating, title, description, isMobile }) => {
   const validRating = Math.max(0, Math.min(5, rating));
 
+  // Logika untuk efek 3D Tilt
+  const ref = useRef(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const xSpring = useSpring(x, { stiffness: 300, damping: 20 });
+  const ySpring = useSpring(y, { stiffness: 300, damping: 20 });
+
+  const rotateX = useTransform(ySpring, [-0.5, 0.5], ["7.5deg", "-7.5deg"]);
+  const rotateY = useTransform(xSpring, [-0.5, 0.5], ["-7.5deg", "7.5deg"]);
+
+  const handleMouseMove = (e) => {
+    if (!ref.current || isMobile) return;
+
+    const rect = ref.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
   return (
-    <div className="w-72 h-full">
-      <div className="bg-white border border-gray-100 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 h-full flex flex-col overflow-hidden">
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: "preserve-3d",
+      }}
+      className="w-72 h-full"
+    >
+      <div
+        className="bg-white border border-gray-100 rounded-xl shadow-lg transition-shadow duration-300 h-full flex flex-col overflow-hidden"
+        style={{
+          transform: "translateZ(50px)",
+          transformStyle: "preserve-3d",
+        }}
+      >
         <div className="flex-shrink-0 w-full aspect-[2/1]">
           <img
             src={imgSrc}
@@ -52,7 +101,7 @@ const TestimonialCard = ({ imgSrc, rating, title, description }) => {
           </p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

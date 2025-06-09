@@ -1,7 +1,8 @@
 //layout/user/jual-mobil/HomeBedge.jsx
+import React, { useRef } from "react";
+import { motion, useInView } from "framer-motion";
 import FeatureCard from "@/components/common/FeatureCard";
 import TittleText from "@/components/common/TittleText";
-import React from "react";
 
 const featuresData = [
   {
@@ -41,30 +42,63 @@ const featuresData = [
 ];
 
 const HomeBedge = () => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 14 },
+    },
+  };
+
   return (
-    <div>
-      <TittleText
-        text="Bosan dengan mobil yang lama?"
-        className="px-3 md:px-0 mt-6 mb-1"
-      />
-      <p className="text-xs lg:text-sm text-gray-500 mb-2 lg:mb-4 px-3 md:px-0">
-        Mau mobil bekas terbaru atau tukar tambah mobil lamamu bisa loh dengan
-        pilihan yang beragam dari Mukrindo Motor
-      </p>
+    <motion.div
+      ref={ref}
+      variants={containerVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+    >
+      <motion.div variants={itemVariants} className="px-3 md:px-0">
+        <TittleText
+          text="Bosan dengan mobil yang lama?"
+          className="mt-6 mb-1"
+        />
+      </motion.div>
+
+      <motion.div variants={itemVariants} className="px-3 md:px-0">
+        <p className="text-xs lg:text-sm text-gray-500 mb-4 lg:mb-6">
+          Mau mobil bekas terbaru atau tukar tambah mobil lamamu bisa loh dengan
+          pilihan yang beragam dari Mukrindo Motor
+        </p>
+      </motion.div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {featuresData.map((feature) => (
-          <div key={feature.id} className="w-full">
-            <FeatureCard
-              imgSrc={feature.imgSrc}
-              title={feature.title}
-              description={feature.description}
-              linkUrl={feature.linkUrl}
-              {...(feature.iconColor && { iconColor: feature.iconColor })}
-            />
-          </div>
+          <FeatureCard
+            key={feature.id}
+            imgSrc={feature.imgSrc}
+            variants={itemVariants}
+            title={feature.title}
+            description={feature.description}
+            linkUrl={feature.linkUrl}
+            {...(feature.iconColor && { iconColor: feature.iconColor })}
+          />
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

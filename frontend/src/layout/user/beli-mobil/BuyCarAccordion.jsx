@@ -1,13 +1,34 @@
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import { motion, useInView } from "framer-motion";
 import Accordion from "@/components/common/Accordion";
 import TittleText from "@/components/common/TittleText";
 
 const BuyCarAccordion = () => {
   const [openIndex, setOpenIndex] = useState(0);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
 
   const handleToggle = (index) => {
     setOpenIndex((prevOpenIndex) => (prevOpenIndex === index ? null : index));
+  };
+
+  const containerVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 15 },
+    },
   };
 
   const accordionItems = [
@@ -142,22 +163,32 @@ const BuyCarAccordion = () => {
   ];
 
   return (
-    <div className="px-3 lg:px-0">
-      <TittleText
-        text="FAQ Seputar Pembelian Mobil"
-        className="mb-2 lg:mb-4 text-center"
-      />
+    <motion.div
+      ref={ref}
+      variants={containerVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      className="px-3 md:px-0"
+    >
+      <motion.div variants={itemVariants}>
+        <TittleText
+          text="FAQ Seputar Pembelian Mobil"
+          className="mb-4 lg:mb-6 text-center"
+        />
+      </motion.div>
 
       {accordionItems.map((item, index) => (
-        <Accordion
-          key={index}
-          title={item.title}
-          description={item.description}
-          isOpen={openIndex === index}
-          onToggle={() => handleToggle(index)}
-        />
+        <motion.div key={index} variants={itemVariants}>
+          <Accordion
+            key={index}
+            title={item.title}
+            description={item.description}
+            isOpen={openIndex === index}
+            onToggle={() => handleToggle(index)}
+          />
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 };
 

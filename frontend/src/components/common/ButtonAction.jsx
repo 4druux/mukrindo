@@ -13,7 +13,7 @@ const ActionButton = ({
   const baseClasses = `
     relative inline-flex items-center justify-center px-6 py-2.5 text-sm font-medium text-white 
     rounded-full overflow-hidden
-    cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500
+    cursor-pointer 
   `;
 
   const disabledClasses = `

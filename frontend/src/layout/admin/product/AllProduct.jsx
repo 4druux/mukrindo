@@ -16,9 +16,10 @@ import EmptyProductDisplay from "@/components/global/EmptyProductDisplay";
 import Pagination from "@/components/global/Pagination";
 import DotLoader from "@/components/common/DotLoader";
 import ButtonMagnetic from "@/components/common/ButtonMagnetic";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Import Icons
-import { Plus, PlusCircleIcon } from "lucide-react";
+import { Plus } from "lucide-react";
 
 const AllProducts = () => {
   const {
@@ -230,10 +231,46 @@ const AllProducts = () => {
     );
   }
 
+  const pageVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 15 },
+    },
+  };
+
   return (
-    <div className="my-6 md:my-0 relative">
-      <BreadcrumbNav items={breadcrumbItems} />
-      <div className="flex items-end justify-end px-3 md:px-0 mb-4">
+    <motion.div
+      variants={pageVariants}
+      initial="hidden"
+      animate="visible"
+      className="my-6 md:my-0 relative"
+    >
+      <motion.div variants={itemVariants}>
+        <BreadcrumbNav items={breadcrumbItems} />
+      </motion.div>
+
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{
+          duration: 0.5,
+          ease: "easeOut",
+          delay: 0.7,
+        }}
+        className="flex items-end justify-end px-3 md:px-0 mb-4"
+      >
         <ButtonMagnetic
           onClick={() => router.push("produk/tambah-produk")}
           icon={<Plus className="w-4 h-4 md:w-5 md:h-5 !-mr-1" />}
@@ -241,27 +278,30 @@ const AllProducts = () => {
         >
           Tambah Produk
         </ButtonMagnetic>
-      </div>
+      </motion.div>
 
-      <div className="mb-4">
+      <motion.div variants={itemVariants} className="mb-4">
         <h1 className="text-md lg:text-lg font-medium text-gray-700 px-3 md:px-0">
           {searchQuery
             ? `Hasil pencarian untuk "${searchQuery}"`
             : "Menampilkan"}
           {` ${processedProducts.length} Produk Mobil`}
         </h1>
-      </div>
+      </motion.div>
 
       {searchQuery && (
-        <ActiveSearchFilters
-          searchParams={searchParams}
-          splitResult={splitSearchFilter}
-          onClearAll={handleClearAllAdminFilters}
-          onRemoveSearchPart={handleRemoveAdminSearchPart}
-          onRemoveFilterParam={handleRemoveAdminFilterParam}
-          isAdminRoute={true}
-        />
+        <motion.div variants={itemVariants}>
+          <ActiveSearchFilters
+            searchParams={searchParams}
+            splitResult={splitSearchFilter}
+            onClearAll={handleClearAllAdminFilters}
+            onRemoveSearchPart={handleRemoveAdminSearchPart}
+            onRemoveFilterParam={handleRemoveAdminFilterParam}
+            isAdminRoute={true}
+          />
+        </motion.div>
       )}
+
       {processedProducts.length === 0 && suggestedQuery && searchQuery && (
         <p className="mt-1 mb-3 text-sm text-gray-600 px-3 md:px-0">
           Mungkin maksud Anda:{" "}
@@ -276,54 +316,61 @@ const AllProducts = () => {
         </p>
       )}
 
-      <div className="mt-4">
+      <motion.div variants={itemVariants} className="mt-4">
         <ShortProduct
           activeFilter={activeFilter}
           onSortChange={handleAdminSortChange}
           excludeFilters={[SHORT_BY.RECOMMENDATION]}
           isAdminRoute={true}
         />
-      </div>
+      </motion.div>
 
-      <CarProductCard
-        products={currentProducts}
-        loading={false}
-        error={error}
-        isAdminRoute={true}
-        handleStatusChange={handleStatusChange}
-        handleDelete={handleDelete}
-        toggleDropdown={toggleDropdown}
-        isDropdownOpen={isDropdownOpen}
-        dropdownRefs={dropdownRefs}
-        emptyMessage={null}
-        skeletonCount={productsPerPage}
-      />
+      <AnimatePresence mode="wait">
+        <CarProductCard
+          key={`${activeFilter}-${searchQuery}-${currentPage}`}
+          products={currentProducts}
+          loading={false}
+          error={error}
+          isAdminRoute={true}
+          handleStatusChange={handleStatusChange}
+          handleDelete={handleDelete}
+          toggleDropdown={toggleDropdown}
+          isDropdownOpen={isDropdownOpen}
+          dropdownRefs={dropdownRefs}
+          emptyMessage={null}
+          skeletonCount={productsPerPage}
+        />
+      </AnimatePresence>
 
       {currentProducts.length > 0 &&
         processedProducts.length > productsPerPage && (
-          <Pagination
-            key={`pagination-${searchParams.toString()}-${currentPage}`}
-            pageCount={Math.ceil(processedProducts.length / productsPerPage)}
-            forcePage={currentPage}
-            onPageChange={handlePageChange}
-          />
+          <motion.div variants={itemVariants}>
+            <Pagination
+              key={`pagination-${searchParams.toString()}-${currentPage}`}
+              pageCount={Math.ceil(processedProducts.length / productsPerPage)}
+              forcePage={currentPage}
+              onPageChange={handlePageChange}
+            />
+          </motion.div>
         )}
 
       {processedProducts.length === 0 && !error && (
-        <EmptyProductDisplay
-          emptyMessage={emptyMessage}
-          suggestedQuery={suggestedQuery}
-          searchQuery={searchQuery}
-          suggestionLinkHref={
-            suggestedQuery
-              ? `/admin/produk?search=${encodeURIComponent(suggestedQuery)}`
-              : null
-          }
-          onSuggestionClick={() =>
-            suggestedQuery && setSearchQuery(suggestedQuery)
-          }
-          isAdminRoute={true}
-        />
+        <motion.div variants={itemVariants}>
+          <EmptyProductDisplay
+            emptyMessage={emptyMessage}
+            suggestedQuery={suggestedQuery}
+            searchQuery={searchQuery}
+            suggestionLinkHref={
+              suggestedQuery
+                ? `/admin/produk?search=${encodeURIComponent(suggestedQuery)}`
+                : null
+            }
+            onSuggestionClick={() =>
+              suggestedQuery && setSearchQuery(suggestedQuery)
+            }
+            isAdminRoute={true}
+          />
+        </motion.div>
       )}
 
       {error && (
@@ -331,7 +378,7 @@ const AllProducts = () => {
           Error: {error.message || "Gagal memuat data produk."}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 export default AllProducts;

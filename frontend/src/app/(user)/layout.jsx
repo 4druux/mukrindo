@@ -89,7 +89,7 @@ export default function MainLayout({ children }) {
     <div className="min-h-screen bg-gray-50 mb-18 md:mb-0">
       {showHeaderAndStandardLayout && <AppHeader />}
       <BookmarkRightbar />
-      <div className="">{children}</div>
+      <div>{children}</div>
       <AppFooter />
     </div>
   );

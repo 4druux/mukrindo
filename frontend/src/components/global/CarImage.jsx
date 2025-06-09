@@ -5,6 +5,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 // Import Component
 import { useHeader } from "@/context/HeaderContext";
@@ -28,6 +29,7 @@ const CarImage = ({
   onImageClick,
   isMobile,
   isAdminRoute = false,
+  variants,
 }) => {
   const { toggleBookmarkSidebar } = useHeader();
   const { bookmarkCount, toggleBookmark, isBookmarked } = useProducts();
@@ -85,10 +87,35 @@ const CarImage = ({
   const bounceAnimate =
     bookmarkCount >= 1 ? "animate-bounce" : "group-hover:animate-bounce";
 
+  const internalContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
+    },
+  };
+
+  const imageVariant = {
+    hidden: { opacity: 0, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
+  };
+
   return (
-    <div className="">
-      <div className="md:flex-1 relative md:min-w-0">
-        <div className="relative aspect-[16/9] rounded-none md:rounded-2xl transition-all duration-500 ease-in-out overflow-hidden">
+    <motion.div variants={variants}>
+      <motion.div
+        variants={internalContainer}
+        initial="hidden"
+        animate="visible"
+        className="md:flex-1 relative md:min-w-0"
+      >
+        <motion.div
+          variants={imageVariant}
+          className="relative aspect-[16/9] rounded-none md:rounded-2xl transition-all duration-500 ease-in-out overflow-hidden"
+        >
           <Swiper
             onSwiper={setMainSwiper}
             spaceBetween={0}
@@ -302,47 +329,50 @@ const CarImage = ({
           >
             {activeIndex + 1} / {validImages.length}
           </div>
-        </div>
-      </div>
+        </motion.div>
 
-      <div className="mt-1 md:mt-4 px-1 relative overflow-hidden horizontal-gradient-fade">
-        <Swiper
-          onSwiper={setThumbsSwiper}
-          spaceBetween={4}
-          slidesPerView={isMobile ? 4 : 5}
-          freeMode={true}
-          watchSlidesProgress={true}
-          modules={[FreeMode, Thumbs]}
-          className="mySwiper rounded-lg"
+        <motion.div
+          variants={imageVariant}
+          className="mt-1 md:mt-4 px-1 relative overflow-hidden horizontal-gradient-fade"
         >
-          {validImages.map((image, index) => (
-            <SwiperSlide key={index}>
-              <button
-                type="button"
-                className={`relative block w-full h-[55px] cursor-pointer group rounded-md overflow-hidden ${
-                  index === activeIndex
-                    ? "border-b-3 md:border-b-4 border-orange-500"
-                    : "border border-white"
-                } ${isAdminRoute ? "lg:h-[72px]" : "md:h-[85px]"}`}
-                onClick={() => mainSwiper?.slideTo(index)}
-                aria-label={`Lihat gambar ${index + 1}`}
-              >
-                <Image
-                  src={image}
-                  alt={`${product.carName || "Thumbnail"} - Thumbnail ${
-                    index + 1
-                  }`}
-                  fill
-                  sizes="100px"
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </button>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
-    </div>
+          <Swiper
+            onSwiper={setThumbsSwiper}
+            spaceBetween={4}
+            slidesPerView={isMobile ? 4 : 5}
+            freeMode={true}
+            watchSlidesProgress={true}
+            modules={[FreeMode, Thumbs]}
+            className="mySwiper rounded-lg"
+          >
+            {validImages.map((image, index) => (
+              <SwiperSlide key={index}>
+                <button
+                  type="button"
+                  className={`relative block w-full h-[55px] cursor-pointer group rounded-md overflow-hidden ${
+                    index === activeIndex
+                      ? "border-b-3 md:border-b-4 border-orange-500"
+                      : "border border-white"
+                  } ${isAdminRoute ? "lg:h-[72px]" : "md:h-[85px]"}`}
+                  onClick={() => mainSwiper?.slideTo(index)}
+                  aria-label={`Lihat gambar ${index + 1}`}
+                >
+                  <Image
+                    src={image}
+                    alt={`${product.carName || "Thumbnail"} - Thumbnail ${
+                      index + 1
+                    }`}
+                    fill
+                    sizes="100px"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </button>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 
