@@ -111,16 +111,18 @@ const backdropVariants = {
 };
 
 const modalVariants = {
-  hidden: { y: "100%", opacity: 0 },
+  hidden: { opacity: 0, scale: 0.9, y: 20 },
   visible: {
-    y: 0,
     opacity: 1,
-    transition: { type: "tween", duration: 0.4, ease: "easeInOut" },
+    scale: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 300, damping: 25 },
   },
   exit: {
-    y: "100%",
     opacity: 0,
-    transition: { type: "tween", duration: 0.4, ease: "easeInOut" },
+    scale: 0.9,
+    y: 20,
+    transition: { duration: 0.2, ease: "easeOut" },
   },
 };
 

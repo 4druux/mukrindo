@@ -134,8 +134,8 @@ const ModalNotifyDetail = ({
 
   if (isLoading && !response) {
     return (
-      <div className="flex-grow flex items-center justify-center p-10">
-        <DotLoader dotSize="w-5 h-5" text="Memuat detail permintaan..." />
+      <div className="flex flex-col gap-3 justify-center items-center p-10">
+        <DotLoader dotSize="w-5 h-5" textSize="text-xl" text="Memuat data..." />
       </div>
     );
   }
