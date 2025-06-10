@@ -1,3 +1,5 @@
+// src/components/admin/dashboard/RequestView.jsx
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
@@ -6,11 +8,8 @@ import axiosInstance from "@/utils/axiosInstance";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 
-// Global Components
 import Pagination from "@/components/global/Pagination";
 import SkeletonRequest from "@/components/skeleton/skeleton-admin/SkeletonRequest";
-
-// Feature-Specific Components
 import RequestList from "@/components/product-admin/BuySell-TradeIn/RequestList";
 import ModalRequestDetail from "@/components/product-admin/BuySell-TradeIn/ModalRequestDetail";
 import RequestNotifyList from "@/components/product-admin/NotifyStock/RequestNotifyList";
@@ -25,11 +24,7 @@ import RequestFilter, {
   NOTIFY_STATUS_FILTER,
   NOTIFY_SORT_ORDER,
 } from "@/components/product-admin/BuySell-TradeIn/RequestFilter";
-
-// Hooks
 import { useRequestContact } from "@/hooks/useRequestContact";
-
-// Icons
 import { FaBoxOpen } from "react-icons/fa";
 
 // --- Constants ---
@@ -84,6 +79,28 @@ const requestConfigs = {
     emptyStateMessage:
       "Tidak ada permintaan notifikasi yang cocok dengan filter yang dipilih.",
     errorTitle: "Permintaan Notifikasi",
+  },
+};
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut",
+    },
   },
 };
 
@@ -422,8 +439,16 @@ const RequestView = () => {
   };
 
   return (
-    <div className="bg-gradient-to-b from-white to-gray-50 md:bg-transparent lg:p-6 lg:rounded-xl lg:shadow-lg lg:bg-white">
-      <div className="flex flex-col gap-2 md:gap-5 pt-6 md:pt-0 mb-6 md:flex-row md:items-center md:justify-between px-3 md:px-0">
+    <motion.div
+      className="bg-gradient-to-b from-white to-gray-50 md:bg-transparent lg:p-6 lg:rounded-xl lg:shadow-lg lg:bg-white"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div
+        className="flex flex-col gap-2 md:gap-5 pt-6 md:pt-0 mb-6 md:flex-row md:items-center md:justify-between px-3 md:px-0"
+        variants={itemVariants}
+      >
         <h1 className="text-md lg:text-lg font-medium text-gray-700">
           {config.pageTitle}
         </h1>
@@ -463,24 +488,38 @@ const RequestView = () => {
             Notifikasi Stok
           </button>
         </nav>
-      </div>
+      </motion.div>
 
-      <RequestFilter
-        key={activeTab}
-        requestType={config.requestType}
-        visuallyActiveFilter={visuallyActiveFilter}
-        onFilterClick={handleFilterClick}
-        statusOptions={config.statusConstants}
-        locationOptions={config.locationConstants}
-        sortOptions={config.sortConstants}
-      />
+      <motion.div variants={itemVariants}>
+        <RequestFilter
+          key={activeTab}
+          requestType={config.requestType}
+          visuallyActiveFilter={visuallyActiveFilter}
+          onFilterClick={handleFilterClick}
+          statusOptions={config.statusConstants}
+          locationOptions={config.locationConstants}
+          sortOptions={config.sortConstants}
+        />
+      </motion.div>
 
-      <div className="mt-4 lg:mt-6">{renderContent()}</div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          className="mt-4 lg:mt-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          variants={itemVariants}
+        >
+          {renderContent()}
+        </motion.div>
+      </AnimatePresence>
 
       <AnimatePresence>{renderModalContent()}</AnimatePresence>
 
       {pageCount > 1 && (
-        <div className="pb-4">
+        <motion.div className="pb-4" variants={itemVariants}>
           <Pagination
             key={`pagination-${activeTab}-${activeFilters.status}-${
               activeFilters.location ?? "none"
@@ -489,9 +528,9 @@ const RequestView = () => {
             forcePage={currentPage}
             onPageChange={handlePageChange}
           />
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

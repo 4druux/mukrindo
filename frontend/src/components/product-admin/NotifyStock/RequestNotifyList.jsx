@@ -1,9 +1,51 @@
-// src/components/product-admin/NotifyStock/RequestNotifyList.js
-import React from "react";
+// src/components/product-admin/NotifyStock/RequestNotifyList.jsx
+
+import React, { useRef } from "react";
 import { FaPhone, FaWhatsapp, FaCar, FaCalendarAlt } from "react-icons/fa";
 import { Loader2 } from "lucide-react";
 import { formatNumberPhone } from "@/utils/formatNumberPhone";
 import { useSearchParams } from "next/navigation";
+import { motion, useInView } from "framer-motion";
+
+const AnimatedItem = ({ children, as: Component = "div", ...props }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
+
+  const desktopItemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
+  };
+
+  const mobileItemVariants = {
+    hidden: { x: -30, opacity: 0 },
+    visible: {
+      x: 0,
+      opacity: 1,
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
+  };
+
+  const itemVariants =
+    Component === "tr" ? desktopItemVariants : mobileItemVariants;
+
+  const MotionComponent = motion[Component];
+
+  return (
+    <MotionComponent
+      ref={ref}
+      variants={itemVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      {...props}
+    >
+      {children}
+    </MotionComponent>
+  );
+};
 
 const RequestNotifyList = ({
   requests,
@@ -35,7 +77,8 @@ const RequestNotifyList = ({
           const hasPhone = !!request.phoneNumber;
 
           return (
-            <div
+            <AnimatedItem
+              as="div"
               key={`mobile-${request._id}`}
               id={`request-${request._id}`}
               className={`bg-white border border-gray-200 rounded-2xl shadow-sm p-4 cursor-pointer hover:bg-blue-50 transition-colors duration-150 ease-in-out ${
@@ -45,6 +88,7 @@ const RequestNotifyList = ({
               }`}
               onClick={() => onRowClick(request._id)}
             >
+              {/* Konten kartu tidak berubah */}
               <div className="flex justify-between items-start mb-2">
                 <span className="text-sm font-semibold text-gray-800 truncate pr-2">
                   {`${request.brand || ""} ${request.model || ""} (${
@@ -59,7 +103,6 @@ const RequestNotifyList = ({
                   {request.status || "N/A"}
                 </span>
               </div>
-
               <div className="grid grid-cols-2 gap-3 py-2">
                 <div className="flex items-center space-x-2">
                   <FaPhone className="text-gray-600 min-w-5 min-h-5 flex-shrink-0" />
@@ -72,7 +115,6 @@ const RequestNotifyList = ({
                     </span>
                   </div>
                 </div>
-
                 <div className="flex items-center space-x-2">
                   <FaCar className="text-gray-600 min-w-5 min-h-5 flex-shrink-0" />
                   <div className="flex flex-col min-w-0">
@@ -84,7 +126,6 @@ const RequestNotifyList = ({
                     </span>
                   </div>
                 </div>
-
                 <div className="flex items-center space-x-2 col-span-2">
                   <FaCalendarAlt className="text-gray-600 min-w-5 min-h-5 flex-shrink-0" />
                   <div className="flex flex-col min-w-0">
@@ -106,8 +147,6 @@ const RequestNotifyList = ({
                   </div>
                 </div>
               </div>
-
-              {/* Tombol Aksi (Hubungi) */}
               <div className="flex justify-end mt-2">
                 <button
                   type="button"
@@ -130,7 +169,7 @@ const RequestNotifyList = ({
                   )}
                 </button>
               </div>
-            </div>
+            </AnimatedItem>
           );
         })}
       </div>
@@ -178,7 +217,8 @@ const RequestNotifyList = ({
               const hasPhone = !!request.phoneNumber;
 
               return (
-                <tr
+                <AnimatedItem
+                  as="tr"
                   key={`desktop-${request._id}`}
                   id={`request-${request._id}`}
                   className={`${
@@ -223,7 +263,6 @@ const RequestNotifyList = ({
                       {request.status || "N/A"}
                     </span>
                   </td>
-
                   <td className="px-3 py-4 text-xs font-medium text-center">
                     <button
                       type="button"
@@ -246,7 +285,7 @@ const RequestNotifyList = ({
                       )}
                     </button>
                   </td>
-                </tr>
+                </AnimatedItem>
               );
             })}
           </tbody>

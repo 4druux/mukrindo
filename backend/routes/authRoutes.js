@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const {
+  getAllUsers,
   registerUser,
   loginUser,
   getUserProfile,
@@ -37,6 +38,19 @@ const uploadAvatar = multer({
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/profile", authenticateToken, getUserProfile);
+
+router.get(
+  "/users",
+  authenticateToken,
+  (req, res, next) => {
+    if (req.user && req.user.role === "admin") {
+      next();
+    } else {
+      res.status(403).json({ message: "Akses ditolak. Memerlukan hak admin." });
+    }
+  },
+  getAllUsers
+);
 
 router.put(
   "/profile",

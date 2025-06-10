@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useProducts } from "@/context/ProductContext";
 import {
@@ -14,6 +14,7 @@ import {
 import { id as localeID } from "date-fns/locale";
 import DotLoader from "@/components/common/DotLoader";
 import { IoIosTrendingDown, IoIosTrendingUp } from "react-icons/io";
+import { motion, useInView } from "framer-motion";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -46,6 +47,8 @@ const STATIC_MONTHLY_TARGET = 1000000000;
 export default function MonthlyTarget() {
   const { products, loading, error } = useProducts();
   const [displayCurrentDate, setDisplayCurrentDate] = useState(new Date());
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -131,6 +134,18 @@ export default function MonthlyTarget() {
         fontFamily: "Outfit, sans-serif",
         type: "radialBar",
         sparkline: { enabled: true },
+        animations: {
+          enabled: true,
+          speed: 800,
+          animateGradually: {
+            enabled: true,
+            delay: 150,
+          },
+          dynamicAnimation: {
+            enabled: true,
+            speed: 350,
+          },
+        },
       },
       plotOptions: {
         radialBar: {
@@ -178,6 +193,33 @@ export default function MonthlyTarget() {
     }
   }, [achievementPercentage, loading]);
 
+  const mainContainerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut", staggerChildren: 0.2 },
+    },
+  };
+
+  const summaryContainerVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const summaryItemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.4, ease: "easeOut" },
+    },
+  };
+
   if (loading) {
     return (
       <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white">
@@ -208,7 +250,13 @@ export default function MonthlyTarget() {
   }
 
   return (
-    <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-gray-50">
+    <motion.div
+      ref={ref}
+      className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-gray-50 overflow-hidden"
+      variants={mainContainerVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+    >
       <div className="px-5 pt-5 bg-white rounded-t-2xl md:border-b md:border-gray-200 pb-5 md:px-6 md:pt-6">
         <div className="flex justify-between items-center">
           <div>
@@ -234,57 +282,65 @@ export default function MonthlyTarget() {
               />
             )}
           </div>
-          {currentMonthRevenue > 0 && lastMonthRevenue > 0 && (
-            <span
-              className={`absolute left-1/2 top-full -translate-x-1/2 -translate-y-[100%] rounded-full px-3 py-1 text-xs font-medium ${
-                revenueChangeVsLastMonth >= 0
-                  ? "bg-green-100 text-green-600"
-                  : "bg-red-100 text-red-600"
-              }`}
-            >
-              {revenueChangeVsLastMonth >= 0 ? (
-                <IoIosTrendingUp className="inline mr-0.5 w-4 h-4 -rotate-12" />
-              ) : (
-                <IoIosTrendingDown className="inline mr-0.5 w-4 h-4 -rotate-12" />
-              )}
-              {Math.abs(revenueChangeVsLastMonth).toFixed(0)}% vs Bulan Lalu
-            </span>
-          )}
+          <span
+            className={`absolute left-1/2 top-full -translate-x-1/2 -translate-y-[100%] rounded-full px-3 py-1 text-xs font-medium ${
+              revenueChangeVsLastMonth >= 0
+                ? "bg-green-100 text-green-600"
+                : "bg-red-100 text-red-600"
+            }`}
+          >
+            {revenueChangeVsLastMonth >= 0 ? (
+              <IoIosTrendingUp className="inline mr-0.5 w-4 h-4" />
+            ) : (
+              <IoIosTrendingDown className="inline mr-0.5 w-4 h-4" />
+            )}
+            {Math.abs(revenueChangeVsLastMonth).toFixed(0)}% vs Bulan Lalu
+          </span>
         </div>
         <p className="mx-auto mt-3 w-full max-w-[420px] text-center text-xs md:text-sm text-gray-600">
           {progressMessage}
         </p>
       </div>
 
-      <div className="flex flex-col items-center justify-around gap-3 px-4 py-4 bg-white rounded-b-2xl">
-        <div className="flex items-start justify-between w-full border-b md:border-none border-gray-200 pb-3 md:pb-0">
+      <motion.div
+        className="flex flex-col items-center justify-around gap-3 px-4 py-4 bg-white rounded-b-2xl"
+        variants={summaryContainerVariants}
+      >
+        <motion.div
+          className="flex items-start justify-between w-full border-b md:border-none border-gray-200 pb-3 md:pb-0"
+          variants={summaryItemVariants}
+        >
           <p className="mb-1 text-center text-gray-500 text-sm">Target</p>
           <p className="flex items-center justify-center gap-1 text-sm font-semibold text-gray-700">
             {formatCurrency(STATIC_MONTHLY_TARGET)}
           </p>
-        </div>
+        </motion.div>
 
-        <div className="flex items-start justify-between w-full border-b md:border-none border-gray-200 pb-3 md:pb-0">
+        <motion.div
+          className="flex items-start justify-between w-full border-b md:border-none border-gray-200 pb-3 md:pb-0"
+          variants={summaryItemVariants}
+        >
           <p className="mb-1 text-center text-gray-500 text-sm">Pendapatan</p>
           <p
             className={`flex items-center justify-center gap-1 text-sm font-semibold ${
-              currentMonthRevenue >= STATIC_MONTHLY_TARGET
+              currentMonthRevenue >= lastMonthRevenue
                 ? "text-green-600"
                 : "text-red-500"
             }`}
           >
-            {currentMonthRevenue !== 0 &&
-              lastMonthRevenue !== 0 &&
-              (currentMonthRevenue >= lastMonthRevenue ? (
-                <IoIosTrendingUp className="w-4 h-4 -rotate-12 text-green-600" />
-              ) : (
-                <IoIosTrendingDown className="w-4 h-4 -rotate-12 text-red-500" />
-              ))}
+            {currentMonthRevenue >= lastMonthRevenue ? (
+              <IoIosTrendingUp className="w-4 h-4 text-green-600" />
+            ) : (
+              <IoIosTrendingDown className="w-4 h-4 text-red-500" />
+            )}
             {formatCurrency(currentMonthRevenue)}
           </p>
-        </div>
+        </motion.div>
 
-        <div className="flex items-start justify-between w-full">
+        <motion.div
+          className="flex items-start justify-between w-full"
+          variants={summaryItemVariants}
+        >
           <p className="mb-1 text-center text-gray-500 text-sm">
             {targetDifference >= 0 ? "Surplus" : "Sisa Target"}
           </p>
@@ -293,16 +349,15 @@ export default function MonthlyTarget() {
               targetDifference >= 0 ? "text-green-600" : "text-red-600"
             }`}
           >
-            {targetDifference > 0 && (
-              <IoIosTrendingUp className="w-4 h-4 -rotate-12 text-green-600" />
-            )}
-            {targetDifference < 0 && (
-              <IoIosTrendingDown className="w-4 h-4 -rotate-12 text-red-500" />
+            {targetDifference >= 0 ? (
+              <IoIosTrendingUp className="w-4 h-4 text-green-600" />
+            ) : (
+              <IoIosTrendingDown className="w-4 h-4 text-red-500" />
             )}
             {formatCurrency(Math.abs(targetDifference))}
           </p>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 }

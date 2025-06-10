@@ -10,18 +10,40 @@ import React, {
 import axiosInstance from "@/utils/axiosInstance";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import useSWR from "swr";
+import isEqual from "lodash/isEqual";
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 const AUTH_API_PATH = "/api/auth";
+const USERS_API_PATH = "/api/auth/users";
+
+const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
   const router = useRouter();
+
+  const {
+    data: usersData,
+    error: usersSwrError,
+    isLoading: usersSwrLoading,
+  } = useSWR(user?.role === "admin" ? USERS_API_PATH : null, fetcher, {
+    revalidateOnFocus: true,
+    compare: (a, b) => isEqual(a, b),
+  });
+
+  const allUsers = usersData || [];
+  const usersLoading = usersSwrLoading;
+  const usersError = usersSwrError
+    ? usersSwrError.response?.data?.message ||
+      usersSwrError.message ||
+      "Gagal memuat data pengguna."
+    : null;
 
   const fetchUserProfile = useCallback(async (token) => {
     setLoading(true);
@@ -240,6 +262,9 @@ export const AuthProvider = ({ children }) => {
     isAdmin: user?.role === "admin",
     isUser: user?.role === "user",
     isAuthenticated: !!user,
+    allUsers,
+    usersLoading,
+    usersError,
   };
 
   return (

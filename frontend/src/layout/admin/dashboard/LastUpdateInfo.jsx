@@ -10,6 +10,7 @@ import {
 } from "date-fns";
 import { FiRefreshCw } from "react-icons/fi";
 import DotLoader from "@/components/common/DotLoader";
+import { motion } from "framer-motion";
 
 const LAST_UPDATE_TIME_KEY = "lastUpdateTime";
 const PREVIOUS_DATA_KEY = "previousData";
@@ -241,18 +242,27 @@ export default function LastUpdatedInfo() {
   };
 
   return (
-    <div className="p-4 border border-gray-200 md:border-none md:rounded-2xl md:shadow-sm text-sm text-gray-600 bg-white flex items-center justify-between gap-2">
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{
+        duration: 0.5,
+        ease: "easeOut",
+        delay: 0.7,
+      }}
+      className="p-4 border border-gray-200 md:border-none md:rounded-2xl md:shadow-sm text-sm text-gray-600 bg-white flex items-center justify-between gap-2"
+    >
       <div className="flex items-center gap-2">
         Data terakhir diupdate: {renderTimestamp()}
       </div>
       <button
         onClick={handleManualRefresh}
         disabled={isUpdating || productsLoading || statsLoading}
-        className="p-2 text-orange-600 bg-orange-100 rounded-md hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+        className="p-2 text-orange-600 bg-orange-100 rounded-md hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center cursor-pointer"
         aria-label={isUpdating ? "Memperbarui data..." : "Perbarui data"}
       >
         <FiRefreshCw size={16} className={isUpdating ? "animate-spin" : ""} />
       </button>
-    </div>
+    </motion.div>
   );
 }

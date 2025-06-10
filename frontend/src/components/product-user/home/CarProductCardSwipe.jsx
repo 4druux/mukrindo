@@ -62,9 +62,9 @@ const CarProductCardSwipe = ({
       transition: { duration: 0.2 },
     },
   };
-
   return (
     <motion.div
+      key="product-grid"
       variants={containerVariants}
       initial="hidden"
       animate="visible"

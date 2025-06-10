@@ -141,6 +141,12 @@ const CarProductCard = ({
               key={product._id}
               layout
               variants={cardItemVariants}
+              whileHover={{
+                scale: 1.01,
+                y: -3,
+                x: -2,
+                transition: { type: "spring", stiffness: 300 },
+              }}
               className="rounded-2xl bg-white overflow-hidden transition-shadow duration-200 relative shadow-md hover:shadow-xl flex flex-col"
             >
               <Link href={detailUrl} className="flex-grow">
