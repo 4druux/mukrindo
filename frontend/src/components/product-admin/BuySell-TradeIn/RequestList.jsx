@@ -1,4 +1,6 @@
-import React from "react";
+// src/components/product-admin/BuySell-TradeIn/RequestList.jsx
+
+import React, { useRef } from "react";
 import {
   FaPhone,
   FaWhatsapp,
@@ -12,6 +14,47 @@ import { Loader2 } from "lucide-react";
 import { formatNumberPhone } from "@/utils/formatNumberPhone";
 import { formatNumber } from "@/utils/formatNumber";
 import { useSearchParams } from "next/navigation";
+import { motion, useInView } from "framer-motion";
+
+const AnimatedItem = ({ children, as: Component = "div", ...props }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
+
+  const desktopItemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
+  };
+
+  const mobileItemVariants = {
+    hidden: { x: -30, opacity: 0 },
+    visible: {
+      x: 0,
+      opacity: 1,
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
+  };
+
+  const itemVariants =
+    Component === "tr" ? desktopItemVariants : mobileItemVariants;
+
+  const MotionComponent = motion[Component];
+
+  return (
+    <MotionComponent
+      ref={ref}
+      variants={itemVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      {...props}
+    >
+      {children}
+    </MotionComponent>
+  );
+};
 
 const RequestList = ({
   requests,
@@ -49,7 +92,8 @@ const RequestList = ({
           const hasPhone = !!request.customerPhoneNumber;
 
           return (
-            <div
+            <AnimatedItem
+              as="div"
               key={`mobile-${request._id}`}
               id={`request-${request._id}`}
               className={`bg-white border border-gray-200 rounded-2xl shadow-sm p-4 cursor-pointer hover:bg-blue-50 transition-colors duration-150 ease-in-out ${
@@ -59,6 +103,7 @@ const RequestList = ({
               }`}
               onClick={() => onRowClick(request._id)}
             >
+              {/* Konten kartu tidak berubah */}
               <div className="flex justify-between items-start mb-2">
                 <span className="text-sm font-semibold text-gray-800 truncate pr-2">
                   {request.customerName || "-"}
@@ -189,12 +234,12 @@ const RequestList = ({
                   )}
                 </button>
               </div>
-            </div>
+            </AnimatedItem>
           );
         })}
       </div>
 
-      {/* Dekstop View */}
+      {/* Desktop View */}
       <div className="hidden lg:block">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -263,7 +308,8 @@ const RequestList = ({
               const hasPhone = !!request.customerPhoneNumber;
 
               return (
-                <tr
+                <AnimatedItem
+                  as="tr"
                   key={`desktop-${request._id}`}
                   id={`request-${request._id}`}
                   className={`${
@@ -310,11 +356,7 @@ const RequestList = ({
                     {request.inspectionDate
                       ? new Date(request.inspectionDate).toLocaleDateString(
                           "id-ID",
-                          {
-                            day: "2-digit",
-                            month: "short",
-                            year: "numeric",
-                          }
+                          { day: "2-digit", month: "short", year: "numeric" }
                         )
                       : "-"}
                   </td>
@@ -349,7 +391,7 @@ const RequestList = ({
                       )}
                     </button>
                   </td>
-                </tr>
+                </AnimatedItem>
               );
             })}
           </tbody>

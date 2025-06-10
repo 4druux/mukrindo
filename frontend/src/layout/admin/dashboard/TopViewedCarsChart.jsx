@@ -7,12 +7,37 @@ import { id } from "date-fns/locale";
 import { useExportData } from "@/hooks/useExportData";
 import ExportDropdown from "@/components/product-admin/Dashboard/ExportDropdown";
 import DotLoader from "@/components/common/DotLoader";
+import { motion, animate, useInView } from "framer-motion";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
 
 const CHART_COLORS = ["#F89B78", "#B6A6E9", "#AFDC8F", "#9AD8D8", "#92C5F9"];
+
+// Helper animasi angka
+function AnimatedNumber({ value, isInteger = true }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.5 });
+
+  useEffect(() => {
+    if (!isInView) return;
+    const node = ref.current;
+    if (!node) return;
+    const controls = animate(0, value, {
+      duration: 4,
+      ease: [0.22, 1, 0.36, 1],
+      onUpdate(latest) {
+        if (isInteger)
+          node.textContent = Math.round(latest).toLocaleString("id-ID");
+        else node.textContent = latest.toFixed(2).replace(".", ",");
+      },
+    });
+    return () => controls.stop();
+  }, [value, isInteger, isInView]);
+
+  return <span ref={ref} />;
+}
 
 const TopViewedCarsChart = () => {
   const { products, loading, error } = useProducts();
@@ -21,6 +46,8 @@ const TopViewedCarsChart = () => {
     averageAllViews: 0,
     allProductsWithViews: [],
   });
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.5 });
 
   const prepareExportData = () => {
     if (
@@ -32,7 +59,6 @@ const TopViewedCarsChart = () => {
 
     const exportDate = format(new Date(), "dd MMM yyyy", { locale: id });
     const periodeText = `Data per: ${exportDate}`;
-
     const pdfData = allStats.allProductsWithViews.map((product, index) => [
       index + 1,
       product.carName || "-",
@@ -41,7 +67,6 @@ const TopViewedCarsChart = () => {
       product.variant || "-",
       product.viewCount.toLocaleString("id-ID"),
     ]);
-
     const csvData = allStats.allProductsWithViews.map((product, index) => [
       index + 1,
       `"${product.carName || "-"}"`,
@@ -99,13 +124,8 @@ const TopViewedCarsChart = () => {
 
   const calculateAllProductsStats = () => {
     if (!products || products.length === 0) {
-      return {
-        totalAllViews: 0,
-        averageAllViews: 0,
-        allProductsWithViews: [],
-      };
+      return { totalAllViews: 0, averageAllViews: 0, allProductsWithViews: [] };
     }
-
     const allProductsWithViews = products.filter(
       (p) => typeof p.viewCount === "number"
     );
@@ -117,7 +137,6 @@ const TopViewedCarsChart = () => {
       allProductsWithViews.length > 0
         ? totalAllViews / allProductsWithViews.length
         : 0;
-
     return {
       totalAllViews,
       averageAllViews,
@@ -131,17 +150,13 @@ const TopViewedCarsChart = () => {
     if (!products || products.length === 0) {
       return { series: [], labels: [], topProducts: [], hasData: false };
     }
-
     const productsWithViews = products
       .filter((p) => typeof p.viewCount === "number" && p.viewCount > 0)
       .sort((a, b) => b.viewCount - a.viewCount);
-
     const topProducts = productsWithViews.slice(0, 5);
-
     if (topProducts.length === 0) {
       return { series: [], labels: [], topProducts: [], hasData: false };
     }
-
     return {
       series: topProducts.map((p) => p.viewCount),
       labels: topProducts.map(
@@ -176,18 +191,9 @@ const TopViewedCarsChart = () => {
             100
           ).toFixed(1);
           const color = w.globals.colors[seriesIndex];
-
-          return `
-          <div class="apexcharts-tooltip-custom" style="padding: 8px 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              <div style="display: flex; align-items: center; margin-bottom: 4px;">
-                  <span style="width: 12px; height: 12px; border-radius: 50%; background-color: ${color}; margin-right: 8px;"></span>
-                  <strong style="font-size: 13px; color: #333;">${label}</strong>
-              </div>
-              <div style="font-size: 12px; color: #555;">
-                  Dilihat: ${value.toLocaleString("id-ID")} (${percentage}%)
-              </div>
-          </div>
-        `;
+          return `<div class="apexcharts-tooltip-custom" style="padding: 8px 12px; background: #fff; border: 1px solid #e0e0e0; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><div style="display: flex; align-items: center; margin-bottom: 4px;"><span style="width: 12px; height: 12px; border-radius: 50%; background-color: ${color}; margin-right: 8px;"></span><strong style="font-size: 13px; color: #333;">${label}</strong></div><div style="font-size: 12px; color: #555;">Dilihat: ${value.toLocaleString(
+            "id-ID"
+          )} (${percentage}%)</div></div>`;
         },
       },
       dataLabels: {
@@ -241,6 +247,20 @@ const TopViewedCarsChart = () => {
     }
   }, [products]);
 
+  const listContainerVariants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.08 } },
+  };
+
+  const listItemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { type: "spring", stiffness: 150, damping: 20 },
+    },
+  };
+
   if (loading) {
     return (
       <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-6">
@@ -263,40 +283,50 @@ const TopViewedCarsChart = () => {
     );
   }
 
-  if (error) {
+  if (error || !chartData.hasData) {
+    const title = "Mobil Paling Diminati";
+    const message = error
+      ? "Gagal memuat data produk."
+      : "Belum ada data produk yang dilihat.";
     return (
-      <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-6 text-red-500">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-md lg:text-lg font-medium text-gray-700">
-            Mobil Paling Diminati
-          </h3>
+      <div
+        className={`border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-6 ${
+          error ? "text-red-500" : "text-gray-500"
+        }`}
+      >
+        <h3 className="text-md lg:text-lg font-medium text-gray-700 mb-4">
+          {title}
+        </h3>
+        <div
+          className="text-center"
+          style={{
+            height: 435,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <p>{message}</p>
         </div>
-        Gagal memuat data produk.
-      </div>
-    );
-  }
-
-  if (!chartData.hasData) {
-    return (
-      <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-md lg:text-lg font-medium text-gray-700">
-            Mobil Paling Diminati
-          </h3>
-        </div>
-        <p className="text-gray-500">Belum ada data produk yang dilihat.</p>
-        <p className="text-sm text-gray-500 mt-4">
-          Total melihat semua mobil: 0
-        </p>
-        <p className="text-sm text-gray-500 mt-1">
-          Rata-rata melihat semua mobil: 0
-        </p>
       </div>
     );
   }
 
   return (
-    <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-4 sm:p-6">
+    <motion.div
+      ref={ref}
+      className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-4 sm:p-6"
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      variants={{
+        hidden: { opacity: 0, scale: 0.95 },
+        visible: {
+          opacity: 1,
+          scale: 1,
+          transition: { duration: 0.5, ease: "easeOut" },
+        },
+      }}
+    >
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-md lg:text-lg font-medium text-gray-700">
           Mobil Paling Diminati
@@ -304,7 +334,12 @@ const TopViewedCarsChart = () => {
         <ExportDropdown onExport={handleExport} className="relative" />
       </div>
 
-      <div className="flex flex-col items-center">
+      <motion.div
+        className="flex flex-col items-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
         {typeof window !== "undefined" && (
           <ReactApexChart
             options={chartOptions}
@@ -314,14 +349,23 @@ const TopViewedCarsChart = () => {
             height={350}
           />
         )}
-      </div>
+      </motion.div>
 
-      <div className="mt-6 space-y-2">
+      <motion.div
+        className="mt-6 space-y-2"
+        variants={listContainerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <h4 className="text-sm font-semibold text-gray-600 mb-2">
           Top 5 Mobil Paling Diminati
         </h4>
         {chartData.topProducts.map((product, index) => (
-          <div key={product._id} className="flex items-center space-x-3">
+          <motion.div
+            key={product._id}
+            className="flex items-center space-x-3"
+            variants={listItemVariants}
+          >
             <span
               className="w-3 h-3 rounded-full flex-shrink-0"
               style={{
@@ -335,27 +379,30 @@ const TopViewedCarsChart = () => {
               {chartData.labels[index]}
             </span>
             <span className="text-xs font-semibold text-gray-800">
-              {product.viewCount.toLocaleString("id-ID")}
+              <AnimatedNumber value={product.viewCount} />
             </span>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       <div className="mt-6 pt-4 border-t border-gray-200">
         <p className="text-xs text-gray-600">
           Total melihat semua data mobil:{" "}
           <span className="font-semibold text-gray-800">
-            {allStats.totalAllViews.toLocaleString("id-ID")}
+            <AnimatedNumber value={allStats.totalAllViews} />
           </span>
         </p>
         <p className="text-xs text-gray-600 mt-1">
           Rata-rata melihat semua data mobil:{" "}
           <span className="font-semibold text-gray-800">
-            {allStats.averageAllViews.toFixed(2).replace(".", ",")}
+            <AnimatedNumber
+              value={allStats.averageAllViews}
+              isInteger={false}
+            />
           </span>
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

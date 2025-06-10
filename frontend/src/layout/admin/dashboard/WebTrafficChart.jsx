@@ -27,6 +27,7 @@ import useSWR from "swr";
 import PeriodFilter from "@/components/product-admin/Dashboard/PeriodFilter";
 import { useAutoScrollToChart } from "@/hooks/useAutoScrollToChart";
 import DotLoader from "@/components/common/DotLoader";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -123,7 +124,7 @@ export default function WebTrafficChart() {
               : 0)
           );
         }, 0);
-        categories.push(format(monthStart, "MMM yyyy", { locale: id }));
+        categories.push(format(monthStart, "MMM yy", { locale: id }));
         visitsData.push(monthlyVisits);
       });
     } else if (selectedTab === "Tahun") {
@@ -267,7 +268,7 @@ export default function WebTrafficChart() {
   const periodTitleMap = {
     Hari: "7 Hari Terakhir",
     Minggu: "4 Minggu Terakhir",
-    Bulan: `Bulan ${currentYear}`,
+    Bulan: `Tahun ${currentYear}`,
     Tahun: "5 Tahun Terakhir",
   };
 
@@ -276,6 +277,23 @@ export default function WebTrafficChart() {
     selectedTab,
     currentYear
   );
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100 },
+    },
+  };
 
   if (historyLoading) {
     return (
@@ -337,8 +355,16 @@ export default function WebTrafficChart() {
     processedChartData.visits.some((v) => v > 0);
 
   return (
-    <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white px-4 pb-5 pt-5 sm:px-6 sm:pt-6">
-      <div className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <motion.div
+      className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white px-4 pb-5 pt-5 sm:px-6 sm:pt-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div
+        variants={itemVariants}
+        className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between"
+      >
         <div className="w-full">
           <h3 className="text-md lg:text-lg font-medium text-gray-700">
             Statistik Trafik Pengunjung {periodTitleMap[selectedTab]}
@@ -353,44 +379,50 @@ export default function WebTrafficChart() {
             webTrafficChart={true}
           />
         </div>
-      </div>
+      </motion.div>
 
-      {hasActualData ? (
-        <div
-          className="max-w-full overflow-x-auto custom-scrollbar"
-          ref={chartContainerRef}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`${selectedTab}-${currentYear}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { duration: 0.5 } }}
+          exit={{ opacity: 0, transition: { duration: 0.2 } }}
         >
-          <div className="min-w-[600px] xl:min-w-full">
-            <ReactApexChart
-              key={`${selectedTab}-${
-                selectedTab === "Bulan" ? currentYear : ""
-              }`}
-              options={chartOptions}
-              series={chartSeries}
-              type="area"
-              height={chartHeight}
-              width={"100%"}
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="py-2">
-          <div
-            className="text-center text-gray-500"
-            style={{
-              height: `${chartHeight}px`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "0.875rem",
-            }}
-          >
-            {historyLoading
-              ? "Memuat data..."
-              : "Tidak ada data kunjungan untuk periode ini."}
-          </div>
-        </div>
-      )}
-    </div>
+          {hasActualData ? (
+            <div
+              className="max-w-full overflow-x-auto custom-scrollbar"
+              ref={chartContainerRef}
+            >
+              <div className="min-w-[600px] xl:min-w-full">
+                <ReactApexChart
+                  options={chartOptions}
+                  series={chartSeries}
+                  type="area"
+                  height={chartHeight}
+                  width={"100%"}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="py-2">
+              <div
+                className="text-center text-gray-500"
+                style={{
+                  height: `${chartHeight}px`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "0.875rem",
+                }}
+              >
+                {historyLoading
+                  ? "Memuat data..."
+                  : "Tidak ada data kunjungan untuk periode ini."}
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </motion.div>
   );
 }

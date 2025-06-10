@@ -91,16 +91,7 @@ const CarImage = ({
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-    },
-  };
-
-  const imageVariant = {
-    hidden: { opacity: 0, scale: 0.95 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: { duration: 0.5, ease: "easeOut" },
+      transition: { staggerChildren: 0.15 },
     },
   };
 
@@ -112,10 +103,7 @@ const CarImage = ({
         animate="visible"
         className="md:flex-1 relative md:min-w-0"
       >
-        <motion.div
-          variants={imageVariant}
-          className="relative aspect-[16/9] rounded-none md:rounded-2xl transition-all duration-500 ease-in-out overflow-hidden"
-        >
+        <div className="relative aspect-[16/9] rounded-none md:rounded-2xl transition-all duration-500 ease-in-out overflow-hidden">
           <Swiper
             onSwiper={setMainSwiper}
             spaceBetween={0}
@@ -329,12 +317,9 @@ const CarImage = ({
           >
             {activeIndex + 1} / {validImages.length}
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div
-          variants={imageVariant}
-          className="mt-1 md:mt-4 px-1 relative overflow-hidden horizontal-gradient-fade"
-        >
+        <div className="mt-1 md:mt-4 px-1 relative overflow-hidden horizontal-gradient-fade">
           <Swiper
             onSwiper={setThumbsSwiper}
             spaceBetween={4}
@@ -370,7 +355,7 @@ const CarImage = ({
               </SwiperSlide>
             ))}
           </Swiper>
-        </motion.div>
+        </div>
       </motion.div>
     </motion.div>
   );

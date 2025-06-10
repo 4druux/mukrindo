@@ -22,6 +22,7 @@ import PeriodFilter from "@/components/product-admin/Dashboard/PeriodFilter";
 import { useAutoScrollToChart } from "@/hooks/useAutoScrollToChart";
 import DotLoader from "@/components/common/DotLoader";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -427,9 +428,34 @@ const SalesStatsChart = () => {
     processedChartData.sales.some((v) => v > 0) ||
     processedChartData.revenue.some((v) => v > 0);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100 },
+    },
+  };
+
   return (
-    <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white px-4 pb-5 pt-5 sm:px-6 sm:pt-6">
-      <div className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white px-4 pb-5 pt-5 sm:px-6 sm:pt-6"
+    >
+      <motion.div
+        variants={itemVariants}
+        className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between"
+      >
         <div className="w-full">
           <h3 className="text-md lg:text-lg font-medium text-gray-700">
             {selectedTab === "Minggu" &&
@@ -448,45 +474,54 @@ const SalesStatsChart = () => {
           />
           <ExportDropdown onExport={handleExport} className="relative" />
         </div>
-      </div>
+      </motion.div>
 
-      {hasActualData ? (
-        <div
-          className="max-w-full overflow-x-auto custom-scrollbar"
-          ref={chartContainerRef}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`${selectedTab}-${currentYear}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, transition: { duration: 0.5 } }}
+          exit={{ opacity: 0, transition: { duration: 0.2 } }}
         >
-          <div className="min-w-[600px] xl:min-w-full">
-            {typeof window !== "undefined" && (
-              <ReactApexChart
-                options={chartOptions}
-                series={chartSeries}
-                type="area"
-                height={310}
-                width="100%"
-                key={`${selectedTab}-${
-                  selectedTab === "Bulan" ? currentYear : ""
-                }`}
-              />
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="py-2">
-          <div
-            className="text-center text-gray-500"
-            style={{
-              height: 310,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "0.875rem",
-            }}
-          >
-            Tidak ada data penjualan untuk periode ini.
-          </div>
-        </div>
-      )}
-    </div>
+          {hasActualData ? (
+            <div
+              className="max-w-full overflow-x-auto custom-scrollbar"
+              ref={chartContainerRef}
+            >
+              <div className="min-w-[600px] xl:min-w-full">
+                {typeof window !== "undefined" && (
+                  <ReactApexChart
+                    options={chartOptions}
+                    series={chartSeries}
+                    type="area"
+                    height={310}
+                    width="100%"
+                    key={`${selectedTab}-${
+                      selectedTab === "Bulan" ? currentYear : ""
+                    }`}
+                  />
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="py-2">
+              <div
+                className="text-center text-gray-500"
+                style={{
+                  height: 310,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "0.875rem",
+                }}
+              >
+                Tidak ada data penjualan untuk periode ini.
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </motion.div>
   );
 };
 

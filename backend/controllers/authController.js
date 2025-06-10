@@ -67,6 +67,18 @@ const deleteFromCloudinary = async (imageUrl) => {
   }
 };
 
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).select("-password");
+    res.json(users);
+  } catch (error) {
+    console.error("Get All Users Error:", error);
+    res
+      .status(500)
+      .json({ message: "Server Error saat mengambil data pengguna." });
+  }
+};
+
 exports.registerUser = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
   try {
@@ -136,12 +148,10 @@ exports.loginUser = async (req, res) => {
         token: generateToken(user._id, user.role),
       });
     } else if (user && !user.password && user.googleId) {
-      return res
-        .status(401)
-        .json({
-          message:
-            "Akun ini terdaftar melalui Google. Silakan login dengan Google.",
-        });
+      return res.status(401).json({
+        message:
+          "Akun ini terdaftar melalui Google. Silakan login dengan Google.",
+      });
     } else {
       res.status(401).json({ message: "Email atau kata sandi salah." });
     }

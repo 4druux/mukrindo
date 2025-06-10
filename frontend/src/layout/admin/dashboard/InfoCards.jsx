@@ -1,10 +1,7 @@
-// InfoCards.jsx
+// frontend/src/components/product-admin/Dashboard/InfoCards.jsx
 "use client";
 import React, { useEffect, useState, useMemo, useRef } from "react";
-import { MdGroup } from "react-icons/md";
 import { IoIosTrendingUp, IoIosTrendingDown } from "react-icons/io";
-
-import { useProducts } from "@/context/ProductContext";
 import {
   startOfMonth,
   endOfMonth,
@@ -13,9 +10,17 @@ import {
   parseISO,
   isValid,
 } from "date-fns";
+import { motion } from "framer-motion";
+
+// Contexts
+import { useProducts } from "@/context/ProductContext";
+import { useAuth } from "@/context/AuthContext";
+
+// Components
 import { CarInfoAvailable } from "@/components/product-admin/Dashboard/CarInfoAvailable";
 import { CarInfoSold } from "@/components/product-admin/Dashboard/CarInfoSold";
 import { WebsiteTraffic } from "@/components/product-admin/Dashboard/WebsiteTraffic";
+import { AccountRegistrantsInfo } from "@/components/product-admin/Dashboard/AccountRegistrantsInfo";
 import SkeletonInfoCard from "@/components/skeleton/skeleton-admin/SkeletonInfoCard";
 
 const LAST_TREND_CALC_MONTH_YEAR_KEY = "infoCardsLastTrendCalcMonthYear";
@@ -41,13 +46,17 @@ const getValidDate = (dateString) => {
 };
 
 export const InfoCards = () => {
+  // Data dari contexts
   const {
     products,
     loading: productsLoading,
     error: productsError,
   } = useProducts();
+  const { allUsers, usersLoading, usersError } = useAuth();
+
   const isInitialMountRef = useRef(true);
 
+  // State untuk statistik produk
   const [displayStats, setDisplayStats] = useState({
     totalAvailable: 0,
     addedThisMonth: 0,
@@ -57,6 +66,14 @@ export const InfoCards = () => {
     soldThisMonth: 0,
     soldLastMonth: 0,
     soldTrend: { value: 0, direction: "neutral", show: false },
+  });
+
+  // State untuk statistik pengguna
+  const [userStats, setUserStats] = useState({
+    totalUsers: 0,
+    registeredThisMonth: 0,
+    registeredLastMonth: 0,
+    registrationTrend: { value: 0, direction: "neutral", show: false },
   });
 
   const { overallTotalAvailable, overallTotalSold } = useMemo(() => {
@@ -73,49 +90,24 @@ export const InfoCards = () => {
   }, [products]);
 
   useEffect(() => {
-    if (
-      productsLoading ||
-      productsError ||
-      !products ||
-      products.length === 0
-    ) {
-      const defaultStats = {
-        totalAvailable: overallTotalAvailable,
-        totalSold: overallTotalSold,
-        addedThisMonth: 0,
-        addedLastMonth: 0,
-        addedTrend: { value: 0, direction: "neutral", show: false },
-        soldThisMonth: 0,
-        soldLastMonth: 0,
-        soldTrend: { value: 0, direction: "neutral", show: false },
-      };
-      if (productsError) {
-        setDisplayStats(defaultStats);
-      } else if (
-        productsLoading ||
-        (!products && !productsError) ||
-        (products && products.length === 0 && !productsError)
-      ) {
-        setDisplayStats(defaultStats);
-      }
-      return;
-    }
+    const isLoading = productsLoading || usersLoading;
+    const hasError = productsError || usersError;
 
+    if (isLoading || hasError) return;
+
+    // Persiapan tanggal
     const now = new Date();
     const currentMonthStart = startOfMonth(now);
     const currentMonthEnd = endOfMonth(now);
-    const currentMonthYearStr = `${now.getFullYear()}-${String(
-      now.getMonth() + 1
-    ).padStart(2, "0")}`;
-
     const prevMonthDate = subMonths(now, 1);
     const prevMonthStart = startOfMonth(prevMonthDate);
     const prevMonthEnd = endOfMonth(prevMonthDate);
 
-    let actualAddedThisMonth = 0;
-    let actualSoldThisMonth = 0;
-    let actualAddedLastMonth = 0;
-    let actualSoldLastMonth = 0;
+    // Kalkulasi Produk
+    let actualAddedThisMonth = 0,
+      actualSoldThisMonth = 0;
+    let actualAddedLastMonth = 0,
+      actualSoldLastMonth = 0;
 
     products.forEach((p) => {
       const creationDate = getValidDate(p.createdAt);
@@ -160,17 +152,45 @@ export const InfoCards = () => {
       }
     });
 
+    // Kalkulasi Pengguna
+    let actualRegisteredThisMonth = 0,
+      actualRegisteredLastMonth = 0;
+    allUsers.forEach((user) => {
+      const registrationDate = getValidDate(user.createdAt);
+      if (
+        registrationDate &&
+        isWithinInterval(registrationDate, {
+          start: currentMonthStart,
+          end: currentMonthEnd,
+        })
+      ) {
+        actualRegisteredThisMonth++;
+      }
+      if (
+        registrationDate &&
+        isWithinInterval(registrationDate, {
+          start: prevMonthStart,
+          end: prevMonthEnd,
+        })
+      ) {
+        actualRegisteredLastMonth++;
+      }
+    });
+
+    // Logika menampilkan tren
+    const currentMonthYearStr = `${now.getFullYear()}-${String(
+      now.getMonth() + 1
+    ).padStart(2, "0")}`;
     const storedLastCalcMonthYear = localStorage.getItem(
       LAST_TREND_CALC_MONTH_YEAR_KEY
     );
-    let showTrends = false;
+    let showTrends = storedLastCalcMonthYear ? true : false;
     if (storedLastCalcMonthYear !== currentMonthYearStr) {
       localStorage.setItem(LAST_TREND_CALC_MONTH_YEAR_KEY, currentMonthYearStr);
       showTrends = true;
-    } else if (storedLastCalcMonthYear) {
-      showTrends = true;
     }
 
+    // Kalkulasi Tren
     const addedTrendVal = calculateTrendInternal(
       actualAddedThisMonth,
       actualAddedLastMonth
@@ -179,7 +199,12 @@ export const InfoCards = () => {
       actualSoldThisMonth,
       actualSoldLastMonth
     );
+    const registrationTrendVal = calculateTrendInternal(
+      actualRegisteredThisMonth,
+      actualRegisteredLastMonth
+    );
 
+    // Set State
     setDisplayStats({
       totalAvailable: overallTotalAvailable,
       addedThisMonth: actualAddedThisMonth,
@@ -200,6 +225,21 @@ export const InfoCards = () => {
         show: showTrends,
       },
     });
+    setUserStats({
+      totalUsers: allUsers.length,
+      registeredThisMonth: actualRegisteredThisMonth,
+      registeredLastMonth: actualRegisteredLastMonth,
+      registrationTrend: {
+        value: Math.abs(registrationTrendVal),
+        direction:
+          registrationTrendVal > 0
+            ? "up"
+            : registrationTrendVal < 0
+            ? "down"
+            : "neutral",
+        show: showTrends,
+      },
+    });
 
     if (isInitialMountRef.current) {
       isInitialMountRef.current = false;
@@ -208,6 +248,9 @@ export const InfoCards = () => {
     products,
     productsLoading,
     productsError,
+    allUsers,
+    usersLoading,
+    usersError,
     overallTotalAvailable,
     overallTotalSold,
   ]);
@@ -221,6 +264,7 @@ export const InfoCards = () => {
       );
     }
     const isUp = direction === "up";
+
     return (
       <span
         className={`text-[11px] font-medium px-1 rounded-full ${
@@ -229,15 +273,15 @@ export const InfoCards = () => {
       >
         {trendValue.toFixed(2)}%
         {isUp ? (
-          <IoIosTrendingUp className="inline ml-1 w-4 h-4 -rotate-12" />
+          <IoIosTrendingUp className="inline ml-1 w-4 h-4" />
         ) : (
-          <IoIosTrendingDown className="inline ml-1 w-4 h-4 rotate-12" />
+          <IoIosTrendingDown className="inline ml-1 w-4 h-4" />
         )}
       </span>
     );
   };
 
-  if (productsLoading && isInitialMountRef.current) {
+  if ((productsLoading || usersLoading) && isInitialMountRef.current) {
     return (
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 md:gap-6">
         {[...Array(4)].map((_, i) => (
@@ -247,51 +291,106 @@ export const InfoCards = () => {
     );
   }
 
-  if (productsError)
+  if (productsError || usersError) {
     return (
       <div className="text-red-500 p-4">
-        Gagal memuat data statistik produk.
+        Gagal memuat data statistik. Error: {productsError || usersError}
       </div>
     );
+  }
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 120,
+        damping: 14,
+      },
+    },
+  };
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-      <CarInfoAvailable
-        totalAvailable={displayStats.totalAvailable}
-        addedThisMonth={displayStats.addedThisMonth}
-        addedLastMonth={displayStats.addedLastMonth}
-        addedTrend={displayStats.addedTrend}
-        renderTrend={renderTrend}
-      />
+    <motion.div
+      className="grid grid-cols-1 gap-4 md:grid-cols-4"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div
+        variants={itemVariants}
+        whileHover={{
+          scale: 1.03,
+          y: -5,
+          transition: { type: "spring", stiffness: 300 },
+        }}
+      >
+        <CarInfoAvailable
+          totalAvailable={displayStats.totalAvailable}
+          addedThisMonth={displayStats.addedThisMonth}
+          addedLastMonth={displayStats.addedLastMonth}
+          addedTrend={displayStats.addedTrend}
+          renderTrend={renderTrend}
+        />
+      </motion.div>
 
-      <CarInfoSold
-        totalSold={displayStats.totalSold}
-        soldThisMonth={displayStats.soldThisMonth}
-        soldLastMonth={displayStats.soldLastMonth}
-        soldTrend={displayStats.soldTrend}
-        renderTrend={renderTrend}
-      />
+      <motion.div
+        variants={itemVariants}
+        whileHover={{
+          scale: 1.03,
+          y: -5,
+          transition: { type: "spring", stiffness: 300 },
+        }}
+      >
+        <CarInfoSold
+          totalSold={displayStats.totalSold}
+          soldThisMonth={displayStats.soldThisMonth}
+          soldLastMonth={displayStats.soldLastMonth}
+          soldTrend={displayStats.soldTrend}
+          renderTrend={renderTrend}
+        />
+      </motion.div>
 
-      <WebsiteTraffic renderTrend={renderTrend} />
+      <motion.div
+        variants={itemVariants}
+        whileHover={{
+          scale: 1.03,
+          y: -5,
+          transition: { type: "spring", stiffness: 300 },
+        }}
+      >
+        <WebsiteTraffic renderTrend={renderTrend} />
+      </motion.div>
 
-      <div className="bg-white border border-gray-200 md:border-none md:rounded-2xl md:shadow-md p-5">
-        <h2 className="text-md text-gray-700 font-medium">Pendaftar Akun</h2>
-        <div className="flex items-start justify-start gap-2 mt-2">
-          <div className="flex items-center justify-center w-14 h-10 bg-blue-100 text-blue-600 rounded-lg mb-3">
-            <MdGroup className="w-5 h-5" />
-          </div>
-          <p className="text-xl font-semibold text-blue-600 mt-2 text-center">
-            3,782
-          </p>
-        </div>
-        <div className="text-xs text-gray-600">
-          Bulan Ini: <span className="font-semibold">150</span>
-          <span className="ml-1 text-green-600">
-            <IoIosTrendingUp className="inline w-4 h-4" />
-            10.5%
-          </span>
-        </div>
-      </div>
-    </div>
+      <motion.div
+        variants={itemVariants}
+        whileHover={{
+          scale: 1.03,
+          y: -5,
+          transition: { type: "spring", stiffness: 300 },
+        }}
+      >
+        <AccountRegistrantsInfo
+          totalUsers={userStats.totalUsers}
+          registeredThisMonth={userStats.registeredThisMonth}
+          registeredLastMonth={userStats.registeredLastMonth}
+          registrationTrend={userStats.registrationTrend}
+          renderTrend={renderTrend}
+        />
+      </motion.div>
+    </motion.div>
   );
 };

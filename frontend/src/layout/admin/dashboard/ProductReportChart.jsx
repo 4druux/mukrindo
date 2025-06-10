@@ -23,6 +23,7 @@ import PeriodFilter from "@/components/product-admin/Dashboard/PeriodFilter";
 import { useAutoScrollToChart } from "@/hooks/useAutoScrollToChart";
 import DotLoader from "@/components/common/DotLoader";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -338,6 +339,23 @@ const ProductReportChart = () => {
     currentYear
   );
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1, delayChildren: 0.1 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100 },
+    },
+  };
+
   if (reportChartLoading) {
     return (
       <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-4 sm:p-6">
@@ -400,8 +418,16 @@ const ProductReportChart = () => {
   const totalTerjualSummary = processedData.terjual.reduce((a, b) => a + b, 0);
 
   return (
-    <div className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-4 sm:p-6">
-      <div className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between">
+    <motion.div
+      className="border border-gray-200 md:border-none md:rounded-2xl md:shadow-md bg-white p-4 sm:p-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div
+        variants={itemVariants}
+        className="flex flex-col gap-2 md:gap-5 mb-2 md:mb-6 sm:flex-row sm:items-center sm:justify-between"
+      >
         <div className="w-full">
           <h3 className="text-md lg:text-lg font-medium text-gray-700">
             {selectedTab === "Minggu" &&
@@ -420,74 +446,94 @@ const ProductReportChart = () => {
           />
           <ExportDropdown onExport={handleExport} className="relative" />
         </div>
-      </div>
+      </motion.div>
 
-      {hasActualData ? (
-        <div
-          className="max-w-full overflow-x-auto custom-scrollbar"
-          ref={chartContainerRef}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={`${selectedTab}-${currentYear}`}
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0, transition: { duration: 0.4 } }}
+          exit={{ opacity: 0, y: -15, transition: { duration: 0.2 } }}
+          className="w-full"
         >
-          <div className="min-w-[600px] xl:min-w-full">
-            {typeof window !== "undefined" && (
-              <ReactApexChart
-                options={options}
-                series={series}
-                type="bar"
-                height={350}
-                width="100%"
-                key={`${selectedTab}-${
-                  selectedTab === "Bulan" ? currentYear : ""
-                }`}
-              />
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="py-2">
-          <div
-            className="text-center text-gray-500"
-            style={{
-              height: 350,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "0.875rem",
-            }}
-          >
-            Tidak ada data produk untuk periode ini.
-          </div>
-        </div>
-      )}
+          {hasActualData ? (
+            <div
+              className="max-w-full overflow-x-auto custom-scrollbar"
+              ref={chartContainerRef}
+            >
+              <div className="min-w-[600px] xl:min-w-full">
+                {typeof window !== "undefined" && (
+                  <ReactApexChart
+                    options={options}
+                    series={series}
+                    type="bar"
+                    height={350}
+                    width="100%"
+                  />
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="py-2">
+              <div
+                className="text-center text-gray-500"
+                style={{
+                  height: 350,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "0.875rem",
+                }}
+              >
+                Tidak ada data produk untuk periode ini.
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
 
-      <div className="mt-4 md:mt-0 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-start">
-        <div className="flex items-start gap-3 p-2 border border-gray-200 rounded-lg bg-gray-50 flex-1 min-w-[200px]">
-          <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-orange-100 rounded-lg">
-            <FaCar className="w-5 h-5 text-orange-500" />
+      <motion.div
+        variants={itemVariants}
+        className="mt-4 md:mt-0 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-start"
+      >
+        <motion.div
+          className="flex-1 min-w-[200px]"
+          whileHover={{ y: -3, transition: { type: "spring", stiffness: 300 } }}
+        >
+          <div className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50 h-full">
+            <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-orange-100 rounded-lg">
+              <FaCar className="w-5 h-5 text-orange-500" />
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-gray-600">
+                Total Produk Masuk
+              </h4>
+              <p className="text-lg font-semibold text-gray-600">
+                {totalMasukSummary.toLocaleString("id-ID")}
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 className="text-sm font-medium text-gray-600">
-              Total Produk Masuk
-            </h4>
-            <p className="text-lg font-semibold text-gray-600">
-              {totalMasukSummary.toLocaleString("id-ID")}
-            </p>
+        </motion.div>
+        <motion.div
+          className="flex-1 min-w-[200px]"
+          whileHover={{ y: -3, transition: { type: "spring", stiffness: 300 } }}
+        >
+          <div className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50 h-full">
+            <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-teal-100 rounded-lg">
+              <FaBoxOpen className="w-5 h-5 text-teal-500" />
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-gray-600">
+                Total Produk Terjual
+              </h4>
+              <p className="text-lg font-semibold text-gray-600">
+                {totalTerjualSummary.toLocaleString("id-ID")}
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-start gap-3 p-2 border border-gray-200 rounded-lg bg-gray-50 flex-1 min-w-[200px]">
-          <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 bg-teal-100 rounded-lg">
-            <FaBoxOpen className="w-5 h-5 text-teal-500" />
-          </div>
-          <div>
-            <h4 className="text-sm font-medium text-gray-600">
-              Total Produk Terjual
-            </h4>
-            <p className="text-lg font-semibold text-gray-600">
-              {totalTerjualSummary.toLocaleString("id-ID")}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 
