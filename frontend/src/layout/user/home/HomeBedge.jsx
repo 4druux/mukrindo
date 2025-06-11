@@ -1,4 +1,4 @@
-//layout/user/jual-mobil/HomeBedge.jsx
+// layout/user/home/HomeBedge.jsx
 import React, { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import FeatureCard from "@/components/common/FeatureCard";
@@ -21,7 +21,6 @@ const featuresData = [
       "Jual mobil Anda dan dapatkan penawaran harga terbaik untuk mobil Anda setelah proses inspeksi yang transparan.",
     linkUrl: "/jual-mobil",
   },
-
   {
     id: 3,
     imgSrc: "/images/Badge/car-3.jpg",
@@ -30,75 +29,88 @@ const featuresData = [
       "Dapatkan penawaran harga terbaik untuk mobil Anda setelah proses inspeksi yang transparan.",
     linkUrl: "/tukar-tambah",
   },
-
-  {
-    id: 4,
-    imgSrc: "/images/Badge/budget.jpg",
-    title: "Simulasi Budget",
-    description:
-      "Simulasikan budget Anda untuk memilih mobil yang sesuai dengan kebutuhan Anda.",
-    linkUrl: "/simulasi-budget",
-  },
 ];
 
 const HomeBedge = () => {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
+        staggerChildren: 0.2,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { y: 20, opacity: 0 },
     visible: {
-      opacity: 1,
       y: 0,
-      transition: { type: "spring", stiffness: 100, damping: 14 },
+      opacity: 1,
+      transition: {
+        ease: "easeOut",
+        duration: 0.5,
+      },
+    },
+  };
+
+  const textVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { ease: "easeOut", duration: 0.5 },
     },
   };
 
   return (
-    <motion.div
-      ref={ref}
-      variants={containerVariants}
-      initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
-    >
-      <motion.div variants={itemVariants} className="px-3 md:px-0">
+    <div ref={ref}>
+      <motion.div
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={textVariants}
+        className="px-3 md:px-0"
+      >
         <TittleText
           text="Bosan dengan mobil yang lama?"
           className="mt-6 mb-1"
         />
       </motion.div>
 
-      <motion.div variants={itemVariants} className="px-3 md:px-0">
+      <motion.div
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={textVariants}
+        transition={{ delay: 0.1 }}
+        className="px-3 md:px-0"
+      >
         <p className="text-xs lg:text-sm text-gray-500 mb-4 lg:mb-6">
           Mau mobil bekas terbaru atau tukar tambah mobil lamamu bisa loh dengan
           pilihan yang beragam dari Mukrindo Motor
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-3 gap-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+      >
         {featuresData.map((feature) => (
-          <FeatureCard
-            key={feature.id}
-            imgSrc={feature.imgSrc}
-            variants={itemVariants}
-            title={feature.title}
-            description={feature.description}
-            linkUrl={feature.linkUrl}
-            {...(feature.iconColor && { iconColor: feature.iconColor })}
-          />
+          <motion.div key={feature.id} variants={itemVariants}>
+            <FeatureCard
+              imgSrc={feature.imgSrc}
+              title={feature.title}
+              description={feature.description}
+              linkUrl={feature.linkUrl}
+            />
+          </motion.div>
         ))}
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 };
 

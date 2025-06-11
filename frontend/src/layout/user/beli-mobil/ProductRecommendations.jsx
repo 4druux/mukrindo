@@ -43,7 +43,7 @@ const ProductRecommendations = ({ recommendations }) => {
         animate="visible"
         className="px-3 md:px-0"
       >
-        <TittleText text="Rekomendasi Mobil Serupa" className="mb-2 lg:mb-4" />
+        <TittleText text="Rekomendasi Mobil Serupa" className="mb-2 " />
       </motion.div>
 
       <motion.div variants={itemVariants}>
