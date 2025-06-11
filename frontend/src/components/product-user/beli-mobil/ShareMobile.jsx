@@ -1,4 +1,4 @@
-// components/product-user/beli-mobil/ShareMobile.jsx
+// frontend/src/components/product-user/beli-mobil/ShareMobile.jsx
 import { useState, useEffect, useRef, useCallback } from "react";
 import { X } from "lucide-react";
 import { FaCopy } from "react-icons/fa";
@@ -13,28 +13,38 @@ const ShareMobile = ({
   copySuccess,
 }) => {
   const [isMounted, setIsMounted] = useState(false);
-  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
+  const [isPopoverVisible, setIsPopoverVisible] = useState(false);
   const popoverRef = useRef(null);
   const touchStartY = useRef(null);
   const popoverStartTranslateY = useRef(0);
+  const animationTimeoutRef = useRef(null);
+  const unmountTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current)
+        clearTimeout(animationTimeoutRef.current);
+      if (unmountTimeoutRef.current) clearTimeout(unmountTimeoutRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
       setIsMounted(true);
-      setIsAnimatingOut(false);
       document.body.style.overflow = "hidden";
-    } else if (isMounted && !isOpen) {
-      setIsAnimatingOut(true);
-      document.body.style.overflow = "auto";
-      const timer = setTimeout(() => {
-        setIsMounted(false);
-        setIsAnimatingOut(false);
-      }, 300);
-      return () => clearTimeout(timer);
+
+      animationTimeoutRef.current = setTimeout(() => {
+        setIsPopoverVisible(true);
+      }, 20);
     } else {
+      setIsPopoverVisible(false);
       document.body.style.overflow = "auto";
+
+      unmountTimeoutRef.current = setTimeout(() => {
+        setIsMounted(false);
+      }, 550);
     }
-  }, [isOpen, isMounted]);
+  }, [isOpen]);
 
   const handleHardClose = useCallback(() => {
     onClose();
@@ -42,7 +52,7 @@ const ShareMobile = ({
 
   const handleTouchStart = useCallback(
     (e) => {
-      if (!popoverRef.current || !isMounted || isAnimatingOut) return;
+      if (!popoverRef.current || !isMounted) return;
       touchStartY.current = e.touches[0].clientY;
       const currentTransform = window.getComputedStyle(
         popoverRef.current
@@ -53,17 +63,12 @@ const ShareMobile = ({
           : 0;
       popoverRef.current.style.transition = "none";
     },
-    [isMounted, isAnimatingOut]
+    [isMounted]
   );
 
   const handleTouchMove = useCallback(
     (e) => {
-      if (
-        !popoverRef.current ||
-        touchStartY.current === null ||
-        !isMounted ||
-        isAnimatingOut
-      )
+      if (!popoverRef.current || touchStartY.current === null || !isMounted)
         return;
       const currentY = e.touches[0].clientY;
       let deltaY = currentY - touchStartY.current;
@@ -71,16 +76,11 @@ const ShareMobile = ({
       if (newTranslateY < 0) newTranslateY = 0;
       popoverRef.current.style.transform = `translateY(${newTranslateY}px)`;
     },
-    [isMounted, isAnimatingOut]
+    [isMounted]
   );
 
   const handleTouchEnd = useCallback(() => {
-    if (
-      !popoverRef.current ||
-      touchStartY.current === null ||
-      !isMounted ||
-      isAnimatingOut
-    )
+    if (!popoverRef.current || touchStartY.current === null || !isMounted)
       return;
     const popoverHeight = popoverRef.current.offsetHeight;
     const threshold = popoverHeight * 0.35;
@@ -93,6 +93,7 @@ const ShareMobile = ({
         : 0;
 
     popoverRef.current.style.transition = "transform 0.3s ease-out";
+
     if (
       currentTranslateY > threshold &&
       currentTranslateY > popoverStartTranslateY.current
@@ -102,7 +103,7 @@ const ShareMobile = ({
       popoverRef.current.style.transform = "translateY(0)";
     }
     touchStartY.current = null;
-  }, [onClose, isMounted, isAnimatingOut]);
+  }, [onClose, isMounted]);
 
   if (!isMounted) return null;
 
@@ -110,10 +111,8 @@ const ShareMobile = ({
     <>
       <div
         onClick={handleHardClose}
-        className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ${
-          isOpen && !isAnimatingOut
-            ? "opacity-100"
-            : "opacity-0 pointer-events-none"
+        className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-500 ${
+          isPopoverVisible ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         aria-hidden="true"
       ></div>
@@ -121,11 +120,10 @@ const ShareMobile = ({
       <div
         ref={popoverRef}
         id="share-popover-mobile"
-        className="fixed bottom-0 left-0 right-0 w-full bg-white rounded-t-2xl shadow-xl z-50 p-4 pb-6
-                   transform transition-transform duration-300 ease-out"
+        className="fixed bottom-0 left-0 right-0 w-full bg-white rounded-t-2xl shadow-xl z-50 p-4 pb-6 transform"
         style={{
-          transform:
-            isOpen && !isAnimatingOut ? "translateY(0)" : "translateY(100%)",
+          transform: isPopoverVisible ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 500ms cubic-bezier(0.36, 0, 0.0, 1)",
           touchAction: "none",
         }}
         role="dialog"
@@ -155,6 +153,7 @@ const ShareMobile = ({
           </button>
         </div>
 
+        {/* ... sisa dari JSX Anda tidak berubah ... */}
         <div className="grid grid-cols-4 gap-x-2 gap-y-4 mb-5 text-center">
           {shareOptions.map((option) => (
             <button

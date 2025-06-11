@@ -13,28 +13,24 @@ const FeatureCard = ({
   iconColor = "text-white",
   iconSize = "w-10 h-10",
   iconContainerSize = "w-20 h-20",
-  variants,
 }) => {
   const hasImage = !!imgSrc;
 
   const imageVariants = {
-    initial: { scale: 1 },
-    hover: { scale: 1.05, transition: { duration: 0.3 } },
+    hover: { scale: 1.05, transition: { duration: 0.3, ease: "easeInOut" } },
   };
 
   const arrowVariants = {
-    initial: { x: 0 },
-    hover: { x: 4, transition: { duration: 0.2 } },
+    hover: { x: 5, transition: { duration: 0.2, ease: "easeInOut" } },
   };
 
   return linkUrl ? (
     <motion.a
       href={linkUrl}
       rel="noopener noreferrer"
-      variants={variants}
-      initial="initial"
       whileHover="hover"
-      className={`bg-white border-y border-gray-200 md:rounded-2xl md:shadow-md lg:hover:shadow-lg transition-shadow duration-200 h-full flex overflow-hidden group ${
+      initial="initial"
+      className={`bg-white border-y border-gray-200 md:rounded-2xl md:shadow-md lg:hover:shadow-lg transition-shadow duration-300 h-full flex overflow-hidden group ${
         hasImage
           ? "flex-col lg:flex-row lg:items-center lg:p-5"
           : "flex-row items-center p-5 gap-4"

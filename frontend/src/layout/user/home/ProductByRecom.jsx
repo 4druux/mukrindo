@@ -174,7 +174,7 @@ const ProductByRecom = () => {
 
       <motion.div
         variants={itemVariants}
-        className="flex space-x-2 mb-4 overflow-x-auto lg:pb-2 px-3 md:px-0"
+        className="flex space-x-2 overflow-x-auto px-3 md:px-0"
         style={{ scrollbarWidth: "none" }}
         ref={scrollContainerRef}
       >

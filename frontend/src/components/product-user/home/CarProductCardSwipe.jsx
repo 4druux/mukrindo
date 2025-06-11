@@ -69,10 +69,10 @@ const CarProductCardSwipe = ({
       initial="hidden"
       animate="visible"
       exit="exit"
-      className={`flex space-x-4 overflow-x-auto md:grid md:gap-4 md:space-x-0 mt-4 md:pb-6 px-3 md:px-2 ${
+      className={`flex space-x-4 overflow-x-auto md:grid md:gap-4 md:space-x-0 md:pb-6 px-3 md:px-2 ${
         isRecommendation
-          ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-2"
-          : "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-4"
+          ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 py-2"
+          : "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 py-4"
       }`}
       style={{ scrollbarWidth: "none" }}
     >
@@ -94,6 +94,12 @@ const CarProductCardSwipe = ({
               <motion.div
                 key={product._id}
                 variants={cardVariants}
+                whileHover={{
+                  scale: 1.01,
+                  y: -3,
+                  x: -2,
+                  transition: { type: "spring", stiffness: 300 },
+                }}
                 className="w-72 md:w-auto flex-shrink-0 md:flex-shrink rounded-2xl bg-white overflow-hidden transition-shadow duration-200 relative shadow-md lg:hover:shadow-xl flex flex-col"
                 onClick={() => onProductClick(product)}
               >
