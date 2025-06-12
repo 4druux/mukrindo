@@ -1,5 +1,8 @@
 const Product = require("../models/productModels");
 const cloudinary = require("cloudinary").v2;
+const ProductRecommendation = require("../models/productRecommendation");
+const UserInteraction = require("../models/userInteraction");
+const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const {
   startOfWeek,
@@ -349,20 +352,34 @@ exports.getAllProducts = async (req, res) => {
 // Get Id
 exports.getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).populate("user");
     if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Produk tidak ditemukan" });
+      return res.status(404).json({ message: "Product not found" });
     }
-    res.status(200).json(product);
+
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.id;
+
+        const interaction = new UserInteraction({
+          userId: userId,
+          productId: product._id,
+          interactionType: "view",
+        });
+        await interaction.save();
+      } catch (err) {
+        console.log(
+          "Could not log user interaction: Invalid token or user not logged in."
+        );
+      }
+    }
+
+    res.json(product);
   } catch (error) {
-    if (error.name === "CastError" && error.kind === "ObjectId") {
-      return res
-        .status(400)
-        .json({ success: false, message: "ID Produk tidak valid" });
-    }
-    return handleServerError(res, error);
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -399,106 +416,61 @@ exports.incrementViewCount = async (req, res) => {
 // Rekomendasi Produk
 exports.getProductRecommendations = async (req, res) => {
   try {
-    const { id: currentProductIdString } = req.params;
-    const MAX_RECOMMENDATIONS = 5;
-    if (!mongoose.Types.ObjectId.isValid(currentProductIdString)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "ID Produk tidak valid." });
-    }
-    const currentProductId = new mongoose.Types.ObjectId(
-      currentProductIdString
-    );
+    const productId = req.params.id;
+    let recommendations = [];
 
-    // 1. Dapatkan produk saat ini untuk mengetahui clusterId-nya
-    const currentProduct = await Product.findById(currentProductId).select(
-      "clusterId carName brand model"
-    ); // Ambil field tambahan untuk logging/fallback
-    if (!currentProduct) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Produk saat ini tidak ditemukan." });
-    }
+    const personalRecsDoc = await ProductRecommendation.findOne({
+      productId: productId,
+    }).populate({
+      path: "recommendations",
+      match: { status: "Tersedia" },
+    });
 
-    // Periksa apakah produk memiliki clusterId
-    if (
-      currentProduct.clusterId === undefined ||
-      currentProduct.clusterId === null
-    ) {
-      console.warn(
-        `Produk ${
-          currentProduct.carName || currentProductIdString
-        } tidak memiliki clusterId. Tidak dapat memberikan rekomendasi berbasis cluster.`
-      );
-      // Fallback: Anda bisa mengembalikan produk populer atau terbaru jika tidak ada clusterId
-      // Untuk sekarang, kita kembalikan array kosong
-      const fallbackRecommendations = await Product.find({
-        _id: { $ne: currentProductId }, // Kecualikan produk saat ini
-        status: "Tersedia",
-      })
-        .sort({ viewCount: -1, createdAt: -1 }) // Contoh: Populer berdasarkan viewCount, lalu terbaru
-        .limit(MAX_RECOMMENDATIONS);
-
-      return res.status(200).json({
-        success: true,
-        recommendations: fallbackRecommendations,
-        message:
-          "Menggunakan rekomendasi fallback karena produk tidak memiliki cluster.",
-      });
-    }
-
-    // 2. Cari produk lain dalam cluster yang sama
-    const recommendations = await Product.find({
-      _id: { $ne: currentProductId },
-      clusterId: currentProduct.clusterId,
-      status: "Tersedia",
-    })
-      .sort({ updatedAt: -1 })
-      .limit(MAX_RECOMMENDATIONS)
-      .lean(); // Gunakan .lean() untuk performa query yang lebih baik jika hanya membaca data
-
-    if (recommendations.length === 0) {
+    if (personalRecsDoc && personalRecsDoc.recommendations.length > 0) {
+      recommendations = personalRecsDoc.recommendations;
       console.log(
-        `Tidak ada rekomendasi di cluster ${currentProduct.clusterId}... Mencoba fallback berdasarkan model.`
+        `Menemukan ${recommendations.length} rekomendasi personal yang tersedia.`
       );
-      fallbackRecommendations = await Product.find({
-        _id: { $ne: currentProductId },
-        status: "Tersedia",
-        brand: currentProduct.brand, // Cari brand yang sama
-        model: currentProduct.model, // Cari model yang sama
-      })
-        .sort({ yearOfAssembly: -1, price: 1 }) // Prioritaskan tahun terbaru, lalu harga termurah
-        .limit(MAX_RECOMMENDATIONS)
-        .lean();
+    }
 
-      if (fallbackRecommendations.length > 0) {
-        return res.status(200).json({
-          success: true,
-          recommendations: fallbackRecommendations,
-          message:
-            "Menggunakan rekomendasi fallback berdasarkan model yang sama.",
-        });
-      } else {
-        // Fallback lebih lanjut jika model sama juga tidak ada
-        const generalFallback = await Product.find({
-          /* ... seperti sebelumnya ... */
-        });
-        return res.status(200).json({
-          success: true,
-          recommendations: generalFallback,
-          message: "Menggunakan rekomendasi fallback umum.",
-        });
+    if (recommendations.length < 5) {
+      console.log("Rekomendasi belum cukup, menjalankan fallback...");
+      const product = await Product.findById(productId);
+      if (product) {
+        const existingIds = new Set(
+          recommendations.map((p) => p._id.toString())
+        );
+        existingIds.add(productId);
+
+        if (product.clusterId !== undefined) {
+          const clusterRecs = await Product.find({
+            clusterId: product.clusterId,
+            _id: { $nin: Array.from(existingIds) },
+            status: "Tersedia",
+          }).limit(5 - recommendations.length);
+
+          clusterRecs.forEach((p) => {
+            recommendations.push(p);
+            existingIds.add(p._id.toString());
+          });
+        }
+
+        if (recommendations.length < 5) {
+          const modelRecs = await Product.find({
+            brand: product.brand,
+            model: product.model,
+            _id: { $nin: Array.from(existingIds) },
+            status: "Tersedia",
+          }).limit(5 - recommendations.length);
+          recommendations.push(...modelRecs);
+        }
       }
     }
 
-    res.status(200).json({ success: true, recommendations });
+    res.json(recommendations.slice(0, 5));
   } catch (error) {
-    // Error CastError sudah ditangani di awal dengan validasi ObjectId
-    console.error("Error fetching product recommendations:", error);
-    res.status(500).json({
-      success: false,
-      message: "Server Error: Gagal mengambil rekomendasi.",
-    });
+    console.error("Error getting product recommendations:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 

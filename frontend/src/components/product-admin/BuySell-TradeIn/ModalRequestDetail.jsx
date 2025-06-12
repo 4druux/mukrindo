@@ -171,7 +171,7 @@ const ModalRequestDetail = ({
 
   if (isLoading && !response) {
     return (
-      <div className="flex flex-col gap-3 justify-center items-center p-10">
+      <div className="flex flex-col gap-3 justify-center items-center h-full">
         <DotLoader dotSize="w-5 h-5" textSize="text-xl" text="Memuat data..." />
       </div>
     );
@@ -180,16 +180,18 @@ const ModalRequestDetail = ({
   if (error) {
     console.error(`Error fetching ${requestType} detail:`, error);
     return (
-      <div className="flex-grow flex items-center justify-center p-10 text-red-600">
-        Gagal memuat detail permintaan. ID: {requestId}
+      <div className="flex flex-col gap-3 justify-center items-center h-full">
+        <span className="p-3 bg-red-50 text-md text-red-500 rounded-md">
+          Gagal memuat detail permintaan. ID: {requestId}
+        </span>
       </div>
     );
   }
 
   if (!isLoading && (!response?.success || !response?.data)) {
     return (
-      <div className="flex-grow flex items-center justify-center p-10 text-gray-600">
-        Data permintaan tidak ditemukan.
+      <div className="flex flex-col gap-3 justify-center items-center h-full">
+        <span className="text-gray-600"> Data permintaan tidak ditemukan.</span>
       </div>
     );
   }

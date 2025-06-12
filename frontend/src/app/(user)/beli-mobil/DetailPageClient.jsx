@@ -17,7 +17,6 @@ import { IoArrowBack } from "react-icons/io5";
 
 const DetailPageClient = ({ productId }) => {
   const router = useRouter();
-
   const { fetchProductById, incrementProductView } = useProducts();
   const [product, setProduct] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
@@ -36,11 +35,10 @@ const DetailPageClient = ({ productId }) => {
       setError(null);
 
       try {
-        await incrementProductView(productId);
-
         const [productResult, recommendationsResponse] = await Promise.all([
           fetchProductById(productId),
           axiosInstance.get(`/api/products/${productId}/recommendations`),
+          incrementProductView(productId),
         ]);
 
         if (productResult.success) {
@@ -49,15 +47,7 @@ const DetailPageClient = ({ productId }) => {
           throw new Error(productResult.error || "Gagal memuat produk.");
         }
 
-        if (recommendationsResponse.data.success) {
-          setRecommendations(recommendationsResponse.data.recommendations);
-        } else {
-          console.warn(
-            "Gagal mengambil rekomendasi:",
-            recommendationsResponse.data.message
-          );
-          setRecommendations([]);
-        }
+        setRecommendations(recommendationsResponse.data);
       } catch (err) {
         console.error("Error fetching page data:", err);
         setError(err.message || "Terjadi kesalahan saat memuat data.");

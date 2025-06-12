@@ -3,6 +3,11 @@ const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
     carName: { type: String, required: [true, "Nama mobil harus diisi"] },
     brand: { type: String, required: [true, "Merek mobil harus diisi"] },
     model: { type: String, required: [true, "Model mobil harus diisi"] },
@@ -68,7 +73,7 @@ const productSchema = new mongoose.Schema(
       sparse: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true, strictPopulate: false }
 );
 
 const Product = mongoose.model("Product", productSchema);
