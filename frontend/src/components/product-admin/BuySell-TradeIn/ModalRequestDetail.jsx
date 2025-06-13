@@ -44,7 +44,7 @@ const ModalRequestDetail = ({
   onStatusUpdated,
 }) => {
   const API_BASE_URL =
-    requestType === "tradeIn" ? "/api/trade-in" : "/api/sell-requests";
+    requestType === "tradeIn" ? "/trade-in" : "/sell-requests";
 
   const statusConstants =
     requestType === "tradeIn"

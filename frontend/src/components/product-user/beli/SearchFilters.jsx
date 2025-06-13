@@ -44,7 +44,7 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
     data: allCarData = [],
     error: carDataError,
     isLoading: isLoadingCarData,
-  } = useSWR("/api/car-data/all-data", fetcher);
+  } = useSWR("/car-data/all-data", fetcher);
 
   useEffect(() => {
     const params = new URLSearchParams(searchParams);

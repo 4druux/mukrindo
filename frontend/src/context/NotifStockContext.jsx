@@ -8,7 +8,7 @@ const NotifStockContext = createContext();
 
 export const useNotification = () => useContext(NotifStockContext);
 
-const NOTIFY_API_PATH = "/api/notif-stock";
+const NOTIFY_API_PATH = "/notif-stock";
 
 export const NotifStockProvider = ({ children }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);

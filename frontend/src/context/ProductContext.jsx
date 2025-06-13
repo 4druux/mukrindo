@@ -11,7 +11,7 @@ import isEqual from "lodash/isEqual";
 import axiosInstance from "@/utils/axiosInstance";
 
 const ProductContext = createContext();
-const PRODUCTS_API_PATH = "/api/products";
+const PRODUCTS_API_PATH = "/products";
 export const useProducts = () => useContext(ProductContext);
 
 const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);

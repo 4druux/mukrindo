@@ -33,7 +33,7 @@ const REQUESTS_PER_PAGE = 12;
 
 const requestConfigs = {
   tradeIn: {
-    apiEndpoint: "/api/trade-in",
+    apiEndpoint: "/trade-in",
     statusConstants: TRADE_IN_STATUS_FILTER,
     locationConstants: TRADE_IN_LOCATION_FILTER,
     sortConstants: TRADE_IN_SORT_ORDER,
@@ -49,7 +49,7 @@ const requestConfigs = {
     errorTitle: "Permintaan Tukar Tambah",
   },
   buySell: {
-    apiEndpoint: "api/sell-requests",
+    apiEndpoint: "/sell-requests",
     statusConstants: SELL_REQUEST_STATUS_FILTER,
     locationConstants: SELL_REQUEST_LOCATION_FILTER,
     sortConstants: SELL_REQUEST_SORT_ORDER,
@@ -59,13 +59,13 @@ const requestConfigs = {
       sortBy: SELL_REQUEST_SORT_ORDER.LATEST_CREATED,
     },
     pageTitle: "Permintaan Jual Beli",
-    requestType: "buySell",
+    requestType: "/buySell",
     emptyStateMessage:
       "Tidak ada permintaan jual beli yang cocok dengan filter yang dipilih.",
     errorTitle: "Permintaan Jual Beli",
   },
   notifyMe: {
-    apiEndpoint: "api/notif-stock",
+    apiEndpoint: "notif-stock",
     statusConstants: NOTIFY_STATUS_FILTER,
     locationConstants: {},
     sortConstants: NOTIFY_SORT_ORDER,

@@ -17,8 +17,8 @@ const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
-const AUTH_API_PATH = "/api/auth";
-const USERS_API_PATH = "/api/auth/users";
+const AUTH_API_PATH = "/auth";
+const USERS_API_PATH = "/auth/users";
 
 const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);
 

@@ -18,5 +18,18 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    const backendUrl =
+      process.env.NODE_ENV === "development"
+        ? "http://localhost:5000"
+        : "https://mukrindo-backend.vercel.app";
+
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${backendUrl}/api/:path*`,
+      },
+    ];
+  },
 };
 export default nextConfig;

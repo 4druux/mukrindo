@@ -8,7 +8,7 @@ const TradeInContext = createContext();
 
 export const useTradeIn = () => useContext(TradeInContext);
 
-const TRADE_IN_API_PATH = "/api/trade-in";
+const TRADE_IN_API_PATH = "/trade-in";
 
 export const TradeInProvider = ({ children }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);

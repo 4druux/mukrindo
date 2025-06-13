@@ -61,7 +61,7 @@ const ProductReportChart = () => {
     isLoading: reportChartLoading,
   } = useSWR(
     selectedTab && currentYear
-      ? `/api/products/stats/report?period=${apiQueryPeriodMap[selectedTab]}&year=${currentYear}`
+      ? `/products/stats/report?period=${apiQueryPeriodMap[selectedTab]}&year=${currentYear}`
       : null,
     fetcher,
     { revalidateOnFocus: true }

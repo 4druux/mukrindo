@@ -55,8 +55,7 @@ const ButtonMagnetic = forwardRef(
 
     const baseClasses = `
       relative inline-flex items-center justify-center px-8 py-3 m-2 text-sm font-medium tracking-wider 
-      rounded-full overflow-hidden
-      cursor-pointer hover:shadow-[0_0_20px_rgba(234,88,12,0.4)]
+      rounded-full overflow-hidden cursor-pointer
     `;
 
     return (

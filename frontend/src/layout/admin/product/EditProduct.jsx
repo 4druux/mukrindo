@@ -87,7 +87,7 @@ const EditProduct = ({ productId }) => {
   const initialProductData = useRef(null);
   const initialMediaFiles = useRef(null);
 
-  const API_ENDPOINT = "/api/products";
+  const API_ENDPOINT = "/products";
 
   const allRefs = useMemo(
     () => ({

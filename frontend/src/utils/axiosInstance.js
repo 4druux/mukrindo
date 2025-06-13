@@ -39,21 +39,18 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response) {
-      console.error("API Error Response:", error.response.data);
-      console.error("Status:", error.response.status);
-      console.error("Headers:", error.response.headers);
+    if (process.env.NODE_ENV === "development") {
+      console.error("API Error Response:", error.response?.data);
+      console.error("Status:", error.response?.status);
+      console.error("Headers:", error.response?.headers);
 
-      if (error.response.status === 401 || error.response.status === 403) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
         console.warn(
           "Akses ditolak atau token tidak valid. Pengguna mungkin perlu login ulang."
         );
       }
-    } else if (error.request) {
-      console.error("API No Response:", error.request);
-    } else {
-      console.error("API Error Message:", error.message);
     }
+
     return Promise.reject(error);
   }
 );

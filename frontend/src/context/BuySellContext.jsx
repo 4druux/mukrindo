@@ -9,7 +9,7 @@ const BuySellContext = createContext();
 export const useBuySell = () => useContext(BuySellContext);
 
 // Sesuaikan dengan endpoint backend Anda untuk jual mobil
-const BUYSELL_API_PATH = "/api/sell-requests";
+const BUYSELL_API_PATH = "/sell-requests";
 
 export const BuySellProvider = ({ children }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
