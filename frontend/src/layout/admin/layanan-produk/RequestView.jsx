@@ -49,7 +49,7 @@ const requestConfigs = {
     errorTitle: "Permintaan Tukar Tambah",
   },
   buySell: {
-    apiEndpoint: "sell-requests",
+    apiEndpoint: "/sell-requests",
     statusConstants: SELL_REQUEST_STATUS_FILTER,
     locationConstants: SELL_REQUEST_LOCATION_FILTER,
     sortConstants: SELL_REQUEST_SORT_ORDER,
@@ -59,7 +59,7 @@ const requestConfigs = {
       sortBy: SELL_REQUEST_SORT_ORDER.LATEST_CREATED,
     },
     pageTitle: "Permintaan Jual Beli",
-    requestType: "buySell",
+    requestType: "/buySell",
     emptyStateMessage:
       "Tidak ada permintaan jual beli yang cocok dengan filter yang dipilih.",
     errorTitle: "Permintaan Jual Beli",
