@@ -86,8 +86,8 @@ const CarBrands = ({
           carDataError.message ||
           "Cek koneksi backend atau endpoint API."}
         <br />
-        Pastikan endpoint <strong>/api/car-data/all-data</strong> sudah benar
-        dan backend berjalan.
+        Pastikan endpoint <strong>/car-data/all-data</strong> sudah benar dan
+        backend berjalan.
       </div>
     );
   }

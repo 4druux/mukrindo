@@ -14,9 +14,9 @@ export const useTraffic = () => {
   return context;
 };
 
-const STATS_API_PATH = "/api/visits/homepage/stats";
-const TRACK_API_PATH = "/api/visits/homepage/track";
-const HISTORY_API_PATH = "/api/visits/homepage/history";
+const STATS_API_PATH = "/visits/homepage/stats";
+const TRACK_API_PATH = "/visits/homepage/track";
+const HISTORY_API_PATH = "/visits/homepage/history";
 
 const fetcher = (path) => axiosInstance.get(path).then((res) => res.data);
 

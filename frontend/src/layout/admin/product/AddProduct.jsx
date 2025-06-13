@@ -81,7 +81,7 @@ const AddProduct = () => {
   const [errors, setErrors] = useState({});
   const router = useRouter();
   const { mutateProducts } = useProducts();
-  const API_ENDPOINT = "/api/products";
+  const API_ENDPOINT = "/products";
 
   const allRefs = useMemo(
     () => ({

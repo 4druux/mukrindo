@@ -70,7 +70,7 @@ const TradeInCar = () => {
     data: allCarData = [],
     error: carDataError,
     isLoading: isLoadingCarData,
-  } = useSWR("/api/car-data/all-data", fetcher);
+  } = useSWR("/car-data/all-data", fetcher);
 
   const searchParams = useSearchParams();
   const [formData, setFormData] = useState({ ...initialFormData });

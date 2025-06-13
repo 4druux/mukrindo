@@ -41,7 +41,7 @@ export default function SignUpForm() {
 
   const handleGoogleLogin = () => {
     if (process.env.NEXT_PUBLIC_API_URL) {
-      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`;
+      window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
     } else {
       console.error("NEXT_PUBLIC_API_URL is not defined");
       toast.error("Konfigurasi error, tidak bisa daftar dengan Google.");

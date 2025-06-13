@@ -24,7 +24,7 @@ export const useCarData = () => {
 
 const fetcher = (url) =>
   axiosInstance.get(url).then((res) => res.data?.data || []);
-const CAR_DATA_API_ENDPOINT = "/api/car-data";
+const CAR_DATA_API_ENDPOINT = "/car-data";
 
 export const CarDataProvider = ({ children }) => {
   const {

@@ -7,7 +7,7 @@ import DetailPageClient from "../DetailPageClient";
 
 async function getProductMetadata(productId) {
   try {
-    const response = await axiosInstance.get(`/api/products/${productId}`);
+    const response = await axiosInstance.get(`/products/${productId}`);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch product metadata:", error);

@@ -37,7 +37,7 @@ const DetailPageClient = ({ productId }) => {
       try {
         const [productResult, recommendationsResponse] = await Promise.all([
           fetchProductById(productId),
-          axiosInstance.get(`/api/products/${productId}/recommendations`),
+          axiosInstance.get(`/products/${productId}/recommendations`),
           incrementProductView(productId),
         ]);
 

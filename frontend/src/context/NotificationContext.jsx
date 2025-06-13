@@ -9,7 +9,7 @@ export const useNotifications = () => useContext(NotificationContext);
 
 const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);
 
-const NOTIFICATION_API_PATH = "/api/notifications";
+const NOTIFICATION_API_PATH = "/notifications";
 
 export const NotificationProvider = ({ children }) => {
   const {
