@@ -18,5 +18,13 @@ const nextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path*",
+        destination: "https://demo-showroom-backend.vercel.app/api/:path*",
+      },
+    ];
+  },
 };
 export default nextConfig;

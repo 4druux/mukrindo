@@ -553,6 +553,9 @@ const BuyCar = () => {
             <motion.div variants={itemVariants}>
               <EmptyProductDisplay
                 emptyMessage={emptyMessage}
+                searchQuery={searchQuery}
+                filterBrand={sBrand}
+                filterModel={sModel}
                 showFilterRecommendations={shouldShowFilterRecsProp}
                 filterRecommendations={filterBasedRecommendations}
                 onProductClick={handleProductClick}

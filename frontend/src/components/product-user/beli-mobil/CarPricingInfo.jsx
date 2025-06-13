@@ -216,10 +216,8 @@ const CarPricingInfo = ({ product, variants }) => {
               <ButtonMagnetic
                 type="button"
                 onClick={handleChatAdminForSoldUnit}
-                className="w-full !py-3.5 !m-0 hover:!shadow-[0_0_20px_rgba(7,94,84,0.4)]"
-                icon={
-                  <FaWhatsapp className="w-5 h-5 text-green-600 group-hover:text-white" />
-                }
+                className="w-full !py-3.5 !m-0 !px-6 text-green-600 group-hover:text-white"
+                icon={<FaWhatsapp className="w-5 h-5" />}
                 textColor="#16a34a"
                 borderColor="#16a34a"
                 gradientFrom="#d3f5e8"
@@ -322,7 +320,7 @@ const CarPricingInfo = ({ product, variants }) => {
               <ButtonMagnetic
                 onClick={handleTradeInClick}
                 icon={<RefreshCw className="w-5 h-5" />}
-                className="w-full !py-3 !m-0"
+                className="w-full !py-3 !m-0 !px-6"
               >
                 Tukar Tambah
               </ButtonMagnetic>
@@ -354,10 +352,8 @@ const CarPricingInfo = ({ product, variants }) => {
             <ButtonMagnetic
               type="button"
               onClick={handleChatAdminForSoldUnit}
-              className="!m-0 w-1/2 !px-4"
-              icon={
-                <FaWhatsapp className="w-5 h-5 text-green-600 group-hover:text-white" />
-              }
+              className="!m-0 w-1/2 !px-4 text-green-600 group-hover:text-white"
+              icon={<FaWhatsapp className="w-5 h-5" />}
               textColor="#16a34a"
               borderColor="#16a34a"
               gradientFrom="#d3f5e8"
