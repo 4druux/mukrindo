@@ -22,7 +22,7 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "https://demo-showroom-backend.vercel.app/api/:path*",
+        destination: "https://mukrindo-backend.vercel.app/api/:path*",
       },
     ];
   },
