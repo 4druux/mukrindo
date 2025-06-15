@@ -5,7 +5,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Fungsi untuk membuat template HTML email
 const createEmailHtml = (title, data, ctaLink) => {
-  const primaryColor = "#0ea5e9";
+  const primaryColor = "#f97316";
 
   return `
     <!DOCTYPE html>
