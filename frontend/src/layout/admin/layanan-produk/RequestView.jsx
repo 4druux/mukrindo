@@ -59,13 +59,13 @@ const requestConfigs = {
       sortBy: SELL_REQUEST_SORT_ORDER.LATEST_CREATED,
     },
     pageTitle: "Permintaan Jual Beli",
-    requestType: "/buySell",
+    requestType: "buySell",
     emptyStateMessage:
       "Tidak ada permintaan jual beli yang cocok dengan filter yang dipilih.",
     errorTitle: "Permintaan Jual Beli",
   },
   notifyMe: {
-    apiEndpoint: "notif-stock",
+    apiEndpoint: "/notif-stock",
     statusConstants: NOTIFY_STATUS_FILTER,
     locationConstants: {},
     sortConstants: NOTIFY_SORT_ORDER,
