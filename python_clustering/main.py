@@ -6,17 +6,15 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from bson import ObjectId
 from collections import defaultdict
-import traceback # Import untuk error handling yang lebih baik
+import traceback 
 
-# --- Bagian yang sudah ada (pastikan file-file ini ada) ---
-# Jika file-file ini belum ada, kita akan buat versi sederhananya
+
 try:
     from data_processing.preparer import DataPreparer
     from clustering.model import Clusterer
     from database.updater import DatabaseUpdater
 except ImportError:
     print("Peringatan: Beberapa modul lokal (preparer, clusterer, updater) tidak ditemukan. Fungsi clustering tidak akan berjalan.")
-    # Sediakan class placeholder jika file tidak ada, agar tidak terjadi error saat import
     class DataPreparer: pass
     class Clusterer: pass
     class DatabaseUpdater: pass
@@ -31,7 +29,6 @@ def connect_to_db():
             print("Error: MONGO_URI tidak ditemukan di file .env")
             return None
         client = MongoClient(mongo_uri)
-        # Verifikasi koneksi dengan mencoba mendapatkan nama database
         db = client.get_database() 
         print(f"Berhasil terhubung ke database: {db.name}")
         return db
@@ -40,7 +37,6 @@ def connect_to_db():
         traceback.print_exc()
         return None
 
-# --- Fungsi untuk Pipeline Clustering (Sistem Lama/Fallback) ---
 def fetch_products(db):
     """Mengambil data produk dari MongoDB untuk clustering."""
     try:
@@ -56,7 +52,6 @@ def fetch_products(db):
         print(f"Error saat mengambil data produk: {e}")
         return None
 
-# --- Fungsi untuk Pipeline Rekomendasi Personal (Sistem Baru) ---
 
 def fetch_user_interactions(db):
     """Mengambil data interaksi 'view' dari koleksi userinteractions."""
