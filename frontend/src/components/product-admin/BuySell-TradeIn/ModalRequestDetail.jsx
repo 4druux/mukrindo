@@ -412,10 +412,10 @@ const ModalRequestDetail = ({
                     <div className="flex flex-col min-w-0">
                       <p className="text-xs text-gray-700">Mobil Dijual</p>
                       <span className="text-gray-900 font-medium text-sm">
-                        {`${requestData.carBrand || ""} ${
-                          requestData.carModel || ""
-                        } ${requestData.carVariant || ""} ${
-                          requestData.carYear || ""
+                        {`${requestData.buySellBrand || ""} ${
+                          requestData.buySellModel || ""
+                        } ${requestData.buySellVariant || ""} ${
+                          requestData.buySellYear || ""
                         }`.trim()}
                       </span>
                     </div>
@@ -425,7 +425,7 @@ const ModalRequestDetail = ({
                     <div className="flex flex-col min-w-0">
                       <p className="text-xs text-gray-700">Transmisi</p>
                       <span className="text-gray-900 font-medium text-sm">
-                        {requestData.carTransmission || "-"}
+                        {requestData.buySellTransmission || "-"}
                       </span>
                     </div>
                   </div>
@@ -434,7 +434,7 @@ const ModalRequestDetail = ({
                     <div className="flex flex-col min-w-0">
                       <p className="text-xs text-gray-700">Warna</p>
                       <span className="text-gray-900 font-medium text-sm">
-                        {requestData.carColor || "-"}
+                        {requestData.buySellColor || "-"}
                       </span>
                     </div>
                   </div>
@@ -443,8 +443,8 @@ const ModalRequestDetail = ({
                     <div className="flex flex-col min-w-0">
                       <p className="text-xs text-gray-700">Jarak Tempuh</p>
                       <span className="text-gray-900 font-medium text-sm">
-                        {requestData.carTravelDistance
-                          ? `${requestData.carTravelDistance.toLocaleString(
+                        {requestData.buySellTravelDistance
+                          ? `${requestData.buySellTravelDistance.toLocaleString(
                               "id-ID"
                             )} KM`
                           : "-"}
@@ -456,9 +456,9 @@ const ModalRequestDetail = ({
                     <div className="flex flex-col min-w-0">
                       <p className="text-xs text-gray-700">Masa Berlaku STNK</p>
                       <span className="text-gray-900 font-medium text-sm">
-                        {requestData.carStnkExpiry
+                        {requestData.buySellStnkExpiry
                           ? new Date(
-                              requestData.carStnkExpiry
+                              requestData.buySellStnkExpiry
                             ).toLocaleDateString("id-ID", {
                               day: "2-digit",
                               month: "short",
@@ -473,9 +473,9 @@ const ModalRequestDetail = ({
                     <div className="flex flex-col min-w-0">
                       <p className="text-xs text-gray-700">Harga Penawaran</p>
                       <span className="text-gray-900 font-medium text-sm">
-                        {requestData.carPrice
+                        {requestData.buySellPrice
                           ? `Rp ${formatNumber(
-                              requestData.carPrice.toString()
+                              requestData.buySellPrice.toString()
                             )}`
                           : "-"}
                       </span>
@@ -570,10 +570,10 @@ const ModalRequestDetail = ({
                           Preferensi Mobil
                         </p>
                         <span className="text-gray-900 font-medium text-sm">
-                          {`${requestData.newCarBrandPreference || ""} ${
-                            requestData.newCarModelPreference || ""
+                          {`${requestData.tradeInNewBrand || ""} ${
+                            requestData.tradeInNewModel || ""
                           } ${
-                            requestData.newCarVariantPreference || ""
+                            requestData.tradeInNewVariant || ""
                           }`.trim() || "-"}
                         </span>
                       </div>
@@ -583,7 +583,7 @@ const ModalRequestDetail = ({
                       <div className="flex flex-col min-w-0">
                         <p className="text-xs text-gray-700">Transmisi</p>
                         <span className="text-gray-900 font-medium text-sm">
-                          {requestData.newCarTransmissionPreference || "-"}
+                          {requestData.tradeInNewTransmission || "-"}
                         </span>
                       </div>
                     </div>
@@ -592,7 +592,7 @@ const ModalRequestDetail = ({
                       <div className="flex flex-col min-w-0">
                         <p className="text-xs text-gray-700">Warna</p>
                         <span className="text-gray-900 font-medium text-sm">
-                          {requestData.newCarColorPreference || "-"}
+                          {requestData.tradeInNewColor || "-"}
                         </span>
                       </div>
                     </div>
@@ -601,8 +601,8 @@ const ModalRequestDetail = ({
                       <div className="flex flex-col min-w-0">
                         <p className="text-xs text-gray-700">Range Harga</p>
                         <span className="text-gray-900 font-medium text-sm">
-                          {requestData.newCarPriceRangePreference
-                            ? `${requestData.newCarPriceRangePreference} jt`
+                          {requestData.tradeInPriceRange
+                            ? `${requestData.tradeInPriceRange} jt`
                             : "-"}
                         </span>
                       </div>

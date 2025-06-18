@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import Select from "@/components/common/Select";
 import ButtonMagnetic from "../common/ButtonMagnetic";
 import ButtonAction from "../common/ButtonAction";
-import DotLoader from "../common/DotLoader";
+import { Loader2 } from "lucide-react";
 
 const priceRangeOptions = [
   { value: "0-100", label: "Rp 0 - 100 Juta" },
@@ -35,7 +35,8 @@ const Step4Form = ({
   transmissionRef,
   colorRef,
   priceRangeRef,
-  isLoading,
+  isSubmitting,
+  isLoadingOptions,
 }) => {
   const noBrandSelected = !formData.newCarBrand;
   const noModelSelected = !formData.newCarModel;
@@ -46,6 +47,8 @@ const Step4Form = ({
   const noVariantsAvailable = variantOptions.length === 0;
   const noTransmissionsAvailable = transmissionOptions.length === 0;
   const noColorsAvailable = colorOptions.length === 0;
+
+  const isFormDisabled = isLoadingOptions || isSubmitting;
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -73,13 +76,7 @@ const Step4Form = ({
         </p>
       </motion.div>
 
-      {isLoading && (
-        <div className="flex justify-center items-center h-[250px]">
-          <DotLoader />
-        </div>
-      )}
-
-      {!isLoading && (
+      {!isLoadingOptions  && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <motion.div variants={itemVariants}>
@@ -99,7 +96,7 @@ const Step4Form = ({
                 onChange={(value) => handleSelectChange("newCarBrand", value)}
                 error={errors.newCarBrand}
                 searchOption={true}
-                disabled={isLoading || brandOptions.length === 0}
+                disabled={isFormDisabled || brandOptions.length === 0}
               />
             </motion.div>
 
@@ -120,7 +117,9 @@ const Step4Form = ({
                 options={modelOptions}
                 value={formData.newCarModel}
                 onChange={(value) => handleSelectChange("newCarModel", value)}
-                disabled={isLoading || noBrandSelected || noModelsAvailable}
+                disabled={
+                  isFormDisabled || noBrandSelected || noModelsAvailable
+                }
                 error={errors.newCarModel}
               />
             </motion.div>
@@ -142,7 +141,9 @@ const Step4Form = ({
                 options={variantOptions}
                 value={formData.newCarVariant}
                 onChange={(value) => handleSelectChange("newCarVariant", value)}
-                disabled={isLoading || noModelSelected || noVariantsAvailable}
+                disabled={
+                  isFormDisabled || noModelSelected || noVariantsAvailable
+                }
                 error={errors.newCarVariant}
               />
             </motion.div>
@@ -168,7 +169,9 @@ const Step4Form = ({
                 }
                 error={errors.newCarTransmission}
                 disabled={
-                  isLoading || noVariantSelected || noTransmissionsAvailable
+                  isFormDisabled ||
+                  noVariantSelected ||
+                  noTransmissionsAvailable
                 }
               />
             </motion.div>
@@ -192,7 +195,7 @@ const Step4Form = ({
                 onChange={(value) => handleSelectChange("newCarColor", value)}
                 error={errors.newCarColor}
                 disabled={
-                  isLoading || noTransmissionSelected || noColorsAvailable
+                  isFormDisabled || noTransmissionSelected || noColorsAvailable
                 }
               />
             </motion.div>
@@ -211,7 +214,7 @@ const Step4Form = ({
                 title="Pilih Rentang Harga"
                 description="Pilih rentang harga mobil baru"
                 error={errors.newCarPriceRange}
-                disabled={isLoading}
+                disabled={isFormDisabled}
               />
             </motion.div>
           </div>
@@ -274,13 +277,25 @@ const Step4Form = ({
           <ButtonMagnetic
             type="button"
             onClick={onBack}
+            disabled={isSubmitting}
             className="!py-2.5 !m-0"
           >
             Kembali
           </ButtonMagnetic>
 
-          <ButtonAction type="button" onClick={onSubmit} disabled={isLoading}>
-            Tukar Sekarang
+          <ButtonAction
+            type="button"
+            onClick={onSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Mengirim...
+              </>
+            ) : (
+              <>Tukar Sekarang</>
+            )}
           </ButtonAction>
         </motion.div>
       </motion.div>

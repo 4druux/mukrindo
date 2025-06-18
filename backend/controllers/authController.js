@@ -1,5 +1,5 @@
 // backend/controllers/authController.js
-const User = require("../models/userModel");
+const Account = require("../models/accountModel");
 const jwt = require("jsonwebtoken");
 const cloudinary = require("cloudinary").v2;
 
@@ -69,7 +69,7 @@ const deleteFromCloudinary = async (imageUrl) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({}).select("-password");
+    const users = await Account.find({}).select("-password");
     res.json(users);
   } catch (error) {
     console.error("Get All Users Error:", error);
@@ -85,7 +85,7 @@ exports.registerUser = async (req, res) => {
     if (!firstName || !lastName || !email || !password) {
       return res.status(400).json({ message: "Harap isi semua field." });
     }
-    const userExists = await User.findOne({ email });
+    const userExists = await Account.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "Email sudah terdaftar." });
     }
@@ -94,7 +94,7 @@ exports.registerUser = async (req, res) => {
         .status(400)
         .json({ message: "Kata sandi minimal 6 karakter." });
     }
-    const user = new User({
+    const user = new Account({
       firstName,
       lastName,
       email,
@@ -135,7 +135,7 @@ exports.loginUser = async (req, res) => {
         .status(400)
         .json({ message: "Email dan kata sandi wajib diisi." });
     }
-    const user = await User.findOne({ email });
+    const user = await Account.findOne({ email });
     if (user && user.password && (await user.matchPassword(password))) {
       res.json({
         _id: user._id,
@@ -163,7 +163,7 @@ exports.loginUser = async (req, res) => {
 
 exports.getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await Account.findById(req.user.id).select("-password");
     if (user) {
       res.json({
         _id: user._id,
@@ -237,7 +237,7 @@ exports.googleCallback = (req, res) => {
 
 exports.updateUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await Account.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: "Pengguna tidak ditemukan." });
     }

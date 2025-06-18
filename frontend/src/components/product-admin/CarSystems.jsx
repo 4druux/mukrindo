@@ -71,8 +71,9 @@ const CarSystems = ({
         onChange={(value) => onChange({ target: { name: "fuelType", value } })}
         options={[
           { value: "bensin", label: "Bensin" },
-          { value: "solar", label: "Solar" },
+          { value: "diesel", label: "Diesel" },
           { value: "hybrid", label: "Hybrid" },
+          { value: "electric", label: "Electric" },
         ]}
       />
     </div>

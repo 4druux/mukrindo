@@ -1,11 +1,17 @@
 // frontend/src/utils/axiosInstance.js
 import axios from "axios";
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL;
+const isServer = typeof window === "undefined";
+
+const baseURL = isServer
+  ? process.env.BACKEND_API_URL_SERVER
+  : process.env.NEXT_PUBLIC_API_URL;
 
 if (!baseURL) {
   console.error(
-    "FATAL ERROR: NEXT_PUBLIC_API_URL is not defined in your environment variables."
+    `FATAL ERROR: ${
+      isServer ? "BACKEND_API_URL_SERVER" : "NEXT_PUBLIC_API_URL"
+    } is not defined in your environment variables.`
   );
 }
 
@@ -22,7 +28,7 @@ axiosInstance.interceptors.request.use(
       console.warn("Frontend: NEXT_PUBLIC_BACKEND_API_KEY is not set.");
     }
 
-    if (typeof window !== "undefined") {
+    if (!isServer) {
       const token = localStorage.getItem("mukrindoAuthToken");
       if (token) {
         config.headers["Authorization"] = `Bearer ${token}`;

@@ -19,8 +19,8 @@ import {
 import { useNotification } from "@/context/NotifStockContext";
 import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
-import TittleText from "../common/TittleText";
-import ButtonAction from "../common/ButtonAction";
+import TittleText from "@/components/common/TittleText";
+import ButtonAction from "@/components/common/ButtonAction";
 
 const PHONE_PREFIX = "+62 ";
 const QUICK_OPEN_DELAY = 50;
@@ -97,7 +97,6 @@ const NotifyMeForm = () => {
     [allCarData]
   );
 
-  // Model options
   const modelOptions = useMemo(() => {
     if (!formData.brand) return [];
     const selectedBrandData = allCarData.find(
@@ -230,11 +229,12 @@ const NotifyMeForm = () => {
         formData.phoneNumber,
         PHONE_PREFIX
       );
+
       const submissionData = {
-        brand: formData.brand,
-        model: formData.model,
-        year: formData.year,
-        phoneNumber: rawPhoneNumber,
+        notifStockBrand: formData.brand,
+        notifStockModel: formData.model,
+        notifStockYear: formData.year,
+        customerPhoneNumber: rawPhoneNumber,
       };
 
       Object.keys(submissionData).forEach((key) => {

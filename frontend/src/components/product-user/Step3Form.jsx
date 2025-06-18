@@ -9,7 +9,7 @@ import {
   provinceOptions,
   getCityOptions,
 } from "@/utils/locationData";
-import { MapPin } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 import ButtonMagnetic from "../common/ButtonMagnetic";
 import ButtonAction from "../common/ButtonAction";
 
@@ -21,6 +21,7 @@ const Step3Form = ({
   onSubmit,
   onNext,
   onBack,
+  isSubmitting,
   currentStep,
   totalCarSteps,
   isSellRoute = false,
@@ -353,12 +354,25 @@ const Step3Form = ({
           <ButtonMagnetic
             type="button"
             onClick={onBack}
+            disabled={isSubmitting}
             className="!py-2.5 !m-0"
           >
             Kembali
           </ButtonMagnetic>
-          <ButtonAction type="button" onClick={isSellRoute ? onSubmit : onNext}>
-            {isSellRoute ? "Jual Sekarang" : "Selanjutnya"}
+
+          <ButtonAction
+            type="button"
+            onClick={isSellRoute ? onSubmit : onNext}
+            disabled={isSubmitting}
+          >
+            {isSubmitting && isSellRoute ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Mengirim...
+              </>
+            ) : (
+              <>{isSellRoute ? "Jual Sekarang" : "Selanjutnya"}</>
+            )}
           </ButtonAction>
         </motion.div>
       </motion.div>

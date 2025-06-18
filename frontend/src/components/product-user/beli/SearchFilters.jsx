@@ -386,7 +386,7 @@ const SearchFilters = ({ onActionComplete = () => {} }) => {
             onChange={(value) => handleFilterChange("fuelType", value)}
             options={[
               { value: "bensin", label: "Bensin" },
-              { value: "solar", label: "Solar" },
+              { value: "diesel", label: "Diesel" },
               { value: "hybrid", label: "Hybrid" },
               { value: "electric", label: "Electric" },
             ]}
