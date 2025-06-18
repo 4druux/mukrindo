@@ -151,10 +151,10 @@ const RequestList = ({
                     </p>
                     <span className="text-gray-900 font-medium text-xs">
                       {requestType === "buySell"
-                        ? `${request.carBrand || ""} ${
-                            request.carModel || ""
-                          } ${request.carVariant || ""} (${
-                            request.carYear || ""
+                        ? `${request.buySellBrand || ""} ${
+                            request.buySellModel || ""
+                          } ${request.buySellVariant || ""} (${
+                            request.buySellYear || ""
                           })`.trim() || "-"
                         : `${request.tradeInBrand || ""} ${
                             request.tradeInModel || ""
@@ -196,11 +196,13 @@ const RequestList = ({
                     </p>
                     <span className="text-gray-900 font-medium text-xs">
                       {requestType === "buySell"
-                        ? request.carPrice
-                          ? `Rp ${formatNumber(request.carPrice.toString())}`
+                        ? request.buySellPrice
+                          ? `Rp ${formatNumber(
+                              request.buySellPrice.toString()
+                            )}`
                           : "-"
-                        : `${request.newCarBrandPreference || ""} ${
-                            request.newCarModelPreference || ""
+                        : `${request.tradeInNewBrand || ""} ${
+                            request.tradeInNewModel || ""
                           }`.trim() || "-"}
                     </span>
                   </div>
@@ -333,20 +335,20 @@ const RequestList = ({
                   </td>
                   <td className="px-3 py-4 text-xs text-gray-600 whitespace-normal break-words">
                     {requestType === "buySell"
-                      ? `${request.carBrand || ""} ${request.carModel || ""} (${
-                          request.carYear || ""
-                        })`.trim() || "-"
+                      ? `${request.buySellBrand || ""} ${
+                          request.buySellModel || ""
+                        } (${request.buySellYear || ""})`.trim() || "-"
                       : `${request.tradeInBrand || ""} ${
                           request.tradeInModel || ""
                         } (${request.tradeInYear || ""})`.trim() || "-"}
                   </td>
                   <td className="px-3 py-4 text-xs text-gray-600 whitespace-normal break-words">
                     {requestType === "buySell"
-                      ? request.carPrice
-                        ? `Rp ${formatNumber(request.carPrice.toString())}`
+                      ? request.buySellPrice
+                        ? `Rp ${formatNumber(request.buySellPrice.toString())}`
                         : "-"
-                      : `${request.newCarBrandPreference || ""} ${
-                          request.newCarModelPreference || ""
+                      : `${request.tradeInNewBrand || ""} ${
+                          request.tradeInNewModel || ""
                         }`.trim() || "-"}
                   </td>
                   <td className="px-3 py-4 text-xs text-gray-600 whitespace-normal break-words">

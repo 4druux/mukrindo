@@ -1,4 +1,4 @@
-// File: src/app/beli-mobil/[slug]/page.jsx
+// File: frontend/src/app/(user)/beli-mobil/[slug]/page.jsx
 
 import React, { Suspense } from "react";
 import DotLoader from "@/components/common/DotLoader";
@@ -10,13 +10,13 @@ async function getProductMetadata(productId) {
     const response = await axiosInstance.get(`/products/${productId}`);
     return response.data;
   } catch (error) {
-    console.error("Failed to fetch product metadata:", error);
+    console.error("Failed to fetch product metadata:", error.message);
     return null;
   }
 }
 
-export async function generateMetadata(props) {
-  const slug = props.params.slug;
+export async function generateMetadata({ params }) {
+  const slug = params.slug;
   const productId = slug.substring(slug.lastIndexOf("-") + 1);
   const product = await getProductMetadata(productId);
 
@@ -33,8 +33,8 @@ export async function generateMetadata(props) {
   };
 }
 
-export default async function DetailCarPage(props) {
-  const slug = props.params.slug;
+export default async function DetailCarPage({ params }) {
+  const slug = params.slug;
   const productId = slug.substring(slug.lastIndexOf("-") + 1);
 
   return (

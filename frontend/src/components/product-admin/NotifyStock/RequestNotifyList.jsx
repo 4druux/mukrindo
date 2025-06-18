@@ -74,7 +74,7 @@ const RequestNotifyList = ({
       <div className="space-y-4 lg:space-y-0 lg:hidden px-2 pt-4 md:pt-0">
         {requests.map((request) => {
           const isUpdating = updatingStatusRequestId === request._id;
-          const hasPhone = !!request.phoneNumber;
+          const hasPhone = !!request.customerPhoneNumber;
 
           return (
             <AnimatedItem
@@ -91,9 +91,9 @@ const RequestNotifyList = ({
               {/* Konten kartu tidak berubah */}
               <div className="flex justify-between items-start mb-2">
                 <span className="text-sm font-semibold text-gray-800 truncate pr-2">
-                  {`${request.brand || ""} ${request.model || ""} (${
-                    request.year || ""
-                  })`.trim() || "-"}
+                  {`${request.notifStockBrand || ""} ${
+                    request.notifStockModel || ""
+                  } (${request.notifStockYear || ""})`.trim() || "-"}
                 </span>
                 <span
                   className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full whitespace-nowrap ${getStatusBadgeClass(
@@ -110,7 +110,9 @@ const RequestNotifyList = ({
                     <p className="text-xs text-gray-700">Nomor Telepon</p>
                     <span className="text-gray-900 font-medium text-xs">
                       {hasPhone
-                        ? `(+62) ${formatNumberPhone(request.phoneNumber)}`
+                        ? `(+62) ${formatNumberPhone(
+                            request.customerPhoneNumber
+                          )}`
                         : "-"}
                     </span>
                   </div>
@@ -120,9 +122,9 @@ const RequestNotifyList = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Mobil Dicari</p>
                     <span className="text-gray-900 font-medium text-xs">
-                      {`${request.brand || ""} ${request.model || ""} (${
-                        request.year || ""
-                      })`.trim() || "-"}
+                      {`${request.notifStockBrand || ""} ${
+                        request.notifStockModel || ""
+                      } (${request.notifStockYear || ""})`.trim() || "-"}
                     </span>
                   </div>
                 </div>
@@ -214,7 +216,7 @@ const RequestNotifyList = ({
           <tbody className="divide-y divide-gray-200">
             {requests.map((request, index) => {
               const isUpdating = updatingStatusRequestId === request._id;
-              const hasPhone = !!request.phoneNumber;
+              const hasPhone = !!request.customerPhoneNumber;
 
               return (
                 <AnimatedItem
@@ -231,13 +233,15 @@ const RequestNotifyList = ({
                   onClick={() => onRowClick(request._id)}
                 >
                   <td className="px-3 py-4 text-xs text-gray-600 whitespace-normal break-words">
-                    {`${request.brand || ""} ${request.model || ""} (${
-                      request.year || ""
-                    })`.trim() || "-"}
+                    {`${request.notifStockBrand || ""} ${
+                      request.notifStockModel || ""
+                    } (${request.notifStockYear || ""})`.trim() || "-"}
                   </td>
                   <td className="px-3 py-4 text-xs text-gray-600 whitespace-normal break-words">
                     {hasPhone
-                      ? `(+62) ${formatNumberPhone(request.phoneNumber)}`
+                      ? `(+62) ${formatNumberPhone(
+                          request.customerPhoneNumber
+                        )}`
                       : "-"}
                   </td>
                   <td className="px-3 py-4 text-xs text-gray-600 whitespace-normal break-words">

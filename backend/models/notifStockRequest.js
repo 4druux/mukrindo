@@ -1,41 +1,33 @@
-// models/notificationRequest.js
 const mongoose = require("mongoose");
 
 const NotifStockRequestSchema = new mongoose.Schema(
   {
-    brand: {
+    notifStockBrand: {
       type: String,
       required: [true, "Merek mobil wajib diisi"],
       trim: true,
     },
-    model: {
+    notifStockModel: {
       type: String,
       required: [true, "Model mobil wajib diisi"],
       trim: true,
     },
-    year: {
-      type: String, // Tahun bisa berupa string jika hanya untuk display/filter
+    notifStockYear: {
+      type: String,
       required: [true, "Tahun mobil wajib diisi"],
     },
-    phoneNumber: {
+    customerPhoneNumber: {
       type: String,
       required: [true, "Nomor telepon wajib diisi"],
-      // Anda bisa menambahkan validasi regex sederhana di sini jika perlu,
-      // tapi validasi utama sudah ada di frontend dan controller bisa cek lagi
+      match: [/^\d{9,15}$/, "Format nomor telepon tidak valid."],
     },
     status: {
       type: String,
-      enum: ["Pending", "Dihubungi"], // Status permintaan
+      enum: ["Pending", "Dihubungi"],
       default: "Pending",
     },
-    // Anda bisa tambahkan field lain jika perlu, misal:
-    // notifiedAt: Date,
-    // notifiedCarId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' }
   },
-  { timestamps: true } // Menambahkan createdAt dan updatedAt otomatis
+  { timestamps: true }
 );
 
-module.exports = mongoose.model(
-  "NotifStockRequest", // Nama model singular
-  NotifStockRequestSchema
-);
+module.exports = mongoose.model("NotifStockRequest", NotifStockRequestSchema);

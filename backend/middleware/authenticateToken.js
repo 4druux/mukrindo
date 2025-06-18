@@ -1,6 +1,6 @@
 // backend/middleware/authenticateToken.js
 const jwt = require("jsonwebtoken");
-const User = require("../models/userModel");
+const Account = require("../models/accountModel");
 
 const authenticateToken = async (req, res, next) => {
   let token;
@@ -11,8 +11,7 @@ const authenticateToken = async (req, res, next) => {
       token = authHeader.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // Tambahkan user ke object request, tanpa password
-      req.user = await User.findById(decoded.id).select("-password");
+      req.user = await Account.findById(decoded.id).select("-password");
       if (!req.user) {
         return res
           .status(401)

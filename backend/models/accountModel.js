@@ -1,8 +1,8 @@
-// backend/models/userModel.js
+// backend/models/accountModel.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema(
+const accountSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
+accountSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     if (!this.password) {
       this.password = undefined;
@@ -61,10 +61,10 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.methods.matchPassword = async function (enteredPassword) {
+accountSchema.methods.matchPassword = async function (enteredPassword) {
   if (!this.password) return false;
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-const User = mongoose.model("User", userSchema);
-module.exports = User;
+const Account = mongoose.model("Account", accountSchema);
+module.exports = Account;

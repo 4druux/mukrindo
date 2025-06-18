@@ -953,12 +953,12 @@ const TradeInCar = () => {
         inspectionDate: formData.inspectionDate,
         inspectionTime: formData.inspectionTime,
         // Step 4
-        newCarBrandPreference: formData.newCarBrand || undefined,
-        newCarModelPreference: formData.newCarModel || undefined,
-        newCarVariantPreference: formData.newCarVariant || undefined,
-        newCarTransmissionPreference: formData.newCarTransmission || undefined,
-        newCarColorPreference: formData.newCarColor || undefined,
-        newCarPriceRangePreference: formData.newCarPriceRange || undefined,
+        tradeInNewBrand: formData.newCarBrand || undefined,
+        tradeInNewModel: formData.newCarModel || undefined,
+        tradeInNewVariant: formData.newCarVariant || undefined,
+        tradeInNewTransmission: formData.newCarTransmission || undefined,
+        tradeInNewColor: formData.newCarColor || undefined,
+        tradeInPriceRange: formData.newCarPriceRange || undefined,
       };
 
       Object.keys(submissionData).forEach((key) => {
@@ -1092,7 +1092,8 @@ const TradeInCar = () => {
                   transmissionRef={newCarTransmissionRef}
                   colorRef={newCarColorRef}
                   priceRangeRef={newCarPriceRangeRef}
-                  isLoading={productsLoading || isSubmitting}
+                  isSubmitting={isSubmitting}
+                  isLoadingOptions={productsLoading}
                 />
               )}
             </AnimatePresence>

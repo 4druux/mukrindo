@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const UserInteractionSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Account",
     required: true,
   },
   productId: {

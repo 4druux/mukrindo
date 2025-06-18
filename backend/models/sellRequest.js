@@ -3,55 +3,46 @@ const mongoose = require("mongoose");
 const SellRequestSchema = new mongoose.Schema(
   {
     // Step 1: Info Mobil yang Dijual
-    carBrand: {
-      // Ganti nama dari tradeInBrand
+    buySellBrand: {
       type: String,
       required: [true, "Merek mobil wajib diisi"],
     },
-    carModel: {
-      // Ganti nama dari tradeInModel
+    buySellModel: {
       type: String,
       required: [true, "Model mobil wajib diisi"],
     },
-    carVariant: {
-      // Ganti nama dari tradeInVariant
+    buySellVariant: {
       type: String,
       required: [true, "Varian mobil wajib diisi"],
     },
-    carYear: {
-      // Ganti nama dari tradeInYear
+    buySellYear: {
       type: String,
       required: [true, "Tahun mobil wajib diisi"],
     },
-    carTransmission: {
-      // Ganti nama dari tradeInTransmission
+    buySellTransmission: {
       type: String,
       required: [true, "Transmisi mobil wajib diisi"],
     },
-    carStnkExpiry: {
-      // Ganti nama dari tradeInStnkExpiry
+    buySellStnkExpiry: {
       type: String,
       required: [true, "Tanggal STNK wajib diisi"],
     },
-    carColor: {
-      // Ganti nama dari tradeInColor
+    buySellColor: {
       type: String,
       required: [true, "Warna mobil wajib diisi"],
     },
-    carTravelDistance: {
-      // Ganti nama dari tradeInTravelDistance
+    buySellTravelDistance: {
       type: Number,
       required: [true, "Jarak tempuh wajib diisi"],
       min: [0, "Jarak tempuh tidak boleh negatif"],
     },
-    carPrice: {
-      // Field baru untuk harga penawaran
+    buySellPrice: {
       type: Number,
       required: [true, "Harga penawaran wajib diisi"],
-      min: [1, "Harga penawaran harus positif"], // Harga tidak boleh 0 atau negatif
+      min: [1, "Harga penawaran harus positif"],
     },
 
-    // Step 2: Info Kontak (Sama seperti TradeIn)
+    // Step 2: Info Kontak
     customerName: {
       type: String,
       required: [true, "Nama pelanggan wajib diisi"],
@@ -69,7 +60,7 @@ const SellRequestSchema = new mongoose.Schema(
       match: [/\S+@\S+\.\S+/, "Format email tidak valid"],
     },
 
-    // Step 3: Lokasi & Jadwal Inspeksi (Sama seperti TradeIn)
+    // Step 3: Lokasi & Jadwal Inspeksi
     inspectionLocationType: {
       type: String,
       required: true,
@@ -109,7 +100,6 @@ const SellRequestSchema = new mongoose.Schema(
       required: [true, "Jam inspeksi wajib diisi"],
     },
 
-    // Status (Sama seperti TradeIn)
     status: {
       type: String,
       enum: ["Pending", "Dihubungi", "Selesai", "Dibatalkan"],
@@ -119,5 +109,4 @@ const SellRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Pastikan nama model unik ('SellRequest')
 module.exports = mongoose.model("SellRequest", SellRequestSchema);

@@ -551,34 +551,34 @@ const SellCar = () => {
 
       const submissionData = {
         // Step 1
-        brand: formData.brand,
-        model: formData.model,
-        variant: formData.variant,
-        year: formData.year,
-        transmission: formData.transmission,
-        stnkExpiry: formData.stnkExpiry,
-        color: formData.color,
-        travelDistance: unformatNumber(formData.travelDistance),
-        price: unformatNumber(formData.price),
+        buySellBrand: formData.brand,
+        buySellModel: formData.model,
+        buySellVariant: formData.variant,
+        buySellYear: formData.year,
+        buySellTransmission: formData.transmission,
+        buySellStnkExpiry: formData.stnkExpiry,
+        buySellColor: formData.color,
+        buySellTravelDistance: unformatNumber(formData.travelDistance),
+        buySellPrice: unformatNumber(formData.price),
         // Step 2
-        name: formData.name,
-        phoneNumber: rawPhoneNumber,
-        email: formData.email,
+        customerName: formData.name,
+        customerPhoneNumber: rawPhoneNumber,
+        customerEmail: formData.email,
         // Step 3
         inspectionLocationType: formData.inspectionLocationType,
-        showroomAddress:
+        inspectionShowroomAddress:
           formData.inspectionLocationType === "showroom"
             ? formData.showroomAddress
             : undefined,
-        province:
+        inspectionProvince:
           formData.inspectionLocationType === "rumah"
             ? formData.province
             : undefined,
-        city:
+        inspectionCity:
           formData.inspectionLocationType === "rumah"
             ? formData.city
             : undefined,
-        fullAddress:
+        inspectionFullAddress:
           formData.inspectionLocationType === "rumah"
             ? formData.fullAddress
             : undefined,
@@ -681,7 +681,8 @@ const SellCar = () => {
                   handleChange={handleChange}
                   handleSelectChange={handleSelectChange}
                   errors={errors}
-                  onSubmit={handleSubmit || isSubmitting}
+                  onSubmit={handleSubmit}
+                  isSubmitting={isSubmitting}
                   onBack={handlePreviousStep}
                   isSellRoute={true}
                   termsAccepted={termsAccepted}

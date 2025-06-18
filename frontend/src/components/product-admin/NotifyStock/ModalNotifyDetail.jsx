@@ -313,8 +313,8 @@ const ModalNotifyDetail = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Nomor Telepon</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      {requestData.phoneNumber
-                        ? `(+62) ${formatNumberPhone(requestData.phoneNumber)}`
+                      {requestData.customerPhoneNumber
+                        ? `(+62) ${formatNumberPhone(requestData.customerPhoneNumber)}`
                         : "-"}
                     </span>
                   </div>
@@ -324,9 +324,9 @@ const ModalNotifyDetail = ({
                   <div className="flex flex-col min-w-0">
                     <p className="text-xs text-gray-700">Mobil Dicari</p>
                     <span className="text-gray-900 font-medium text-sm">
-                      {`${requestData.brand || ""} ${
-                        requestData.model || ""
-                      } (${requestData.year || ""})`.trim() || "-"}
+                      {`${requestData.notifStockBrand || ""} ${
+                        requestData.notifStockModel || ""
+                      } (${requestData.notifStockYear || ""})`.trim() || "-"}
                     </span>
                   </div>
                 </div>
@@ -363,14 +363,14 @@ const ModalNotifyDetail = ({
               className={`flex items-center text-green-600 py-2.5 px-6 rounded-full focus:outline-none focus:shadow-outline border border-green-500 bg-green-50 hover:bg-green-100 cursor-pointer ${
                 isBeingContacted ||
                 isUpdatingStatus ||
-                !requestData?.phoneNumber
+                !requestData?.customerPhoneNumber
                   ? "opacity-50 cursor-not-allowed"
                   : ""
               }`}
               disabled={
                 isBeingContacted ||
                 isUpdatingStatus ||
-                !requestData?.phoneNumber
+                !requestData?.customerPhoneNumber
               }
             >
               {isBeingContacted ? (

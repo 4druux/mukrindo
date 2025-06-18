@@ -46,7 +46,7 @@ const TradeInRequestSchema = new mongoose.Schema(
     customerPhoneNumber: {
       type: String,
       required: [true, "Nomor telepon wajib diisi"],
-    }, // Simpan tanpa format (+62)
+    },
     customerEmail: {
       type: String,
       required: [true, "Email wajib diisi"],
@@ -96,27 +96,27 @@ const TradeInRequestSchema = new mongoose.Schema(
     },
 
     // Step 4: Preferensi Mobil Baru
-    newCarBrandPreference: {
+    tradeInNewBrand: {
       type: String,
       required: [true, "Preferensi merek mobil baru wajib diisi"],
     },
-    newCarModelPreference: {
+    tradeInNewModel: {
       type: String,
       required: [true, "Preferensi model mobil baru wajib diisi"],
     },
-    newCarVariantPreference: {
+    tradeInNewVariant: {
       type: String,
       required: [true, "Preferensi varian mobil baru wajib diisi"],
     },
-    newCarTransmissionPreference: {
+    tradeInNewTransmission: {
       type: String,
       required: [true, "Preferensi transmisi mobil baru wajib diisi"],
     },
-    newCarColorPreference: {
+    tradeInNewColor: {
       type: String,
       required: [true, "Preferensi warna mobil baru wajib diisi"],
     },
-    newCarPriceRangePreference: {
+    tradeInPriceRange: {
       type: String,
       required: [true, "Preferensi rentang harga wajib diisi"],
     },
