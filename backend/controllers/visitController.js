@@ -1,6 +1,7 @@
-// backend/controllers/visitController.js
-const TrackingVisit = require("../models/trackingVisit"); //
-const { v4: uuidv4 } = require("uuid"); //
+// controllers/visitController.js
+
+const TrackingVisit = require("../models/trackingVisit");
+const { v4: uuidv4 } = require("uuid");
 const {
   startOfDay,
   endOfDay,
@@ -18,10 +19,9 @@ const {
 } = require("date-fns");
 
 const VISITOR_COOKIE_NAME =
-  process.env.VISITOR_COOKIE_NAME || "mukrindo_visitor_id"; //
+  process.env.VISITOR_COOKIE_NAME || "mukrindo_visitor_id";
 
 exports.trackHomepageVisit = async (req, res) => {
-  //
   try {
     let visitorId = req.cookies[VISITOR_COOKIE_NAME];
     let isNewVisitorSession = false;
@@ -104,13 +104,12 @@ exports.trackHomepageVisit = async (req, res) => {
 };
 
 exports.getHomepageVisitStats = async (req, res) => {
-  //
   try {
     const now = new Date();
-    const currentMonthStart = startOfMonth(now); // Pastikan startOfMonth diimpor
-    const currentMonthEnd = endOfMonth(now); // Pastikan endOfMonth diimpor
+    const currentMonthStart = startOfMonth(now);
+    const currentMonthEnd = endOfMonth(now);
 
-    const prevMonthDate = subMonths(now, 1); // Pastikan subMonths diimpor
+    const prevMonthDate = subMonths(now, 1);
     const prevMonthStart = startOfMonth(prevMonthDate);
     const prevMonthEnd = endOfMonth(prevMonthDate);
 
@@ -146,7 +145,6 @@ exports.getHomepageVisitStats = async (req, res) => {
 };
 
 exports.getHomepageVisitHistory = async (req, res) => {
-  //
   try {
     const { period = "daily" } = req.query;
     const now = new Date();
@@ -154,7 +152,7 @@ exports.getHomepageVisitHistory = async (req, res) => {
 
     switch (period) {
       case "weekly":
-        startDate = subWeeks(now, 4); // Pastikan subWeeks diimpor
+        startDate = subWeeks(now, 4);
         groupByFormat = {
           year: { $year: "$visitTimestamp" },
           week: { $isoWeek: "$visitTimestamp" },
@@ -164,7 +162,7 @@ exports.getHomepageVisitHistory = async (req, res) => {
         };
         break;
       case "monthly":
-        startDate = subMonths(now, 12); // Pastikan subMonths diimpor
+        startDate = subMonths(now, 12);
         groupByFormat = {
           year: { $year: "$visitTimestamp" },
           month: { $month: "$visitTimestamp" },
@@ -174,12 +172,12 @@ exports.getHomepageVisitHistory = async (req, res) => {
         };
         break;
       case "yearly":
-        startDate = subYears(now, 5); // Pastikan subYears diimpor
+        startDate = subYears(now, 5);
         groupByFormat = { year: { $year: "$visitTimestamp" } };
         dateFieldForGroup = { $dateFromParts: { year: "$_id.year" } };
         break;
-      default: // daily
-        startDate = subDays(now, 7); // Pastikan subDays diimpor
+      default:
+        startDate = subDays(now, 7);
         groupByFormat = {
           year: { $year: "$visitTimestamp" },
           month: { $month: "$visitTimestamp" },
@@ -197,7 +195,6 @@ exports.getHomepageVisitHistory = async (req, res) => {
     const visits = await TrackingVisit.aggregate([
       {
         $match: {
-          // Pastikan startOfDay dan endOfDay diimpor jika Anda ingin menggunakannya di sini
           visitTimestamp: { $gte: startOfDay(startDate), $lte: endOfDay(now) },
         },
       },
