@@ -1,3 +1,5 @@
+// controllers/productController.js
+
 const Product = require("../models/productModels");
 const cloudinary = require("cloudinary").v2;
 const ProductRecommendation = require("../models/productRecommendation");
@@ -27,7 +29,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Handle Server Error
 const handleServerError = (res, error) => {
   console.error("Server Error:", error);
   return res.status(500).json({
@@ -36,7 +37,6 @@ const handleServerError = (res, error) => {
   });
 };
 
-// Safe Parse ISO
 const safeParseISO = (dateInput) => {
   if (!dateInput) return null;
   if (dateInput instanceof Date) return isValid(dateInput) ? dateInput : null;
@@ -51,7 +51,6 @@ const safeParseISO = (dateInput) => {
   return null;
 };
 
-// Delete From Cloudinary
 const deleteFromCloudinary = async (imageUrl) => {
   if (!imageUrl || !imageUrl.includes("cloudinary.com")) return;
   try {
@@ -75,7 +74,6 @@ const deleteFromCloudinary = async (imageUrl) => {
   }
 };
 
-// Create Product
 exports.createProduct = async (req, res) => {
   try {
     const {
@@ -170,7 +168,6 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-// Update Id
 exports.updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -309,7 +306,6 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
-// Delete Id
 exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -339,7 +335,6 @@ exports.deleteProduct = async (req, res) => {
   }
 };
 
-// Get All
 exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
@@ -349,7 +344,6 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
-// Get Id
 exports.getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate("user");
@@ -383,7 +377,6 @@ exports.getProductById = async (req, res) => {
   }
 };
 
-// View Count
 exports.incrementViewCount = async (req, res) => {
   try {
     const { id: productId } = req.params;
@@ -413,7 +406,6 @@ exports.incrementViewCount = async (req, res) => {
   }
 };
 
-// Rekomendasi Produk
 exports.getProductRecommendations = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -474,7 +466,6 @@ exports.getProductRecommendations = async (req, res) => {
   }
 };
 
-// Product Report Chart
 exports.getProductReportStats = async (req, res) => {
   try {
     const { period = "weekly", year: queryYear } = req.query;
@@ -663,7 +654,6 @@ exports.getProductReportStats = async (req, res) => {
   }
 };
 
-// Product Sales Stats
 exports.getProductSalesStats = async (req, res) => {
   try {
     const { period = "weekly", year: queryYear } = req.query;

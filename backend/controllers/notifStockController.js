@@ -1,3 +1,5 @@
+// controllers/notifStockController.js
+
 const NotifStockRequest = require("../models/notifStockRequest");
 const Notification = require("../models/notification");
 const { sendNotificationEmail } = require("../services/emailService");

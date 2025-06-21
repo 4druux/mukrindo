@@ -13,14 +13,14 @@ const createAdminUsers = async () => {
       firstName: "Admin",
       lastName: "Satu",
       email: "admin1@mukrindo.com",
-      password: "Zaratustr4",
+      password: "adminmukrindo1",
       role: "admin",
     },
     {
       firstName: "Admin",
       lastName: "Dua",
       email: "admin2@mukrindo.com",
-      password: "Zaratustr4@",
+      password: "adminmukrindo2",
       role: "admin",
     },
   ];

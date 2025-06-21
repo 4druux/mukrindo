@@ -1,3 +1,5 @@
+// controllers/tradeInController.js
+
 const TradeInRequest = require("../models/tradeInRequest");
 const Notification = require("../models/notification");
 const { sendNotificationEmail } = require("../services/emailService");
