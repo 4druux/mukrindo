@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
+
 import axiosInstance from "@/utils/axiosInstance";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -18,7 +19,6 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 const AUTH_API_PATH = "/auth";
-const USERS_API_PATH = "/auth/users";
 
 const fetcher = (url) => axiosInstance.get(url).then((res) => res.data);
 
@@ -32,10 +32,14 @@ export const AuthProvider = ({ children }) => {
     data: usersData,
     error: usersSwrError,
     isLoading: usersSwrLoading,
-  } = useSWR(user?.role === "admin" ? USERS_API_PATH : null, fetcher, {
-    revalidateOnFocus: true,
-    compare: (a, b) => isEqual(a, b),
-  });
+  } = useSWR(
+    user?.role === "admin" ? `${AUTH_API_PATH}/users` : null,
+    fetcher,
+    {
+      revalidateOnFocus: true,
+      compare: (a, b) => isEqual(a, b),
+    }
+  );
 
   const allUsers = usersData || [];
   const usersLoading = usersSwrLoading;
@@ -73,7 +77,6 @@ export const AuthProvider = ({ children }) => {
         error.response?.data?.message ||
         error.message ||
         "Sesi Anda mungkin telah berakhir. Silakan login kembali.";
-      console.error("Fetch Profile Error:", message);
       if (error.response?.status !== 401) {
         setAuthError(message);
       }
@@ -102,38 +105,39 @@ export const AuthProvider = ({ children }) => {
         password,
       });
 
-      localStorage.setItem("mukrindoAuthToken", data.token);
-      const userData = {
-        _id: data._id,
-        firstName: data.firstName || "",
-        lastName: data.lastName || "",
-        email: data.email,
-        role: data.role,
-        avatar: data.avatar || null,
-        hasPassword: data.hasPassword || true,
-      };
-      setUser(userData);
-      setAuthError(null);
-      setLoading(false);
-
-      if (data.role === "admin") {
-        router.push("/admin");
+      if (data.otpRequired) {
+        toast.success(data.message || "Silakan masukkan OTP Anda.", {
+          className: "custom-toast",
+        });
+        setLoading(false);
+        router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
+        return { success: true, otpRequired: true };
       } else {
-        router.push("/");
+        localStorage.setItem("mukrindoAuthToken", data.token);
+        window.location.href = "/";
       }
-      return { success: true, user: userData };
     } catch (error) {
-      const message =
-        error.response?.data?.message || error.message || "Login gagal.";
-      setAuthError(message);
-      toast.error(message, { className: "custom-toast" });
+      const serverMessage = error.response?.data?.message || "Login gagal.";
+
+      setAuthError(serverMessage);
+
+      let toastMessage = "Email atau kata sandi salah.";
+      if (
+        serverMessage.toLowerCase().includes("kunci") ||
+        serverMessage.toLowerCase().includes("percobaan")
+      ) {
+        toastMessage = "Terlalu banyak percobaan, coba lagi nanti.";
+      }
+
+      toast.error(toastMessage, { className: "custom-toast" });
+
       setUser(null);
       setLoading(false);
-      return { success: false, error: message };
+      return { success: false, error: serverMessage };
     }
   };
 
-  const register = async (firstName, lastName, email, password) => {
+  const register = async (firstName, lastName, email, password, role) => {
     setLoading(true);
     setAuthError(null);
     try {
@@ -142,29 +146,69 @@ export const AuthProvider = ({ children }) => {
         lastName,
         email,
         password,
+        role,
       });
       localStorage.setItem("mukrindoAuthToken", data.token);
-      setUser({
-        _id: data._id,
-        firstName: data.firstName || "",
-        lastName: data.lastName || "",
-        email: data.email,
-        role: data.role,
-        avatar: data.avatar || null,
-        hasPassword: data.hasPassword,
-      });
       toast.success(data.message || "Registrasi berhasil!", {
         className: "custom-toast",
       });
-      setLoading(false);
-      router.push("/");
-      return { success: true, user: data };
+      if (data.role === "admin") {
+        window.location.href = "/admin";
+      } else {
+        window.location.href = "/";
+      }
+      return { success: true };
     } catch (error) {
-      const message =
-        error.response?.data?.message || error.message || "Registrasi gagal.";
+      const message = error.response?.data?.message || "Registrasi gagal.";
       setAuthError(message);
       toast.error(message, { className: "custom-toast" });
-      setUser(null);
+      setLoading(false);
+      return { success: false, error: message };
+    }
+  };
+
+  const forgotPassword = async (email) => {
+    setLoading(true);
+    setAuthError(null);
+    try {
+      const { data } = await axiosInstance.post(
+        `${AUTH_API_PATH}/forgot-password`,
+        { email }
+      );
+      toast.success(data.message || "Link reset telah dikirim.", {
+        className: "custom-toast",
+      });
+      setLoading(false);
+      return { success: true };
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "Gagal mengirim email reset.";
+      setAuthError(message);
+      toast.error(message, { className: "custom-toast" });
+      setLoading(false);
+      return { success: false, error: message };
+    }
+  };
+
+  const resetPassword = async (token, password) => {
+    setLoading(true);
+    setAuthError(null);
+    try {
+      const { data } = await axiosInstance.put(
+        `${AUTH_API_PATH}/reset-password/${token}`,
+        { password }
+      );
+      toast.success(data.message || "Kata sandi berhasil diubah.", {
+        className: "custom-toast",
+      });
+      setLoading(false);
+      router.push("/login");
+      return { success: true };
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "Gagal mereset kata sandi.";
+      setAuthError(message);
+      toast.error(message, { className: "custom-toast" });
       setLoading(false);
       return { success: false, error: message };
     }
@@ -179,30 +223,14 @@ export const AuthProvider = ({ children }) => {
     router.push("/login");
   };
 
-  const handleOAuthSuccess = useCallback(
-    (oauthData) => {
-      localStorage.setItem("mukrindoAuthToken", oauthData.token);
-      const userData = {
-        _id: oauthData.userId,
-        firstName: oauthData.firstName || "",
-        lastName: oauthData.lastName || "",
-        email: oauthData.email,
-        role: oauthData.role,
-        avatar: oauthData.avatar || null,
-        hasPassword: oauthData.hasPassword === "true",
-      };
-      setUser(userData);
-      setAuthError(null);
-      setLoading(false);
-
-      if (oauthData.role === "admin") {
-        router.push("/admin");
-      } else {
-        router.push("/");
-      }
-    },
-    [router]
-  );
+  const handleOAuthSuccess = useCallback((oauthData) => {
+    localStorage.setItem("mukrindoAuthToken", oauthData.token);
+    if (oauthData.role === "admin") {
+      window.location.href = "/admin";
+    } else {
+      window.location.href = "/";
+    }
+  }, []);
 
   const updateUser = async (formDataToSubmit) => {
     setLoading(true);
@@ -248,9 +276,62 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const verifyOtp = async (email, otp) => {
+    setLoading(true);
+    setAuthError(null);
+    try {
+      const { data } = await axiosInstance.post(`${AUTH_API_PATH}/verify-otp`, {
+        email,
+        otp,
+      });
+
+      localStorage.setItem("mukrindoAuthToken", data.token);
+
+      toast.success(data.message || "Verifikasi berhasil!", {
+        className: "custom-toast",
+      });
+
+      if (data.role === "admin") {
+        window.location.href = "/admin";
+      } else {
+        window.location.href = "/";
+      }
+      return { success: true };
+    } catch (error) {
+      const message = error.response?.data?.message || "Verifikasi OTP gagal.";
+      setAuthError(message);
+      toast.error(message, { className: "custom-toast" });
+      setLoading(false);
+      return { success: false, error: message };
+    }
+  };
+
+  const resendOtp = async (email) => {
+    setLoading(true);
+    setAuthError(null);
+    try {
+      const { data } = await axiosInstance.post(`${AUTH_API_PATH}/resend-otp`, {
+        email,
+      });
+      toast.success(data.message, {
+        className: "custom-toast",
+      });
+      setLoading(false);
+      return { success: true };
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "Gagal mengirim ulang OTP.";
+      setAuthError(message);
+      toast.error(message, { className: "custom-toast" });
+      setLoading(false);
+      return { success: false };
+    }
+  };
+
   const contextValue = {
     user,
     loading,
+    setLoading,
     authError,
     setAuthError,
     login,
@@ -265,6 +346,10 @@ export const AuthProvider = ({ children }) => {
     allUsers,
     usersLoading,
     usersError,
+    forgotPassword,
+    resetPassword,
+    verifyOtp,
+    resendOtp,
   };
 
   return (

@@ -1,6 +1,6 @@
 // backend/middleware/authenticateToken.js
 const jwt = require("jsonwebtoken");
-const Account = require("../models/accountModel");
+const Authentication = require("../models/authModel");
 
 const authenticateToken = async (req, res, next) => {
   let token;
@@ -11,7 +11,7 @@ const authenticateToken = async (req, res, next) => {
       token = authHeader.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      req.user = await Account.findById(decoded.id).select("-password");
+      req.user = await Authentication.findById(decoded.id).select("-password");
       if (!req.user) {
         return res
           .status(401)
