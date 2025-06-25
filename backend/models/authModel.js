@@ -1,8 +1,7 @@
-// backend/models/accountModel.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
-const accountSchema = new mongoose.Schema(
+const authSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
@@ -26,24 +25,35 @@ const accountSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    avatar: {
+      type: String,
+      default: null,
+    },
     googleId: {
       type: String,
       unique: true,
       sparse: true,
     },
-    avatar: {
-      type: String,
-      default: null,
-    },
     hasPassword: {
       type: Boolean,
       default: false,
     },
+
+    otp: { type: String },
+    otpExpires: { type: Date },
+    otpLastSentAt: { type: Date },
+    otpResendAttempts: { type: Number, default: 0 },
+
+    resetPasswordToken: { type: String },
+    resetPasswordExpire: { type: Date },
+
+    loginAttempts: { type: Number, required: true, default: 0 },
+    lockUntil: { type: Date },
   },
   { timestamps: true }
 );
 
-accountSchema.pre("save", async function (next) {
+authSchema.pre("save", async function (next) {
   if (this.isModified("password")) {
     if (!this.password) {
       this.password = undefined;
@@ -61,10 +71,10 @@ accountSchema.pre("save", async function (next) {
   next();
 });
 
-accountSchema.methods.matchPassword = async function (enteredPassword) {
+authSchema.methods.matchPassword = async function (enteredPassword) {
   if (!this.password) return false;
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-const Account = mongoose.model("Account", accountSchema);
-module.exports = Account;
+const Auth = mongoose.model("Auth", authSchema);
+module.exports = Auth;

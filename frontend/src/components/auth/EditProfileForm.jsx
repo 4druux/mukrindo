@@ -165,8 +165,8 @@ export default function EditProfileForm({ isUserPage = false }) {
       formData.newPassword || formData.confirmNewPassword;
 
     if (isAttemptingPasswordChange) {
-      if (formData.newPassword.length < 6) {
-        newErrors.newPassword = "Kata sandi baru minimal 6 karakter.";
+      if (formData.newPassword.length < 8) {
+        newErrors.newPassword = "Kata sandi baru minimal 8 karakter.";
       }
       if (formData.newPassword !== formData.confirmNewPassword) {
         newErrors.confirmNewPassword =
@@ -390,7 +390,7 @@ export default function EditProfileForm({ isUserPage = false }) {
               value={formData.newPassword}
               onChange={handleChange}
               error={errors.newPassword}
-              placeholder="Min. 6 karakter"
+              placeholder="Min. 8 karakter"
               autoComplete="new-password"
               disabled={isSubmitting}
             />

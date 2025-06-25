@@ -1,7 +1,16 @@
 // backend/controllers/authController.js
-const Account = require("../models/accountModel");
+const Authentication = require("../models/authModel");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cloudinary = require("cloudinary").v2;
+const {
+  sendPasswordResetEmail,
+  sendOtpEmail,
+} = require("../services/emailService");
+const crypto = require("crypto");
+
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCK_TIME = 5 * 60 * 1000;
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -69,7 +78,7 @@ const deleteFromCloudinary = async (imageUrl) => {
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await Account.find({}).select("-password");
+    const users = await Authentication.find({}).select("-password");
     res.json(users);
   } catch (error) {
     console.error("Get All Users Error:", error);
@@ -79,26 +88,39 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-exports.registerUser = async (req, res) => {
-  const { firstName, lastName, email, password } = req.body;
+exports.authRegister = async (req, res) => {
+  const { firstName, lastName, email, password, role } = req.body;
   try {
     if (!firstName || !lastName || !email || !password) {
       return res.status(400).json({ message: "Harap isi semua field." });
     }
-    const userExists = await Account.findOne({ email });
+    const userExists = await Authentication.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "Email sudah terdaftar." });
     }
-    if (password.length < 6) {
+    if (password.length < 8) {
       return res
         .status(400)
-        .json({ message: "Kata sandi minimal 6 karakter." });
+        .json({ message: "Kata sandi minimal 8 karakter." });
     }
-    const user = new Account({
+
+    let finalRole = "user";
+    if (role === "admin") {
+      const adminCount = await Authentication.countDocuments({ role: "admin" });
+      if (adminCount >= 2) {
+        return res
+          .status(403)
+          .json({ message: "Pendaftaran admin sudah tidak tersedia." });
+      }
+      finalRole = "admin";
+    }
+
+    const user = new Authentication({
       firstName,
       lastName,
       email,
       password,
+      role: finalRole,
     });
     await user.save();
 
@@ -111,59 +133,106 @@ exports.registerUser = async (req, res) => {
       avatar: user.avatar || null,
       hasPassword: user.hasPassword,
       token: generateToken(user._id, user.role),
-      message: "Registrasi berhasil.",
+      message: "Registrasi berhasil!",
     });
   } catch (error) {
     console.error("Register Error:", error);
-    if (error.name === "ValidationError") {
-      const messages = Object.values(error.errors).map((val) => val.message);
-      return res.status(400).json({
-        success: false,
-        message: "Data tidak valid.",
-        errors: messages,
-      });
-    }
     res.status(500).json({ message: "Server Error saat registrasi." });
   }
 };
 
-exports.loginUser = async (req, res) => {
+exports.authLogin = async (req, res) => {
   const { email, password } = req.body;
+
   try {
-    if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email dan kata sandi wajib diisi." });
+    const account = await Authentication.findOne({ email });
+    if (!account) {
+      return res.status(401).json({ message: "Email atau kata sandi salah" });
     }
-    const user = await Account.findOne({ email });
-    if (user && user.password && (await user.matchPassword(password))) {
+
+    if (account.lockUntil && account.lockUntil > Date.now()) {
+      const remainingSeconds = Math.ceil(
+        (account.lockUntil - Date.now()) / 1000
+      );
+      const remainingTimeMessage =
+        remainingSeconds > 60
+          ? `${Math.ceil(remainingSeconds / 60)} menit`
+          : `${remainingSeconds} detik`;
+
+      return res.status(403).json({
+        message: `Ups! Terlalu banyak percobaan login. Silakan coba kembali dalam ${remainingTimeMessage}.`,
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, account.password);
+
+    if (!isMatch) {
+      account.loginAttempts += 1;
+
+      if (account.loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+        account.lockUntil = Date.now() + LOCK_TIME;
+        await account.save();
+
+        return res.status(403).json({
+          message: `Kami mendeteksi terlalu banyak percobaan login yang gagal. Untuk keamanan, silakan coba beberapa saat lagi.`,
+        });
+      }
+
+      await account.save();
+      return res.status(401).json({ message: "Email atau kata sandi salah" });
+    }
+
+    if (account.role === "admin") {
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      account.otp = otp;
+      account.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // OTP berlaku 10 menit
+      account.otpLastSentAt = new Date();
+      account.otpResendAttempts = 0; // Reset percobaan kirim ulang
+      await account.save();
+
+      // Panggil service untuk kirim email OTP
+      await sendOtpEmail(account.email, account.firstName, otp);
+
+      // Kirim respons bahwa OTP diperlukan
+      return res.status(200).json({
+        otpRequired: true,
+        email: account.email,
+        message: "Login berhasil, masukkan OTP dari email Anda.",
+      });
+    }
+
+    // Jika yang login adalah USER BIASA, langsung berikan token
+    else {
+      account.loginAttempts = 0;
+      account.lockUntil = null;
+      await account.save();
+
+      const payload = { id: account._id, role: account.role };
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: "1d",
+      });
+
       res.json({
-        _id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName || "",
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar || null,
-        hasPassword: user.hasPassword,
-        token: generateToken(user._id, user.role),
+        message: "Login berhasil",
+        token,
+        _id: account._id,
+        email: account.email,
+        firstName: account.firstName,
+        lastName: account.lastName,
+        role: account.role,
+        avatar: account.avatar,
+        hasPassword: account.hasPassword,
       });
-    } else if (user && !user.password && user.googleId) {
-      return res.status(401).json({
-        message:
-          "Akun ini terdaftar melalui Google. Silakan login dengan Google.",
-      });
-    } else {
-      res.status(401).json({ message: "Email atau kata sandi salah." });
     }
   } catch (error) {
-    console.error("Login Error:", error);
-    res.status(500).json({ message: "Server Error saat login." });
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Terjadi kesalahan pada server." });
   }
 };
 
 exports.getUserProfile = async (req, res) => {
   try {
-    const user = await Account.findById(req.user.id).select("-password");
+    const user = await Authentication.findById(req.user.id).select("-password");
     if (user) {
       res.json({
         _id: user._id,
@@ -237,7 +306,7 @@ exports.googleCallback = (req, res) => {
 
 exports.updateUserProfile = async (req, res) => {
   try {
-    const user = await Account.findById(req.user.id);
+    const user = await Authentication.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: "Pengguna tidak ditemukan." });
     }
@@ -263,10 +332,10 @@ exports.updateUserProfile = async (req, res) => {
     }
 
     if (newPassword) {
-      if (newPassword.length < 6) {
+      if (newPassword.length < 8) {
         return res
           .status(400)
-          .json({ message: "Kata sandi baru minimal 6 karakter." });
+          .json({ message: "Kata sandi baru minimal 8 karakter." });
       }
       user.password = newPassword;
     }
@@ -292,5 +361,172 @@ exports.updateUserProfile = async (req, res) => {
         .json({ message: "Data tidak valid.", errors: error.errors });
     }
     res.status(500).json({ message: "Server Error saat memperbarui profil." });
+  }
+};
+
+exports.getAdminCount = async (req, res) => {
+  try {
+    const adminCount = await Authentication.countDocuments({ role: "admin" });
+    res.json({ adminCount });
+  } catch (error) {
+    console.error("Get Admin Count Error:", error);
+    res.status(500).json({ message: "Server Error saat menghitung admin." });
+  }
+};
+
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await Authentication.findOne({ email });
+    if (!user) {
+      return res.status(200).json({
+        message: "Jika email Anda terdaftar, Anda akan menerima link reset.",
+      });
+    }
+
+    const resetToken = crypto.randomBytes(20).toString("hex");
+    user.resetPasswordToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // Token berlaku 10 menit
+    await user.save();
+
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+    await sendPasswordResetEmail(user.email, user.firstName, resetUrl);
+
+    res
+      .status(200)
+      .json({ message: "Link reset kata sandi telah dikirim ke email Anda." });
+  } catch (error) {
+    console.error("Forgot Password Error:", error);
+    // Hapus token jika terjadi error agar user bisa coba lagi
+    const user = await Authentication.findOne({ email });
+    if (user) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save();
+    }
+    res.status(500).json({ message: "Server Error." });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  const { password } = req.body;
+  try {
+    const resetPasswordToken = crypto
+      .createHash("sha256")
+      .update(req.params.token)
+      .digest("hex");
+    const user = await Authentication.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "Token tidak valid atau sudah kedaluwarsa." });
+    }
+
+    if (password.length < 8) {
+      return res
+        .status(400)
+        .json({ message: "Kata sandi minimal 8 karakter." });
+    }
+
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Kata sandi berhasil direset. Silakan login.",
+    });
+  } catch (error) {
+    console.error("Reset Password Error:", error);
+    res.status(500).json({ message: "Server Error." });
+  }
+};
+
+// TAMBAHKAN FUNGSI BARU INI
+exports.verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
+  try {
+    if (!email || !otp) {
+      return res.status(400).json({ message: "Email dan OTP wajib diisi." });
+    }
+    const user = await Authentication.findOne({
+      email,
+      otp,
+      otpExpires: { $gt: Date.now() },
+    });
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "OTP salah atau sudah kedaluwarsa." });
+    }
+    user.isVerified = true;
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    user.otpLastSentAt = undefined;
+    user.otpResendAttempts = 0;
+    await user.save();
+    res.json({
+      message: "Verifikasi berhasil! Anda sekarang sudah login.",
+      token: generateToken(user._id, user.role),
+      _id: user._id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      avatar: user.avatar,
+      hasPassword: user.hasPassword,
+    });
+  } catch (error) {
+    console.error("Verify OTP Error:", error);
+    res.status(500).json({ message: "Server Error saat verifikasi OTP." });
+  }
+};
+
+// TAMBAHKAN FUNGSI BARU INI
+exports.resendOtp = async (req, res) => {
+  const { email } = req.body;
+  try {
+    if (!email) {
+      return res.status(400).json({ message: "Email wajib diisi." });
+    }
+    const user = await Authentication.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Email tidak terdaftar." });
+    }
+    const MAX_RESEND_ATTEMPTS = 3;
+    if (user.otpResendAttempts >= MAX_RESEND_ATTEMPTS) {
+      return res.status(429).json({
+        message: "Anda telah mencapai batas maksimal kirim ulang OTP.",
+      });
+    }
+    const oneMinute = 60 * 1000;
+    if (user.otpLastSentAt && new Date() - user.otpLastSentAt < oneMinute) {
+      const timeLeft = Math.ceil(
+        (oneMinute - (new Date() - user.otpLastSentAt)) / 1000
+      );
+      return res.status(429).json({
+        message: `Harap tunggu ${timeLeft} detik sebelum mengirim ulang OTP.`,
+      });
+    }
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otp = otp;
+    user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    user.otpLastSentAt = new Date();
+    user.otpResendAttempts = (user.otpResendAttempts || 0) + 1;
+    await user.save();
+    await sendOtpEmail(user.email, user.firstName, otp);
+    res.status(200).json({ message: "OTP baru telah dikirim ke email Anda." });
+  } catch (error) {
+    console.error("Resend OTP Error:", error);
+    res.status(500).json({ message: "Server Error saat mengirim ulang OTP." });
   }
 };

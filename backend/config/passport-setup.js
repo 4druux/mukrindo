@@ -1,7 +1,7 @@
 // backend/config/passport-setup.js
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const Account = require("../models/accountModel");
+const Authentication = require("../models/authModel");
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -9,7 +9,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await Account.findById(id);
+    const user = await Authentication.findById(id);
     done(null, user);
   } catch (err) {
     done(err, null);
@@ -27,7 +27,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
-          let user = await Account.findOne({ googleId: profile.id });
+          let user = await Authentication.findOne({ googleId: profile.id });
 
           if (user) {
             const googleAvatar =
@@ -53,7 +53,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
               );
             }
 
-            user = await Account.findOne({ email: emailFromProfile });
+            user = await Authentication.findOne({ email: emailFromProfile });
             if (user) {
               user.googleId = profile.id;
               user.avatar =
@@ -69,7 +69,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
               await user.save();
               return done(null, user);
             } else {
-              const newUser = new Account({
+              const newUser = new Authentication({
                 googleId: profile.id,
                 firstName: profile.name.givenName || "User",
                 lastName: profile.name.familyName || "",

@@ -2,7 +2,7 @@
 require("dotenv").config({ path: "./.env" });
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const Account = require("./models/accountModel");
+const Authentication = require("./models/authModel");
 const connectDB = require("./config/db");
 
 connectDB();
@@ -26,7 +26,9 @@ const createAdminUsers = async () => {
   ];
 
   try {
-    const existingAdmins = await Account.countDocuments({ role: "admin" });
+    const existingAdmins = await Authentication.countDocuments({
+      role: "admin",
+    });
     if (existingAdmins >= 2) {
       console.log(
         "Jumlah akun admin sudah maksimal (2). Tidak ada akun baru dibuat."
@@ -37,11 +39,13 @@ const createAdminUsers = async () => {
 
     let createdCount = 0;
     for (const adminData of adminUsersData) {
-      if ((await Account.countDocuments({ role: "admin" })) >= 2) break;
+      if ((await Authentication.countDocuments({ role: "admin" })) >= 2) break;
 
-      const userExists = await Account.findOne({ email: adminData.email });
+      const userExists = await Authentication.findOne({
+        email: adminData.email,
+      });
       if (!userExists) {
-        await Account.create(adminData);
+        await Authentication.create(adminData);
         console.log(`Admin ${adminData.email} berhasil dibuat.`);
         createdCount++;
       } else {

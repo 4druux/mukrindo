@@ -3,11 +3,16 @@ const express = require("express");
 const router = express.Router();
 const {
   getAllUsers,
-  registerUser,
-  loginUser,
+  authRegister,
+  authLogin,
+  verifyOtp,
+  resendOtp,
+  forgotPassword,
+  resetPassword,
   getUserProfile,
   googleCallback,
   updateUserProfile,
+  getAdminCount,
 } = require("../controllers/authController");
 const { authenticateToken } = require("../middleware/authenticateToken");
 const multer = require("multer");
@@ -35,9 +40,14 @@ const uploadAvatar = multer({
   },
 });
 
-router.post("/register", registerUser);
-router.post("/login", loginUser);
+router.post("/register", authRegister);
+router.post("/login", authLogin);
+router.post("/forgot-password", forgotPassword);
+router.put("/reset-password/:token", resetPassword);
+router.post("/verify-otp", verifyOtp);
+router.post("/resend-otp", resendOtp);
 router.get("/profile", authenticateToken, getUserProfile);
+router.get("/admin-count", getAdminCount);
 
 router.get(
   "/users",

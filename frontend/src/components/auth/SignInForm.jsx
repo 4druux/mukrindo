@@ -17,22 +17,45 @@ export default function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isChecked, setIsChecked] = useState(false);
+  const [errors, setErrors] = useState({});
   const { login, loading: authLoading, authError, setAuthError } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (authError) setAuthError(null);
-    if (!email || !password) {
-      toast.error("Email dan kata sandi wajib diisi.", {
+    setAuthError(null);
+    setErrors({});
+
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!email) {
+      newErrors.email = "Email wajib diisi.";
+    } else if (!emailRegex.test(email)) {
+      newErrors.email = "Format email yang Anda masukkan tidak valid.";
+    }
+
+    if (!password) {
+      newErrors.password = "Kata sandi wajib diisi.";
+    } else if (password.length < 8) {
+      newErrors.password = "Kata sandi minimal harus 8 karakter.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Harap periksa kembali data Anda.", {
         className: "custom-toast",
       });
       return;
     }
+
     await login(email, password);
   };
 
-  const handleInputChange = (setter) => (e) => {
+  const handleInputChange = (setter, fieldName) => (e) => {
     setter(e.target.value);
+    if (errors[fieldName]) {
+      setErrors((prev) => ({ ...prev, [fieldName]: null }));
+    }
     if (authError) {
       setAuthError(null);
     }
@@ -49,9 +72,11 @@ export default function SignInForm() {
     }
   };
 
+  const displayError = authError;
+
   return (
-    <div className="flex flex-col flex-1 lg:w-1/2 w-full py-4">
-      <div className="w-full max-w-md pt-5 md:pt-10 mx-auto mb-5">
+    <div className="flex flex-col flex-1 min-h-[100dvh] justify-start items-start 2xl:justify-center 2xl:items-center 2xl:w-1/2 w-full py-4">
+      <div className="w-full pt- 2xl:pt-0 max-w-md mx-auto mb-2">
         <Link href="/">
           <div className="flex items-center justify-center">
             <Image
@@ -60,13 +85,13 @@ export default function SignInForm() {
               width={130}
               height={35}
               priority
-              className="cursor-pointer w-[200px] h-[60px]"
+              className="w-auto h-auto max-w-[200px] max-h-[80px] object-cover"
             />
           </div>
         </Link>
       </div>
 
-      <div className="flex flex-col justify-center pt-5 w-full max-w-md mx-auto">
+      <div className="flex flex-col justify-center pt-5 w-full max-w-lg mx-auto">
         <div>
           <div className="mb-2 md:mb-5 text-left">
             <TittleText text="Masuk Sekarang" className="text-xl md:text-2xl" />
@@ -95,13 +120,13 @@ export default function SignInForm() {
               </div>
             </div>
 
-            {authError && !authLoading && (
+            {displayError && !authLoading && (
               <p className="text-xs text-red-500 text-center mb-4 p-2 bg-red-50 border border-red-200 rounded">
-                {authError}
+                {displayError}
               </p>
             )}
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <div className="space-y-5">
                 <div>
                   <label
@@ -116,20 +141,29 @@ export default function SignInForm() {
                     id="email-signin"
                     name="email"
                     value={email}
-                    onChange={handleInputChange(setEmail)}
-                    required
-                    className="block w-full px-4 py-2 text-base lg:text-sm text-gray-700 bg-white border border-gray-300 rounded-lg placeholder-gray-400/70 focus:border-orange-300 focus:outline-none"
+                    onChange={handleInputChange(setEmail, "email")}
+                    className={`block w-full px-4 py-2 text-base lg:text-sm text-gray-700 bg-white border rounded-lg placeholder-gray-400/70 focus:outline-none ${
+                      errors.email || authError
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:border-orange-300"
+                    }`}
                   />
+                  <div className="mt-1 min-h-[1rem]">
+                    {errors.email && (
+                      <p className="text-xs text-red-500">{errors.email}</p>
+                    )}
+                  </div>
                 </div>
+
                 <InputPassword
                   label="Kata Sandi"
                   id="password-signin"
                   name="password"
                   value={password}
-                  onChange={handleInputChange(setPassword)}
+                  onChange={handleInputChange(setPassword, "password")}
                   placeholder="Masukkan kata sandi anda"
                   autoComplete="current-password"
-                  required
+                  error={errors.password}
                 />
 
                 <div className="flex items-center justify-between">
@@ -146,7 +180,7 @@ export default function SignInForm() {
                     </label>
                   </div>
                   <Link
-                    href="/reset-password"
+                    href="/forgot-password"
                     className="text-sm text-orange-600 hover:underline"
                   >
                     Lupa kata sandi?
