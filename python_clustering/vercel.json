@@ -2,15 +2,10 @@
   "version": 2,
   "functions": {
     "api/run_clustering.py": {
-      "runtime": "@vercel/python"
+      "runtime": "python3.9",
+      "maxDuration": 300
     }
   },
-  "routes": [
-    {
-      "src": "/api/run_clustering",
-      "dest": "/api/run_clustering.py"
-    }
-  ],
   "crons": [
     {
       "path": "/api/run_clustering",
