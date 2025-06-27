@@ -1,22 +1,14 @@
 {
   "version": 2,
-  "builds": [
+  "functions": {
+    "api/run_clustering.py": {
+      "runtime": "python3.9"
+    }
+  },
+  "routes": [
     {
-      "src": "api/run_clustering.py",
-      "use": "@vercel/python",
-      "config": {
-        "includeFiles": [
-          "main.py",
-          "requirements.txt",
-          "data_processing/**",
-          "clustering/**",
-          "database/**"
-        ]
-      }
-    },
-    {
-      "src": "api/tes.py",
-      "use": "@vercel/python"
+      "src": "/api/run_clustering",
+      "dest": "/api/run_clustering.py"
     }
   ],
   "crons": [

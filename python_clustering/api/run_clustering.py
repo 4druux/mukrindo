@@ -8,13 +8,13 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir) # Ini akan menunjuk ke python_clustering
 sys.path.insert(0, project_root)
 
-from main import run_recommendation_pipeline # Impor fungsi pipeline dari main.py
+from main import main_pipeline
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             print("Menerima permintaan GET untuk menjalankan job clustering...")
-            run_recommendation_pipeline() # Panggil fungsi utama Anda
+            main_pipeline() # Panggil fungsi utama Anda
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
