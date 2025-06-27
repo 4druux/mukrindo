@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
@@ -8,22 +8,68 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import TittleText from "@/components/common/TittleText";
 import ButtonAction from "@/components/common/ButtonAction";
 import toast from "react-hot-toast";
+import { usePathname } from "next/navigation";
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { forgotPassword, loading, authError, setAuthError } = useAuth();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setErrors({});
+    setAuthError(null);
+  }, [pathname, setAuthError]);
+
+  const handleInputChange = (setter, fieldName) => (e) => {
+    setter(e.target.value);
+    if (errors[fieldName]) {
+      setErrors((prev) => ({ ...prev, [fieldName]: null }));
+    }
+    if (authError) {
+      setAuthError(null);
+    }
+  };
+
+  const errorMessages = {
+    SERVER_ERROR: "Gagal mengirim email reset. Silakan coba lagi.",
+  };
+
+  const displayError = authError ? errorMessages[authError] || authError : null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setAuthError(null);
+    setErrors({});
+
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!email) {
-      toast.error("Email wajib diisi.");
+      newErrors.email = "Email wajib diisi.";
+    } else if (!emailRegex.test(email)) {
+      newErrors.email = "Format email yang Anda masukkan tidak valid.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Harap periksa kembali alamat email Anda.", {
+        className: "custom-toast",
+      });
       return;
     }
-    const result = await forgotPassword(email);
-    if (result.success) {
+
+    const resp = await forgotPassword(email);
+    if (resp.success) {
       setIsSubmitted(true);
+      toast.success("Jika email sesuai, kami telah mengirim link reset.", {
+        className: "custom-toast",
+      });
+    } else {
+      const serverErrorMsg =
+        errorMessages[resp.error] || errorMessages.SERVER_ERROR;
+      toast.error(serverErrorMsg, { className: "custom-toast" });
     }
   };
 
@@ -58,13 +104,13 @@ export default function ForgotPasswordForm() {
         {isSubmitted ? (
           <div className="flex flex-col space-y-4">
             <div className="p-6 text-center bg-green-50 border border-green-200 rounded-lg">
-              <h3 className="text-lg font-semibold text-green-800">
+              <h3 className="text-lg font-semibold text-green-700">
                 Permintaan Terkirim
               </h3>
               <p className="mt-2 text-sm text-green-700">
-                Jika email <span className="font-bold">{email}</span> terdaftar
-                di sistem kami, Anda akan menerima email berisi link untuk
-                mereset kata sandi Anda.
+                Jika email <span className="font-semibold">{email}</span>{" "}
+                terdaftar di sistem kami, Anda akan menerima email berisi link
+                untuk mereset kata sandi Anda.
               </p>
             </div>
           </div>
@@ -74,12 +120,14 @@ export default function ForgotPasswordForm() {
               Masukkan alamat email Anda yang terdaftar. Kami akan mengirimkan
               link untuk mereset kata sandi Anda.
             </p>
-            {authError && (
+
+            {displayError && !loading && (
               <p className="text-xs text-red-500 text-center mb-4 p-2 bg-red-50 border border-red-200 rounded">
-                {authError}
+                {displayError}
               </p>
             )}
-            <form onSubmit={handleSubmit}>
+
+            <form onSubmit={handleSubmit} noValidate>
               <div className="space-y-5">
                 <div>
                   <label
@@ -94,11 +142,20 @@ export default function ForgotPasswordForm() {
                     id="email-forgot"
                     name="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="block w-full px-4 py-2 text-base lg:text-sm text-gray-700 bg-white border border-gray-300 rounded-lg placeholder-gray-400/70 focus:border-orange-300 focus:outline-none"
+                    onChange={handleInputChange(setEmail, "email")}
+                    className={`block w-full px-4 py-2 text-base lg:text-sm text-gray-700 bg-white border rounded-lg placeholder-gray-400/70 focus:outline-none ${
+                      errors.email || displayError
+                        ? "border-red-500 focus:border-red-500"
+                        : "border-gray-300 focus:border-orange-300"
+                    }`}
                   />
+                  <div className="mt-1 min-h-[1rem]">
+                    {errors.email && (
+                      <p className="text-xs text-red-500">{errors.email}</p>
+                    )}
+                  </div>
                 </div>
+
                 <div>
                   <ButtonAction
                     type="submit"

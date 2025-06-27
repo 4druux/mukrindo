@@ -31,10 +31,7 @@ export const NotifStockProvider = ({ children }) => {
         setSubmitSuccess(true);
         toast.success(
           response.data?.message || "Permintaan notifikasi berhasil dikirim!",
-          {
-            className: "custom-toast",
-            duration: 5000,
-          }
+          { className: "custom-toast" }
         );
         return { success: true, data: response.data };
       } else {

@@ -109,7 +109,7 @@ export default function AdminDropdown() {
             animate="open"
             exit="closed"
             variants={dropDownVariant}
-            className="absolute z-50 right-0 mt-2.5 w-64 rounded-lg border border-gray-200 bg-white shadow-xl"
+            className="absolute z-50 right-0 mt-2.5 min-w-[200px] rounded-lg border border-gray-200 bg-white shadow-xl"
           >
             <div className="py-1">
               {isAuthenticated && user ? (
@@ -132,27 +132,15 @@ export default function AdminDropdown() {
                         Edit Profil
                       </Link>
                     </li>
-
                     <li>
-                      <Link
-                        href="/admin/settings"
-                        className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-gray-700 hover:text-orange-600 hover:bg-orange-50 cursor-pointer transition-colors rounded-md"
-                        onClick={() => setIsDropdownOpen(false)}
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer transition-colors rounded-md"
                       >
-                        <MdSettings className="w-5 h-5" />
-                        Pengaturan
-                      </Link>
+                        <MdLogout className="w-4 h-4" /> Keluar
+                      </button>
                     </li>
                   </ul>
-
-                  <div className="px-1 py-1 border-t border-gray-200">
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-2.5 w-full text-left text-xs font-medium px-4 py-2.5 text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer transition-colors rounded-md"
-                    >
-                      <MdLogout className="w-4 h-4" /> Keluar
-                    </button>
-                  </div>
                 </>
               ) : (
                 <Link

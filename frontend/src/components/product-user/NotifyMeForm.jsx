@@ -1,7 +1,7 @@
 // components/product-user/beli-mobil/NotifyMeForm.jsx
 "use client";
 
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import Image from "next/image";
 import Select from "@/components/common/Select";
 import Input from "@/components/common/Input";
@@ -22,7 +22,7 @@ import { Loader2 } from "lucide-react";
 import TittleText from "@/components/common/TittleText";
 import ButtonAction from "@/components/common/ButtonAction";
 
-const PHONE_PREFIX = "+62 ";
+const PHONE_PREFIX = "(+62) ";
 const QUICK_OPEN_DELAY = 50;
 
 const initialFormData = {
@@ -31,6 +31,7 @@ const initialFormData = {
   year: "",
   phoneNumber: PHONE_PREFIX,
 };
+
 const fetcher = (url) =>
   axiosInstance.get(url).then((res) => res.data?.data || []);
 
@@ -117,14 +118,40 @@ const NotifyMeForm = () => {
     (year) => ({ value: year.toString(), label: year.toString() })
   );
 
+  const validatePhoneNumber = (numberValue) => {
+    const rawNumber = unformatNumberPhone(numberValue, PHONE_PREFIX);
+    let error = "";
+    if (!rawNumber) {
+      error = "";
+    } else if (!rawNumber.startsWith("8")) {
+      error = "Harus diawali angka 8.";
+    } else {
+      const minLength = 9;
+      const maxLength = 12;
+      if (rawNumber.length < minLength || rawNumber.length > maxLength) {
+        error = `Harus ${minLength}-${maxLength} digit setelah '8'.`;
+      }
+    }
+
+    setErrors((prev) => ({ ...prev, phoneFormat: error }));
+    return error;
+  };
+
+  useEffect(() => {
+    validatePhoneNumber(formData.phoneNumber);
+  }, [formData.phoneNumber]);
+
   const clearErrorOnChange = (name) => {
-    if (errors[name] || (name === "phoneNumber" && errors.phoneFormat)) {
+    if (errors[name]) {
       setErrors((prevErrors) => {
         const newErrors = { ...prevErrors };
         delete newErrors[name];
-        if (name === "phoneNumber") delete newErrors.phoneFormat;
         return newErrors;
       });
+    }
+
+    if (name === "phoneNumber" && errors.phoneFormat) {
+      setErrors((prev) => ({ ...prev, phoneFormat: undefined }));
     }
   };
 
@@ -157,7 +184,7 @@ const NotifyMeForm = () => {
     clearErrorOnChange(name);
   };
 
-  const validateForm = (returnErrors = false) => {
+  const validateForm = () => {
     let tempErrors = {};
     const rawPhoneNumber = unformatNumberPhone(
       formData.phoneNumber,
@@ -168,17 +195,15 @@ const NotifyMeForm = () => {
     if (!formData.model) tempErrors.model = "Model wajib dipilih.";
     if (!formData.year) tempErrors.year = "Tahun wajib dipilih.";
 
+    const phoneFormatError = validatePhoneNumber(formData.phoneNumber);
+
     if (!rawPhoneNumber) {
       tempErrors.phoneNumber = "Nomor telepon wajib diisi.";
-    } else if (!/^\d{9,13}$/.test(rawPhoneNumber)) {
-      tempErrors.phoneFormat = "Format nomor telepon tidak valid (9-13 digit).";
+    } else if (phoneFormatError) {
+      tempErrors.phoneFormat = phoneFormatError;
     }
 
     setErrors(tempErrors);
-
-    if (returnErrors) {
-      return tempErrors;
-    }
     return Object.keys(tempErrors).length === 0;
   };
 
@@ -224,12 +249,13 @@ const NotifyMeForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (validateForm()) {
+    const isValid = validateForm();
+
+    if (isValid) {
       const rawPhoneNumber = unformatNumberPhone(
         formData.phoneNumber,
         PHONE_PREFIX
       );
-
       const submissionData = {
         notifStockBrand: formData.brand,
         notifStockModel: formData.model,
@@ -237,22 +263,11 @@ const NotifyMeForm = () => {
         customerPhoneNumber: rawPhoneNumber,
       };
 
-      Object.keys(submissionData).forEach((key) => {
-        if (submissionData[key] === undefined || submissionData[key] === "") {
-          delete submissionData[key];
-        }
-      });
-
-      console.log("Mengirim Data Notifikasi:", submissionData);
-
       try {
         const result = await submitNotificationRequest(submissionData);
         if (result.success) {
-          console.log("Pengiriman notifikasi berhasil:", result.data);
           setFormData({ ...initialFormData });
           setErrors({});
-        } else {
-          console.error("Pengiriman notifikasi gagal:", result.error);
         }
       } catch (error) {
         console.error("Error saat memanggil submitNotificationRequest:", error);
@@ -261,24 +276,15 @@ const NotifyMeForm = () => {
         });
       }
     } else {
-      const currentErrors = validateForm(true);
-      console.log("Validation errors:", currentErrors);
-      toast.error("Harap lengkapi semua informasi yang diperlukan.", {
+      toast.error("Harap lengkapi semua informasi dengan benar.", {
         className: "custom-toast",
       });
-
       if (!isFormExpanded && window.innerWidth < 1024) {
         setIsFormExpanded(true);
-        setTimeout(() => scrollToError(currentErrors), 100);
+        setTimeout(() => scrollToError(errors), 100);
       } else {
-        scrollToError(currentErrors);
+        scrollToError(errors);
       }
-    }
-  };
-
-  const expandForm = () => {
-    if (!isFormExpanded) {
-      setIsFormExpanded(true);
     }
   };
 
@@ -457,7 +463,7 @@ const NotifyMeForm = () => {
                     type="tel"
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
-                    placeholder={PHONE_PREFIX}
+                    prefix={PHONE_PREFIX}
                     error={errors.phoneNumber || errors.phoneFormat}
                     inputMode="numeric"
                     disabled={isSubmitting}

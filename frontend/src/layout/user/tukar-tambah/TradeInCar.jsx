@@ -675,6 +675,17 @@ const TradeInCar = () => {
     }
   };
 
+  useEffect(() => {
+    if (formData.phoneNumber !== PHONE_PREFIX) {
+      const phoneFormatError = validatePhoneNumber(formData.phoneNumber);
+      setErrors((prev) => ({
+        ...prev,
+        phoneNumber: undefined,
+        phoneFormat: phoneFormatError,
+      }));
+    }
+  }, [formData.phoneNumber]);
+
   const scrollToFirstError = (newErrors) => {
     const firstErrorKey = Object.keys(newErrors)[0];
     if (firstErrorKey) {

@@ -1,17 +1,22 @@
 // frontend/src/components/auth/SignInForm.jsx
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useState } from "react";
-import { Loader2 } from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+
+// import components
 import { useAuth } from "@/context/AuthContext";
-import toast from "react-hot-toast";
 import TittleText from "@/components/common/TittleText";
 import InputPassword from "@/components/common/InputPassword";
 import ButtonAction from "../common/ButtonAction";
 import AnimatedArrowRight from "../animate-icon/AnimatedArrowRight";
+import toast from "react-hot-toast";
+
+// import icons
+import { Loader2 } from "lucide-react";
+import { FcGoogle } from "react-icons/fc";
 
 export default function SignInForm() {
   const [email, setEmail] = useState("");
@@ -19,37 +24,12 @@ export default function SignInForm() {
   const [isChecked, setIsChecked] = useState(false);
   const [errors, setErrors] = useState({});
   const { login, loading: authLoading, authError, setAuthError } = useAuth();
+  const pathname = usePathname();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setAuthError(null);
+  useEffect(() => {
     setErrors({});
-
-    const newErrors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!email) {
-      newErrors.email = "Email wajib diisi.";
-    } else if (!emailRegex.test(email)) {
-      newErrors.email = "Format email yang Anda masukkan tidak valid.";
-    }
-
-    if (!password) {
-      newErrors.password = "Kata sandi wajib diisi.";
-    } else if (password.length < 8) {
-      newErrors.password = "Kata sandi minimal harus 8 karakter.";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      toast.error("Harap periksa kembali data Anda.", {
-        className: "custom-toast",
-      });
-      return;
-    }
-
-    await login(email, password);
-  };
+    setAuthError(null);
+  }, [pathname]);
 
   const handleInputChange = (setter, fieldName) => (e) => {
     setter(e.target.value);
@@ -72,7 +52,61 @@ export default function SignInForm() {
     }
   };
 
-  const displayError = authError;
+  const errorMessages = {
+    INVALID_CREDENTIALS: "Email atau kata sandi salah.",
+    SERVER_ERROR: "Terjadi kesalahan server. Silakan coba lagi.",
+    ACCOUNT_LOCKED:
+      "Kami mendeteksi terlalu banyak percobaan login yang gagal. Untuk keamanan, silakan coba beberapa saat lagi.",
+  };
+
+  const displayError = authError ? errorMessages[authError] || authError : null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setAuthError(null);
+    setErrors({});
+
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // email
+    if (!email) {
+      newErrors.email = "Email wajib diisi.";
+    } else if (!emailRegex.test(email)) {
+      newErrors.email = "Format email yang Anda masukkan tidak valid.";
+    }
+
+    // password
+    if (!password) {
+      newErrors.password = "Kata sandi wajib diisi.";
+    } else if (password.length < 8) {
+      newErrors.password = "Kata sandi minimal harus 8 karakter.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Harap periksa kembali data Anda.", {
+        className: "custom-toast",
+      });
+      return;
+    }
+
+    const resp = await login(email, password);
+    if (!resp.success) {
+      let toastMsg;
+      if (resp.error === "ACCOUNT_LOCKED") {
+        const sec = resp.retryAfter || 0;
+        toastMsg =
+          sec > 60
+            ? `Silakan coba lagi dalam ${Math.ceil(sec / 60)} menit.`
+            : `Silakan coba lagi dalam ${sec} detik.`;
+      } else {
+        toastMsg = errorMessages[resp.error] || errorMessages.SERVER_ERROR;
+      }
+      toast.error(toastMsg, { className: "custom-toast" });
+      return;
+    }
+  };
 
   return (
     <div className="flex flex-col flex-1 min-h-[100dvh] justify-start items-start 2xl:justify-center 2xl:items-center 2xl:w-1/2 w-full py-4">
@@ -143,7 +177,7 @@ export default function SignInForm() {
                     value={email}
                     onChange={handleInputChange(setEmail, "email")}
                     className={`block w-full px-4 py-2 text-base lg:text-sm text-gray-700 bg-white border rounded-lg placeholder-gray-400/70 focus:outline-none ${
-                      errors.email || authError
+                      errors.email || displayError
                         ? "border-red-500 focus:border-red-500"
                         : "border-gray-300 focus:border-orange-300"
                     }`}
@@ -163,7 +197,9 @@ export default function SignInForm() {
                   onChange={handleInputChange(setPassword, "password")}
                   placeholder="Masukkan kata sandi anda"
                   autoComplete="current-password"
-                  error={errors.password}
+                  error={
+                    errors.password ? errors.password : Boolean(displayError)
+                  }
                 />
 
                 <div className="flex items-center justify-between">
