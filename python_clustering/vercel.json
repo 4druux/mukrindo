@@ -2,16 +2,13 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/**/*.py",
+      "src": "api/run_clustering.py",
       "use": "@vercel/python"
     }
   ],
-  "routes": [
-    { "src": "/api/run_clustering_job", "dest": "/api/run_clustering_job.py" }
-  ],
   "crons": [
     {
-      "path": "/api/run_clustering_job",
+      "path": "/api/run_clustering",
       "schedule": "0 2 * * *"
     }
   ]

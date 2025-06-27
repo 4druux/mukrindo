@@ -459,7 +459,7 @@ exports.getProductRecommendations = async (req, res) => {
       }
     }
 
-    res.json(recommendations.slice(0, 5));
+    res.json(recommendations);
   } catch (error) {
     console.error("Error getting product recommendations:", error);
     res.status(500).json({ message: "Internal server error" });

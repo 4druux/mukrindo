@@ -3,76 +3,92 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
 
-# === DAFTAR FITUR FINAL YANG SANGAT CERDAS ===
-NUMERIC_FEATURES = ['price', 'yearOfAssembly', 'cc', 'travelDistance', 'numberOfSeats'] # <-- DITAMBAHKAN DI SINI
-CATEGORICAL_FEATURES = ['type', 'brand', 'transmission', 'fuelType']
-# ============================================
+# Konstanta untuk nama fitur, memudahkan pengelolaan
+NUMERIC_FEATURES = ['price', 'yearOfAssembly', 'cc', 'travelDistance', 'numberOfSeats'] 
+CATEGORICAL_FEATURES = ['model', 'type', 'brand', 'transmission', 'fuelType']
 
 class DataPreparer:
-    def __init__(self, data):
-        """
-        Inisialisasi dengan data produk mentah dari MongoDB.
-        """
-        self.data = data.copy()
-        
-        # Saring fitur yang benar-benar ada di dataframe untuk menghindari error
-        self.numeric_features = [f for f in NUMERIC_FEATURES if f in self.data.columns]
-        self.categorical_features = [f for f in CATEGORICAL_FEATURES if f in self.data.columns]
+    """
+    Kelas untuk membersihkan, memproses, dan mengubah data mentah produk
+    menjadi format numerik yang siap untuk di-cluster.
+    """
+    def __init__(self, data: pd.DataFrame):
+        """Inisialisasi dengan data produk mentah (DataFrame)."""
+        self.raw_data = data.copy()
 
-    def prepare_data(self):
+    def _clean_data(self) -> pd.DataFrame:
         """
-        Membersihkan, memproses, dan mengubah data menjadi format numerik 
-        yang siap untuk clustering.
+        Membersihkan data dengan menangani nilai yang hilang (missing values).
         """
-        print("Mempersiapkan data dengan fitur yang lebih lengkap...")
+        cleaned_data = self.raw_data.copy()
         
-        # --- Langkah 1: Membersihkan Data ---
-        # Untuk fitur numerik, isi nilai yang hilang dengan nilai tengah (median)
-        for col in self.numeric_features:
-            self.data[col] = pd.to_numeric(self.data[col], errors='coerce').fillna(self.data[col].median())
-        
-        # Untuk fitur kategorikal, isi nilai yang hilang dengan 'Unknown'
-        for col in self.categorical_features:
-            self.data[col] = self.data[col].fillna('Unknown').astype(str)
+        # Validasi dan pembersihan fitur numerik
+        for col in NUMERIC_FEATURES:
+            if col in cleaned_data.columns:
+                # Ubah ke numerik, ganti error dengan NaN, lalu isi NaN dengan median
+                cleaned_data[col] = pd.to_numeric(cleaned_data[col], errors='coerce')
+                median_value = cleaned_data[col].median()
+                cleaned_data[col] = cleaned_data[col].fillna(median_value)
 
-        # Pastikan tidak ada kolom yang hilang setelah pembersihan
-        if not self.numeric_features or not self.categorical_features:
+        # Validasi dan pembersihan fitur kategorikal
+        for col in CATEGORICAL_FEATURES:
+            if col in cleaned_data.columns:
+                # Isi nilai yang hilang dengan 'Unknown'
+                cleaned_data[col] = cleaned_data[col].fillna('Unknown').astype(str)
+
+        return cleaned_data
+
+    def process(self) -> pd.DataFrame:
+        """
+        Menjalankan pipeline pra-pemrosesan lengkap.
+        
+        Returns:
+            pd.DataFrame: DataFrame yang telah diproses dan siap untuk clustering,
+                          lengkap dengan kolom '_id' untuk referensi.
+        """
+        print("Mempersiapkan data untuk clustering...")
+        
+        data_to_process = self._clean_data()
+
+        # Tentukan fitur yang benar-benar ada di data setelah pembersihan
+        numeric_features_present = [f for f in NUMERIC_FEATURES if f in data_to_process.columns]
+        categorical_features_present = [f for f in CATEGORICAL_FEATURES if f in data_to_process.columns]
+
+        if not numeric_features_present or not categorical_features_present:
             print("Peringatan: Fitur numerik atau kategorikal tidak ditemukan. Proses tidak dapat dilanjutkan.")
             return pd.DataFrame()
 
-        # --- Langkah 2: Membuat Pipeline Preprocessing ---
-        # Pipeline untuk fitur numerik: Scaling
-        numeric_transformer = StandardScaler()
+        print(f"Memproses {len(numeric_features_present)} fitur numerik dan {len(categorical_features_present)} fitur kategorikal.")
 
-        # Pipeline untuk fitur kategorikal: One-Hot Encoding
+        # Buat pipeline preprocessing
+        numeric_transformer = StandardScaler()
         categorical_transformer = OneHotEncoder(handle_unknown='ignore')
 
-        # Gabungkan kedua pipeline menggunakan ColumnTransformer
         preprocessor = ColumnTransformer(
             transformers=[
-                ('num', numeric_transformer, self.numeric_features),
-                ('cat', categorical_transformer, self.categorical_features)
+                ('num', numeric_transformer, numeric_features_present),
+                ('cat', categorical_transformer, categorical_features_present)
             ],
-            remainder='passthrough'
+            remainder='drop' # 'drop' lebih aman daripada 'passthrough'
         )
 
-        # --- Langkah 3: Terapkan Pipeline ke Data ---
-        print(f"Memproses {len(self.numeric_features)} fitur numerik dan {len(self.categorical_features)} fitur kategorikal.")
-        processed_data = preprocessor.fit_transform(self.data)
-        
-        if hasattr(processed_data, "toarray"):
-            processed_data = processed_data.toarray()
+        # Latih dan transformasikan data
+        processed_data = preprocessor.fit_transform(data_to_process)
 
-        # Buat dataframe dari data yang sudah diproses
-        cat_feature_names = preprocessor.named_transformers_['cat'].get_feature_names_out(self.categorical_features)
-        all_feature_names = self.numeric_features + list(cat_feature_names)
+        # **PERBAIKAN BUG UTAMA ADA DI SINI**
+        # Ambil nama kolom secara dinamis dari preprocessor setelah dilatih
+        all_feature_names = preprocessor.get_feature_names_out()
         
-        processed_df = pd.DataFrame(processed_data, columns=all_feature_names, index=self.data.index)
+        processed_df = pd.DataFrame(
+            processed_data.toarray() if hasattr(processed_data, "toarray") else processed_data,
+            columns=all_feature_names,
+            index=data_to_process.index
+        )
+        
+        # Tambahkan kembali kolom _id untuk referensi
+        if '_id' in data_to_process:
+            processed_df['_id'] = data_to_process['_id'].values
 
-        # Tambahkan kembali kolom _id untuk referensi saat update database
-        processed_df['_id'] = self.data['_id']
-        
-        print("Data berhasil dipersiapkan untuk clustering cerdas.")
+        print("Data berhasil dipersiapkan.")
         return processed_df
