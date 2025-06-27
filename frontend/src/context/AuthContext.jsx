@@ -106,34 +106,27 @@ export const AuthProvider = ({ children }) => {
       });
 
       if (data.otpRequired) {
-        toast.success(data.message || "Silakan masukkan OTP Anda.", {
-          className: "custom-toast",
-        });
         setLoading(false);
         router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
         return { success: true, otpRequired: true };
-      } else {
-        localStorage.setItem("mukrindoAuthToken", data.token);
-        window.location.href = "/";
       }
+
+      localStorage.setItem("mukrindoAuthToken", data.token);
+      window.location.href = "/";
+
+      return { success: true };
     } catch (error) {
-      const serverMessage = error.response?.data?.message || "Login gagal.";
-
-      setAuthError(serverMessage);
-
-      let toastMessage = "Email atau kata sandi salah.";
-      if (
-        serverMessage.toLowerCase().includes("kunci") ||
-        serverMessage.toLowerCase().includes("percobaan")
-      ) {
-        toastMessage = "Terlalu banyak percobaan, coba lagi nanti.";
-      }
-
-      toast.error(toastMessage, { className: "custom-toast" });
-
-      setUser(null);
+      const err = error.response?.data || {};
+      const backendCode = [
+        "INVALID_CREDENTIALS",
+        "ACCOUNT_LOCKED",
+        "SERVER_ERROR",
+      ];
+      const code = backendCode.includes(err.error) ? err.error : "SERVER_ERROR";
+      setAuthError(code);
       setLoading(false);
-      return { success: false, error: serverMessage };
+
+      return { success: false, error: code };
     }
   };
 
@@ -148,45 +141,46 @@ export const AuthProvider = ({ children }) => {
         password,
         role,
       });
+
       localStorage.setItem("mukrindoAuthToken", data.token);
-      toast.success(data.message || "Registrasi berhasil!", {
-        className: "custom-toast",
-      });
       if (data.role === "admin") {
         window.location.href = "/admin";
       } else {
         window.location.href = "/";
       }
+
       return { success: true };
     } catch (error) {
-      const message = error.response?.data?.message || "Registrasi gagal.";
-      setAuthError(message);
-      toast.error(message, { className: "custom-toast" });
+      const err = error.response?.data || {};
+      const backendCode = ["EMAIL_TAKEN", "ADMIN_REG_LIMIT", "SERVER_ERROR"];
+      const code = backendCode.includes(err.error) ? err.error : "SERVER_ERROR";
+      setAuthError(code);
       setLoading(false);
-      return { success: false, error: message };
+
+      return { success: false, error: code };
     }
   };
 
   const forgotPassword = async (email) => {
     setLoading(true);
     setAuthError(null);
+
     try {
       const { data } = await axiosInstance.post(
         `${AUTH_API_PATH}/forgot-password`,
         { email }
       );
-      toast.success(data.message || "Link reset telah dikirim.", {
-        className: "custom-toast",
-      });
+
       setLoading(false);
-      return { success: true };
+      return { success: data.success === true, error: null };
     } catch (error) {
-      const message =
-        error.response?.data?.message || "Gagal mengirim email reset.";
-      setAuthError(message);
-      toast.error(message, { className: "custom-toast" });
+      const err = error.response?.data?.error;
+      const backendCode = ["SERVER_ERROR"];
+      const code = backendCode.includes(err) ? err : "SERVER_ERROR";
+
+      setAuthError(code);
       setLoading(false);
-      return { success: false, error: message };
+      return { success: false, error: code };
     }
   };
 
@@ -198,19 +192,16 @@ export const AuthProvider = ({ children }) => {
         `${AUTH_API_PATH}/reset-password/${token}`,
         { password }
       );
-      toast.success(data.message || "Kata sandi berhasil diubah.", {
-        className: "custom-toast",
-      });
       setLoading(false);
       router.push("/login");
-      return { success: true };
+      return { success: data.success === true };
     } catch (error) {
-      const message =
-        error.response?.data?.message || "Gagal mereset kata sandi.";
-      setAuthError(message);
-      toast.error(message, { className: "custom-toast" });
+      const err = error.response?.data?.error;
+      const backendCodes = ["INVALID_TOKEN", "SERVER_ERROR"];
+      const code = backendCodes.includes(err) ? err : "SERVER_ERROR";
+      setAuthError(code);
       setLoading(false);
-      return { success: false, error: message };
+      return { success: false, error: code };
     }
   };
 
@@ -287,44 +278,38 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("mukrindoAuthToken", data.token);
 
-      toast.success(data.message || "Verifikasi berhasil!", {
-        className: "custom-toast",
-      });
+      window.location.href = "/admin";
 
-      if (data.role === "admin") {
-        window.location.href = "/admin";
-      } else {
-        window.location.href = "/";
-      }
-      return { success: true };
+      return { success: true, user: data };
     } catch (error) {
-      const message = error.response?.data?.message || "Verifikasi OTP gagal.";
-      setAuthError(message);
-      toast.error(message, { className: "custom-toast" });
+      const err = error.response?.data?.error;
+      const validCodes = ["INVALID_OTP", "SERVER_ERROR"];
+      const code = validCodes.includes(err) ? err : "SERVER_ERROR";
+      setAuthError(code);
       setLoading(false);
-      return { success: false, error: message };
+      return { success: false, error: code };
     }
   };
 
   const resendOtp = async (email) => {
-    setLoading(true);
     setAuthError(null);
     try {
       const { data } = await axiosInstance.post(`${AUTH_API_PATH}/resend-otp`, {
         email,
       });
-      toast.success(data.message, {
-        className: "custom-toast",
-      });
-      setLoading(false);
-      return { success: true };
+      return { success: data.success === true, retryAfter: data.retryAfter };
     } catch (error) {
-      const message =
-        error.response?.data?.message || "Gagal mengirim ulang OTP.";
-      setAuthError(message);
-      toast.error(message, { className: "custom-toast" });
-      setLoading(false);
-      return { success: false };
+      const err = error.response?.data?.error;
+      const validCodes = [
+        "EMAIL_NOT_FOUND",
+        "RESEND_LIMIT_EXCEEDED",
+        "RESEND_TOO_SOON",
+        "SERVER_ERROR",
+      ];
+      const code = validCodes.includes(err) ? err : "SERVER_ERROR";
+      const retryAfter = error.response?.data?.retryAfter;
+      setAuthError(code);
+      return { success: false, error: code, retryAfter };
     }
   };
 

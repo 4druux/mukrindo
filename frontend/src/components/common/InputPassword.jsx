@@ -38,7 +38,7 @@ const InputPassword = forwardRef(
           htmlFor={id}
           className="block mb-2 text-sm font-medium text-gray-700"
         >
-          {label}{<span className="text-red-500">*</span>}
+          {label} {<span className="text-red-500">*</span>}
         </label>
         <div className="relative">
           <input
@@ -78,7 +78,9 @@ const InputPassword = forwardRef(
           </span>
         </div>
         <div>
-          {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+          {typeof error === "string" && error && (
+            <p className="text-xs text-red-500 mt-1">{error}</p>
+          )}
         </div>
       </div>
     );

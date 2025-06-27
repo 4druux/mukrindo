@@ -25,7 +25,11 @@ export default function RootLayoutClient({ children }) {
                   <NotifStockProvider>
                     <SidebarProvider>
                       <HeaderProvider>
-                        <Toaster position="top-right" reverseOrder={true} />
+                        <Toaster
+                          position="top-right"
+                          reverseOrder={true}
+                          duration={5000}
+                        />
                         {children}
                       </HeaderProvider>
                     </SidebarProvider>

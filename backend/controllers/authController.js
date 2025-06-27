@@ -91,26 +91,16 @@ exports.getAllUsers = async (req, res) => {
 exports.authRegister = async (req, res) => {
   const { firstName, lastName, email, password, role } = req.body;
   try {
-    if (!firstName || !lastName || !email || !password) {
-      return res.status(400).json({ message: "Harap isi semua field." });
-    }
     const userExists = await Authentication.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: "Email sudah terdaftar." });
-    }
-    if (password.length < 8) {
-      return res
-        .status(400)
-        .json({ message: "Kata sandi minimal 8 karakter." });
+      return res.status(400).json({ error: "EMAIL_TAKEN" });
     }
 
     let finalRole = "user";
     if (role === "admin") {
       const adminCount = await Authentication.countDocuments({ role: "admin" });
       if (adminCount >= 2) {
-        return res
-          .status(403)
-          .json({ message: "Pendaftaran admin sudah tidak tersedia." });
+        return res.status(403).json({ error: "ADMIN_REG_LIMIT" });
       }
       finalRole = "admin";
     }
@@ -124,7 +114,10 @@ exports.authRegister = async (req, res) => {
     });
     await user.save();
 
-    res.status(201).json({
+    const token = generateToken(user._id, user.role);
+    return res.status(201).json({
+      success: true,
+      token,
       _id: user._id,
       firstName: user.firstName,
       lastName: user.lastName || "",
@@ -132,101 +125,70 @@ exports.authRegister = async (req, res) => {
       role: user.role,
       avatar: user.avatar || null,
       hasPassword: user.hasPassword,
-      token: generateToken(user._id, user.role),
-      message: "Registrasi berhasil!",
     });
   } catch (error) {
     console.error("Register Error:", error);
-    res.status(500).json({ message: "Server Error saat registrasi." });
+    return res.status(500).json({ error: "SERVER_ERROR" });
   }
 };
 
 exports.authLogin = async (req, res) => {
   const { email, password } = req.body;
-
   try {
-    const account = await Authentication.findOne({ email });
-    if (!account) {
-      return res.status(401).json({ message: "Email atau kata sandi salah" });
+    const user = await Authentication.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ error: "INVALID_CREDENTIALS" });
     }
 
-    if (account.lockUntil && account.lockUntil > Date.now()) {
-      const remainingSeconds = Math.ceil(
-        (account.lockUntil - Date.now()) / 1000
-      );
-      const remainingTimeMessage =
-        remainingSeconds > 60
-          ? `${Math.ceil(remainingSeconds / 60)} menit`
-          : `${remainingSeconds} detik`;
-
-      return res.status(403).json({
-        message: `Ups! Terlalu banyak percobaan login. Silakan coba kembali dalam ${remainingTimeMessage}.`,
-      });
+    if (user.lockUntil && user.lockUntil > Date.now()) {
+      const retryAfter = Math.ceil((user.lockUntil - Date.now()) / 1000);
+      return res.status(403).json({ error: "ACCOUNT_LOCKED", retryAfter });
     }
 
-    const isMatch = await bcrypt.compare(password, account.password);
-
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      account.loginAttempts += 1;
-
-      if (account.loginAttempts >= MAX_LOGIN_ATTEMPTS) {
-        account.lockUntil = Date.now() + LOCK_TIME;
-        await account.save();
-
-        return res.status(403).json({
-          message: `Kami mendeteksi terlalu banyak percobaan login yang gagal. Untuk keamanan, silakan coba beberapa saat lagi.`,
-        });
+      user.loginAttempts = (user.loginAttempts || 0) + 1;
+      if (user.loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+        user.lockUntil = Date.now() + LOCK_TIME;
+        await user.save();
+        return res
+          .status(403)
+          .json({ error: "ACCOUNT_LOCKED", retryAfter: LOCK_TIME / 1000 });
       }
-
-      await account.save();
-      return res.status(401).json({ message: "Email atau kata sandi salah" });
+      await user.save();
+      return res.status(401).json({ error: "INVALID_CREDENTIALS" });
     }
 
-    if (account.role === "admin") {
+    user.loginAttempts = 0;
+    user.lockUntil = null;
+    await user.save();
+
+    if (user.role === "admin") {
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      account.otp = otp;
-      account.otpExpires = new Date(Date.now() + 10 * 60 * 1000); // OTP berlaku 10 menit
-      account.otpLastSentAt = new Date();
-      account.otpResendAttempts = 0; // Reset percobaan kirim ulang
-      await account.save();
-
-      // Panggil service untuk kirim email OTP
-      await sendOtpEmail(account.email, account.firstName, otp);
-
-      // Kirim respons bahwa OTP diperlukan
-      return res.status(200).json({
-        otpRequired: true,
-        email: account.email,
-        message: "Login berhasil, masukkan OTP dari email Anda.",
-      });
+      user.otp = otp;
+      user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+      user.otpLastSentAt = new Date();
+      user.otpResendAttempts = 0;
+      await user.save();
+      await sendOtpEmail(user.email, user.firstName, otp);
+      return res.status(200).json({ otpRequired: true, email: user.email });
     }
 
-    // Jika yang login adalah USER BIASA, langsung berikan token
-    else {
-      account.loginAttempts = 0;
-      account.lockUntil = null;
-      await account.save();
-
-      const payload = { id: account._id, role: account.role };
-      const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: "1d",
-      });
-
-      res.json({
-        message: "Login berhasil",
-        token,
-        _id: account._id,
-        email: account.email,
-        firstName: account.firstName,
-        lastName: account.lastName,
-        role: account.role,
-        avatar: account.avatar,
-        hasPassword: account.hasPassword,
-      });
-    }
+    const token = generateToken(user._id, user.role);
+    return res.status(200).json({
+      success: true,
+      token,
+      _id: user._id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      avatar: user.avatar,
+      hasPassword: user.hasPassword,
+    });
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Terjadi kesalahan pada server." });
+    console.error("Login Error:", error);
+    return res.status(500).json({ error: "SERVER_ERROR" });
   }
 };
 
@@ -376,64 +338,58 @@ exports.getAdminCount = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
+
   try {
     const user = await Authentication.findOne({ email });
-    if (!user) {
-      return res.status(200).json({
-        message: "Jika email Anda terdaftar, Anda akan menerima link reset.",
-      });
+
+    if (user) {
+      const resetToken = crypto.randomBytes(20).toString("hex");
+      user.resetPasswordToken = crypto
+        .createHash("sha256")
+        .update(resetToken)
+        .digest("hex");
+      user.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+      await user.save();
+
+      const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+      await sendPasswordResetEmail(user.email, user.firstName, resetUrl);
     }
 
-    const resetToken = crypto.randomBytes(20).toString("hex");
-    user.resetPasswordToken = crypto
-      .createHash("sha256")
-      .update(resetToken)
-      .digest("hex");
-    user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // Token berlaku 10 menit
-    await user.save();
-
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-
-    await sendPasswordResetEmail(user.email, user.firstName, resetUrl);
-
-    res
-      .status(200)
-      .json({ message: "Link reset kata sandi telah dikirim ke email Anda." });
+    return res.status(200).json({ success: true });
   } catch (error) {
     console.error("Forgot Password Error:", error);
-    // Hapus token jika terjadi error agar user bisa coba lagi
-    const user = await Authentication.findOne({ email });
-    if (user) {
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpire = undefined;
-      await user.save();
+
+    try {
+      const user = await Authentication.findOne({ email });
+      if (user) {
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save();
+      }
+    } catch (cleanupErr) {
+      console.error("Cleanup Error:", cleanupErr);
     }
-    res.status(500).json({ message: "Server Error." });
+
+    return res.status(500).json({ error: "SERVER_ERROR" });
   }
 };
 
 exports.resetPassword = async (req, res) => {
   const { password } = req.body;
+
   try {
     const resetPasswordToken = crypto
       .createHash("sha256")
       .update(req.params.token)
       .digest("hex");
+
     const user = await Authentication.findOne({
       resetPasswordToken,
       resetPasswordExpire: { $gt: Date.now() },
     });
 
     if (!user) {
-      return res
-        .status(400)
-        .json({ message: "Token tidak valid atau sudah kedaluwarsa." });
-    }
-
-    if (password.length < 8) {
-      return res
-        .status(400)
-        .json({ message: "Kata sandi minimal 8 karakter." });
+      return res.status(400).json({ error: "INVALID_TOKEN" });
     }
 
     user.password = password;
@@ -441,92 +397,88 @@ exports.resetPassword = async (req, res) => {
     user.resetPasswordExpire = undefined;
     await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: "Kata sandi berhasil direset. Silakan login.",
-    });
+    return res.status(200).json({ success: true });
   } catch (error) {
     console.error("Reset Password Error:", error);
-    res.status(500).json({ message: "Server Error." });
+    return res.status(500).json({ error: "SERVER_ERROR" });
   }
 };
 
-// TAMBAHKAN FUNGSI BARU INI
 exports.verifyOtp = async (req, res) => {
   const { email, otp } = req.body;
   try {
-    if (!email || !otp) {
-      return res.status(400).json({ message: "Email dan OTP wajib diisi." });
-    }
     const user = await Authentication.findOne({
       email,
       otp,
       otpExpires: { $gt: Date.now() },
     });
+
     if (!user) {
-      return res
-        .status(400)
-        .json({ message: "OTP salah atau sudah kedaluwarsa." });
+      return res.status(400).json({ error: "INVALID_OTP" });
     }
+
     user.isVerified = true;
     user.otp = undefined;
     user.otpExpires = undefined;
     user.otpLastSentAt = undefined;
     user.otpResendAttempts = 0;
     await user.save();
-    res.json({
-      message: "Verifikasi berhasil! Anda sekarang sudah login.",
-      token: generateToken(user._id, user.role),
+
+    const token = generateToken(user._id, user.role);
+    return res.status(200).json({
+      success: true,
+      token,
       _id: user._id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
       role: user.role,
-      avatar: user.avatar,
+      avatar: user.avatar || null,
       hasPassword: user.hasPassword,
     });
   } catch (error) {
     console.error("Verify OTP Error:", error);
-    res.status(500).json({ message: "Server Error saat verifikasi OTP." });
+    return res.status(500).json({ error: "SERVER_ERROR" });
   }
 };
 
-// TAMBAHKAN FUNGSI BARU INI
 exports.resendOtp = async (req, res) => {
   const { email } = req.body;
   try {
-    if (!email) {
-      return res.status(400).json({ message: "Email wajib diisi." });
-    }
     const user = await Authentication.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "Email tidak terdaftar." });
+      return res.status(400).json({ error: "EMAIL_NOT_FOUND" });
     }
-    const MAX_RESEND_ATTEMPTS = 3;
-    if (user.otpResendAttempts >= MAX_RESEND_ATTEMPTS) {
-      return res.status(429).json({
-        message: "Anda telah mencapai batas maksimal kirim ulang OTP.",
-      });
+
+    const MAX_RESEND = 3;
+    if ((user.otpResendAttempts || 0) >= MAX_RESEND) {
+      return res.status(429).json({ error: "RESEND_LIMIT_EXCEEDED" });
     }
-    const oneMinute = 60 * 1000;
-    if (user.otpLastSentAt && new Date() - user.otpLastSentAt < oneMinute) {
-      const timeLeft = Math.ceil(
-        (oneMinute - (new Date() - user.otpLastSentAt)) / 1000
+
+    const MIN_INTERVAL = 60 * 1000;
+    if (
+      user.otpLastSentAt &&
+      Date.now() - user.otpLastSentAt.getTime() < MIN_INTERVAL
+    ) {
+      const secondsLeft = Math.ceil(
+        (MIN_INTERVAL - (Date.now() - user.otpLastSentAt.getTime())) / 1000
       );
-      return res.status(429).json({
-        message: `Harap tunggu ${timeLeft} detik sebelum mengirim ulang OTP.`,
-      });
+      return res
+        .status(429)
+        .json({ error: "RESEND_TOO_SOON", retryAfter: secondsLeft });
     }
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    user.otp = otp;
-    user.otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+    const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.otp = newOtp;
+    user.otpExpires = Date.now() + 10 * 60 * 1000;
     user.otpLastSentAt = new Date();
     user.otpResendAttempts = (user.otpResendAttempts || 0) + 1;
     await user.save();
-    await sendOtpEmail(user.email, user.firstName, otp);
-    res.status(200).json({ message: "OTP baru telah dikirim ke email Anda." });
+    await sendOtpEmail(user.email, user.firstName, newOtp);
+
+    return res.status(200).json({ success: true });
   } catch (error) {
     console.error("Resend OTP Error:", error);
-    res.status(500).json({ message: "Server Error saat mengirim ulang OTP." });
+    return res.status(500).json({ error: "SERVER_ERROR" });
   }
 };

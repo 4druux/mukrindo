@@ -1,18 +1,23 @@
 // frontend/src/components/auth/SignUpForm.jsx
 "use client";
 
-import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
-import { FcGoogle } from "react-icons/fc";
+import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+
+// import components
 import { useAuth } from "@/context/AuthContext";
-import toast from "react-hot-toast";
 import TittleText from "@/components/common/TittleText";
 import InputPassword from "@/components/common/InputPassword";
 import ButtonAction from "../common/ButtonAction";
 import AnimatedArrowRight from "../animate-icon/AnimatedArrowRight";
 import axiosInstance from "@/utils/axiosInstance";
+import toast from "react-hot-toast";
+
+// import icons
+import { Loader2 } from "lucide-react";
+import { FcGoogle } from "react-icons/fc";
 
 export default function SignUpForm() {
   const [firstName, setFirstName] = useState("");
@@ -23,6 +28,7 @@ export default function SignUpForm() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [errors, setErrors] = useState({});
   const { register, loading: authLoading, authError, setAuthError } = useAuth();
+  const pathname = usePathname();
 
   const [adminCount, setAdminCount] = useState(0);
   const [isCheckingAdmins, setIsCheckingAdmins] = useState(true);
@@ -43,6 +49,11 @@ export default function SignUpForm() {
     fetchAdminCount();
   }, []);
 
+  useEffect(() => {
+    setErrors({});
+    setAuthError(null);
+  }, [pathname]);
+
   const handleInputChange = (setter, fieldName) => (e) => {
     setter(e.target.value);
     if (errors[fieldName]) {
@@ -53,41 +64,82 @@ export default function SignUpForm() {
     }
   };
 
-  const handleSubmit = (role) => async (e) => {
-    e.preventDefault();
-    if (authError) setAuthError(null);
-    setErrors({});
-
-    const newErrors = {};
-    if (!firstName) newErrors.firstName = "Nama depan wajib diisi.";
-    if (!lastName) newErrors.lastName = "Nama belakang wajib diisi.";
-    if (!email) newErrors.email = "Email wajib diisi.";
-    if (password.length < 8) {
-      newErrors.password = "Kata sandi minimal 8 karakter.";
-    }
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = "Konfirmasi kata sandi tidak cocok.";
-    }
-    if (!termsAccepted) {
-      newErrors.terms =
-        "Anda harus menyetujui Syarat & Ketentuan serta Kebijakan Privasi.";
-      toast.error(newErrors.terms, { className: "custom-toast" });
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    await register(firstName, lastName, email, password, role);
-  };
-
   const handleGoogleLogin = () => {
     if (process.env.NEXT_PUBLIC_API_URL) {
       window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
     } else {
       console.error("NEXT_PUBLIC_API_URL is not defined");
       toast.error("Konfigurasi error, tidak bisa daftar dengan Google.");
+    }
+  };
+
+  const errorMessages = {
+    EMAIL_TAKEN: "Email sudah terdaftar.",
+    ADMIN_REG_LIMIT: "Pendaftaran admin sudah tidak tersedia.",
+    SERVER_ERROR: "Terjadi kesalahan server. Silakan coba lagi.",
+  };
+
+  const displayError = authError ? errorMessages[authError] || authError : null;
+
+  const handleSubmit = (role) => async (e) => {
+    e.preventDefault();
+    setAuthError(null);
+    setErrors({});
+
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!firstName) newErrors.firstName = "Nama depan wajib diisi.";
+    if (!lastName) newErrors.lastName = "Nama belakang wajib diisi.";
+
+    // email
+    if (!email) {
+      newErrors.email = "Email wajib diisi.";
+    } else if (!emailRegex.test(email)) {
+      newErrors.email = "Format email yang Anda masukkan tidak valid.";
+    }
+
+    // password
+    if (!password) {
+      newErrors.password = "Kata sandi wajib diisi.";
+    } else if (password.length < 8) {
+      newErrors.password = "Kata sandi minimal harus 8 karakter.";
+    }
+
+    // confirm password
+    if (!confirmPassword) {
+      newErrors.confirmPassword = "Konfirmasi kata sandi wajib diisi.";
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = "Konfirmasi kata sandi tidak cocok.";
+    }
+
+    // terms
+    if (!termsAccepted)
+      newErrors.terms =
+        "*Silahkan centang Syarat dan ketentuan serta Kebijakan Privasi";
+
+    const nonTermsKeys = Object.keys(newErrors).filter(
+      (key) => key !== "terms"
+    );
+
+    if (nonTermsKeys.length > 0) {
+      setErrors(newErrors);
+      toast.error("Harap periksa kembali data Anda.", {
+        className: "custom-toast",
+      });
+      return;
+    }
+
+    if (newErrors.terms) {
+      setErrors(newErrors);
+      toast.error(newErrors.terms, { className: "custom-toast" });
+      return;
+    }
+
+    const resp = await register(firstName, lastName, email, password, role);
+    if (!resp.success) {
+      const msg = errorMessages[resp.error] || errorMessages.SERVER_ERROR;
+      toast.error(msg, { className: "custom-toast" });
     }
   };
 
@@ -139,9 +191,9 @@ export default function SignUpForm() {
               </div>
             </div>
 
-            {authError && !authLoading && (
+            {displayError && !authLoading && (
               <p className="text-xs text-red-500 text-center mb-4 p-2 bg-red-50 border border-red-200 rounded">
-                {authError}
+                {displayError}
               </p>
             )}
 
@@ -153,7 +205,7 @@ export default function SignUpForm() {
                       htmlFor="fname-signup"
                       className="block mb-2 text-sm font-medium text-gray-700"
                     >
-                      Nama Depan<span className="text-red-500">*</span>
+                      Nama Depan <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -163,7 +215,7 @@ export default function SignUpForm() {
                       value={firstName}
                       onChange={handleInputChange(setFirstName, "firstName")}
                       className={`block w-full px-4 py-2 text-base lg:text-sm text-gray-700 bg-white border rounded-lg placeholder-gray-400/70 focus:outline-none ${
-                        errors.firstName || authError
+                        errors.firstName || displayError
                           ? "border-red-500 focus:border-red-500"
                           : "border-gray-300 focus:border-orange-300"
                       }`}
@@ -180,7 +232,7 @@ export default function SignUpForm() {
                       htmlFor="lname-signup"
                       className="block mb-2 text-sm font-medium text-gray-700"
                     >
-                      Nama Belakang<span className="text-red-500">*</span>
+                      Nama Belakang <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -190,7 +242,7 @@ export default function SignUpForm() {
                       value={lastName}
                       onChange={handleInputChange(setLastName, "lastName")}
                       className={`block w-full px-4 py-2 text-base lg:text-sm text-gray-700 bg-white border rounded-lg placeholder-gray-400/70 focus:outline-none ${
-                        errors.lastName || authError
+                        errors.lastName || displayError
                           ? "border-red-500 focus:border-red-500"
                           : "border-gray-300 focus:border-orange-300"
                       }`}
@@ -208,7 +260,7 @@ export default function SignUpForm() {
                     htmlFor="email-signup"
                     className="block mb-2 text-sm font-medium text-gray-700"
                   >
-                    Email<span className="text-red-500">*</span>
+                    Email <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="email"
@@ -218,7 +270,7 @@ export default function SignUpForm() {
                     value={email}
                     onChange={handleInputChange(setEmail, "email")}
                     className={`block w-full px-4 py-2 text-base lg:text-sm text-gray-700 bg-white border rounded-lg placeholder-gray-400/70 focus:outline-none ${
-                      errors.email || authError
+                      errors.email || displayError
                         ? "border-red-500 focus:border-red-500"
                         : "border-gray-300 focus:border-orange-300"
                     }`}
@@ -236,7 +288,9 @@ export default function SignUpForm() {
                     onChange={handleInputChange(setPassword, "password")}
                     placeholder="Masukkan kata sandi anda"
                     autoComplete="new-password"
-                    error={errors.password}
+                    error={
+                      errors.password ? errors.password : Boolean(displayError)
+                    }
                   />
                   <InputPassword
                     label="Konfirmasi Kata Sandi"
@@ -248,7 +302,11 @@ export default function SignUpForm() {
                     )}
                     placeholder="Konfirmasi kata sandi anda"
                     autoComplete="new-password"
-                    error={errors.confirmPassword}
+                    error={
+                      errors.confirmPassword
+                        ? errors.confirmPassword
+                        : Boolean(displayError)
+                    }
                   />{" "}
                 </div>
 
