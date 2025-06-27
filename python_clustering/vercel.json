@@ -1,22 +1,9 @@
 {
   "version": 2,
-  "builds": [
+  "crons": [
     {
-      "src": "api/run_clustering.py",
-      "use": "@vercel/python",
-      "config": {
-        "includeFiles": [
-          "main.py",
-          "requirements.txt",
-          "data_processing/**",
-          "clustering/**",
-          "database/**"
-        ]
-      }
-    },
-    {
-      "src": "api/tes.py",
-      "use": "@vercel/python"
+      "path": "/api/run_clustering",
+      "schedule": "0 2 * * *"
     }
   ]
 }
