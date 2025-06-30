@@ -4,7 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
-const connectDB = require("./config/db"); //
+const connectDB = require("./config/db"); 
 const { createServer } = require("http");
 const passport = require("passport");
 require("./config/passport-setup");
@@ -19,6 +19,7 @@ const notifStockRoutes = require("./routes/notifStockRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const visitRoutes = require("./routes/visitRoutes");
 const carDataRoutes = require("./routes/carDataRoutes");
+const logRoutes = require("./routes/logRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -55,6 +56,7 @@ app.use("/api/notif-stock", apiKeyAuth, notifStockRoutes);
 app.use("/api/notifications", apiKeyAuth, notificationRoutes);
 app.use("/api/visits", apiKeyAuth, visitRoutes);
 app.use("/api/car-data", apiKeyAuth, carDataRoutes);
+app.use("/api/logs", logRoutes);
 
 // Handler untuk rute tidak ditemukan (404)
 app.use((req, res, next) => {

@@ -28,7 +28,6 @@ const defaultOptions = {
 export const useFilterAndSuggest = ({
   initialProducts = [],
   searchQuery = "",
-  initialFilter = SHORT_BY.LATEST,
   options = {},
   isLoading = false,
 }) => {
@@ -179,11 +178,13 @@ export const useFilterAndSuggest = ({
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
         break;
+
       case SHORT_BY.PRICE_ASC:
         sortedAndFilteredProducts.sort(
           (a, b) => (a.price || 0) - (b.price || 0)
         );
         break;
+
       case SHORT_BY.YEAR_DESC:
         sortedAndFilteredProducts.sort(
           (a, b) =>
@@ -192,6 +193,7 @@ export const useFilterAndSuggest = ({
             new Date(b.createdAt) - new Date(a.createdAt)
         );
         break;
+
       case SHORT_BY.RECOMMENDATION:
         if (recentlyViewed && recentlyViewed.length > 0) {
           const viewedBrands = new Set(
@@ -208,19 +210,42 @@ export const useFilterAndSuggest = ({
             let scoreB = 0;
             const modelA = `${a.brand?.toLowerCase()}-${a.model?.toLowerCase()}`;
             const modelB = `${b.brand?.toLowerCase()}-${b.model?.toLowerCase()}`;
-            if (viewedModels.has(modelA)) scoreA += 2;
-            else if (viewedBrands.has(a.brand?.toLowerCase())) scoreA += 1;
-            if (viewedModels.has(modelB)) scoreB += 2;
-            else if (viewedBrands.has(b.brand?.toLowerCase())) scoreB += 1;
+            if (viewedModels.has(modelA)) scoreA = 2;
+            else if (viewedBrands.has(a.brand?.toLowerCase())) scoreA = 1;
+            if (viewedModels.has(modelB)) scoreB = 2;
+            else if (viewedBrands.has(b.brand?.toLowerCase())) scoreB = 1;
             if (scoreB !== scoreA) return scoreB - scoreA;
             return new Date(b.createdAt) - new Date(a.createdAt);
           });
         } else {
-          sortedAndFilteredProducts.sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-          );
+          const productsByCluster = new Map();
+          sortedAndFilteredProducts.forEach((product) => {
+            if (product.clusterId != null) {
+              if (!productsByCluster.has(product.clusterId)) {
+                productsByCluster.set(product.clusterId, []);
+              }
+              productsByCluster.get(product.clusterId).push(product);
+            }
+          });
+
+          if (productsByCluster.size > 0) {
+            const productsWithoutCluster = sortedAndFilteredProducts.filter(
+              (p) => p.clusterId == null
+            );
+            const sortedClusters = [...productsByCluster.entries()].sort(
+              (a, b) => b[1].length - a[1].length
+            );
+            sortedAndFilteredProducts = sortedClusters
+              .flatMap((c) => c[1])
+              .concat(productsWithoutCluster);
+          } else {
+            sortedAndFilteredProducts.sort(
+              (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            );
+          }
         }
         break;
+
       case SHORT_BY.PRICE_UNDER_150:
       case SHORT_BY.PRICE_BETWEEN_150_300:
       case SHORT_BY.PRICE_OVER_300:
@@ -235,9 +260,9 @@ export const useFilterAndSuggest = ({
   }, [
     initialProducts,
     searchQuery,
+    searchParams,
     activeFilter,
     recentlyViewed,
-    searchParams,
   ]);
 
   const suggestedQuery = useMemo(() => {

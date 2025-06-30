@@ -16,20 +16,6 @@ const getRecentlyViewed = () => {
   return items ? JSON.parse(items) : [];
 };
 
-const addRecentlyViewed = (product) => {
-  if (typeof window === "undefined" || !product) return;
-  const viewed = getRecentlyViewed();
-  const newItem = {
-    id: product._id,
-    brand: product.brand,
-    model: product.model,
-    variant: product.variant,
-  };
-  const filteredViewed = viewed.filter((item) => item.id !== newItem.id);
-  const updatedViewed = [newItem, ...filteredViewed].slice(0, MAX_VIEWED_ITEMS);
-  localStorage.setItem(VIEWED_PRODUCTS_KEY, JSON.stringify(updatedViewed));
-};
-
 const FILTER_TYPES = {
   RECOMMENDATION: "recommendation",
   LATEST: "latest",
@@ -40,7 +26,7 @@ const FILTER_TYPES = {
 const ProductByRecom = () => {
   const { products, loading, error } = useProducts();
   const [activeFilter, setActiveFilter] = useState(FILTER_TYPES.RECOMMENDATION);
-  const [recentlyViewed, setRecentlyViewed] = useState([]);
+  const [recentlyViewed, setRecentlyViewed] = useState(getRecentlyViewed);
   const buttonRefs = useRef({});
   const scrollContainerRef = useRef(null);
   const ref = useRef(null);
@@ -61,9 +47,25 @@ const ProductByRecom = () => {
     scrollToActiveButton();
   }, [activeFilter]);
 
-  useEffect(() => {
-    setRecentlyViewed(getRecentlyViewed());
-  }, []);
+  const addRecentlyViewed = (product) => {
+    if (typeof window === "undefined" || !product) return;
+    const currentViewed = getRecentlyViewed();
+    const newItem = {
+      id: product._id,
+      brand: product.brand,
+      model: product.model,
+      variant: product.variant,
+    };
+    const filteredViewed = currentViewed.filter(
+      (item) => item.id !== newItem.id
+    );
+    const updatedViewed = [newItem, ...filteredViewed].slice(
+      0,
+      MAX_VIEWED_ITEMS
+    );
+    localStorage.setItem(VIEWED_PRODUCTS_KEY, JSON.stringify(updatedViewed));
+    setRecentlyViewed(updatedViewed);
+  };
 
   const displayedProducts = useMemo(() => {
     if (!products || products.length === 0) {
@@ -83,32 +85,53 @@ const ProductByRecom = () => {
         sortedProducts.sort((a, b) => b.yearOfAssembly - a.yearOfAssembly);
         break;
       case FILTER_TYPES.RECOMMENDATION:
-        if (recentlyViewed.length === 0) {
-          sortedProducts.sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-          );
-        } else {
+        if (recentlyViewed && recentlyViewed.length > 0) {
           const viewedBrands = new Set(
-            recentlyViewed.map((item) => item.brand)
+            recentlyViewed.map((item) => item.brand?.toLowerCase())
           );
           const viewedModels = new Set(
-            recentlyViewed.map((item) => `${item.brand}-${item.model}`)
+            recentlyViewed.map(
+              (item) =>
+                `${item.brand?.toLowerCase()}-${item.model?.toLowerCase()}`
+            )
           );
           sortedProducts.sort((a, b) => {
-            let scoreA = 0;
-            let scoreB = 0;
-            const modelA = `${a.brand}-${a.model}`;
-            const modelB = `${b.brand}-${b.model}`;
-            if (viewedModels.has(modelA)) scoreA += 2;
-            else if (viewedBrands.has(a.brand)) scoreA += 1;
-            if (viewedModels.has(modelB)) scoreB += 2;
-            else if (viewedBrands.has(b.brand)) scoreB += 1;
-            if (scoreB !== scoreA) {
-              return scoreB - scoreA;
-            } else {
-              return new Date(b.createdAt) - new Date(a.createdAt);
+            let scoreA = 0,
+              scoreB = 0;
+            const modelA = `${a.brand?.toLowerCase()}-${a.model?.toLowerCase()}`;
+            const modelB = `${b.brand?.toLowerCase()}-${b.model?.toLowerCase()}`;
+            if (viewedModels.has(modelA)) scoreA = 2;
+            else if (viewedBrands.has(a.brand?.toLowerCase())) scoreA = 1;
+            if (viewedModels.has(modelB)) scoreB = 2;
+            else if (viewedBrands.has(b.brand?.toLowerCase())) scoreB = 1;
+            if (scoreB !== scoreA) return scoreB - scoreA;
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          });
+        } else {
+          const productsByCluster = new Map();
+          sortedProducts.forEach((product) => {
+            if (product.clusterId != null) {
+              if (!productsByCluster.has(product.clusterId)) {
+                productsByCluster.set(product.clusterId, []);
+              }
+              productsByCluster.get(product.clusterId).push(product);
             }
           });
+          if (productsByCluster.size > 0) {
+            const productsWithoutCluster = sortedProducts.filter(
+              (p) => p.clusterId == null
+            );
+            const sortedClusters = [...productsByCluster.entries()].sort(
+              (a, b) => b[1].length - a[1].length
+            );
+            sortedProducts = sortedClusters
+              .flatMap((c) => c[1])
+              .concat(productsWithoutCluster);
+          } else {
+            sortedProducts.sort(
+              (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            );
+          }
         }
         break;
       default:
@@ -121,9 +144,6 @@ const ProductByRecom = () => {
 
   const handleProductClick = (product) => {
     addRecentlyViewed(product);
-    if (activeFilter === FILTER_TYPES.RECOMMENDATION) {
-      setRecentlyViewed(getRecentlyViewed());
-    }
   };
 
   if (error) {

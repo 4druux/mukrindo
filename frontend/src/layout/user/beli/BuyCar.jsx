@@ -29,36 +29,40 @@ const getRecentlyViewed = () => {
   return items ? JSON.parse(items) : [];
 };
 
-const addRecentlyViewed = (product) => {
-  if (typeof window === "undefined" || !product) return;
-  const viewed = getRecentlyViewed();
-  const newItem = {
-    id: product._id,
-    brand: product.brand,
-    model: product.model,
-    variant: product.variant,
-  };
-
-  const filteredViewed = viewed.filter((item) => item.id !== newItem.id);
-  const updatedViewed = [newItem, ...filteredViewed].slice(0, MAX_VIEWED_ITEMS);
-  localStorage.setItem(VIEWED_PRODUCTS_KEY, JSON.stringify(updatedViewed));
-};
-
 const BuyCar = () => {
   const { products, loading, error } = useProducts();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [isMobileSearchFiltersOpen, setIsMobileSearchFiltersOpen] =
     useState(false);
   const [filterBasedRecommendations, setFilterBasedRecommendations] = useState(
     []
   );
+  const [recentlyViewed, setRecentlyViewed] = useState(getRecentlyViewed);
 
-  useEffect(() => {
-    setRecentlyViewed(getRecentlyViewed());
-  }, []);
+  const addRecentlyViewed = (product) => {
+    if (typeof window === "undefined" || !product) return;
+
+    const currentViewed = getRecentlyViewed();
+    const newItem = {
+      id: product._id,
+      brand: product.brand,
+      model: product.model,
+      variant: product.variant,
+    };
+
+    const filteredViewed = currentViewed.filter(
+      (item) => item.id !== newItem.id
+    );
+    const updatedViewed = [newItem, ...filteredViewed].slice(
+      0,
+      MAX_VIEWED_ITEMS
+    );
+
+    localStorage.setItem(VIEWED_PRODUCTS_KEY, JSON.stringify(updatedViewed));
+    setRecentlyViewed(updatedViewed);
+  };
 
   const searchQuery = useMemo(
     () => searchParams.get("search") || "",
@@ -214,6 +218,28 @@ const BuyCar = () => {
   useEffect(() => {
     setCurrentPage(0);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (searchQuery && products.length > 0) {
+      const queryLower = searchQuery.toLowerCase();
+      const topSearchResult = products.find(
+        (p) =>
+          p.carName?.toLowerCase().includes(queryLower) ||
+          p.brand?.toLowerCase().includes(queryLower) ||
+          p.model?.toLowerCase().includes(queryLower)
+      );
+
+      if (topSearchResult) {
+        const currentViewed = getRecentlyViewed();
+        if (
+          !currentViewed.length ||
+          currentViewed[0].id !== topSearchResult._id
+        ) {
+          addRecentlyViewed(topSearchResult);
+        }
+      }
+    }
+  }, [searchQuery, products]);
 
   const handleProductClick = (product) => {
     addRecentlyViewed(product);
