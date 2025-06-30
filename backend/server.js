@@ -4,7 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
-const connectDB = require("./config/db"); //
+const connectDB = require("./config/db"); 
 const { createServer } = require("http");
 const passport = require("passport");
 require("./config/passport-setup");

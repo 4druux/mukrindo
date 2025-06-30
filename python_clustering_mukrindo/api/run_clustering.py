@@ -17,10 +17,6 @@ if not MONGO_URI or not API_KEY or not BACKEND_URL:
     print("FATAL ERROR: MONGO_URI, BACKEND_URL, atau API_KEY tidak ditemukan di .env.")
     sys.exit(1)
 
-if "<" in MONGO_URI or ">" in MONGO_URI:
-    print(f"FATAL ERROR: MONGO_URI sepertinya masih placeholder: {MONGO_URI}")
-    sys.exit(1)
-
 try:
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(current_dir)
