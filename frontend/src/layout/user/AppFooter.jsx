@@ -77,13 +77,6 @@ const AppFooter = () => {
             >
               <li>Tukar Tambah</li>
             </Link>
-            <Link
-              href="/simulasi-budget"
-              onClick={scrollToTop}
-              className="hover:text-orange-600 cursor-pointer underline"
-            >
-              <li>Simulasi Budget</li>
-            </Link>
           </ul>
         </div>
 

@@ -44,12 +44,18 @@ const ButtonMagnetic = forwardRef(
       rest: {
         scale: 1,
         color: textColor,
-        transition: { type: "spring", stiffness: 400, damping: 10 },
+        transition: {
+          delay: 0.2,
+        },
       },
       hover: {
         scale: 1.05,
         color: "#FFFFFF",
-        transition: { type: "spring", stiffness: 400, damping: 10 },
+        transition: {
+          type: "spring",
+          stiffness: 400,
+          damping: 10,
+        },
       },
     };
 
