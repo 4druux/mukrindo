@@ -1,4 +1,4 @@
-# python_clustering_demo/main.py
+# python_clustering_mukrindo/main.py
 
 import os
 import pandas as pd

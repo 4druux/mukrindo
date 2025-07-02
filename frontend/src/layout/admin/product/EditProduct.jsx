@@ -612,29 +612,63 @@ const EditProduct = ({ productId }) => {
               }
               options={[
                 {
-                  value: "sedan",
-                  label: "Sedan",
-                  ImgUrl: "/images/CarType/sedan.png",
-                },
-                {
-                  value: "hatchback",
-                  label: "Hatchback",
-                  ImgUrl: "/images/CarType/hatchback.png",
-                },
-                {
-                  value: "suv",
-                  label: "SUV",
-                  ImgUrl: "/images/CarType/suv.png",
-                },
-                {
                   value: "mpv",
                   label: "MPV",
-                  ImgUrl: "/images/CarType/mpv.png",
                 },
                 {
                   value: "minibus",
                   label: "Minibus",
-                  ImgUrl: "/images/CarType/minibus.png",
+                },
+                {
+                  value: "van",
+                  label: "Van",
+                },
+                {
+                  value: "lcgc",
+                  label: "LCGC",
+                },
+                {
+                  value: "city-car",
+                  label: "City Car",
+                },
+
+                {
+                  value: "sedan",
+                  label: "Sedan",
+                },
+                {
+                  value: "hatchback",
+                  label: "Hatchback",
+                },
+                {
+                  value: "coupe",
+                  label: "Coupe",
+                },
+                {
+                  value: "convertible",
+                  label: "Convertible",
+                },
+                {
+                  value: "wagon",
+                  label: "Wagon/Estate",
+                },
+
+                {
+                  value: "suv",
+                  label: "SUV",
+                },
+                {
+                  value: "jeep",
+                  label: "Jeep",
+                },
+                {
+                  value: "pickup",
+                  label: "Pickup Truck",
+                },
+
+                {
+                  value: "commercial",
+                  label: "Commercial",
                 },
               ]}
             />
