@@ -16,9 +16,9 @@ const CarouselGlobal = ({ imageUrl, imageAlt, title, subtitle }) => {
         />
         <div className="absolute inset-0 bg-black opacity-10"></div>
         {/* Teks di atas Banner */}
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center p-4 z-10">
-          <h1 className="text-3xl md:text-5xl font-bold mb-4">{title}</h1>
-          <p className="text-lg md:text-xl">{subtitle}</p>
+        <div className="absolute inset-0 flex flex-col justify-center items-center bg-gradient-to-r from-neutral-50 via-neutral-100 to-neutral-300 bg-clip-text text-transparent text-center p-4 z-10">
+          <h1 className="text-xl md:text-5xl font-bold lg:mb-4">{title}</h1>
+          <p className="text-sm font-semibold md:text-xl">{subtitle}</p>
         </div>
       </div>
     </div>
